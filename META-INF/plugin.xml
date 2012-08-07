@@ -1,0 +1,71 @@
+<idea-plugin url="https://github.com/johnlindquist/open-source-plugins"
+             version="2">
+    <name>AceJump</name>
+    <id>AceJump</id>
+
+    <description><![CDATA[
+    AceJump allows you to quickly navigate the cursor to any position visible in the editor. Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump.
+            Inspired by http://dl.dropbox.com/u/3254819/AceJumpModeDemo/AceJumpDemo.htm
+    ]]>
+    </description>
+    <change-notes><![CDATA[
+        <html>
+        <dl>
+            <dt>1.0</dt>
+            <dd>Initial Release</dd>
+        </dl>
+        </html>
+        ]]>
+    </change-notes>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <version>1.0</version>
+    <category>Navigation</category>
+    <vendor url="http://johnlindquist.com"
+            email="johnlindquist@gmail.com">johnlindquist
+    </vendor>
+
+
+    <idea-version since-build="120.000" />
+
+    <project-components>
+        <!-- Add your project components here -->
+    </project-components>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action id="AceJumpAction"
+                class="com.johnlindquist.acejump.AceJumpAction"
+                text="Ace Jump"
+                description="Search and navigate to result">
+            <keyboard-shortcut keymap="$default"
+                               first-keystroke="ctrl SEMICOLON"/>
+        </action>
+        <action id="AceJumpSelectAction"
+                class="com.johnlindquist.acejump.AceJumpSelectAction"
+                text="Ace Jump Select"
+                description="Search and select result">
+            <keyboard-shortcut keymap="$default"
+                               first-keystroke="ctrl shift SEMICOLON"/>
+        </action>
+        <action id="com.johnlindquist.acejump.AceJumpSmartCompletionAction"
+                class="com.johnlindquist.acejump.AceJumpSmartCompletionAction"
+                text="Ace Jump Smart Completion"
+                description="Search and complete at result">
+            <keyboard-shortcut keymap="$default"
+                               first-keystroke="ctrl alt SEMICOLON"/>
+        </action>
+        <action id="com.johnlindquist.acejump.AceJumpSelectFromCaretAction"
+                class="com.johnlindquist.acejump.AceJumpSelectFromCaretAction"
+                text="Ace Jump Select From Caret"
+                description="Search and select from caret">
+            <keyboard-shortcut keymap="$default"
+                               first-keystroke="ctrl shift alt SEMICOLON"/>
+        </action>
+    </actions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+</idea-plugin>
