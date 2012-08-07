@@ -42,27 +42,6 @@
             <keyboard-shortcut keymap="$default"
                                first-keystroke="ctrl SEMICOLON"/>
         </action>
-        <action id="AceJumpSelectAction"
-                class="com.johnlindquist.acejump.AceJumpSelectAction"
-                text="Ace Jump Select"
-                description="Search and select result">
-            <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift SEMICOLON"/>
-        </action>
-        <action id="com.johnlindquist.acejump.AceJumpSmartCompletionAction"
-                class="com.johnlindquist.acejump.AceJumpSmartCompletionAction"
-                text="Ace Jump Smart Completion"
-                description="Search and complete at result">
-            <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl alt SEMICOLON"/>
-        </action>
-        <action id="com.johnlindquist.acejump.AceJumpSelectFromCaretAction"
-                class="com.johnlindquist.acejump.AceJumpSelectFromCaretAction"
-                text="Ace Jump Select From Caret"
-                description="Search and select from caret">
-            <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl shift alt SEMICOLON"/>
-        </action>
     </actions>
 
     <extensions defaultExtensionNs="com.intellij">
