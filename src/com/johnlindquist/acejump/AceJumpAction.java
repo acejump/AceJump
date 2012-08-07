@@ -10,6 +10,7 @@ import com.intellij.openapi.application.Result;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.editor.impl.DocumentImpl;
 import com.intellij.openapi.editor.impl.EditorImpl;
@@ -17,24 +18,22 @@ import com.intellij.openapi.editor.impl.FoldingModelImpl;
 import com.intellij.openapi.editor.impl.ScrollingModelImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.*;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
-import com.intellij.psi.codeStyle.NameUtil;
-import com.intellij.psi.impl.cache.impl.id.IdTableBuilding;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.popup.AbstractPopup;
 import com.intellij.usageView.UsageInfo;
 import com.intellij.usages.UsageInfo2UsageAdapter;
-import com.intellij.util.ArrayUtil;
-import com.intellij.util.ui.BlockBorder;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.*;
@@ -42,7 +41,7 @@ import java.util.List;
 
 /**
  * User: John Lindquist
- * Date: 9/8/11
+ * Date: 8/6/2012
  * Time: 12:10 AM
  */
 public class AceJumpAction extends AnAction {
@@ -60,7 +59,7 @@ public class AceJumpAction extends AnAction {
     protected AnActionEvent inputEvent;
     protected CaretModel caretModel;
 
-    private CharSequence alphabet = "abcdefghijklmnopqrstuvwxyz";
+    private CharSequence allowedCharacters = "abcdefghijklmnopqrstuvwxyz0123456789-=[];',./";
     private Font font;
 
     public void actionPerformed(AnActionEvent e) {
@@ -86,17 +85,32 @@ public class AceJumpAction extends AnAction {
         searchBox.setSize(searchBox.getPreferredSize());
 
         ComponentPopupBuilder popupBuilder = JBPopupFactory.getInstance().createComponentPopupBuilder(searchBox, searchBox);
+        popupBuilder.setCancelKeyEnabled(true);
+
+        final List<Pair<ActionListener, KeyStroke>>
+                keyboardActions = Collections.singletonList(Pair.<ActionListener, KeyStroke>create(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                searchBox.hideBalloons();
+            }
+        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0)));
+
+
         popup = (AbstractPopup) popupBuilder.createPopup();
 
-        popup.getContent().setBorder(new BlockBorder());
+//        popup.getContent().setBorder(new BlockBorder());
 
         popup.show(guessBestLocation(editor));
+
         popup.addListener(new JBPopupAdapter() {
             @Override
             public void onClosed(LightweightWindowEvent event) {
                 searchBox.hideBalloons();
             }
         });
+
+
+        searchBox.setFocusable(true);
         searchBox.requestFocus();
 
         searchBox.findText();
@@ -120,7 +134,7 @@ public class AceJumpAction extends AnAction {
     public RelativePoint guessBestLocation(Editor editor) {
         VisualPosition logicalPosition = editor.getCaretModel().getVisualPosition();
         RelativePoint pointFromVisualPosition = getPointFromVisualPosition(editor, logicalPosition);
-        pointFromVisualPosition.getOriginalPoint().translate(-4, -searchBox.getHeight() - editor.getLineHeight() + 2);
+        pointFromVisualPosition.getOriginalPoint().translate(0, -searchBox.getHeight());
         return pointFromVisualPosition;
     }
 
@@ -134,78 +148,13 @@ public class AceJumpAction extends AnAction {
 //        editor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
     }
 
-    protected void addNewLineAfterCaret() {
-        ActionManager actionManager = ActionManagerImpl.getInstance();
-        final AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_START_NEW_LINE);
-        AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), IdeActions.ACTION_EDITOR_START_NEW_LINE, inputEvent.getPresentation(), ActionManager.getInstance(), 0);
-        action.actionPerformed(event);
-    }
-
-    protected void addNewLineBeforeCaret() {
-        ActionManager actionManager = ActionManagerImpl.getInstance();
-        AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_MOVE_CARET_UP);
-        AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), IdeActions.ACTION_EDITOR_COMPLETE_STATEMENT, inputEvent.getPresentation(), ActionManager.getInstance(), 0);
-        action.actionPerformed(event);
-
-        addNewLineAfterCaret();
-    }
-
-    protected void addSpaceBeforeCaret() {
-        addSpace();
-        moveCaretRight();
-    }
-
-    private void addSpace() {
-        ApplicationManager.getApplication().runWriteAction(new Runnable() {
-            @Override
-            public void run() {
-                document.insertString(caretModel.getOffset(), " ");
-            }
-        });
-    }
-
-    protected void addSpaceAfterCaret() {
-        moveCaretRight();
-        addSpaceBeforeCaret();
-    }
-
-    private void moveCaretRight() {
-        ActionManager actionManager = ActionManagerImpl.getInstance();
-        AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT);
-        AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT, inputEvent.getPresentation(), ActionManager.getInstance(), 0);
-        action.actionPerformed(event);
-    }
-
-    private void moveCaretLeft() {
-        ActionManager actionManager = ActionManagerImpl.getInstance();
-        AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT);
-        AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT, inputEvent.getPresentation(), ActionManager.getInstance(), 0);
-        action.actionPerformed(event);
-    }
-
-    protected void applyModifier(KeyEvent e) {
-        if (e.isShiftDown() && e.isControlDown()) {
-            addNewLineBeforeCaret();
-        } else if (e.isAltDown() && e.isControlDown()) {
-            addSpaceBeforeCaret();
-        } else if (e.isControlDown()) {
-            addNewLineAfterCaret();
-        } else if (e.isAltDown()) {
-            addSpaceAfterCaret();
-        }
-    }
-
-    protected void completeCaretMove(Integer offset) {
-    }
-
     protected void clearSelection() {
         popup.cancel();
         editor.getSelectionModel().removeSelection();
     }
 
     protected class SearchBox extends JTextField {
-        private static final int ALLOWED_RESULTS = 26;
-        private ArrayList<Balloon> balloons = new ArrayList<Balloon>();
+        private ArrayList<JBPopup> balloons = new ArrayList<JBPopup>();
         protected HashMap<String, Integer> hashMap = new HashMap<String, Integer>();
         protected int key;
         protected List<Integer> results;
@@ -214,10 +163,13 @@ public class AceJumpAction extends AnAction {
         private SearchArea searchArea;
 
         private SearchBox() {
-
             addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(final KeyEvent e) {
+                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                        System.out.print("foo");
+                    }
+
                     char keyChar = e.getKeyChar();
                     key = Character.getNumericValue(keyChar);
                     int keyCode = e.getKeyCode();
@@ -230,30 +182,17 @@ public class AceJumpAction extends AnAction {
                         if (offset != null) {
                             clearSelection();
                             moveCaret(offset);
-                            new WriteCommandAction(project) {
-                                @Override
-                                protected void run(Result result) throws Throwable {
-                                    applyModifier(e);
-                                }
-                            }.execute();
-                            try {
-                                completeCaretMove(offset);
-                            } catch (Exception e1) {
-                                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                            }
                         }
-                    }
-                    else if(keyCode == KeyEvent.VK_SPACE){
+                        else
+                        {
+                            hideBalloons();
+                            clearSelection();
+                        }
+                    } else if (searchBox.getText().length() > 1) {
 
-                    }
-
-                    else if (keyCode == KeyEvent.VK_BACK_SPACE) {
-                        hideBalloons();
                     } else {
                         showBalloons(results, startResult, endResult);
                     }
-
-
                 }
             });
 
@@ -276,16 +215,12 @@ public class AceJumpAction extends AnAction {
         }
 
         private void startFindText() {
-
-            int delay = 100;
-
             String text = getText();
-            int length = text.length();
 
             int width = 11 + getFontMetrics(getFont()).stringWidth(getText());
             int height = getHeight();
-            popup.setSize(new Dimension(width, height));
-            setSize(width, height);
+            popup.setSize(new Dimension(width, editor.getLineHeight()));
+            setSize(width, editor.getLineHeight());
 //            System.out.println("the single char is: " + text);
 
             char c = text.charAt(0);
@@ -295,7 +230,7 @@ public class AceJumpAction extends AnAction {
         private void findText() {
             findModel.setRegularExpressions(false);
             String text = getText();
-            if(text.equals(" ")) {
+            if (text.equals(" ")) {
                 text = "^.";
                 findModel.setRegularExpressions(true);
             }
@@ -354,7 +289,7 @@ public class AceJumpAction extends AnAction {
                     });
 
                     startResult = 0;
-                    endResult = ALLOWED_RESULTS;
+                    endResult = allowedCharacters.length();
 
                     showBalloons(results, startResult, endResult);//To change body of implemented methods use File | Settings | File Templates.
                 }
@@ -371,19 +306,19 @@ public class AceJumpAction extends AnAction {
             }
 
 
-            final HashMap<Balloon, RelativePoint> balloonPointHashMap = new HashMap<Balloon, RelativePoint>();
+            final HashMap<JBPopup, RelativePoint> jbPopupRelativePointHashMap = new HashMap<JBPopup, RelativePoint>();
             for (int i = start; i < end; i++) {
 
                 int textOffset = results.get(i);
                 RelativePoint point = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset));
                 Point originalPoint = point.getOriginalPoint();
-                originalPoint.translate(0, -editor.getLineHeight() / 2);
+                originalPoint.translate(0, -editor.getLineHeight());
 //                System.out.println(originalPoint.getX() + " " + originalPoint.getY());
 
                 JPanel jPanel = new JPanel(new GridLayout());
                 jPanel.setBackground(new Color(255, 255, 255));
-                int resultIndex = i % ALLOWED_RESULTS;
-                String text = String.valueOf(alphabet.charAt(i % ALLOWED_RESULTS));
+                int resultIndex = i % allowedCharacters.length();
+                String text = String.valueOf(allowedCharacters.charAt(i % allowedCharacters.length()));
 
                 JLabel jLabel = new JLabel(text);
 //                Font jLabelFont = new Font(jLabel.getFont().getName(), Font.BOLD, 11);
@@ -391,40 +326,34 @@ public class AceJumpAction extends AnAction {
                 jLabel.setBackground(new Color(192, 192, 192));
                 jLabel.setHorizontalAlignment(CENTER);
                 jLabel.setFocusable(false);
-                jLabel.setSize(jLabel.getWidth(), 5);
-                jPanel.setFocusable(false);
+                jLabel.setSize(3, editor.getLineHeight());
                 jPanel.add(jLabel);
 
-                if (text.equals("Enter")) {
-                    jPanel.setPreferredSize(new Dimension(45, 13));
 
-                } else {
-                    jPanel.setPreferredSize(new Dimension(19, 13));
-
-                }
-
-                BalloonBuilder balloonBuilder = JBPopupFactory.getInstance().createBalloonBuilder(jPanel);
-                balloonBuilder.setFadeoutTime(0);
-                balloonBuilder.setAnimationCycle(0);
-                balloonBuilder.setHideOnClickOutside(true);
-                balloonBuilder.setHideOnKeyOutside(true);
-                balloonBuilder.setHideOnAction(true);
-                balloonBuilder.setFillColor(new Color(221, 221, 221));
-                balloonBuilder.setBorderColor(new Color(136, 136, 136));
-
-                Balloon balloon = balloonBuilder.createBalloon();
-                balloonPointHashMap.put(balloon, point);
+                jPanel.setPreferredSize(new Dimension(3, editor.getLineHeight()));
 
 
-                balloons.add(balloon);
+                ComponentPopupBuilder componentPopupBuilder = JBPopupFactory.getInstance().createComponentPopupBuilder(jPanel, jPanel);
+                componentPopupBuilder.setCancelOnClickOutside(true);
+                componentPopupBuilder.setCancelOnOtherWindowOpen(true);
+                componentPopupBuilder.setCancelKeyEnabled(true);
+                componentPopupBuilder.setMovable(false);
+                componentPopupBuilder.setFocusable(false);
+                componentPopupBuilder.setBelongsToGlobalPopupStack(false);
+
+                JBPopup popup1 = componentPopupBuilder.createPopup();
+                jbPopupRelativePointHashMap.put(popup1, point);
+
+
+                balloons.add(popup1);
                 hashMap.put(text, textOffset);
             }
 
-            Collections.sort(balloons, new Comparator<Balloon>() {
+            Collections.sort(balloons, new Comparator<JBPopup>() {
                 @Override
-                public int compare(Balloon o1, Balloon o2) {
-                    RelativePoint point1 = balloonPointHashMap.get(o1);
-                    RelativePoint point2 = balloonPointHashMap.get(o2);
+                public int compare(JBPopup o1, JBPopup o2) {
+                    RelativePoint point1 = jbPopupRelativePointHashMap.get(o1);
+                    RelativePoint point2 = jbPopupRelativePointHashMap.get(o2);
 
                     if (point1.getOriginalPoint().y < point2.getOriginalPoint().y) {
                         return 1;
@@ -436,17 +365,16 @@ public class AceJumpAction extends AnAction {
                 }
             });
 
-            for (int i = 0, balloonsSize = balloons.size(); i < balloonsSize; i++) {
-                Balloon balloon = balloons.get(i);
-                RelativePoint point = balloonPointHashMap.get(balloon);
-                balloon.show(point, Balloon.Position.above);
+            for (JBPopup balloon : balloons) {
+                RelativePoint point = jbPopupRelativePointHashMap.get(balloon);
+                balloon.show(point);
             }
 
 
         }
 
         private void hideBalloons() {
-            for (Balloon balloon1 : balloons) {
+            for (JBPopup balloon1 : balloons) {
                 balloon1.dispose();
             }
             balloons.clear();
@@ -567,27 +495,5 @@ public class AceJumpAction extends AnAction {
                 endOffset = document.getLineEndOffset(endLine);
             }
         }
-    }
-
-
-    protected String[] calcWords(final String prefix, Editor editor) {
-        final NameUtil.Matcher matcher = (NameUtil.Matcher) NameUtil.buildMatcher(prefix, 0, true, true);
-        final Set<String> words = new HashSet<String>();
-        CharSequence chars = editor.getDocument().getCharsSequence();
-
-        IdTableBuilding.scanWords(new IdTableBuilding.ScanWordProcessor() {
-            @Override
-            public void run(CharSequence charSequence, @Nullable char[] chars, int start, int end) {
-                final String word = charSequence.subSequence(start, end).toString();
-                if (matcher.matches(word)) {
-                    words.add(word);
-                }
-            }
-        }, chars, 0, chars.length());
-
-        ArrayList<String> sortedWords = new ArrayList<String>(words);
-        Collections.sort(sortedWords);
-
-        return ArrayUtil.toStringArray(sortedWords);
     }
 }
