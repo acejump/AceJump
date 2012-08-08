@@ -10,8 +10,9 @@ import com.intellij.openapi.application.Result;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.editor.VisualPosition;
+import com.intellij.openapi.editor.colors.EditorColorsManager;
+import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.impl.DocumentImpl;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.impl.FoldingModelImpl;
@@ -28,6 +29,7 @@ import com.intellij.usageView.UsageInfo;
 import com.intellij.usages.UsageInfo2UsageAdapter;
 import org.jetbrains.annotations.Nullable;
 
+import javax.help.HomeAction;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -78,11 +80,11 @@ public class AceJumpAction extends AnAction {
 
 //        font = editor.getComponent().getFont();
 
-        font = new Font("Verdana", Font.BOLD, 11);
+        EditorColorsScheme scheme = EditorColorsManager.getInstance().getGlobalScheme();
+        font = new Font(scheme.getEditorFontName(), Font.BOLD, scheme.getEditorFontSize());
         searchBox = new SearchBox();
 
         searchBox.setFont(font);
-        searchBox.setSize(searchBox.getPreferredSize());
 
         ComponentPopupBuilder popupBuilder = JBPopupFactory.getInstance().createComponentPopupBuilder(searchBox, searchBox);
         popupBuilder.setCancelKeyEnabled(true);
@@ -148,13 +150,77 @@ public class AceJumpAction extends AnAction {
 //        editor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
     }
 
+    protected void addNewLineAfterCaret() {
+        ActionManager actionManager = ActionManagerImpl.getInstance();
+        final AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_START_NEW_LINE);
+        AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), IdeActions.ACTION_EDITOR_START_NEW_LINE, inputEvent.getPresentation(), ActionManager.getInstance(), 0);
+        action.actionPerformed(event);
+    }
+
+    protected void addNewLineBeforeCaret() {
+        ActionManager actionManager = ActionManagerImpl.getInstance();
+        AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_MOVE_CARET_UP);
+        AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), IdeActions.ACTION_EDITOR_COMPLETE_STATEMENT, inputEvent.getPresentation(), ActionManager.getInstance(), 0);
+        action.actionPerformed(event);
+
+        addNewLineAfterCaret();
+    }
+
+    protected void addSpaceBeforeCaret() {
+        addSpace();
+        moveCaretRight();
+    }
+
+    private void addSpace() {
+        ApplicationManager.getApplication().runWriteAction(new Runnable() {
+            @Override
+            public void run() {
+                document.insertString(caretModel.getOffset(), " ");
+            }
+        });
+    }
+
+    protected void addSpaceAfterCaret() {
+        moveCaretRight();
+        addSpaceBeforeCaret();
+    }
+
+    private void moveCaretRight() {
+        ActionManager actionManager = ActionManagerImpl.getInstance();
+        AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT);
+        AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), IdeActions.ACTION_EDITOR_MOVE_CARET_RIGHT, inputEvent.getPresentation(), ActionManager.getInstance(), 0);
+        action.actionPerformed(event);
+    }
+
+    private void moveCaretLeft() {
+        ActionManager actionManager = ActionManagerImpl.getInstance();
+        AnAction action = actionManager.getAction(IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT);
+        AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), IdeActions.ACTION_EDITOR_MOVE_CARET_LEFT, inputEvent.getPresentation(), ActionManager.getInstance(), 0);
+        action.actionPerformed(event);
+    }
+
+    protected void applyModifier(KeyEvent e) {
+        if (e.isShiftDown() && e.isControlDown()) {
+            addNewLineBeforeCaret();
+        } else if (e.isAltDown() && e.isControlDown()) {
+            addSpaceBeforeCaret();
+        } else if (e.isControlDown()) {
+            addNewLineAfterCaret();
+        } else if (e.isAltDown()) {
+            addSpaceAfterCaret();
+        }
+    }
+
+    protected void completeCaretMove(Integer offset) {
+    }
+
     protected void clearSelection() {
         popup.cancel();
         editor.getSelectionModel().removeSelection();
     }
 
     protected class SearchBox extends JTextField {
-        private ArrayList<JBPopup> balloons = new ArrayList<JBPopup>();
+        private ArrayList<JBPopup> resultPopups = new ArrayList<JBPopup>();
         protected HashMap<String, Integer> hashMap = new HashMap<String, Integer>();
         protected int key;
         protected List<Integer> results;
@@ -166,10 +232,6 @@ public class AceJumpAction extends AnAction {
             addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(final KeyEvent e) {
-                    if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                        System.out.print("foo");
-                    }
-
                     char keyChar = e.getKeyChar();
                     key = Character.getNumericValue(keyChar);
                     int keyCode = e.getKeyCode();
@@ -178,21 +240,104 @@ public class AceJumpAction extends AnAction {
                         System.out.println("value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
                         System.out.println("---------passed: " + "value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
 
-                        final Integer offset = hashMap.get(String.valueOf(keyChar));
+
+                        Integer offset = hashMap.get(getLowerCaseStringFromChar(keyChar));
                         if (offset != null) {
                             clearSelection();
-                            moveCaret(offset);
+                            if (e.isShiftDown()) {
+                                editor.getSelectionModel().removeSelection();
+                                int caretOffset = caretModel.getOffset();
+                                int offsetModifer = 1;
+                                if (offset < caretOffset) {
+                                    offset = offset + searchBox.getText().length();
+                                    offsetModifer = -1;
+                                }
+                                editor.getSelectionModel().setSelection(caretOffset, offset + offsetModifer);
+                            } else {
+                                moveCaret(offset);
+                            }
+                            new WriteCommandAction(project) {
+                                @Override
+                                protected void run(Result result) throws Throwable {
+                                    applyModifier(e);
+                                }
+                            }.execute();
+                            try {
+                                completeCaretMove(offset);
+                            } catch (Exception e1) {
+                                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                            }
                         }
-                        else
-                        {
-                            hideBalloons();
-                            clearSelection();
-                        }
-                    } else if (searchBox.getText().length() > 1) {
-
+                    } else if (keyCode == KeyEvent.VK_END) {
+                        setText("\n");
+                        startFindText();
+                    } else if (keyCode == KeyEvent.VK_BACK_SPACE) {
+                        hideBalloons();
                     } else {
                         showBalloons(results, startResult, endResult);
                     }
+
+
+                }
+
+                @Override
+                public void keyTyped(KeyEvent e) {
+                    super.keyTyped(e);    //To change body of overridden methods use File | Settings | File Templates.
+                }
+
+                /*todo: I hate this. Strict mapping to my USA keyboard :(*/
+                private String getLowerCaseStringFromChar(char keyChar) {
+
+                    String s = String.valueOf(keyChar);
+                    if (s.equals("!")) {
+                        return "1";
+
+                    } else if (s.equals("@")) {
+                        return "2";
+
+                    } else if (s.equals("#")) {
+                        return "3";
+
+                    } else if (s.equals("$")) {
+                        return "4";
+
+                    } else if (s.equals("%")) {
+                        return "5";
+
+                    } else if (s.equals("^")) {
+                        return "6";
+
+                    } else if (s.equals("&")) {
+                        return "7";
+
+                    } else if (s.equals("*")) {
+                        return "8";
+
+                    } else if (s.equals("(")) {
+                        return "9";
+
+                    } else if (s.equals(")")) {
+                        return "0";
+                    } else if (s.equals("_")) {
+                        return "-";
+                    } else if (s.equals("+")) {
+                        return "=";
+                    } else if (s.equals("{")) {
+                        return "[";
+                    } else if (s.equals("}")) {
+                        return "]";
+                    } else if (s.equals("|")) {
+                        return "\\";
+                    } else if (s.equals(":")) {
+                        return ";";
+                    } else if (s.equals("<")) {
+                        return ",";
+                    } else if (s.equals(">")) {
+                        return ".";
+                    } else if (s.equals("?")) {
+                        return "/";
+                    }
+                    return s.toLowerCase();
                 }
             });
 
@@ -218,12 +363,8 @@ public class AceJumpAction extends AnAction {
             String text = getText();
 
             int width = 11 + getFontMetrics(getFont()).stringWidth(getText());
-            int height = getHeight();
             popup.setSize(new Dimension(width, editor.getLineHeight()));
             setSize(width, editor.getLineHeight());
-//            System.out.println("the single char is: " + text);
-
-            char c = text.charAt(0);
             findText();
         }
 
@@ -232,6 +373,10 @@ public class AceJumpAction extends AnAction {
             String text = getText();
             if (text.equals(" ")) {
                 text = "^.";
+                findModel.setRegularExpressions(true);
+            }
+            findModel.setStringToFind(text);
+            if (text.equals("\n")) {
                 findModel.setRegularExpressions(true);
             }
             findModel.setStringToFind(text);
@@ -244,9 +389,6 @@ public class AceJumpAction extends AnAction {
                     if (searchArea.getPsiFile() == null) return;
 
                     results = findAllVisible();
-
-                    //camelCase logic
-//                            findCamelCase();
                 }
 
             });
@@ -254,11 +396,8 @@ public class AceJumpAction extends AnAction {
             ApplicationManager.getApplication().invokeLater(new Runnable() {
                 @Override
                 public void run() {
-//                            System.out.println("results: " + results);
 
                     final int caretOffset = editor.getCaretModel().getOffset();
-                    RelativePoint caretPoint = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(caretOffset));
-                    final Point cP = caretPoint.getOriginalPoint();
                     int lineNumber = document.getLineNumber(caretOffset);
                     final int lineStartOffset = document.getLineStartOffset(lineNumber);
                     final int lineEndOffset = document.getLineEndOffset(lineNumber);
@@ -312,25 +451,32 @@ public class AceJumpAction extends AnAction {
                 int textOffset = results.get(i);
                 RelativePoint point = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset));
                 Point originalPoint = point.getOriginalPoint();
-                originalPoint.translate(0, -editor.getLineHeight());
+                originalPoint.translate(-3, -editor.getLineHeight());
 //                System.out.println(originalPoint.getX() + " " + originalPoint.getY());
 
-                JPanel jPanel = new JPanel(new GridLayout());
-                jPanel.setBackground(new Color(255, 255, 255));
-                int resultIndex = i % allowedCharacters.length();
-                String text = String.valueOf(allowedCharacters.charAt(i % allowedCharacters.length()));
+                GridBagLayout layout = new GridBagLayout();
+                JPanel jPanel = new JPanel(layout);
+//                jPanel.setBackground(new Color(255, 255, 255));
+                char resultChar = allowedCharacters.charAt(i % allowedCharacters.length());
+                String text = String.valueOf(resultChar);
 
                 JLabel jLabel = new JLabel(text);
-//                Font jLabelFont = new Font(jLabel.getFont().getName(), Font.BOLD, 11);
                 jLabel.setFont(font);
-                jLabel.setBackground(new Color(192, 192, 192));
+
+
+//                jLabel.setBackground(new Color(192, 192, 192));
                 jLabel.setHorizontalAlignment(CENTER);
                 jLabel.setFocusable(false);
-                jLabel.setSize(3, editor.getLineHeight());
+                jLabel.setSize(jLabel.getWidth(), editor.getLineHeight());
+
                 jPanel.add(jLabel);
 
+                GridBagConstraints constraints = new GridBagConstraints();
+                constraints.ipady = editor.getLineHeight() / 4;
+                System.out.print(constraints.insets.top);
+                layout.setConstraints(jLabel, constraints);
 
-                jPanel.setPreferredSize(new Dimension(3, editor.getLineHeight()));
+//                jPanel.setPreferredSize(new Dimension(3, editor.getLineHeight()));
 
 
                 ComponentPopupBuilder componentPopupBuilder = JBPopupFactory.getInstance().createComponentPopupBuilder(jPanel, jPanel);
@@ -340,16 +486,15 @@ public class AceJumpAction extends AnAction {
                 componentPopupBuilder.setMovable(false);
                 componentPopupBuilder.setFocusable(false);
                 componentPopupBuilder.setBelongsToGlobalPopupStack(false);
+                JBPopup jPanelPopup = componentPopupBuilder.createPopup();
+                jbPopupRelativePointHashMap.put(jPanelPopup, point);
 
-                JBPopup popup1 = componentPopupBuilder.createPopup();
-                jbPopupRelativePointHashMap.put(popup1, point);
 
-
-                balloons.add(popup1);
+                resultPopups.add(jPanelPopup);
                 hashMap.put(text, textOffset);
             }
 
-            Collections.sort(balloons, new Comparator<JBPopup>() {
+            Collections.sort(resultPopups, new Comparator<JBPopup>() {
                 @Override
                 public int compare(JBPopup o1, JBPopup o2) {
                     RelativePoint point1 = jbPopupRelativePointHashMap.get(o1);
@@ -365,7 +510,7 @@ public class AceJumpAction extends AnAction {
                 }
             });
 
-            for (JBPopup balloon : balloons) {
+            for (JBPopup balloon : resultPopups) {
                 RelativePoint point = jbPopupRelativePointHashMap.get(balloon);
                 balloon.show(point);
             }
@@ -374,10 +519,10 @@ public class AceJumpAction extends AnAction {
         }
 
         private void hideBalloons() {
-            for (JBPopup balloon1 : balloons) {
+            for (JBPopup balloon1 : resultPopups) {
                 balloon1.dispose();
             }
-            balloons.clear();
+            resultPopups.clear();
             hashMap.clear();
         }
 
