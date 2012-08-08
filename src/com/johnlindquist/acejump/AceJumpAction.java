@@ -89,15 +89,6 @@ public class AceJumpAction extends AnAction {
         ComponentPopupBuilder popupBuilder = JBPopupFactory.getInstance().createComponentPopupBuilder(searchBox, searchBox);
         popupBuilder.setCancelKeyEnabled(true);
 
-        final List<Pair<ActionListener, KeyStroke>>
-                keyboardActions = Collections.singletonList(Pair.<ActionListener, KeyStroke>create(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                searchBox.hideBalloons();
-            }
-        }, KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0)));
-
-
         popup = (AbstractPopup) popupBuilder.createPopup();
 
 //        popup.getContent().setBorder(new BlockBorder());
@@ -112,10 +103,11 @@ public class AceJumpAction extends AnAction {
         });
 
 
+        Dimension dimension = new Dimension(20, editor.getLineHeight());
+        popup.setSize(dimension);
+        searchBox.setSize(dimension);
         searchBox.setFocusable(true);
         searchBox.requestFocus();
-
-//        searchBox.findText();
     }
 
 
@@ -136,7 +128,7 @@ public class AceJumpAction extends AnAction {
     public RelativePoint guessBestLocation(Editor editor) {
         VisualPosition logicalPosition = editor.getCaretModel().getVisualPosition();
         RelativePoint pointFromVisualPosition = getPointFromVisualPosition(editor, logicalPosition);
-        pointFromVisualPosition.getOriginalPoint().translate(0, -searchBox.getHeight());
+        pointFromVisualPosition.getOriginalPoint().translate(0, -editor.getLineHeight());
         return pointFromVisualPosition;
     }
 
@@ -229,7 +221,16 @@ public class AceJumpAction extends AnAction {
         private SearchArea searchArea;
         private boolean searchMode = true;
 
+        @Override
+        protected void paintBorder(Graphics g) {
+            //do nothing
+        }
 
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(getFontMetrics(getFont()).stringWidth("w"), editor.getLineHeight());
+        }
 
         @Override
         protected void processKeyEvent(final KeyEvent e) {
@@ -285,7 +286,7 @@ public class AceJumpAction extends AnAction {
 
             if (hasChar && searchMode) {
                 System.out.println("searching " + e.getKeyChar() + "\n");
-                startFindText();
+                findText();
                 searchMode = false;
             }
 
@@ -344,16 +345,6 @@ public class AceJumpAction extends AnAction {
                 return "/";
             }
             return s.toLowerCase();
-        }
-
-
-        private void startFindText() {
-            String text = getText();
-
-            int width = 11 + getFontMetrics(getFont()).stringWidth(getText());
-            popup.setSize(new Dimension(width, editor.getLineHeight()));
-            setSize(width, editor.getLineHeight());
-            findText();
         }
 
         private void findText() {
