@@ -115,7 +115,7 @@ public class AceJumpAction extends AnAction {
         searchBox.setFocusable(true);
         searchBox.requestFocus();
 
-        searchBox.findText();
+//        searchBox.findText();
     }
 
 
@@ -227,137 +227,125 @@ public class AceJumpAction extends AnAction {
         protected int startResult;
         protected int endResult;
         private SearchArea searchArea;
-
-        private SearchBox() {
-            addKeyListener(new KeyAdapter() {
-                @Override
-                public void keyPressed(final KeyEvent e) {
-                    char keyChar = e.getKeyChar();
-                    key = Character.getNumericValue(keyChar);
-                    int keyCode = e.getKeyCode();
-
-                    if (searchBox.getText().length() == 1) {
-                        System.out.println("value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
-                        System.out.println("---------passed: " + "value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
+        private boolean searchMode = true;
 
 
-                        Integer offset = hashMap.get(getLowerCaseStringFromChar(keyChar));
-                        if (offset != null) {
-                            clearSelection();
-                            if (e.isShiftDown()) {
-                                editor.getSelectionModel().removeSelection();
-                                int caretOffset = caretModel.getOffset();
-                                int offsetModifer = 1;
-                                if (offset < caretOffset) {
-                                    offset = offset + searchBox.getText().length();
-                                    offsetModifer = -1;
-                                }
-                                editor.getSelectionModel().setSelection(caretOffset, offset + offsetModifer);
-                            } else {
-                                moveCaret(offset);
-                            }
-                            new WriteCommandAction(project) {
-                                @Override
-                                protected void run(Result result) throws Throwable {
-                                    applyModifier(e);
-                                }
-                            }.execute();
-                            try {
-                                completeCaretMove(offset);
-                            } catch (Exception e1) {
-                                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                            }
+
+        @Override
+        protected void processKeyEvent(final KeyEvent e) {
+            super.processKeyEvent(e);
+            //only handle "press" events
+            if(e.getID() == KeyEvent.KEY_RELEASED) return;
+
+            char keyChar = e.getKeyChar();
+            key = Character.getNumericValue(keyChar);
+            int keyCode = e.getKeyCode();
+
+
+            boolean hasChar = getText().length() == 1;
+
+
+            if (hasChar && !searchMode) {
+                System.out.println("navigating" + e.getKeyChar());
+//                System.out.println("value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
+//                System.out.println("---------passed: " + "value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
+
+
+                Integer offset = hashMap.get(getLowerCaseStringFromChar(keyChar));
+                if (offset != null) {
+                    clearSelection();
+                    if (e.isShiftDown()) {
+                        editor.getSelectionModel().removeSelection();
+                        int caretOffset = caretModel.getOffset();
+                        int offsetModifer = 1;
+                        if (offset < caretOffset) {
+                            offset = offset + searchBox.getText().length();
+                            offsetModifer = -1;
                         }
-                    } else if (keyCode == KeyEvent.VK_END) {
-                        setText("\n");
-                        startFindText();
-                    } else if (keyCode == KeyEvent.VK_BACK_SPACE) {
-                        hideBalloons();
+                        editor.getSelectionModel().setSelection(caretOffset, offset + offsetModifer);
                     } else {
-                        showBalloons(results, startResult, endResult);
+                        moveCaret(offset);
                     }
-
-
-                }
-
-                @Override
-                public void keyTyped(KeyEvent e) {
-                    super.keyTyped(e);    //To change body of overridden methods use File | Settings | File Templates.
-                }
-
-                /*todo: I hate this. Strict mapping to my USA keyboard :(*/
-                private String getLowerCaseStringFromChar(char keyChar) {
-
-                    String s = String.valueOf(keyChar);
-                    if (s.equals("!")) {
-                        return "1";
-
-                    } else if (s.equals("@")) {
-                        return "2";
-
-                    } else if (s.equals("#")) {
-                        return "3";
-
-                    } else if (s.equals("$")) {
-                        return "4";
-
-                    } else if (s.equals("%")) {
-                        return "5";
-
-                    } else if (s.equals("^")) {
-                        return "6";
-
-                    } else if (s.equals("&")) {
-                        return "7";
-
-                    } else if (s.equals("*")) {
-                        return "8";
-
-                    } else if (s.equals("(")) {
-                        return "9";
-
-                    } else if (s.equals(")")) {
-                        return "0";
-                    } else if (s.equals("_")) {
-                        return "-";
-                    } else if (s.equals("+")) {
-                        return "=";
-                    } else if (s.equals("{")) {
-                        return "[";
-                    } else if (s.equals("}")) {
-                        return "]";
-                    } else if (s.equals("|")) {
-                        return "\\";
-                    } else if (s.equals(":")) {
-                        return ";";
-                    } else if (s.equals("<")) {
-                        return ",";
-                    } else if (s.equals(">")) {
-                        return ".";
-                    } else if (s.equals("?")) {
-                        return "/";
+                    new WriteCommandAction(project) {
+                        @Override
+                        protected void run(Result result) throws Throwable {
+                            applyModifier(e);
+                        }
+                    }.execute();
+                    try {
+                        completeCaretMove(offset);
+                    } catch (Exception e1) {
+                        e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                     }
-                    return s.toLowerCase();
-                }
-            });
-
-            getDocument().addDocumentListener(new DocumentListener() {
-                @Override
-                public void insertUpdate(DocumentEvent e) {
-                    startFindText();
                 }
 
-                @Override
-                public void removeUpdate(DocumentEvent e) {
-                    startFindText();
-                }
+            } else if (keyCode == KeyEvent.VK_BACK_SPACE) {
+                hideBalloons();
+            }
 
-                @Override
-                public void changedUpdate(DocumentEvent e) {
-                }
-            });
+            if (hasChar && searchMode) {
+                System.out.println("searching " + e.getKeyChar() + "\n");
+                startFindText();
+                searchMode = false;
+            }
 
         }
+
+        /*todo: I hate this. Strict mapping to my USA keyboard :(*/
+        private String getLowerCaseStringFromChar(char keyChar) {
+
+            String s = String.valueOf(keyChar);
+            if (s.equals("!")) {
+                return "1";
+
+            } else if (s.equals("@")) {
+                return "2";
+
+            } else if (s.equals("#")) {
+                return "3";
+
+            } else if (s.equals("$")) {
+                return "4";
+
+            } else if (s.equals("%")) {
+                return "5";
+
+            } else if (s.equals("^")) {
+                return "6";
+
+            } else if (s.equals("&")) {
+                return "7";
+
+            } else if (s.equals("*")) {
+                return "8";
+
+            } else if (s.equals("(")) {
+                return "9";
+
+            } else if (s.equals(")")) {
+                return "0";
+            } else if (s.equals("_")) {
+                return "-";
+            } else if (s.equals("+")) {
+                return "=";
+            } else if (s.equals("{")) {
+                return "[";
+            } else if (s.equals("}")) {
+                return "]";
+            } else if (s.equals("|")) {
+                return "\\";
+            } else if (s.equals(":")) {
+                return ";";
+            } else if (s.equals("<")) {
+                return ",";
+            } else if (s.equals(">")) {
+                return ".";
+            } else if (s.equals("?")) {
+                return "/";
+            }
+            return s.toLowerCase();
+        }
+
 
         private void startFindText() {
             String text = getText();
@@ -387,7 +375,7 @@ public class AceJumpAction extends AnAction {
                     searchArea = new SearchArea();
                     searchArea.invoke();
                     if (searchArea.getPsiFile() == null) return;
-
+                    results = new ArrayList<Integer>();
                     results = findAllVisible();
                 }
 
@@ -473,7 +461,6 @@ public class AceJumpAction extends AnAction {
 
                 GridBagConstraints constraints = new GridBagConstraints();
                 constraints.ipady = editor.getLineHeight() / 4;
-                System.out.print(constraints.insets.top);
                 layout.setConstraints(jLabel, constraints);
 
 //                jPanel.setPreferredSize(new Dimension(3, editor.getLineHeight()));
@@ -524,11 +511,6 @@ public class AceJumpAction extends AnAction {
             }
             resultPopups.clear();
             hashMap.clear();
-        }
-
-        @Override
-        public Dimension getPreferredSize() {
-            return new Dimension(20, 20);
         }
 
         @Nullable
