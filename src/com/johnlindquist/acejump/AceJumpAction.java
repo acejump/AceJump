@@ -10,6 +10,7 @@ import com.intellij.openapi.application.Result;
 import com.intellij.openapi.command.WriteCommandAction;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.FoldRegion;
 import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
@@ -19,7 +20,6 @@ import com.intellij.openapi.editor.impl.FoldingModelImpl;
 import com.intellij.openapi.editor.impl.ScrollingModelImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.*;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
@@ -29,14 +29,8 @@ import com.intellij.usageView.UsageInfo;
 import com.intellij.usages.UsageInfo2UsageAdapter;
 import org.jetbrains.annotations.Nullable;
 
-import javax.help.HomeAction;
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.List;
@@ -77,7 +71,6 @@ public class AceJumpAction extends AnAction {
 
         findManager = FindManager.getInstance(project);
         findModel = createFindModel(findManager);
-
 //        font = editor.getComponent().getFont();
 
         EditorColorsScheme scheme = EditorColorsManager.getInstance().getGlobalScheme();
@@ -232,21 +225,35 @@ public class AceJumpAction extends AnAction {
             return new Dimension(getFontMetrics(getFont()).stringWidth("w"), editor.getLineHeight());
         }
 
+        //todo: refactor to bindings
         @Override
         protected void processKeyEvent(final KeyEvent e) {
+            //todo: refactor to behaviors, just spiking for now
+            boolean isSpecialChar = false;
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_HOME:
+                    findText("(?<=^\\s*)\\S", true);
+                    searchMode = false;
+                    isSpecialChar = true;
+                    break;
+                case KeyEvent.VK_END:
+                    findText("\n", true);
+                    searchMode = false;
+                    isSpecialChar = true;
+                    break;
+            }
+
+            if (isSpecialChar) return;
+
             super.processKeyEvent(e);
             //only handle "press" events
-            if(e.getID() == KeyEvent.KEY_RELEASED) return;
+            if (e.getID() == KeyEvent.KEY_RELEASED) return;
 
             char keyChar = e.getKeyChar();
             key = Character.getNumericValue(keyChar);
             int keyCode = e.getKeyCode();
 
-
-            boolean hasChar = getText().length() == 1;
-
-
-            if (hasChar && !searchMode) {
+            if (!searchMode) {
                 System.out.println("navigating" + e.getKeyChar());
 //                System.out.println("value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
 //                System.out.println("---------passed: " + "value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
@@ -284,9 +291,9 @@ public class AceJumpAction extends AnAction {
                 hideBalloons();
             }
 
-            if (hasChar && searchMode) {
+            if (searchMode && getText().length() == 1) {
                 System.out.println("searching " + e.getKeyChar() + "\n");
-                findText();
+                findText(getText(), false);
                 searchMode = false;
             }
 
@@ -347,18 +354,9 @@ public class AceJumpAction extends AnAction {
             return s.toLowerCase();
         }
 
-        private void findText() {
-            findModel.setRegularExpressions(false);
-            String text = getText();
-            if (text.equals(" ")) {
-                text = "^.";
-                findModel.setRegularExpressions(true);
-            }
+        private void findText(String text, boolean isRegEx) {
             findModel.setStringToFind(text);
-            if (text.equals("\n")) {
-                findModel.setRegularExpressions(true);
-            }
-            findModel.setStringToFind(text);
+            findModel.setRegularExpressions(isRegEx);
 
             ApplicationManager.getApplication().runReadAction(new Runnable() {
                 @Override
@@ -450,9 +448,9 @@ public class AceJumpAction extends AnAction {
 
                 jPanel.add(jLabel);
 
-                GridBagConstraints constraints = new GridBagConstraints();
-                constraints.ipady = editor.getLineHeight() / 4;
-                layout.setConstraints(jLabel, constraints);
+//                GridBagConstraints constraints = new GridBagConstraints();
+//                constraints.ipady = editor.getLineHeight() / 4;
+//                layout.setConstraints(jLabel, constraints);
 
 //                jPanel.setPreferredSize(new Dimension(3, editor.getLineHeight()));
 
@@ -506,7 +504,7 @@ public class AceJumpAction extends AnAction {
 
         @Nullable
         protected java.util.List<Integer> findAllVisible() {
-//            System.out.println("----- findAllVisible");
+            System.out.println("----- findAllVisible");
             int offset = searchArea.getOffset();
             int endOffset = searchArea.getEndOffset();
             CharSequence text = searchArea.getText();
@@ -515,17 +513,34 @@ public class AceJumpAction extends AnAction {
 
 
             List<Integer> offsets = new ArrayList<Integer>();
-            while (offset < endOffset) {
-//                System.out.println("offset: " + offset + "/" + endOffset);
+            FoldRegion[] allFoldRegions = foldingModel.getAllFoldRegions();
 
-//                System.out.println("Finding: " + findModel.getStringToFind() + " = " + offset);
+            offsetWhile: while (offset < endOffset) {
+                System.out.println("offset: " + offset + "/" + endOffset);
+
+                System.out.println("Finding: " + findModel.getStringToFind() + " = " + offset);
+
+                //skip folded regions. Re-think approach.
+                for (FoldRegion foldRegion : allFoldRegions) {
+                    if (!foldRegion.isExpanded()) {
+                        if (offset >= foldRegion.getStartOffset() && offset <= foldRegion.getEndOffset()) {
+//                            System.out.println("before offset: " + offset);
+                            offset = foldRegion.getEndOffset() + 1;
+//                            System.out.println("after offset: " + offset);
+                            continue offsetWhile;
+                        }
+                    }
+                }
+
                 FindResult result = findManager.findString(text, offset, findModel, virtualFile);
                 if (!result.isStringFound()) {
-//                    System.out.println(findModel.getStringToFind() + ": not found");
+                    System.out.println(findModel.getStringToFind() + ": not found");
                     break;
                 }
 
-//                System.out.println("result: " + result.toString());
+
+
+                System.out.println("result: " + result.toString());
 
                 UsageInfo2UsageAdapter usageAdapter = new UsageInfo2UsageAdapter(new UsageInfo(psiFile, result.getStartOffset(), result.getEndOffset()));
                 Point point = editor.logicalPositionToXY(editor.offsetToLogicalPosition(usageAdapter.getUsageInfo().getNavigationOffset()));
@@ -534,7 +549,7 @@ public class AceJumpAction extends AnAction {
                     int navigationOffset = usageInfo.getNavigationOffset();
                     if (navigationOffset != caretModel.getOffset()) {
                         if (!results.contains(navigationOffset)) {
-//                            System.out.println("Adding: " + navigationOffset + "-> " + usageAdapter.getPlainText());
+                            System.out.println("Adding: " + navigationOffset + "-> " + usageAdapter.getPlainText());
                             offsets.add(navigationOffset);
                         }
                     }
@@ -592,17 +607,13 @@ public class AceJumpAction extends AnAction {
                 double viewportY = viewport.getViewPosition().getY();
 
                 ScrollingModelImpl scrollingModel = (ScrollingModelImpl) editor.getScrollingModel();
+                //you need the "visibleArea" to see if the point is inside of it
                 visibleArea = scrollingModel.getVisibleArea();
 
                 double height = visibleArea.getHeight();
                 //TODO: Can this be more accurate?
                 double linesAbove = viewportY / editor.getLineHeight();
-                height += editor.getLineHeight() * 4;
-                double visibleLines = height / editor.getLineHeight();
-                double padding = 20;
-                visibleLines += padding;
-                //            System.out.println("visibleLines: " + visibleLines);
-
+                double visibleLines =  editor.getPreferredHeight();
                 if (linesAbove < 0) linesAbove = 0;
                 offset = document.getLineStartOffset((int) linesAbove);
                 int endLine = (int) (linesAbove + visibleLines);
