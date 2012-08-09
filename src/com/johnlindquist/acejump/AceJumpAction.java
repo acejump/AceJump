@@ -1,8 +1,10 @@
 package com.johnlindquist.acejump;
 
+import com.intellij.codeInsight.editorActions.SelectWordUtil;
 import com.intellij.find.FindManager;
 import com.intellij.find.FindModel;
 import com.intellij.find.FindResult;
+import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.impl.ActionManagerImpl;
 import com.intellij.openapi.application.ApplicationManager;
@@ -20,17 +22,23 @@ import com.intellij.openapi.editor.impl.FoldingModelImpl;
 import com.intellij.openapi.editor.impl.ScrollingModelImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.*;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.intellij.ui.awt.RelativePoint;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.popup.AbstractPopup;
 import com.intellij.usageView.UsageInfo;
 import com.intellij.usages.UsageInfo2UsageAdapter;
+import org.jdesktop.swingx.JXLabel;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.util.*;
 import java.util.List;
@@ -196,9 +204,6 @@ public class AceJumpAction extends AnAction {
         }
     }
 
-    protected void completeCaretMove(Integer offset) {
-    }
-
     protected void clearSelection() {
         popup.cancel();
         editor.getSelectionModel().removeSelection();
@@ -213,6 +218,9 @@ public class AceJumpAction extends AnAction {
         protected int endResult;
         private SearchArea searchArea;
         private boolean searchMode = true;
+        private boolean isAutocomplete = false;
+        private boolean mnemonicsDisabled;
+
 
         @Override
         protected void paintBorder(Graphics g) {
@@ -225,9 +233,34 @@ public class AceJumpAction extends AnAction {
             return new Dimension(getFontMetrics(getFont()).stringWidth("w"), editor.getLineHeight());
         }
 
+        public SearchBox() {
+            final UISettings settings = UISettings.getInstance();
+            addFocusListener(new FocusListener() {
+                @Override
+                public void focusGained(FocusEvent e) {
+
+                    mnemonicsDisabled = settings.DISABLE_MNEMONICS;
+
+                    if (!mnemonicsDisabled) {
+                        settings.DISABLE_MNEMONICS = true;
+                        settings.fireUISettingsChanged();
+                    }
+                }
+
+                @Override
+                public void focusLost(FocusEvent e) {
+                    if (!mnemonicsDisabled) {
+                        settings.DISABLE_MNEMONICS = false;
+                        settings.fireUISettingsChanged();
+                    }
+                }
+            });
+        }
+
         //todo: refactor to bindings
         @Override
         protected void processKeyEvent(final KeyEvent e) {
+
             //todo: refactor to behaviors, just spiking for now
             boolean isSpecialChar = false;
             switch (e.getKeyCode()) {
@@ -241,19 +274,31 @@ public class AceJumpAction extends AnAction {
                     searchMode = false;
                     isSpecialChar = true;
                     break;
+
+                case KeyEvent.VK_SPACE:
+                    searchMode = false;
+                    isSpecialChar = true;
+                    isAutocomplete = true;
+                    break;
+                case KeyEvent.VK_BACK_SPACE:
+                    hideBalloons();
+                    isSpecialChar = true;
+                    break;
             }
 
             if (isSpecialChar) return;
-
             super.processKeyEvent(e);
-            //only handle "press" events
-            if (e.getID() == KeyEvent.KEY_RELEASED) return;
+
+            //only watch "key_typed" events
+            if (e.getID() != KeyEvent.KEY_TYPED) return;
 
             char keyChar = e.getKeyChar();
             key = Character.getNumericValue(keyChar);
             int keyCode = e.getKeyCode();
 
             if (!searchMode) {
+                KeyStroke keyStrokeForEvent = KeyStroke.getKeyStrokeForEvent(e);
+                char keyChar1 = keyStrokeForEvent.getKeyChar();
                 System.out.println("navigating" + e.getKeyChar());
 //                System.out.println("value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
 //                System.out.println("---------passed: " + "value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
@@ -268,27 +313,23 @@ public class AceJumpAction extends AnAction {
                         int offsetModifer = 1;
                         if (offset < caretOffset) {
                             offset = offset + searchBox.getText().length();
-                            offsetModifer = -1;
+                            offsetModifer = -2;
                         }
                         editor.getSelectionModel().setSelection(caretOffset, offset + offsetModifer);
+                    } else if (e.isAltDown()) {
+                        moveCaret(offset);
+                        selectWordAtCaret();
+
+                        ActionManager actionManager = ActionManagerImpl.getInstance();
+                        final AnAction action = actionManager.getAction(IdeActions.ACTION_CODE_COMPLETION);
+                        AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), IdeActions.ACTION_CODE_COMPLETION, inputEvent.getPresentation(), ActionManager.getInstance(), 0);
+                        action.actionPerformed(event);
+
                     } else {
                         moveCaret(offset);
                     }
-                    new WriteCommandAction(project) {
-                        @Override
-                        protected void run(Result result) throws Throwable {
-                            applyModifier(e);
-                        }
-                    }.execute();
-                    try {
-                        completeCaretMove(offset);
-                    } catch (Exception e1) {
-                        e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                    }
                 }
 
-            } else if (keyCode == KeyEvent.VK_BACK_SPACE) {
-                hideBalloons();
             }
 
             if (searchMode && getText().length() == 1) {
@@ -297,6 +338,25 @@ public class AceJumpAction extends AnAction {
                 searchMode = false;
             }
 
+
+        }
+
+        protected void selectWordAtCaret() {
+            CharSequence text = document.getCharsSequence();
+            List<TextRange> ranges = new ArrayList<TextRange>();
+            SelectWordUtil.addWordSelection(false, text, editor.getCaretModel().getOffset(), ranges);
+            if (ranges.isEmpty()) return;
+
+            int startWordOffset = Math.max(0, ranges.get(0).getStartOffset());
+            int endWordOffset = Math.min(ranges.get(0).getEndOffset(), document.getTextLength());
+
+            if (ranges.size() == 2 && editor.getSelectionModel().getSelectionStart() == startWordOffset &&
+                    editor.getSelectionModel().getSelectionEnd() == endWordOffset) {
+                startWordOffset = Math.max(0, ranges.get(1).getStartOffset());
+                endWordOffset = Math.min(ranges.get(1).getEndOffset(), document.getTextLength());
+            }
+
+            editor.getSelectionModel().setSelection(startWordOffset, endWordOffset);
         }
 
         /*todo: I hate this. Strict mapping to my USA keyboard :(*/
@@ -423,50 +483,41 @@ public class AceJumpAction extends AnAction {
 
 
             final HashMap<JBPopup, RelativePoint> jbPopupRelativePointHashMap = new HashMap<JBPopup, RelativePoint>();
+//            int xTranslate = -getFontMetrics(getFont()).stringWidth("W");
+            int yTranslate = -getFontMetrics(getFont()).getHeight();
             for (int i = start; i < end; i++) {
 
                 int textOffset = results.get(i);
                 RelativePoint point = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset));
                 Point originalPoint = point.getOriginalPoint();
-                originalPoint.translate(-3, -editor.getLineHeight());
+                originalPoint.translate(0, yTranslate);
 //                System.out.println(originalPoint.getX() + " " + originalPoint.getY());
 
-                GridBagLayout layout = new GridBagLayout();
-                JPanel jPanel = new JPanel(layout);
 //                jPanel.setBackground(new Color(255, 255, 255));
                 char resultChar = allowedCharacters.charAt(i % allowedCharacters.length());
                 String text = String.valueOf(resultChar);
 
-                JLabel jLabel = new JLabel(text);
+                JBLabel jLabel = new JBLabel(text) {
+                };
                 jLabel.setFont(font);
-
-
-//                jLabel.setBackground(new Color(192, 192, 192));
-                jLabel.setHorizontalAlignment(CENTER);
+                jLabel.setVerticalTextPosition(JBLabel.BOTTOM);
                 jLabel.setFocusable(false);
                 jLabel.setSize(jLabel.getWidth(), editor.getLineHeight());
-
-                jPanel.add(jLabel);
-
-//                GridBagConstraints constraints = new GridBagConstraints();
-//                constraints.ipady = editor.getLineHeight() / 4;
-//                layout.setConstraints(jLabel, constraints);
-
-//                jPanel.setPreferredSize(new Dimension(3, editor.getLineHeight()));
+                jLabel.setOpaque(false);
 
 
-                ComponentPopupBuilder componentPopupBuilder = JBPopupFactory.getInstance().createComponentPopupBuilder(jPanel, jPanel);
+                ComponentPopupBuilder componentPopupBuilder = JBPopupFactory.getInstance().createComponentPopupBuilder(jLabel, jLabel);
                 componentPopupBuilder.setCancelOnClickOutside(true);
                 componentPopupBuilder.setCancelOnOtherWindowOpen(true);
                 componentPopupBuilder.setCancelKeyEnabled(true);
                 componentPopupBuilder.setMovable(false);
                 componentPopupBuilder.setFocusable(false);
                 componentPopupBuilder.setBelongsToGlobalPopupStack(false);
-                JBPopup jPanelPopup = componentPopupBuilder.createPopup();
-                jbPopupRelativePointHashMap.put(jPanelPopup, point);
+                JBPopup jbPopup = componentPopupBuilder.createPopup();
 
+                jbPopupRelativePointHashMap.put(jbPopup, point);
 
-                resultPopups.add(jPanelPopup);
+                resultPopups.add(jbPopup);
                 hashMap.put(text, textOffset);
             }
 
@@ -515,7 +566,8 @@ public class AceJumpAction extends AnAction {
             List<Integer> offsets = new ArrayList<Integer>();
             FoldRegion[] allFoldRegions = foldingModel.getAllFoldRegions();
 
-            offsetWhile: while (offset < endOffset) {
+            offsetWhile:
+            while (offset < endOffset) {
                 System.out.println("offset: " + offset + "/" + endOffset);
 
                 System.out.println("Finding: " + findModel.getStringToFind() + " = " + offset);
@@ -537,7 +589,6 @@ public class AceJumpAction extends AnAction {
                     System.out.println(findModel.getStringToFind() + ": not found");
                     break;
                 }
-
 
 
                 System.out.println("result: " + result.toString());
@@ -613,7 +664,7 @@ public class AceJumpAction extends AnAction {
                 double height = visibleArea.getHeight();
                 //TODO: Can this be more accurate?
                 double linesAbove = viewportY / editor.getLineHeight();
-                double visibleLines =  editor.getPreferredHeight();
+                double visibleLines = editor.getPreferredHeight();
                 if (linesAbove < 0) linesAbove = 0;
                 offset = document.getLineStartOffset((int) linesAbove);
                 int endLine = (int) (linesAbove + visibleLines);
