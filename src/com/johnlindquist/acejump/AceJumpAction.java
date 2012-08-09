@@ -1,6 +1,9 @@
 package com.johnlindquist.acejump;
 
 import com.intellij.codeInsight.editorActions.SelectWordUtil;
+import com.intellij.codeInsight.hint.LineTooltipRenderer;
+import com.intellij.codeInsight.hint.TooltipGroup;
+import com.intellij.codeInsight.hint.TooltipRenderer;
 import com.intellij.find.FindManager;
 import com.intellij.find.FindModel;
 import com.intellij.find.FindResult;
@@ -8,38 +11,36 @@ import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.impl.ActionManagerImpl;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.Result;
-import com.intellij.openapi.command.WriteCommandAction;
-import com.intellij.openapi.editor.CaretModel;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.FoldRegion;
-import com.intellij.openapi.editor.VisualPosition;
+import com.intellij.openapi.editor.*;
+import com.intellij.openapi.editor.colors.EditorColors;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
-import com.intellij.openapi.editor.impl.DocumentImpl;
-import com.intellij.openapi.editor.impl.EditorImpl;
-import com.intellij.openapi.editor.impl.FoldingModelImpl;
-import com.intellij.openapi.editor.impl.ScrollingModelImpl;
+import com.intellij.openapi.editor.ex.ErrorStripTooltipRendererProvider;
+import com.intellij.openapi.editor.impl.*;
+import com.intellij.openapi.editor.markup.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.*;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
+import com.intellij.ui.HintHint;
+import com.intellij.ui.LightweightHint;
 import com.intellij.ui.awt.RelativePoint;
-import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.popup.AbstractPopup;
 import com.intellij.usageView.UsageInfo;
 import com.intellij.usages.UsageInfo2UsageAdapter;
-import org.jdesktop.swingx.JXLabel;
+import com.intellij.util.ui.UIUtil;
+import gnu.trove.THashSet;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 
@@ -65,6 +66,9 @@ public class AceJumpAction extends AnAction {
 
     private CharSequence allowedCharacters = "abcdefghijklmnopqrstuvwxyz0123456789-=[];',./";
     private Font font;
+    private Graphics2D aceGraphics;
+    private Component component;
+
 
     public void actionPerformed(AnActionEvent e) {
         inputEvent = e;
@@ -129,12 +133,12 @@ public class AceJumpAction extends AnAction {
     public RelativePoint guessBestLocation(Editor editor) {
         VisualPosition logicalPosition = editor.getCaretModel().getVisualPosition();
         RelativePoint pointFromVisualPosition = getPointFromVisualPosition(editor, logicalPosition);
-        pointFromVisualPosition.getOriginalPoint().translate(0, -editor.getLineHeight());
+//        pointFromVisualPosition.getOriginalPoint().translate(0, -editor.getLineHeight());
         return pointFromVisualPosition;
     }
 
-    protected RelativePoint getPointFromVisualPosition(Editor editor, VisualPosition logicalPosition) {
-        Point p = editor.visualPositionToXY(new VisualPosition(logicalPosition.line + 1, logicalPosition.column));
+    protected static RelativePoint getPointFromVisualPosition(Editor editor, VisualPosition logicalPosition) {
+        Point p = editor.visualPositionToXY(new VisualPosition(logicalPosition.line, logicalPosition.column));
         return new RelativePoint(editor.getContentComponent(), p);
     }
 
@@ -238,6 +242,14 @@ public class AceJumpAction extends AnAction {
             addFocusListener(new FocusListener() {
                 @Override
                 public void focusGained(FocusEvent e) {
+                    JComponent contentComponent = editor.getContentComponent();
+                    component = contentComponent.add(new JComponent() {
+
+                    });
+                    component.setSize(contentComponent.getSize());
+                    Point locationOnScreen = contentComponent.getLocationOnScreen();
+                    component.setLocation(-locationOnScreen.x, -locationOnScreen.y + 23);
+                    aceGraphics = (Graphics2D) component.getGraphics();
 
                     mnemonicsDisabled = settings.DISABLE_MNEMONICS;
 
@@ -249,6 +261,8 @@ public class AceJumpAction extends AnAction {
 
                 @Override
                 public void focusLost(FocusEvent e) {
+                    editor.getContentComponent().remove(component);
+                    component = null;
                     if (!mnemonicsDisabled) {
                         settings.DISABLE_MNEMONICS = false;
                         settings.fireUISettingsChanged();
@@ -472,6 +486,25 @@ public class AceJumpAction extends AnAction {
             });
         }
 
+        private class MyLineMarkerRenderer implements LineMarkerRenderer {
+            private static final int DEEPNESS = 2;
+            private static final int THICKNESS = 2;
+            private final Color myColor;
+
+            private MyLineMarkerRenderer(Color color) {
+                myColor = color;
+            }
+
+            public void paint(Editor editor, Graphics g, Rectangle r) {
+                int height = r.height + editor.getLineHeight();
+                g.setColor(myColor);
+                g.fillRect(r.x, r.y, THICKNESS, height);
+                g.fillRect(r.x + THICKNESS, r.y, DEEPNESS, THICKNESS);
+                g.fillRect(r.x + THICKNESS, r.y + height - THICKNESS, DEEPNESS, THICKNESS);
+            }
+        }
+
+
         private void showBalloons(List<Integer> results, int start, int end) {
             hideBalloons();
 
@@ -490,14 +523,46 @@ public class AceJumpAction extends AnAction {
                 int textOffset = results.get(i);
                 RelativePoint point = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset));
                 Point originalPoint = point.getOriginalPoint();
-                originalPoint.translate(0, yTranslate);
+//                originalPoint.translate(0, yTranslate);
 //                System.out.println(originalPoint.getX() + " " + originalPoint.getY());
 
 //                jPanel.setBackground(new Color(255, 255, 255));
                 char resultChar = allowedCharacters.charAt(i % allowedCharacters.length());
-                String text = String.valueOf(resultChar);
+                final String text = String.valueOf(resultChar);
+//                document.replaceString(textOffset, textOffset + 1, text);
+                TextAttributes attributes = EditorColorsManager.getInstance().getGlobalScheme().getAttributes(EditorColors.SEARCH_RESULT_ATTRIBUTES);
+//                HighlightManager highlightManager = HighlightManagerImpl.getInstance(project);
+//                highlightManager.addOccurrenceHighlight(editor, textOffset, textOffset + 1, attributes, 0, null, null);
+//
+           /*     RangeHighlighter highlighter = editor.getMarkupModel().addRangeHighlighter(textOffset, textOffset + 1, HIGHLIGHT_LAYER,
+                        attributes, HighlighterTargetArea.EXACT_RANGE);*/
 
-                JBLabel jLabel = new JBLabel(text) {
+
+                int halfLineHeight = editor.getLineHeight() / 2;
+                aceGraphics.setColor(Color.BLUE);
+                aceGraphics.fillRect(originalPoint.x, originalPoint.y, getFontMetrics(getFont()).stringWidth("w"), editor.getLineHeight());
+
+                aceGraphics.setFont(font);
+                aceGraphics.setColor(Color.YELLOW);
+                EditorColorsScheme scheme = EditorColorsManager.getInstance().getGlobalScheme();
+
+                aceGraphics.drawString(text, originalPoint.x, originalPoint.y + scheme.getEditorFontSize());
+
+                component.update(aceGraphics);
+
+//                BasicTooltipRendererProvider rendererProvider = new BasicTooltipRendererProvider();
+//                TrafficTooltipRenderer renderer = rendererProvider.createTrafficTooltipRenderer(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        //nothing;j
+//                    }
+//                }, editor);
+//                renderer.show(editor, point, )
+//                TooltipController tooltipController = TooltipController.getInstance();
+//                tooltipController.showTooltip(editor, originalPoint, text, false, tooltipGroup);
+
+
+          /*      JBLabel jLabel = new JBLabel(text) {
                 };
                 jLabel.setFont(font);
                 jLabel.setVerticalTextPosition(JBLabel.BOTTOM);
@@ -517,7 +582,7 @@ public class AceJumpAction extends AnAction {
 
                 jbPopupRelativePointHashMap.put(jbPopup, point);
 
-                resultPopups.add(jbPopup);
+                resultPopups.add(jbPopup);*/
                 hashMap.put(text, textOffset);
             }
 
@@ -544,6 +609,7 @@ public class AceJumpAction extends AnAction {
 
 
         }
+
 
         private void hideBalloons() {
             for (JBPopup balloon1 : resultPopups) {
