@@ -1,4 +1,4 @@
-<idea-plugin url="https://github.com/johnlindquist/open-source-plugins"
+<idea-plugin url="https://github.com/johnlindquist/AceJump"
              version="2">
     <name>AceJump</name>
     <id>AceJump</id>
@@ -11,8 +11,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
-            <dt>1.0</dt>
-            <dd>Initial Release</dd>
+            <dt>1.0 Beta</dt>
+            <dd>Beta Release: Works on my install, but needs testing from other users on different OSes, keyboards, settings, etc</dd>
         </dl>
         </html>
         ]]>
