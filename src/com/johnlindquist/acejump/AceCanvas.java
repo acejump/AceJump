@@ -40,7 +40,7 @@ public class AceCanvas extends JComponent {
             Color defaultBackground = colorPair.getFirst();
 
             g2d.setColor(defaultForeground);
-            g2d.fillRect(originalPoint.x, originalPoint.y, getFontMetrics(font).stringWidth("w"), lineHeight + 1);
+            g2d.fillRect(originalPoint.x, originalPoint.y, getFontMetrics(font).stringWidth("w"), lineHeight);
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f));
 
 

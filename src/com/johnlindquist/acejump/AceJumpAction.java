@@ -186,10 +186,9 @@ public class AceJumpAction extends AnAction {
                     aceCanvas.setBounds(0, 0, viewport.getWidth() + 1000, viewport.getHeight() + 1000);
                     //System.out.println(aceCanvas.getWidth());
 
-                    Point locationOnScreen = contentComponent.getLocationOnScreen();
-                    //probably need to check for menuBar visibility
-                    int menuBarHeight = editor.getComponent().getRootPane().getJMenuBar().getHeight();
-                    aceCanvas.setLocation(-locationOnScreen.x, -locationOnScreen.y + menuBarHeight);
+                    JRootPane rootPane = editor.getComponent().getRootPane();
+                    Point locationOnScreen = SwingUtilities.convertPoint(aceCanvas, aceCanvas.getLocation(), rootPane);
+                    aceCanvas.setLocation(-locationOnScreen.x, -locationOnScreen.y);
 
                     aceGraphics = (Graphics2D) aceCanvas.getGraphics();
                     aceGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
