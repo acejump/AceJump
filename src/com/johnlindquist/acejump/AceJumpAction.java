@@ -1,6 +1,5 @@
 package com.johnlindquist.acejump;
 
-import com.intellij.application.options.colors.*;
 import com.intellij.codeInsight.editorActions.SelectWordUtil;
 import com.intellij.find.FindManager;
 import com.intellij.find.FindModel;
@@ -12,11 +11,10 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
-import com.intellij.openapi.editor.colors.impl.EditorColorsManagerImpl;
-import com.intellij.openapi.editor.ex.util.EditorUtil;
 import com.intellij.openapi.editor.impl.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.*;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
@@ -28,6 +26,7 @@ import com.intellij.usages.UsageInfo2UsageAdapter;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -55,13 +54,18 @@ public class AceJumpAction extends AnAction {
     protected AnActionEvent inputEvent;
     protected CaretModel caretModel;
 
-    private CharSequence allowedCharacters = "abcdefghijklmnopqrstuvwxyz0123456789-=[];',./";
+    private CharSequence allowedCharacters = "abcdefghijklmnopqrstuvwxyz";//0123456789-=[];',./";
     private Font font;
     private Graphics2D aceGraphics;
-    private Component aceCanvas;
+    private AceCanvas aceCanvas;
     private EditorColorsScheme scheme;
+    private int allowedCount;
+
+    protected HashMap<String, Integer> offsetHash = new HashMap<String, Integer>();
 
     public void actionPerformed(AnActionEvent e) {
+
+        allowedCount = allowedCharacters.length();
         inputEvent = e;
 
         project = e.getData(PlatformDataKeys.PROJECT);
@@ -91,12 +95,12 @@ public class AceJumpAction extends AnAction {
 
         popup.show(guessBestLocation(editor));
 
-        popup.addListener(new JBPopupAdapter() {
+/*        popup.addListener(new JBPopupAdapter() {
             @Override
             public void onClosed(LightweightWindowEvent event) {
-                searchBox.hideBalloons();
+                offsetHash.clear();
             }
-        });
+        });*/
 
 
         Dimension dimension = new Dimension(searchBox.getFontMetrics(font).stringWidth("w") * 2, editor.getLineHeight());
@@ -138,13 +142,15 @@ public class AceJumpAction extends AnAction {
     }
 
     protected void clearSelection() {
-        popup.cancel();
+        aceCanvas.setBallonInfos(null);
+        aceCanvas.repaint();
+        offsetHash.clear();
+//        popup.cancel();
         editor.getSelectionModel().removeSelection();
     }
 
     protected class SearchBox extends JTextField {
         private ArrayList<JBPopup> resultPopups = new ArrayList<JBPopup>();
-        protected HashMap<String, Integer> offsetHash = new HashMap<String, Integer>();
         protected int key;
         protected List<Integer> results;
         protected int startResult;
@@ -165,19 +171,20 @@ public class AceJumpAction extends AnAction {
             return new Dimension(getFontMetrics(getFont()).stringWidth("w"), editor.getLineHeight());
         }
 
+        //todo: refactor, extract and clean up
         public SearchBox() {
             final UISettings settings = UISettings.getInstance();
             addFocusListener(new FocusListener() {
                 @Override
                 public void focusGained(FocusEvent e) {
                     JComponent contentComponent = editor.getContentComponent();
-                    aceCanvas = contentComponent.add(new JComponent() {
+                    aceCanvas = new AceCanvas();
 
-                    });
+                    contentComponent.add(aceCanvas);
                     JViewport viewport = editor.getScrollPane().getViewport();
-                    //the 1000s are for the panels on the sides
+                    //the 1000s are for the panels on the sides, hopefully user testing will find any holes
                     aceCanvas.setBounds(0, 0, viewport.getWidth() + 1000, viewport.getHeight() + 1000);
-                    System.out.println(aceCanvas.getWidth());
+                    //System.out.println(aceCanvas.getWidth());
 
                     Point locationOnScreen = contentComponent.getLocationOnScreen();
                     //probably need to check for menuBar visibility
@@ -210,48 +217,91 @@ public class AceJumpAction extends AnAction {
         @Override
         protected void processKeyEvent(final KeyEvent e) {
 
-            //todo: refactor to behaviors, just spiking for now
-            boolean isSpecialChar = false;
-            switch (e.getKeyCode()) {
-                case KeyEvent.VK_HOME:
-                    findText("(?<=^\\s*)\\S", true);
-                    searchMode = false;
-                    isSpecialChar = true;
-                    break;
-                case KeyEvent.VK_END:
-                    findText("\n", true);
-                    searchMode = false;
-                    isSpecialChar = true;
-                    break;
-
-                case KeyEvent.VK_SPACE:
-                    searchMode = false;
-                    isSpecialChar = true;
-                    break;
-
-                case KeyEvent.VK_BACK_SPACE:
-                    popup.cancel();
-                    break;
+            if (getText().length() == 0) {
+                searchMode = true;
             }
 
-            if (isSpecialChar) return;
+            //todo: refactor to behaviors, just spiking for now
+            boolean isSpecialChar = false;
+
+            if (e.getID() == KeyEvent.KEY_RELEASED) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_HOME:
+                        findText("^.", true);
+                        //the textfield needs to have a char to read/delete for consistent behavior
+                        setText(" ");
+                        searchMode = false;
+                        isSpecialChar = true;
+                        break;
+                    case KeyEvent.VK_END:
+                        findText("\n", true);
+                        setText(" ");
+                        searchMode = false;
+                        isSpecialChar = true;
+                        break;
+
+                    case KeyEvent.VK_SPACE:
+                        searchMode = false;
+                        isSpecialChar = true;
+                        break;
+
+                }
+            }
+
+            if (e.getID() == KeyEvent.KEY_PRESSED) {
+                switch (e.getKeyCode()) {
+                    case KeyEvent.VK_BACK_SPACE:
+                        searchMode = false;
+                        clearSelection();
+                        break;
+
+                    case KeyEvent.VK_ENTER:
+                        if (!e.isShiftDown()) {
+                            startResult += allowedCount;
+                            endResult += allowedCount;
+                        } else {
+                            startResult -= allowedCount;
+                            endResult -= allowedCount;
+                        }
+                        if (startResult < 0) {
+                            startResult = 0;
+                        }
+                        if (endResult < allowedCount) {
+                            endResult = allowedCount;
+                        }
+                        showBalloons(results, startResult, endResult);
+                        isSpecialChar = true;
+                        break;
+                }
+            }
+
+            //System.out.println("start: " + startResult + " end: " + endResult);
+            if (isSpecialChar) {
+                return;
+            }
             super.processKeyEvent(e);
 
             //only watch "key_typed" events
-            if (e.getID() != KeyEvent.KEY_TYPED) return;
+            if (e.getID() != KeyEvent.KEY_TYPED) {
+                return;
+            }
+
 
             char keyChar = e.getKeyChar();
             key = Character.getNumericValue(keyChar);
 
             if (!searchMode) {
-                System.out.println("navigating" + e.getKeyChar());
+
+                //Systemm.out.println("navigating" + e.getKeyChar());
 //                System.out.println("value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
 //                System.out.println("---------passed: " + "value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
 
 
                 Integer offset = offsetHash.get(getLowerCaseStringFromChar(keyChar));
                 if (offset != null) {
+
                     clearSelection();
+                    popup.cancel();
                     if (e.isShiftDown()) {
                         editor.getSelectionModel().removeSelection();
                         int caretOffset = caretModel.getOffset();
@@ -278,11 +328,19 @@ public class AceJumpAction extends AnAction {
             }
 
             if (searchMode && getText().length() == 1) {
-                System.out.println("searching " + e.getKeyChar() + "\n");
+                //System.out.println("searching " + e.getKeyChar() + "\n");
                 findText(getText(), false);
                 searchMode = false;
+                return;
             }
 
+            if (getText().length() == 2) {
+                try {
+                    setText(getText(0, 1));
+                } catch (BadLocationException e1) {
+                    e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                }
+            }
 
         }
 
@@ -418,13 +476,13 @@ public class AceJumpAction extends AnAction {
         }
 
         private void showBalloons(List<Integer> results, int start, int end) {
-            hideBalloons();
-
-
+            offsetHash.clear();
             int size = results.size();
             if (end > size) {
                 end = size;
             }
+
+            Vector<Pair<String, Point>> ballonInfos = new Vector<Pair<String, Point>>();
 
             for (int i = start; i < end; i++) {
 
@@ -434,32 +492,22 @@ public class AceJumpAction extends AnAction {
                 char resultChar = allowedCharacters.charAt(i % allowedCharacters.length());
                 final String text = String.valueOf(resultChar);
 
-                Color defaultForeground = scheme.getDefaultForeground();
-                Color defaultBackground = scheme.getDefaultBackground();
-
-//                aceGraphics.setStroke(new BasicStroke(3));
-//                aceGraphics.setColor(Color.DARK_GRAY);
-//                aceGraphics.drawRect(originalPoint.x - 4, originalPoint.y -2, getFontMetrics(getFont()).stringWidth("w") + 8, editor.getLineHeight() + 4);
-                aceGraphics.setColor(defaultForeground);
-                aceGraphics.fillRect(originalPoint.x - 2, originalPoint.y, getFontMetrics(getFont()).stringWidth("w") + 5, editor.getLineHeight() + 1);
-
-                aceGraphics.setFont(font);
-                aceGraphics.setColor(defaultBackground);
-                aceGraphics.drawString(text, originalPoint.x, originalPoint.y + scheme.getEditorFontSize());
-
+                ballonInfos.add(new Pair<String, Point>(text, originalPoint));
                 offsetHash.put(text, textOffset);
             }
 
+            aceCanvas.setFont(font);
+            aceCanvas.setBallonInfos(ballonInfos);
+            aceCanvas.setLineHeight(editor.getLineHeight());
+            aceCanvas.setBackgroundForegroundColors(new Pair<Color, Color>(scheme.getDefaultBackground(), scheme.getDefaultForeground()));
+
+            aceCanvas.repaint();
         }
 
-
-        private void hideBalloons() {
-            offsetHash.clear();
-        }
 
         @Nullable
         protected java.util.List<Integer> findAllVisible() {
-            System.out.println("----- findAllVisible");
+            //System.out.println("----- findAllVisible");
             int offset = searchArea.getOffset();
             int endOffset = searchArea.getEndOffset();
             CharSequence text = searchArea.getText();
@@ -490,12 +538,12 @@ public class AceJumpAction extends AnAction {
 
                 FindResult result = findManager.findString(text, offset, findModel, virtualFile);
                 if (!result.isStringFound()) {
-                    System.out.println(findModel.getStringToFind() + ": not found");
+                    //System.out.println(findModel.getStringToFind() + ": not found");
                     break;
                 }
 
 
-                System.out.println("result: " + result.toString());
+                //System.out.println("result: " + result.toString());
 
                 UsageInfo2UsageAdapter usageAdapter = new UsageInfo2UsageAdapter(new UsageInfo(psiFile, result.getStartOffset(), result.getEndOffset()));
                 Point point = editor.logicalPositionToXY(editor.offsetToLogicalPosition(usageAdapter.getUsageInfo().getNavigationOffset()));
@@ -504,7 +552,7 @@ public class AceJumpAction extends AnAction {
                     int navigationOffset = usageInfo.getNavigationOffset();
                     if (navigationOffset != caretModel.getOffset()) {
                         if (!results.contains(navigationOffset)) {
-                            System.out.println("Adding: " + navigationOffset + "-> " + usageAdapter.getPlainText());
+                            //System.out.println("Adding: " + navigationOffset + "-> " + usageAdapter.getPlainText());
                             offsets.add(navigationOffset);
                         }
                     }
