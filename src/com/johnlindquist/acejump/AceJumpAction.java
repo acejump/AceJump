@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump;
 
+import com.intellij.application.options.colors.*;
 import com.intellij.codeInsight.editorActions.SelectWordUtil;
 import com.intellij.find.FindManager;
 import com.intellij.find.FindModel;
@@ -11,6 +12,8 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
+import com.intellij.openapi.editor.colors.impl.EditorColorsManagerImpl;
+import com.intellij.openapi.editor.ex.util.EditorUtil;
 import com.intellij.openapi.editor.impl.*;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.*;
@@ -56,7 +59,7 @@ public class AceJumpAction extends AnAction {
     private Font font;
     private Graphics2D aceGraphics;
     private Component aceCanvas;
-
+    private EditorColorsScheme scheme;
 
     public void actionPerformed(AnActionEvent e) {
         inputEvent = e;
@@ -72,7 +75,8 @@ public class AceJumpAction extends AnAction {
         findManager = FindManager.getInstance(project);
         findModel = createFindModel(findManager);
 
-        EditorColorsScheme scheme = EditorColorsManager.getInstance().getGlobalScheme();
+        scheme = EditorColorsManager.getInstance().getGlobalScheme();
+
         font = new Font(scheme.getEditorFontName(), Font.BOLD, scheme.getEditorFontSize());
         searchBox = new SearchBox();
 
@@ -179,7 +183,9 @@ public class AceJumpAction extends AnAction {
                     //probably need to check for menuBar visibility
                     int menuBarHeight = editor.getComponent().getRootPane().getJMenuBar().getHeight();
                     aceCanvas.setLocation(-locationOnScreen.x, -locationOnScreen.y + menuBarHeight);
+
                     aceGraphics = (Graphics2D) aceCanvas.getGraphics();
+                    aceGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
                     aceGraphics.setClip(0, 0, aceCanvas.getWidth(), aceCanvas.getHeight());
                     mnemonicsDisabled = settings.DISABLE_MNEMONICS;
 
@@ -224,7 +230,7 @@ public class AceJumpAction extends AnAction {
                     break;
 
                 case KeyEvent.VK_BACK_SPACE:
-                    reset();
+                    popup.cancel();
                     break;
             }
 
@@ -238,7 +244,6 @@ public class AceJumpAction extends AnAction {
             key = Character.getNumericValue(keyChar);
 
             if (!searchMode) {
-                KeyStroke keyStrokeForEvent = KeyStroke.getKeyStrokeForEvent(e);
                 System.out.println("navigating" + e.getKeyChar());
 //                System.out.println("value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
 //                System.out.println("---------passed: " + "value: " + key + " code " + keyCode + " char " + e.getKeyChar() + " location: " + e.getKeyLocation());
@@ -429,16 +434,19 @@ public class AceJumpAction extends AnAction {
                 char resultChar = allowedCharacters.charAt(i % allowedCharacters.length());
                 final String text = String.valueOf(resultChar);
 
-                aceGraphics.setColor(Color.BLUE);
-                aceGraphics.fillRect(originalPoint.x, originalPoint.y, getFontMetrics(getFont()).stringWidth("w"), editor.getLineHeight());
+                Color defaultForeground = scheme.getDefaultForeground();
+                Color defaultBackground = scheme.getDefaultBackground();
+
+//                aceGraphics.setStroke(new BasicStroke(3));
+//                aceGraphics.setColor(Color.DARK_GRAY);
+//                aceGraphics.drawRect(originalPoint.x - 4, originalPoint.y -2, getFontMetrics(getFont()).stringWidth("w") + 8, editor.getLineHeight() + 4);
+                aceGraphics.setColor(defaultForeground);
+                aceGraphics.fillRect(originalPoint.x - 2, originalPoint.y, getFontMetrics(getFont()).stringWidth("w") + 5, editor.getLineHeight() + 1);
 
                 aceGraphics.setFont(font);
-                aceGraphics.setColor(Color.YELLOW);
-                EditorColorsScheme scheme = EditorColorsManager.getInstance().getGlobalScheme();
-
+                aceGraphics.setColor(defaultBackground);
                 aceGraphics.drawString(text, originalPoint.x, originalPoint.y + scheme.getEditorFontSize());
 
-                aceCanvas.update(aceGraphics);
                 offsetHash.put(text, textOffset);
             }
 
