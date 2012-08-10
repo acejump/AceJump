@@ -613,6 +613,8 @@ public class AceJumpAction extends AnAction {
                 ScrollingModelImpl scrollingModel = (ScrollingModelImpl) editor.getScrollingModel();
                 //you need the "visibleArea" to see if the point is inside of it
                 visibleArea = scrollingModel.getVisibleArea();
+                //it seems like visibleArea can miss a top line, so I'm manually adding one. Investigate later.
+                visibleArea.setRect(visibleArea.x, visibleArea.y - editor.getLineHeight(), visibleArea.width, visibleArea.height + editor.getLineHeight());
 
                 //TODO: Can this be more accurate?
                 double linesAbove = viewportY / editor.getLineHeight();
