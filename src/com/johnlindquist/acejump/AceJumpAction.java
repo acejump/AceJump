@@ -203,7 +203,7 @@ public class AceJumpAction extends AnAction {
 
                 @Override
                 public void focusLost(FocusEvent e) {
-                    reset();
+                    clearSelection();
                     if (!mnemonicsDisabled) {
                         settings.DISABLE_MNEMONICS = false;
                         settings.fireUISettingsChanged();
@@ -482,12 +482,13 @@ public class AceJumpAction extends AnAction {
             }
 
             Vector<Pair<String, Point>> ballonInfos = new Vector<Pair<String, Point>>();
-
+            float hOffset = font.getSize() - (font.getSize() * scheme.getLineSpacing());
             for (int i = start; i < end; i++) {
 
                 int textOffset = results.get(i);
                 RelativePoint point = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset));
                 Point originalPoint = point.getOriginalPoint();
+                originalPoint.translate(0, (int) -hOffset);
                 char resultChar = allowedCharacters.charAt(i % allowedCharacters.length());
                 final String text = String.valueOf(resultChar);
 
@@ -495,9 +496,11 @@ public class AceJumpAction extends AnAction {
                 offsetHash.put(text, textOffset);
             }
 
+
             aceCanvas.setFont(font);
-            aceCanvas.setBallonInfos(ballonInfos);
             aceCanvas.setLineHeight(editor.getLineHeight());
+            aceCanvas.setLineSpacing(scheme.getLineSpacing());
+            aceCanvas.setBallonInfos(ballonInfos);
             aceCanvas.setBackgroundForegroundColors(new Pair<Color, Color>(scheme.getDefaultBackground(), scheme.getDefaultForeground()));
 
             aceCanvas.repaint();
@@ -627,13 +630,6 @@ public class AceJumpAction extends AnAction {
                 }
                 endOffset = document.getLineEndOffset(endLine);
             }
-        }
-    }
-
-    private void reset() {
-        if (aceCanvas != null) {
-            editor.getContentComponent().remove(aceCanvas);
-            aceCanvas = null;
         }
     }
 }
