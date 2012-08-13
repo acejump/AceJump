@@ -48,18 +48,23 @@ public class AceCanvas extends JComponent {
             Color defaultBackground = colorPair.getFirst();
 
             int hOffset = (int) (fontHeight * lineSpacing - fontHeight);
-            originalPoint.translate(0, hOffset);
+//            originalPoint.translate(0, hOffset);
 
+
+            //the background rectangle
             g2d.setColor(defaultForeground);
 
 
-            g2d.fillRect(originalPoint.x, originalPoint.y + lineDiff, fontWidth, rectHeight);
+//            g2d.fillRect(originalPoint.x, originalPoint.y + lineDiff, fontWidth, rectHeight);
+            g2d.fillRect(originalPoint.x, originalPoint.y - hOffset, fontWidth, lineHeight);
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.85f));
 
 
+            //the foreground text
             g2d.setFont(font);
             g2d.setColor(defaultBackground);
-            g2d.drawString(text, originalPoint.x, originalPoint.y + fontHeight + lineDiff);
+//            g2d.drawString(text, originalPoint.x, originalPoint.y + fontHeight + lineDiff);
+            g2d.drawString(text, originalPoint.x, originalPoint.y);
         }
 
     }

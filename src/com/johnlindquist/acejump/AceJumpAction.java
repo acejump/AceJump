@@ -548,9 +548,10 @@ public class AceJumpAction extends AnAction {
                 //System.out.println("result: " + result.toString());
 
                 UsageInfo2UsageAdapter usageAdapter = new UsageInfo2UsageAdapter(new UsageInfo(psiFile, result.getStartOffset(), result.getEndOffset()));
-                Point point = editor.logicalPositionToXY(editor.offsetToLogicalPosition(usageAdapter.getUsageInfo().getNavigationOffset()));
+                UsageInfo info = usageAdapter.getUsageInfo();
+                Point point = editor.logicalPositionToXY(editor.offsetToLogicalPosition(info.getNavigationOffset(), true));
                 if (visibleArea.contains(point)) {
-                    UsageInfo usageInfo = usageAdapter.getUsageInfo();
+                    UsageInfo usageInfo = info;
                     int navigationOffset = usageInfo.getNavigationOffset();
                     if (navigationOffset != caretModel.getOffset()) {
                         if (!results.contains(navigationOffset)) {
