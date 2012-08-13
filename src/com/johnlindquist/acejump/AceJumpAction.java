@@ -145,8 +145,6 @@ public class AceJumpAction extends AnAction {
         aceCanvas.setBallonInfos(null);
         aceCanvas.repaint();
         offsetHash.clear();
-//        popup.cancel();
-        editor.getSelectionModel().removeSelection();
     }
 
     protected class SearchBox extends JTextField {

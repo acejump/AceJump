@@ -33,12 +33,11 @@ public class AceCanvas extends JComponent {
         Graphics2D g2d = (Graphics2D) g;
         int fontWidth = getFontMetrics(font).stringWidth("w");
         int fontHeight = font.getSize();
-        int rectHeight = lineHeight;
-        int lineDiff = 0;
-        if (fontHeight > lineHeight) {
-            rectHeight = fontHeight;
-            lineDiff = fontHeight - lineHeight;
-        }
+
+        int rectMarginWidth = fontWidth / 2;
+        int doubleRectMarginWidth = rectMarginWidth * 2;
+        int rectHOffset = (int) (fontHeight * lineSpacing - fontHeight);
+        int rectWidth = fontWidth + doubleRectMarginWidth;
 
         for (Pair<String, Point> ballonInfo : ballonInfos) {
 
@@ -47,24 +46,22 @@ public class AceCanvas extends JComponent {
             Color defaultForeground = colorPair.getSecond();
             Color defaultBackground = colorPair.getFirst();
 
-            int hOffset = (int) (fontHeight * lineSpacing - fontHeight);
-//            originalPoint.translate(0, hOffset);
 
+            g2d.setColor(defaultBackground);
+            g2d.drawRect(originalPoint.x - rectMarginWidth - 1, originalPoint.y - rectHOffset - 1, rectWidth + 1, lineHeight + 1);
 
             //the background rectangle
             g2d.setColor(defaultForeground);
+            g2d.fillRect(originalPoint.x - rectMarginWidth, originalPoint.y - rectHOffset, rectWidth, lineHeight);
 
-
-//            g2d.fillRect(originalPoint.x, originalPoint.y + lineDiff, fontWidth, rectHeight);
-            g2d.fillRect(originalPoint.x, originalPoint.y - hOffset, fontWidth, lineHeight);
+            //just a touch of alpha
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.85f));
-
 
             //the foreground text
             g2d.setFont(font);
             g2d.setColor(defaultBackground);
-//            g2d.drawString(text, originalPoint.x, originalPoint.y + fontHeight + lineDiff);
-            g2d.drawString(text, originalPoint.x, originalPoint.y);
+            g2d.drawString(text.toUpperCase(), originalPoint.x, originalPoint.y + fontHeight);
+
         }
 
     }
