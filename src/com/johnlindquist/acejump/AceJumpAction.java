@@ -139,7 +139,7 @@ public class AceJumpAction extends AnAction {
     }
 
     protected class SearchBox extends JTextField {
-        private ArrayList<JBPopup> resultPopups = new ArrayList<JBPopup>();
+        //todo: cleanup searchbox
         protected int key;
         protected List<Integer> results;
         protected int startResult;
@@ -458,6 +458,7 @@ public class AceJumpAction extends AnAction {
             }
 
             Vector<Pair<String, Point>> ballonInfos = new Vector<Pair<String, Point>>();
+            //todo: move all font-based positioning logic into the canvas
             float hOffset = font.getSize() - (font.getSize() * scheme.getLineSpacing());
             for (int i = start; i < end; i++) {
 
