@@ -145,6 +145,8 @@ public class AceJumpAction extends AnAction {
         aceCanvas.setBallonInfos(null);
         aceCanvas.repaint();
         offsetHash.clear();
+//        popup.cancel();
+//        editor.getSelectionModel().removeSelection();
     }
 
     protected class SearchBox extends JTextField {
@@ -518,8 +520,11 @@ public class AceJumpAction extends AnAction {
             List<Integer> offsets = new ArrayList<Integer>();
             FoldRegion[] allFoldRegions = foldingModel.getAllFoldRegions();
 
+            int resultCount = 0;
+            //any more than 4 result sets is probably unreasonable (96 results for now)
+            int possibleOffsets = allowedCharacters.length() * 10;
             offsetWhile:
-            while (offset < endOffset) {
+            while (offset < endOffset && resultCount < possibleOffsets) {
 //                System.out.println("offset: " + offset + "/" + endOffset);
 
 //                System.out.println("Finding: " + findModel.getStringToFind() + " = " + offset);
@@ -567,6 +572,8 @@ public class AceJumpAction extends AnAction {
                 if (prevOffset == offset) {
                     ++offset;
                 }
+
+                resultCount++;
             }
 
             return offsets;
@@ -619,7 +626,7 @@ public class AceJumpAction extends AnAction {
 
                 //TODO: Can this be more accurate?
                 double linesAbove = viewportY / editor.getLineHeight();
-                double visibleLines = editor.getPreferredHeight();
+                double visibleLines = visibleArea.getHeight() / editor.getLineHeight();
                 if (linesAbove < 0) linesAbove = 0;
                 offset = document.getLineStartOffset((int) linesAbove);
                 int endLine = (int) (linesAbove + visibleLines);
@@ -629,6 +636,15 @@ public class AceJumpAction extends AnAction {
                 }
                 endOffset = document.getLineEndOffset(endLine);
             }
+
+            private int getVisibleLogicalLinesCount() {
+                return document.getLineCount() - foldingModel.getFoldedLinesCountBefore(document.getTextLength() + 1);
+            }
+
+            int getVisibleLineCount() {
+                return getVisibleLogicalLinesCount() + editor.getSoftWrapModel().getSoftWrapsIntroducedLinesNumber();
+            }
+
         }
     }
 }

@@ -5,7 +5,8 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Vector;
+import java.util.*;
+import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,13 +15,13 @@ import java.util.Vector;
  * Time: 9:45 AM
  */
 public class AceCanvas extends JComponent {
-    private Vector<Pair<String, Point>> ballonInfos;
+    private List<Pair<String, Point>> ballonInfos;
     private Pair<Color, Color> colorPair;
     private float lineSpacing;
     private int lineHeight;
 
 
-    public void setBallonInfos(@Nullable Vector<Pair<String, Point>> ballonInfos) {
+    public void setBallonInfos(@Nullable List<Pair<String, Point>> ballonInfos) {
         this.ballonInfos = ballonInfos;
     }
 
