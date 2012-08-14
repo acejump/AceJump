@@ -50,6 +50,7 @@ public class AceCanvas extends JComponent {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
             //a slight border for "pop"
+
             g2d.setColor(defaultBackground);
             g2d.drawRect(originalPoint.x - rectMarginWidth - 1, originalPoint.y - rectHOffset - 1, rectWidth + 1, lineHeight + 1);
 

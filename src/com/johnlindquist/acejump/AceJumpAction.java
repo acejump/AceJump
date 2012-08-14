@@ -67,17 +67,6 @@ public class AceJumpAction extends AnAction {
     protected HashMap<String, Integer> offsetHash = new HashMap<String, Integer>();
 
     public void actionPerformed(AnActionEvent e) {
-
-        //clear just in case (can get stuck in debugging, etc)
-        Component[] components = editor.getContentComponent().getComponents();
-        for (Component component : components) {
-            if (component instanceof AceCanvas) {
-                editor.getContentComponent().remove(component);
-                component = null;
-            }
-        }
-
-
         allowedCount = allowedCharacters.length();
         inputEvent = e;
 
