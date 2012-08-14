@@ -12,7 +12,9 @@
         <html>
         <dl>
             <dt>1.0 Beta</dt>
-            <dd>Beta Release: Works on my install, but needs testing from other users on different OSes, keyboards, settings, etc</dd>
+            <dd>Beta Release: Huge performance increases and visual fixes.</dd>
+            <dt>1.0 Alpha</dt>
+            <dd>Alpha Release: Works on my install, but needs testing from other users on different OSes, keyboards, settings, etc</dd>
         </dl>
         </html>
         ]]>
@@ -20,7 +22,7 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <version>1.0</version>
+    <version>1.0 Beta</version>
     <category>Navigation</category>
     <vendor url="http://johnlindquist.com"
             email="johnlindquist@gmail.com">johnlindquist

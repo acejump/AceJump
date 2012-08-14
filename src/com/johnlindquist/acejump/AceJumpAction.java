@@ -9,10 +9,7 @@ import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.impl.ActionManagerImpl;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.CaretModel;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.FoldRegion;
-import com.intellij.openapi.editor.VisualPosition;
+import com.intellij.openapi.editor.*;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.impl.DocumentImpl;
@@ -98,17 +95,8 @@ public class AceJumpAction extends AnAction {
 
         popup = (AbstractPopup) popupBuilder.createPopup();
 
-//        popup.getContent().setBorder(new BlockBorder());
 
         popup.show(guessBestLocation(editor));
-
-/*        popup.addListener(new JBPopupAdapter() {
-            @Override
-            public void onClosed(LightweightWindowEvent event) {
-                offsetHash.clear();
-            }
-        });*/
-
 
         Dimension dimension = new Dimension(searchBox.getFontMetrics(font).stringWidth("w") * 2, editor.getLineHeight());
         popup.setSize(dimension);
@@ -144,15 +132,12 @@ public class AceJumpAction extends AnAction {
 
     protected void moveCaret(Integer offset) {
         editor.getCaretModel().moveToOffset(offset);
-//        editor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
     }
 
     protected void clearSelection() {
         aceCanvas.setBallonInfos(null);
         aceCanvas.repaint();
         offsetHash.clear();
-//        popup.cancel();
-//        editor.getSelectionModel().removeSelection();
     }
 
     protected class SearchBox extends JTextField {
@@ -468,7 +453,7 @@ public class AceJumpAction extends AnAction {
                     startResult = 0;
                     endResult = allowedCharacters.length();
 
-                    showBalloons(results, startResult, endResult);//To change body of implemented methods use File | Settings | File Templates.
+                    showBalloons(results, startResult, endResult);
                 }
             });
         }
@@ -512,46 +497,18 @@ public class AceJumpAction extends AnAction {
             int offset = searchArea.getOffset();
             int endOffset = searchArea.getEndOffset();
             CharSequence text = searchArea.getText();
-            PsiFile psiFile = searchArea.getPsiFile();
-            Rectangle visibleArea = searchArea.getVisibleArea();
-
-
             List<Integer> offsets = new ArrayList<Integer>();
-            FoldRegion[] allFoldRegions = foldingModel.getAllFoldRegions();
-
-            int resultCount = 0;
-            //any more than 10 result sets is probably unreasonable (260 results for now)
-            int possibleOffsets = allowedCharacters.length() * 10;
-            offsetWhile:
             while (offset < endOffset) {
-//                System.out.println("offset: " + offset + "/" + endOffset);
-
-//                System.out.println("Finding: " + findModel.getStringToFind() + " = " + offset);
-
                 //skip folded regions. Re-think approach.
-                for (FoldRegion foldRegion : allFoldRegions) {
-                    if (!foldRegion.isExpanded()) {
-                        if (offset >= foldRegion.getStartOffset() && offset <= foldRegion.getEndOffset()) {
-//                            System.out.println("before offset: " + offset);
-                            offset = foldRegion.getEndOffset() + 1;
-//                            System.out.println("after offset: " + offset);
-                            continue offsetWhile;
-                        }
-                    }
-                }
+                offset = checkFolded(offset);
 
                 FindResult result = findManager.findString(text, offset, findModel, virtualFile);
                 if (!result.isStringFound()) {
                     //System.out.println(findModel.getStringToFind() + ": not found");
                     break;
                 }
-
-
                 offsets.add(result.getStartOffset());
-
-
                 offset = result.getEndOffset();
-                resultCount++;
             }
 
             return offsets;
@@ -571,10 +528,6 @@ public class AceJumpAction extends AnAction {
 
             public CharSequence getText() {
                 return text;
-            }
-
-            public Rectangle getVisibleArea() {
-                return visibleArea;
             }
 
             public int getOffset() {
@@ -609,20 +562,19 @@ public class AceJumpAction extends AnAction {
                 offset = document.getLineStartOffset((int) linesAbove);
                 int endLine = (int) (linesAbove + visibleLines);
                 int lineCount = document.getLineCount() - 1;
-                if (endLine > lineCount) {
+                int foldedLinesCountBefore = editor.getFoldingModel().getFoldedLinesCountBefore(document.getTextLength() + 1);
+                if (endLine + foldedLinesCountBefore > lineCount) {
                     endLine = lineCount;
                 }
                 endOffset = document.getLineEndOffset(endLine);
             }
-
-            private int getVisibleLogicalLinesCount() {
-                return document.getLineCount() - foldingModel.getFoldedLinesCountBefore(document.getTextLength() + 1);
-            }
-
-            int getVisibleLineCount() {
-                return getVisibleLogicalLinesCount() + editor.getSoftWrapModel().getSoftWrapsIntroducedLinesNumber();
-            }
-
         }
+    }
+
+    private int checkFolded(int offset) {
+        for (FoldRegion foldRegion : editor.getFoldingModel().fetchCollapsedAt(offset)) {
+            offset = foldRegion.getEndOffset() + 1;
+        }
+        return offset;
     }
 }
