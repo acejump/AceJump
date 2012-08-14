@@ -9,13 +9,15 @@ import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.impl.ActionManagerImpl;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.editor.*;
+import com.intellij.openapi.editor.CaretModel;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.FoldRegion;
+import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.impl.DocumentImpl;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.impl.FoldingModelImpl;
-import com.intellij.openapi.editor.impl.ScrollingModelImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.ComponentPopupBuilder;
 import com.intellij.openapi.ui.popup.JBPopup;
@@ -23,8 +25,6 @@ import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiDocumentManager;
-import com.intellij.psi.PsiFile;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.popup.AbstractPopup;
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +60,6 @@ public class AceJumpAction extends AnAction {
 
     private CharSequence allowedCharacters = "abcdefghijklmnopqrstuvwxyz0123456789";//-=[];',./";
     private Font font;
-    private Graphics2D aceGraphics;
     private AceCanvas aceCanvas;
     private EditorColorsScheme scheme;
     private int allowedCount;
@@ -68,6 +67,16 @@ public class AceJumpAction extends AnAction {
     protected HashMap<String, Integer> offsetHash = new HashMap<String, Integer>();
 
     public void actionPerformed(AnActionEvent e) {
+
+        //clear just in case (can get stuck in debugging, etc)
+        Component[] components = editor.getContentComponent().getComponents();
+        for (Component component : components) {
+            if (component instanceof AceCanvas) {
+                editor.getContentComponent().remove(component);
+                component = null;
+            }
+        }
+
 
         allowedCount = allowedCharacters.length();
         inputEvent = e;
@@ -146,7 +155,6 @@ public class AceJumpAction extends AnAction {
         protected List<Integer> results;
         protected int startResult;
         protected int endResult;
-        private SearchArea searchArea;
         private boolean searchMode = true;
         private boolean mnemonicsDisabled;
 
@@ -175,15 +183,13 @@ public class AceJumpAction extends AnAction {
                     JViewport viewport = editor.getScrollPane().getViewport();
                     //the 1000s are for the panels on the sides, hopefully user testing will find any holes
                     aceCanvas.setBounds(0, 0, viewport.getWidth() + 1000, viewport.getHeight() + 1000);
+//                    aceCanvas.setBounds(0, 0, viewport.getWidth(), viewport.getHeight());
                     //System.out.println(aceCanvas.getWidth());
 
                     JRootPane rootPane = editor.getComponent().getRootPane();
                     Point locationOnScreen = SwingUtilities.convertPoint(aceCanvas, aceCanvas.getLocation(), rootPane);
                     aceCanvas.setLocation(-locationOnScreen.x, -locationOnScreen.y);
 
-                    aceGraphics = (Graphics2D) aceCanvas.getGraphics();
-                    aceGraphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    aceGraphics.setClip(0, 0, aceCanvas.getWidth(), aceCanvas.getHeight());
                     mnemonicsDisabled = settings.DISABLE_MNEMONICS;
 
                     if (!mnemonicsDisabled) {
@@ -407,9 +413,6 @@ public class AceJumpAction extends AnAction {
             ApplicationManager.getApplication().runReadAction(new Runnable() {
                 @Override
                 public void run() {
-                    searchArea = new SearchArea();
-                    searchArea.invoke();
-                    if (searchArea.getPsiFile() == null) return;
                     results = new ArrayList<Integer>();
                     results = findAllVisible();
                 }
@@ -494,10 +497,13 @@ public class AceJumpAction extends AnAction {
         @Nullable
         protected java.util.List<Integer> findAllVisible() {
             //System.out.println("----- findAllVisible");
-            int offset = searchArea.getOffset();
-            int endOffset = searchArea.getEndOffset();
-            CharSequence text = searchArea.getText();
+            int offset = 0;//searchArea.getOffset();
+            int endOffset = document.getTextLength();//searchArea.getEndOffset();
+            CharSequence text = document.getCharsSequence();//searchArea.getText();
             List<Integer> offsets = new ArrayList<Integer>();
+            Rectangle visibleArea = editor.getScrollingModel().getVisibleArea();
+            //add a lineHeight of padding
+            visibleArea.setRect(visibleArea.x, visibleArea.y - editor.getLineHeight(), visibleArea.getWidth(), visibleArea.getHeight() + editor.getLineHeight() * 2);
             while (offset < endOffset) {
                 //skip folded regions. Re-think approach.
                 offset = checkFolded(offset);
@@ -507,68 +513,17 @@ public class AceJumpAction extends AnAction {
                     //System.out.println(findModel.getStringToFind() + ": not found");
                     break;
                 }
-                offsets.add(result.getStartOffset());
+                int startOffset = result.getStartOffset();
+                if(visibleArea.contains(editor.logicalPositionToXY(editor.offsetToLogicalPosition(startOffset))))
+                {
+                    offsets.add(startOffset);
+                }
                 offset = result.getEndOffset();
             }
 
             return offsets;
         }
 
-        //todo: can probably refactor this out now
-        public class SearchArea {
-            private PsiFile psiFile;
-            private CharSequence text;
-            private Rectangle visibleArea;
-            private int offset;
-            private int endOffset;
-
-            public PsiFile getPsiFile() {
-                return psiFile;
-            }
-
-            public CharSequence getText() {
-                return text;
-            }
-
-            public int getOffset() {
-                return offset;
-            }
-
-            public int getEndOffset() {
-                return endOffset;
-            }
-
-            public void invoke() {
-                psiFile = PsiDocumentManager.getInstance(project).getPsiFile(document);
-                if (psiFile == null) {
-                    return;
-                }
-
-                text = document.getCharsSequence();
-
-                JViewport viewport = editor.getScrollPane().getViewport();
-                double viewportY = viewport.getViewPosition().getY();
-
-                ScrollingModelImpl scrollingModel = (ScrollingModelImpl) editor.getScrollingModel();
-                //you need the "visibleArea" to see if the point is inside of it
-                visibleArea = scrollingModel.getVisibleArea();
-                //it seems like visibleArea can miss a top line, so I'm manually adding one. Investigate later.
-                visibleArea.setRect(visibleArea.x, visibleArea.y - editor.getLineHeight(), visibleArea.width, visibleArea.height + editor.getLineHeight());
-
-                //TODO: Can this be more accurate?
-                double linesAbove = viewportY / editor.getLineHeight();
-                double visibleLines = visibleArea.getHeight() / editor.getLineHeight();
-                if (linesAbove < 0) linesAbove = 0;
-                offset = document.getLineStartOffset((int) linesAbove);
-                int endLine = (int) (linesAbove + visibleLines);
-                int lineCount = document.getLineCount() - 1;
-                int foldedLinesCountBefore = editor.getFoldingModel().getFoldedLinesCountBefore(document.getTextLength() + 1);
-                if (endLine + foldedLinesCountBefore > lineCount) {
-                    endLine = lineCount;
-                }
-                endOffset = document.getLineEndOffset(endLine);
-            }
-        }
     }
 
     private int checkFolded(int offset) {
