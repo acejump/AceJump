@@ -11,6 +11,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>1.0.1 Beta</dt>
+            <dd>Updating the home/end regex and guarding against "out of bounds" errors when the end of the file is folded</dd>
             <dt>1.0 Beta</dt>
             <dd>Beta Release: Huge performance increases and visual fixes.</dd>
             <dt>1.0 Alpha</dt>
