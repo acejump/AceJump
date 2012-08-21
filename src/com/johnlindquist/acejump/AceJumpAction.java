@@ -212,14 +212,14 @@ public class AceJumpAction extends AnAction {
             if (e.getID() == KeyEvent.KEY_RELEASED) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_HOME:
-                        findText("^.", true);
+                        findText("^.|\\n(?<!.\\n)", true);
                         //the textfield needs to have a char to read/delete for consistent behavior
                         setText(" ");
                         searchMode = false;
                         isSpecialChar = true;
                         break;
                     case KeyEvent.VK_END:
-                        findText("\n", true);
+                        findText("\\n|\\Z", true);
                         setText(" ");
                         searchMode = false;
                         isSpecialChar = true;
@@ -494,9 +494,12 @@ public class AceJumpAction extends AnAction {
             Rectangle visibleArea = editor.getScrollingModel().getVisibleArea();
             //add a lineHeight of padding
             visibleArea.setRect(visibleArea.x, visibleArea.y - editor.getLineHeight(), visibleArea.getWidth(), visibleArea.getHeight() + editor.getLineHeight() * 2);
+            int maxLength = document.getCharsSequence().length();
             while (offset < endOffset) {
                 //skip folded regions. Re-think approach.
                 offset = checkFolded(offset);
+                if(offset > maxLength) offset = maxLength;
+
 
                 FindResult result = findManager.findString(text, offset, findModel, virtualFile);
                 if (!result.isStringFound()) {
