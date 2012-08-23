@@ -4,14 +4,11 @@ import com.google.common.collect.Lists;
 import com.intellij.codeInsight.editorActions.SelectWordUtil;
 import com.intellij.find.FindManager;
 import com.intellij.find.FindModel;
-import com.intellij.find.FindResult;
 import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.impl.ActionManagerImpl;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.FoldRegion;
 import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
@@ -20,14 +17,12 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.impl.FoldingModelImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.ComponentPopupBuilder;
-import com.intellij.openapi.ui.popup.JBPopup;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.popup.AbstractPopup;
-import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -58,16 +53,18 @@ public class AceJumpAction extends AnAction {
     protected AnActionEvent inputEvent;
     protected CaretModel caretModel;
 
-    private CharSequence allowedCharacters = "abcdefghijklmnopqrstuvwxyz0123456789";//-=[];',./";
     private Font font;
     private AceCanvas aceCanvas;
     private EditorColorsScheme scheme;
-    private int allowedCount;
+    private boolean mnemonicsDisabled;
+
+    private boolean searchMode = true;
+
 
     protected HashMap<String, Integer> offsetHash = new HashMap<String, Integer>();
+    private AceFinder aceFinder;
 
     public void actionPerformed(AnActionEvent e) {
-        allowedCount = allowedCharacters.length();
         inputEvent = e;
 
         project = e.getData(PlatformDataKeys.PROJECT);
@@ -78,8 +75,7 @@ public class AceJumpAction extends AnAction {
         dataContext = e.getDataContext();
         caretModel = editor.getCaretModel();
 
-        findManager = FindManager.getInstance(project);
-        findModel = createFindModel(findManager);
+        aceFinder = new AceFinder(project, document, editor, virtualFile);
 
         scheme = EditorColorsManager.getInstance().getGlobalScheme();
 
@@ -100,23 +96,34 @@ public class AceJumpAction extends AnAction {
         popup.setSize(dimension);
         searchBox.setSize(dimension);
         searchBox.setFocusable(true);
+        final UISettings settings = UISettings.getInstance();
+
+        searchBox.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                createAceCanvas(settings);
+
+                mnemonicsDisabled = settings.DISABLE_MNEMONICS;
+                if (!mnemonicsDisabled) {
+                    settings.DISABLE_MNEMONICS = true;
+                    settings.fireUISettingsChanged();
+                }
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                clearSelection();
+                if (!mnemonicsDisabled) {
+                    settings.DISABLE_MNEMONICS = false;
+                    settings.fireUISettingsChanged();
+                }
+            }
+        });
+
+
         searchBox.requestFocus();
     }
 
-
-    protected FindModel createFindModel(FindManager findManager) {
-        FindModel clone = (FindModel) findManager.getFindInFileModel().clone();
-        clone.setFindAll(true);
-        clone.setFromCursor(true);
-        clone.setForward(true);
-        clone.setRegularExpressions(false);
-        clone.setWholeWordsOnly(false);
-        clone.setCaseSensitive(false);
-        clone.setSearchHighlighters(true);
-        clone.setPreserveCase(false);
-
-        return clone;
-    }
 
     public RelativePoint guessBestLocation(Editor editor) {
         VisualPosition logicalPosition = editor.getCaretModel().getVisualPosition();
@@ -138,65 +145,89 @@ public class AceJumpAction extends AnAction {
         offsetHash.clear();
     }
 
-    protected class SearchBox extends JTextField {
-        //todo: cleanup searchbox
-        protected int key;
-        protected List<Integer> results;
-        protected int startResult;
-        protected int endResult;
-        private boolean searchMode = true;
-        private boolean mnemonicsDisabled;
+    private void createAceCanvas(UISettings settings) {
+        JComponent contentComponent = editor.getContentComponent();
+        aceCanvas = new AceCanvas();
 
+        contentComponent.add(aceCanvas);
+        JViewport viewport = editor.getScrollPane().getViewport();
+        //the 1000s are for the panels on the sides, hopefully user testing will find any holes
+        aceCanvas.setBounds(0, 0, viewport.getWidth() + 1000, viewport.getHeight() + 1000);
+//                    aceCanvas.setBounds(0, 0, viewport.getWidth(), viewport.getHeight());
+        //System.out.println(aceCanvas.getWidth());
+
+        JRootPane rootPane = editor.getComponent().getRootPane();
+        Point locationOnScreen = SwingUtilities.convertPoint(aceCanvas, aceCanvas.getLocation(), rootPane);
+        aceCanvas.setLocation(-locationOnScreen.x, -locationOnScreen.y);
+
+    }
+
+    protected void selectWordAtCaret() {
+        CharSequence text = document.getCharsSequence();
+        List<TextRange> ranges = new ArrayList<TextRange>();
+        SelectWordUtil.addWordSelection(false, text, editor.getCaretModel().getOffset(), ranges);
+        if (ranges.isEmpty()) return;
+
+        int startWordOffset = Math.max(0, ranges.get(0).getStartOffset());
+        int endWordOffset = Math.min(ranges.get(0).getEndOffset(), document.getTextLength());
+
+        if (ranges.size() == 2 && editor.getSelectionModel().getSelectionStart() == startWordOffset &&
+                editor.getSelectionModel().getSelectionEnd() == endWordOffset) {
+            startWordOffset = Math.max(0, ranges.get(1).getStartOffset());
+            endWordOffset = Math.min(ranges.get(1).getEndOffset(), document.getTextLength());
+        }
+
+        editor.getSelectionModel().setSelection(startWordOffset, endWordOffset);
+    }
+
+
+    private void showBalloons(List<Integer> results, int start, int end) {
+        offsetHash.clear();
+        int size = results.size();
+        if (end > size) {
+            end = size;
+        }
+
+        Vector<Pair<String, Point>> ballonInfos = new Vector<Pair<String, Point>>();
+        //todo: move all font-based positioning logic into the canvas
+        float hOffset = font.getSize() - (font.getSize() * scheme.getLineSpacing());
+        for (int i = start; i < end; i++) {
+
+            int textOffset = results.get(i);
+            RelativePoint point = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset));
+            Point originalPoint = point.getOriginalPoint();
+            originalPoint.translate(0, (int) -hOffset);
+            char resultChar = aceFinder.getAllowedCharacters().charAt(i % aceFinder.getAllowedCharacters().length());
+            final String text = String.valueOf(resultChar);
+
+            ballonInfos.add(new Pair<String, Point>(text, originalPoint));
+            offsetHash.put(text, textOffset);
+        }
+
+
+        aceCanvas.setFont(font);
+        aceCanvas.setLineHeight(editor.getLineHeight());
+        aceCanvas.setLineSpacing(scheme.getLineSpacing());
+        aceCanvas.setBallonInfos(Lists.reverse(ballonInfos));
+        aceCanvas.setBackgroundForegroundColors(new Pair<Color, Color>(scheme.getDefaultBackground(), scheme.getDefaultForeground()));
+
+        aceCanvas.repaint();
+    }
+
+
+    protected class SearchBox extends JTextField {
+        protected int key;
 
         @Override
         protected void paintBorder(Graphics g) {
             //do nothing
         }
 
-
         @Override
         public Dimension getPreferredSize() {
             return new Dimension(getFontMetrics(getFont()).stringWidth("w"), editor.getLineHeight());
         }
 
-        //todo: refactor, extract and clean up
-        public SearchBox() {
-            final UISettings settings = UISettings.getInstance();
-            addFocusListener(new FocusListener() {
-                @Override
-                public void focusGained(FocusEvent e) {
-                    JComponent contentComponent = editor.getContentComponent();
-                    aceCanvas = new AceCanvas();
-
-                    contentComponent.add(aceCanvas);
-                    JViewport viewport = editor.getScrollPane().getViewport();
-                    //the 1000s are for the panels on the sides, hopefully user testing will find any holes
-                    aceCanvas.setBounds(0, 0, viewport.getWidth() + 1000, viewport.getHeight() + 1000);
-//                    aceCanvas.setBounds(0, 0, viewport.getWidth(), viewport.getHeight());
-                    //System.out.println(aceCanvas.getWidth());
-
-                    JRootPane rootPane = editor.getComponent().getRootPane();
-                    Point locationOnScreen = SwingUtilities.convertPoint(aceCanvas, aceCanvas.getLocation(), rootPane);
-                    aceCanvas.setLocation(-locationOnScreen.x, -locationOnScreen.y);
-
-                    mnemonicsDisabled = settings.DISABLE_MNEMONICS;
-
-                    if (!mnemonicsDisabled) {
-                        settings.DISABLE_MNEMONICS = true;
-                        settings.fireUISettingsChanged();
-                    }
-                }
-
-                @Override
-                public void focusLost(FocusEvent e) {
-                    clearSelection();
-                    if (!mnemonicsDisabled) {
-                        settings.DISABLE_MNEMONICS = false;
-                        settings.fireUISettingsChanged();
-                    }
-                }
-            });
-        }
 
         //todo: clean up keys
         @Override
@@ -213,6 +244,7 @@ public class AceJumpAction extends AnAction {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_HOME:
                         findText("^.|\\n(?<!.\\n)", true);
+                        showBalloons(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
                         //the textfield needs to have a char to read/delete for consistent behavior
                         setText(" ");
                         searchMode = false;
@@ -242,19 +274,15 @@ public class AceJumpAction extends AnAction {
 
                     case KeyEvent.VK_ENTER:
                         if (!e.isShiftDown()) {
-                            startResult += allowedCount;
-                            endResult += allowedCount;
+                            aceFinder.expandResults();
+
                         } else {
-                            startResult -= allowedCount;
-                            endResult -= allowedCount;
+                            aceFinder.contractResults();
                         }
-                        if (startResult < 0) {
-                            startResult = 0;
-                        }
-                        if (endResult < allowedCount) {
-                            endResult = allowedCount;
-                        }
-                        showBalloons(results, startResult, endResult);
+
+                        aceFinder.checkForReset();
+
+                        showBalloons(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
                         isSpecialChar = true;
                         break;
                 }
@@ -276,7 +304,7 @@ public class AceJumpAction extends AnAction {
             key = Character.getNumericValue(keyChar);
 
             if (!searchMode) {
-                Integer offset = offsetHash.get(getLowerCaseStringFromChar(keyChar));
+                Integer offset = offsetHash.get(AceKeyUtil.getLowerCaseStringFromChar(keyChar));
                 if (offset != null) {
 
                     clearSelection();
@@ -322,207 +350,17 @@ public class AceJumpAction extends AnAction {
 
         }
 
-        protected void selectWordAtCaret() {
-            CharSequence text = document.getCharsSequence();
-            List<TextRange> ranges = new ArrayList<TextRange>();
-            SelectWordUtil.addWordSelection(false, text, editor.getCaretModel().getOffset(), ranges);
-            if (ranges.isEmpty()) return;
-
-            int startWordOffset = Math.max(0, ranges.get(0).getStartOffset());
-            int endWordOffset = Math.min(ranges.get(0).getEndOffset(), document.getTextLength());
-
-            if (ranges.size() == 2 && editor.getSelectionModel().getSelectionStart() == startWordOffset &&
-                    editor.getSelectionModel().getSelectionEnd() == endWordOffset) {
-                startWordOffset = Math.max(0, ranges.get(1).getStartOffset());
-                endWordOffset = Math.min(ranges.get(1).getEndOffset(), document.getTextLength());
-            }
-
-            editor.getSelectionModel().setSelection(startWordOffset, endWordOffset);
-        }
-
-        /*todo: I hate this. Strict mapping to my USA keyboard :(*/
-        private String getLowerCaseStringFromChar(char keyChar) {
-
-            String s = String.valueOf(keyChar);
-            if (s.equals("!")) {
-                return "1";
-
-            } else if (s.equals("@")) {
-                return "2";
-
-            } else if (s.equals("#")) {
-                return "3";
-
-            } else if (s.equals("$")) {
-                return "4";
-
-            } else if (s.equals("%")) {
-                return "5";
-
-            } else if (s.equals("^")) {
-                return "6";
-
-            } else if (s.equals("&")) {
-                return "7";
-
-            } else if (s.equals("*")) {
-                return "8";
-
-            } else if (s.equals("(")) {
-                return "9";
-
-            } else if (s.equals(")")) {
-                return "0";
-            } else if (s.equals("_")) {
-                return "-";
-            } else if (s.equals("+")) {
-                return "=";
-            } else if (s.equals("{")) {
-                return "[";
-            } else if (s.equals("}")) {
-                return "]";
-            } else if (s.equals("|")) {
-                return "\\";
-            } else if (s.equals(":")) {
-                return ";";
-            } else if (s.equals("<")) {
-                return ",";
-            } else if (s.equals(">")) {
-                return ".";
-            } else if (s.equals("?")) {
-                return "/";
-            }
-            return s.toLowerCase();
-        }
-
-        private void findText(String text, boolean isRegEx) {
-            findModel.setStringToFind(text);
-            findModel.setRegularExpressions(isRegEx);
-
-            ApplicationManager.getApplication().runReadAction(new Runnable() {
-                @Override
-                public void run() {
-                    results = new ArrayList<Integer>();
-                    results = findAllVisible();
-                }
-
-            });
-
-            ApplicationManager.getApplication().invokeLater(new Runnable() {
-                @Override
-                public void run() {
-
-                    final int caretOffset = editor.getCaretModel().getOffset();
-                    int lineNumber = document.getLineNumber(caretOffset);
-                    final int lineStartOffset = document.getLineStartOffset(lineNumber);
-                    final int lineEndOffset = document.getLineEndOffset(lineNumber);
-
-
-                    Collections.sort(results, new Comparator<Integer>() {
-                        @Override
-                        public int compare(Integer o1, Integer o2) {
-                            int i1 = Math.abs(caretOffset - o1);
-                            int i2 = Math.abs(caretOffset - o2);
-                            boolean o1OnSameLine = o1 >= lineStartOffset && o1 <= lineEndOffset;
-                            boolean o2OnSameLine = o2 >= lineStartOffset && o2 <= lineEndOffset;
-
-                            if (i1 > i2) {
-                                if (!o2OnSameLine && o1OnSameLine) {
-                                    return -1;
-                                }
-                                return 1;
-                            } else if (i1 == i2) {
-                                return 0;
-                            } else {
-                                if (!o1OnSameLine && o2OnSameLine) {
-                                    return 1;
-                                }
-                                return -1;
-                            }
-                        }
-                    });
-
-                    startResult = 0;
-                    endResult = allowedCharacters.length();
-
-                    showBalloons(results, startResult, endResult);
-                }
-            });
-        }
-
-        private void showBalloons(List<Integer> results, int start, int end) {
-            offsetHash.clear();
-            int size = results.size();
-            if (end > size) {
-                end = size;
-            }
-
-            Vector<Pair<String, Point>> ballonInfos = new Vector<Pair<String, Point>>();
-            //todo: move all font-based positioning logic into the canvas
-            float hOffset = font.getSize() - (font.getSize() * scheme.getLineSpacing());
-            for (int i = start; i < end; i++) {
-
-                int textOffset = results.get(i);
-                RelativePoint point = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset));
-                Point originalPoint = point.getOriginalPoint();
-                originalPoint.translate(0, (int) -hOffset);
-                char resultChar = allowedCharacters.charAt(i % allowedCharacters.length());
-                final String text = String.valueOf(resultChar);
-
-                ballonInfos.add(new Pair<String, Point>(text, originalPoint));
-                offsetHash.put(text, textOffset);
-            }
-
-
-            aceCanvas.setFont(font);
-            aceCanvas.setLineHeight(editor.getLineHeight());
-            aceCanvas.setLineSpacing(scheme.getLineSpacing());
-            aceCanvas.setBallonInfos(Lists.reverse(ballonInfos));
-            aceCanvas.setBackgroundForegroundColors(new Pair<Color, Color>(scheme.getDefaultBackground(), scheme.getDefaultForeground()));
-
-            aceCanvas.repaint();
-        }
-
-
-        @Nullable
-        protected java.util.List<Integer> findAllVisible() {
-            //System.out.println("----- findAllVisible");
-            int offset = 0;//searchArea.getOffset();
-            int endOffset = document.getTextLength();//searchArea.getEndOffset();
-            CharSequence text = document.getCharsSequence();//searchArea.getText();
-            List<Integer> offsets = new ArrayList<Integer>();
-            Rectangle visibleArea = editor.getScrollingModel().getVisibleArea();
-            //add a lineHeight of padding
-            visibleArea.setRect(visibleArea.x, visibleArea.y - editor.getLineHeight(), visibleArea.getWidth(), visibleArea.getHeight() + editor.getLineHeight() * 2);
-            int maxLength = document.getCharsSequence().length();
-            while (offset < endOffset) {
-                //skip folded regions. Re-think approach.
-                offset = checkFolded(offset);
-                if(offset > maxLength) offset = maxLength;
-
-
-                FindResult result = findManager.findString(text, offset, findModel, virtualFile);
-                if (!result.isStringFound()) {
-                    //System.out.println(findModel.getStringToFind() + ": not found");
-                    break;
-                }
-                int startOffset = result.getStartOffset();
-                if(visibleArea.contains(editor.logicalPositionToXY(editor.offsetToLogicalPosition(startOffset))))
-                {
-                    offsets.add(startOffset);
-                }
-                offset = result.getEndOffset();
-            }
-
-            return offsets;
-        }
-
     }
 
-    private int checkFolded(int offset) {
-        for (FoldRegion foldRegion : ((FoldingModelImpl) editor.getFoldingModel()).fetchCollapsedAt(offset)) {
-            offset = foldRegion.getEndOffset() + 1;
-        }
-        return offset;
+    private void findText(String textToFind, boolean isRegEx) {
+        aceFinder.addObserver(new Observer() {
+            @Override
+            public void update(Observable o, Object arg) {
+                showBalloons(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
+            }
+        });
+
+        aceFinder.findText(textToFind, isRegEx);
     }
+
 }
