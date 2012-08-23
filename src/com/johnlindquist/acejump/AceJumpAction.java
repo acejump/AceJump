@@ -74,7 +74,7 @@ public class AceJumpAction extends AnAction {
         editor = (EditorImpl) e.getData(PlatformDataKeys.EDITOR);
         virtualFile = e.getData(PlatformDataKeys.VIRTUAL_FILE);
         document = (DocumentImpl) editor.getDocument();
-        foldingModel = editor.getFoldingModel();
+        foldingModel = (FoldingModelImpl) editor.getFoldingModel();
         dataContext = e.getDataContext();
         caretModel = editor.getCaretModel();
 
@@ -520,7 +520,7 @@ public class AceJumpAction extends AnAction {
     }
 
     private int checkFolded(int offset) {
-        for (FoldRegion foldRegion : editor.getFoldingModel().fetchCollapsedAt(offset)) {
+        for (FoldRegion foldRegion : ((FoldingModelImpl) editor.getFoldingModel()).fetchCollapsedAt(offset)) {
             offset = foldRegion.getEndOffset() + 1;
         }
         return offset;
