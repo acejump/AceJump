@@ -7,8 +7,6 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.CaretModel;
-import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.editor.VisualPosition;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.impl.DocumentImpl;
@@ -48,7 +46,7 @@ public class AceJumpAction extends AnAction {
     protected FoldingModelImpl foldingModel;
     protected SearchBox searchBox;
     protected DataContext dataContext;
-    protected AnActionEvent inputEvent;
+    protected AnActionEvent actionEvent;
     protected CaretModel caretModel;
 
     private Font font;
@@ -59,15 +57,18 @@ public class AceJumpAction extends AnAction {
     private AceFinder aceFinder;
     private AceJumper aceJumper;
 
-    public void actionPerformed(AnActionEvent e) {
-        inputEvent = e;
+    public HashMap<String, Integer> textAndOffsetHash = new HashMap<String, Integer>();
 
-        project = e.getData(PlatformDataKeys.PROJECT);
-        editor = (EditorImpl) e.getData(PlatformDataKeys.EDITOR);
-        virtualFile = e.getData(PlatformDataKeys.VIRTUAL_FILE);
+
+    public void actionPerformed(AnActionEvent actionEvent) {
+        this.actionEvent = actionEvent;
+
+        project = actionEvent.getData(PlatformDataKeys.PROJECT);
+        editor = (EditorImpl) actionEvent.getData(PlatformDataKeys.EDITOR);
+        virtualFile = actionEvent.getData(PlatformDataKeys.VIRTUAL_FILE);
         document = (DocumentImpl) editor.getDocument();
         foldingModel = (FoldingModelImpl) editor.getFoldingModel();
-        dataContext = e.getDataContext();
+        dataContext = actionEvent.getDataContext();
         caretModel = editor.getCaretModel();
 
         aceFinder = new AceFinder(project, document, editor, virtualFile);
@@ -76,6 +77,11 @@ public class AceJumpAction extends AnAction {
         scheme = EditorColorsManager.getInstance().getGlobalScheme();
 
         font = new Font(scheme.getEditorFontName(), Font.BOLD, scheme.getEditorFontSize());
+
+        createSearchBox();
+    }
+
+    private void createSearchBox() {
         searchBox = new SearchBox();
 
         setupSearchBoxKeys();
@@ -86,9 +92,7 @@ public class AceJumpAction extends AnAction {
         popupBuilder.setCancelKeyEnabled(true);
 
         popup = (AbstractPopup) popupBuilder.createPopup();
-
-
-        popup.show(guessBestLocation(editor));
+        popup.show(AceUtil.guessBestLocation(editor));
 
         Dimension dimension = new Dimension(searchBox.getFontMetrics(font).stringWidth("w") * 2, editor.getLineHeight());
         popup.setSize(dimension);
@@ -111,7 +115,7 @@ public class AceJumpAction extends AnAction {
 
             @Override
             public void focusLost(FocusEvent e) {
-                clearSelection();
+                exit();
                 if (!mnemonicsDisabled) {
                     settings.DISABLE_MNEMONICS = false;
                     settings.fireUISettingsChanged();
@@ -123,75 +127,11 @@ public class AceJumpAction extends AnAction {
         searchBox.requestFocus();
     }
 
-
-
-    public RelativePoint guessBestLocation(Editor editor) {
-        VisualPosition logicalPosition = editor.getCaretModel().getVisualPosition();
-        return getPointFromVisualPosition(editor, logicalPosition);
-    }
-
-    protected static RelativePoint getPointFromVisualPosition(Editor editor, VisualPosition logicalPosition) {
-        Point p = editor.visualPositionToXY(new VisualPosition(logicalPosition.line, logicalPosition.column));
-        return new RelativePoint(editor.getContentComponent(), p);
-    }
-
-    protected void clearSelection() {
-        aceCanvas.setJumpInfos(null);
-        aceCanvas.repaint();
-        aceJumper.textAndOffsetHash.clear();
-    }
-
-    private void createAceCanvas() {
-        JComponent contentComponent = editor.getContentComponent();
-        aceCanvas = new AceCanvas();
-
-        contentComponent.add(aceCanvas);
-        JViewport viewport = editor.getScrollPane().getViewport();
-        //the 1000s are for the panels on the sides, hopefully user testing will find any holes
-        aceCanvas.setBounds(0, 0, viewport.getWidth() + 1000, viewport.getHeight() + 1000);
-//                    aceCanvas.setBounds(0, 0, viewport.getWidth(), viewport.getHeight());
-        //System.out.println(aceCanvas.getWidth());
-
-        JRootPane rootPane = editor.getComponent().getRootPane();
-        Point locationOnScreen = SwingUtilities.convertPoint(aceCanvas, aceCanvas.getLocation(), rootPane);
-        aceCanvas.setLocation(-locationOnScreen.x, -locationOnScreen.y);
-    }
-
-
-    private void showJumpLocations(List<Integer> results, int start, int end) {
-        aceJumper.textAndOffsetHash.clear();
-        int size = results.size();
-        if (end > size) {
-            end = size;
-        }
-
-        Vector<Pair<String, Point>> textPointPairs = new Vector<Pair<String, Point>>();
-        for (int i = start; i < end; i++) {
-
-            int textOffset = results.get(i);
-            RelativePoint point = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset));
-            char resultChar = aceFinder.getAllowedCharacters().charAt(i % aceFinder.getAllowedCharacters().length());
-            final String text = String.valueOf(resultChar);
-
-            textPointPairs.add(new Pair<String, Point>(text, point.getOriginalPoint()));
-            aceJumper.textAndOffsetHash.put(text, textOffset);
-        }
-
-
-        aceCanvas.setFont(font);
-        aceCanvas.setLineHeight(editor.getLineHeight());
-        aceCanvas.setLineSpacing(scheme.getLineSpacing());
-        aceCanvas.setJumpInfos(Lists.reverse(textPointPairs));
-        aceCanvas.setBackgroundForegroundColors(new Pair<Color, Color>(scheme.getDefaultBackground(), scheme.getDefaultForeground()));
-
-        aceCanvas.repaint();
-    }
-
     private void setupSearchBoxKeys() {
         Observer showJumpObserver = new Observer() {
             @Override
             public void update(Observable o, Object arg) {
-                showJumpLocations(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
+                setupJumpLocations(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
             }
         };
 
@@ -216,11 +156,66 @@ public class AceJumpAction extends AnAction {
         searchBox.preProcessKeyPressedMap.put(KeyEvent.VK_ENTER, pressedBackspace);
 
 
-        DefaultKeyCommand defaultKeyCommand = new DefaultKeyCommand(searchBox, aceFinder, aceJumper);
+        DefaultKeyCommand defaultKeyCommand = new DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash);
         defaultKeyCommand.addObserver(showJumpObserver);
 
         searchBox.setDefaultKeyCommand(defaultKeyCommand);
     }
+
+    private void createAceCanvas() {
+        JComponent contentComponent = editor.getContentComponent();
+        aceCanvas = new AceCanvas();
+
+        contentComponent.add(aceCanvas);
+        JViewport viewport = editor.getScrollPane().getViewport();
+        //the 1000s are for the panels on the sides, hopefully user testing will find any holes
+        aceCanvas.setBounds(0, 0, viewport.getWidth() + 1000, viewport.getHeight() + 1000);
+
+        JRootPane rootPane = editor.getComponent().getRootPane();
+        Point locationOnScreen = SwingUtilities.convertPoint(aceCanvas, aceCanvas.getLocation(), rootPane);
+        aceCanvas.setLocation(-locationOnScreen.x, -locationOnScreen.y);
+    }
+
+    private void setupJumpLocations(List<Integer> results, int start, int end) {
+        textAndOffsetHash.clear();
+        int size = results.size();
+        if (end > size) {
+            end = size;
+        }
+
+        Vector<Pair<String, Point>> textPointPairs = new Vector<Pair<String, Point>>();
+        for (int i = start; i < end; i++) {
+
+            int textOffset = results.get(i);
+            RelativePoint point = AceUtil.getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset));
+            char resultChar = aceFinder.getAllowedCharacters().charAt(i % aceFinder.getAllowedCharacters().length());
+            final String text = String.valueOf(resultChar);
+
+            textPointPairs.add(new Pair<String, Point>(text, point.getOriginalPoint()));
+            textAndOffsetHash.put(text, textOffset);
+        }
+
+
+        showJumpers(textPointPairs);
+    }
+
+
+    private void showJumpers(Vector<Pair<String, Point>> textPointPairs) {
+        aceCanvas.setJumpInfos(Lists.reverse(textPointPairs));
+        aceCanvas.setFont(font);
+        aceCanvas.setLineHeight(editor.getLineHeight());
+        aceCanvas.setLineSpacing(scheme.getLineSpacing());
+        aceCanvas.setBackgroundForegroundColors(new Pair<Color, Color>(scheme.getDefaultBackground(), scheme.getDefaultForeground()));
+
+        aceCanvas.repaint();
+    }
+
+    protected void exit() {
+        aceCanvas.setJumpInfos(null);
+        aceCanvas.repaint();
+        textAndOffsetHash.clear();
+    }
+
 
 
 }

@@ -1,6 +1,7 @@
 package com.johnlindquist.acejump.ui;
 
 import com.intellij.openapi.util.Pair;
+import com.johnlindquist.acejump.AceJumpAction;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
@@ -14,20 +15,20 @@ import java.util.List;
  * Time: 9:45 AM
  */
 public class AceCanvas extends JComponent {
-    private List<Pair<String, Point>> ballonInfos;
+    private List<Pair<String, Point>> jumpInfos;
     private Pair<Color, Color> colorPair;
     private float lineSpacing;
     private int lineHeight;
 
 
     public void setJumpInfos(@Nullable List<Pair<String, Point>> ballonInfos) {
-        this.ballonInfos = ballonInfos;
+        this.jumpInfos = ballonInfos;
     }
 
     @Override
     public void paint(Graphics g) {
         super.paint(g);    //To change body of overridden methods use File | Settings | File Templates.
-        if (ballonInfos == null) return;
+        if (jumpInfos == null) return;
 
         Font font = getFont();
         Graphics2D g2d = (Graphics2D) g;
@@ -42,7 +43,7 @@ public class AceCanvas extends JComponent {
         float hOffset = font.getSize() - (font.getSize() * lineSpacing);
 
 
-        for (Pair<String, Point> ballonInfo : ballonInfos) {
+        for (Pair<String, Point> ballonInfo : jumpInfos) {
 
             String text = ballonInfo.getFirst();
             Point originalPoint = ballonInfo.getSecond();
@@ -86,4 +87,6 @@ public class AceCanvas extends JComponent {
     public void setLineHeight(int lineHeight) {
         this.lineHeight = lineHeight;
     }
+
+
 }

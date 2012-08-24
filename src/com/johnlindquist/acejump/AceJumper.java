@@ -16,7 +16,6 @@ import java.util.List;
  * Time: 2:37 PM
  */
 public class AceJumper {
-    public HashMap<String, Integer> textAndOffsetHash = new HashMap<String, Integer>();
     private EditorImpl editor;
     private DocumentImpl document;
 

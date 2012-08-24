@@ -7,6 +7,7 @@ import com.johnlindquist.acejump.ui.SearchBox;
 
 import javax.swing.text.BadLocationException;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -20,18 +21,20 @@ public class DefaultKeyCommand extends AceKeyCommand {
     private SearchBox searchBox;
     private AceFinder aceFinder;
     private AceJumper aceJumper;
+    private HashMap<String, Integer> textAndOffsetHash;
 
-    public DefaultKeyCommand(SearchBox searchBox, AceFinder aceFinder, AceJumper aceJumper) {
+    public DefaultKeyCommand(SearchBox searchBox, AceFinder aceFinder, AceJumper aceJumper, HashMap<String, Integer> textAndOffsetHash) {
         this.searchBox = searchBox;
         this.aceFinder = aceFinder;
         this.aceJumper = aceJumper;
+        this.textAndOffsetHash = textAndOffsetHash;
     }
 
     public void execute(KeyEvent keyEvent) {
         char keyChar = keyEvent.getKeyChar();
 
         if (!searchBox.getIsSearchEnabled()) {
-            Integer offset = aceJumper.textAndOffsetHash.get(AceKeyUtil.getLowerCaseStringFromChar(keyChar));
+            Integer offset = textAndOffsetHash.get(AceKeyUtil.getLowerCaseStringFromChar(keyChar));
             if (offset != null) {
                 searchBox.getPopupContainer().cancel();
                 if (keyEvent.isShiftDown()) {

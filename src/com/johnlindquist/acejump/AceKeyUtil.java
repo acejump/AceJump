@@ -8,7 +8,7 @@ package com.johnlindquist.acejump;
  */
 public class AceKeyUtil {
 
-    /*todo: I hate this. Strict mapping to my USA keyboard :(*/
+    /*todo: I hate this, but I keep debating whether I wanted to allow numbers and special chars in the "AllowedCharacters" set. Strict mapping to my USA keyboard :(*/
     public static String getLowerCaseStringFromChar(char keyChar) {
 
         String s = String.valueOf(keyChar);
