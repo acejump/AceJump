@@ -1,12 +1,11 @@
 package com.johnlindquist.acejump;
 
 import com.google.common.collect.Lists;
-import com.intellij.codeInsight.editorActions.SelectWordUtil;
-import com.intellij.find.FindManager;
-import com.intellij.find.FindModel;
 import com.intellij.ide.ui.UISettings;
-import com.intellij.openapi.actionSystem.*;
-import com.intellij.openapi.actionSystem.impl.ActionManagerImpl;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.VisualPosition;
@@ -19,13 +18,14 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.ComponentPopupBuilder;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
 import com.intellij.openapi.util.Pair;
-import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.popup.AbstractPopup;
+import com.johnlindquist.acejump.keycommands.*;
+import com.johnlindquist.acejump.ui.AceCanvas;
+import com.johnlindquist.acejump.ui.SearchBox;
 
 import javax.swing.*;
-import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -42,8 +42,6 @@ public class AceJumpAction extends AnAction {
 
     protected Project project;
     protected EditorImpl editor;
-    protected FindModel findModel;
-    protected FindManager findManager;
     protected AbstractPopup popup;
     protected VirtualFile virtualFile;
     protected DocumentImpl document;
@@ -58,11 +56,8 @@ public class AceJumpAction extends AnAction {
     private EditorColorsScheme scheme;
     private boolean mnemonicsDisabled;
 
-    private boolean searchMode = true;
-
-
-    protected HashMap<String, Integer> textAndOffsetHash = new HashMap<String, Integer>();
     private AceFinder aceFinder;
+    private AceJumper aceJumper;
 
     public void actionPerformed(AnActionEvent e) {
         inputEvent = e;
@@ -76,11 +71,14 @@ public class AceJumpAction extends AnAction {
         caretModel = editor.getCaretModel();
 
         aceFinder = new AceFinder(project, document, editor, virtualFile);
+        aceJumper = new AceJumper(editor, document);
 
         scheme = EditorColorsManager.getInstance().getGlobalScheme();
 
         font = new Font(scheme.getEditorFontName(), Font.BOLD, scheme.getEditorFontSize());
         searchBox = new SearchBox();
+
+        setupSearchBoxKeys();
 
         searchBox.setFont(font);
 
@@ -94,6 +92,7 @@ public class AceJumpAction extends AnAction {
 
         Dimension dimension = new Dimension(searchBox.getFontMetrics(font).stringWidth("w") * 2, editor.getLineHeight());
         popup.setSize(dimension);
+        searchBox.setPopupContainer(popup);
         searchBox.setSize(dimension);
         searchBox.setFocusable(true);
         final UISettings settings = UISettings.getInstance();
@@ -101,7 +100,7 @@ public class AceJumpAction extends AnAction {
         searchBox.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                createAceCanvas(settings);
+                createAceCanvas();
 
                 mnemonicsDisabled = settings.DISABLE_MNEMONICS;
                 if (!mnemonicsDisabled) {
@@ -125,6 +124,7 @@ public class AceJumpAction extends AnAction {
     }
 
 
+
     public RelativePoint guessBestLocation(Editor editor) {
         VisualPosition logicalPosition = editor.getCaretModel().getVisualPosition();
         return getPointFromVisualPosition(editor, logicalPosition);
@@ -135,17 +135,13 @@ public class AceJumpAction extends AnAction {
         return new RelativePoint(editor.getContentComponent(), p);
     }
 
-    protected void moveCaret(Integer offset) {
-        editor.getCaretModel().moveToOffset(offset);
-    }
-
     protected void clearSelection() {
-        aceCanvas.setBallonInfos(null);
+        aceCanvas.setJumpInfos(null);
         aceCanvas.repaint();
-        textAndOffsetHash.clear();
+        aceJumper.textAndOffsetHash.clear();
     }
 
-    private void createAceCanvas(UISettings settings) {
+    private void createAceCanvas() {
         JComponent contentComponent = editor.getContentComponent();
         aceCanvas = new AceCanvas();
 
@@ -159,30 +155,11 @@ public class AceJumpAction extends AnAction {
         JRootPane rootPane = editor.getComponent().getRootPane();
         Point locationOnScreen = SwingUtilities.convertPoint(aceCanvas, aceCanvas.getLocation(), rootPane);
         aceCanvas.setLocation(-locationOnScreen.x, -locationOnScreen.y);
-
-    }
-
-    protected void selectWordAtCaret() {
-        CharSequence text = document.getCharsSequence();
-        List<TextRange> ranges = new ArrayList<TextRange>();
-        SelectWordUtil.addWordSelection(false, text, editor.getCaretModel().getOffset(), ranges);
-        if (ranges.isEmpty()) return;
-
-        int startWordOffset = Math.max(0, ranges.get(0).getStartOffset());
-        int endWordOffset = Math.min(ranges.get(0).getEndOffset(), document.getTextLength());
-
-        if (ranges.size() == 2 && editor.getSelectionModel().getSelectionStart() == startWordOffset &&
-                editor.getSelectionModel().getSelectionEnd() == endWordOffset) {
-            startWordOffset = Math.max(0, ranges.get(1).getStartOffset());
-            endWordOffset = Math.min(ranges.get(1).getEndOffset(), document.getTextLength());
-        }
-
-        editor.getSelectionModel().setSelection(startWordOffset, endWordOffset);
     }
 
 
     private void showJumpLocations(List<Integer> results, int start, int end) {
-        textAndOffsetHash.clear();
+        aceJumper.textAndOffsetHash.clear();
         int size = results.size();
         if (end > size) {
             end = size;
@@ -197,166 +174,53 @@ public class AceJumpAction extends AnAction {
             final String text = String.valueOf(resultChar);
 
             textPointPairs.add(new Pair<String, Point>(text, point.getOriginalPoint()));
-            textAndOffsetHash.put(text, textOffset);
+            aceJumper.textAndOffsetHash.put(text, textOffset);
         }
 
 
         aceCanvas.setFont(font);
         aceCanvas.setLineHeight(editor.getLineHeight());
         aceCanvas.setLineSpacing(scheme.getLineSpacing());
-        aceCanvas.setBallonInfos(Lists.reverse(textPointPairs));
+        aceCanvas.setJumpInfos(Lists.reverse(textPointPairs));
         aceCanvas.setBackgroundForegroundColors(new Pair<Color, Color>(scheme.getDefaultBackground(), scheme.getDefaultForeground()));
 
         aceCanvas.repaint();
     }
 
-
-    protected class SearchBox extends JTextField {
-        protected int key;
-
-        @Override
-        protected void paintBorder(Graphics g) {
-            //do nothing
-        }
-
-        @Override
-        public Dimension getPreferredSize() {
-            return new Dimension(getFontMetrics(getFont()).stringWidth("w"), editor.getLineHeight());
-        }
-
-
-        //todo: clean up keys.
-        /*  This gets a bit tricky because I have to catch home/end/etc before the key is processed,
-            so this looks pretty ugly right now. Still playing with ideas on whether it is worth cleaning up.
-         */
-        @Override
-        protected void processKeyEvent(final KeyEvent e) {
-
-            if (getText().length() == 0) {
-                searchMode = true;
-            }
-
-            //todo: refactor to lookup key behaviors (if desirable)
-            boolean isSpecialChar = false;
-
-            if (e.getID() == KeyEvent.KEY_RELEASED) {
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_HOME:
-                        findText(AceFinder.BEGINNING_OF_LINE, true);
-                        //the textfield needs to have a char to read/delete for consistent behavior
-                        setText(" ");
-                        searchMode = false;
-                        isSpecialChar = true;
-                        break;
-                    case KeyEvent.VK_END:
-                        findText(AceFinder.END_OF_LINE, true);
-                        setText(" ");
-                        searchMode = false;
-                        isSpecialChar = true;
-                        break;
-
-                    case KeyEvent.VK_SPACE:
-                        searchMode = false;
-                        isSpecialChar = true;
-                        break;
-
-                }
-            }
-
-            if (e.getID() == KeyEvent.KEY_PRESSED) {
-                switch (e.getKeyCode()) {
-                    case KeyEvent.VK_BACK_SPACE:
-                        searchMode = false;
-                        clearSelection();
-                        break;
-
-                    case KeyEvent.VK_ENTER:
-                        if (!e.isShiftDown()) {
-                            aceFinder.expandResults();
-
-                        } else {
-                            aceFinder.contractResults();
-                        }
-
-                        aceFinder.checkForReset();
-
-                        showJumpLocations(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
-                        isSpecialChar = true;
-                        break;
-                }
-            }
-
-            //System.out.println("start: " + startResult + " end: " + endResult);
-            if (isSpecialChar) {
-                return;
-            }
-            super.processKeyEvent(e);
-
-            //only watch "key_typed" events
-            if (e.getID() != KeyEvent.KEY_TYPED) {
-                return;
-            }
-
-
-            char keyChar = e.getKeyChar();
-            key = Character.getNumericValue(keyChar);
-
-            if (!searchMode) {
-                Integer offset = textAndOffsetHash.get(AceKeyUtil.getLowerCaseStringFromChar(keyChar));
-                if (offset != null) {
-
-                    clearSelection();
-                    popup.cancel();
-                    if (e.isShiftDown()) {
-                        setSelectionFromCaretToOffset(offset);
-                    } else if (e.isAltDown()) {
-                        moveCaret(offset);
-                        selectWordAtCaret();
-                    } else {
-                        moveCaret(offset);
-                    }
-                }
-
-            }
-
-            if (searchMode && getText().length() == 1) {
-                findText(getText(), false);
-                searchMode = false;
-                return;
-            }
-
-            if (getText().length() == 2) {
-                try {
-                    setText(getText(0, 1));
-                } catch (BadLocationException e1) {
-                    e1.printStackTrace();
-                }
-            }
-
-        }
-
-    }
-
-    private void setSelectionFromCaretToOffset(Integer offset) {
-        editor.getSelectionModel().removeSelection();
-        int caretOffset = caretModel.getOffset();
-        int offsetModifer = 1;
-        if (offset < caretOffset) {
-            offset = offset + searchBox.getText().length();
-            offsetModifer = -2;
-        }
-        editor.getSelectionModel().setSelection(caretOffset, offset + offsetModifer);
-    }
-
-    private void findText(String textToFind, boolean isRegEx) {
-        aceFinder.addObserver(new Observer() {
+    private void setupSearchBoxKeys() {
+        Observer showJumpObserver = new Observer() {
             @Override
             public void update(Observable o, Object arg) {
                 showJumpLocations(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
             }
-        });
+        };
 
-        aceFinder.findText(textToFind, isRegEx);
+        AceKeyCommand releasedHome = new ReleasedHome(searchBox, aceFinder);
+        AceKeyCommand releasedEnd = new ReleasedEnd(searchBox, aceFinder);
+        AceKeyCommand releasedSpace = new ReleasedSpace(searchBox, aceFinder);
+
+        releasedHome.addObserver(showJumpObserver);
+        releasedEnd.addObserver(showJumpObserver);
+
+        searchBox.preProcessKeyReleasedMap.put(KeyEvent.VK_HOME, releasedHome);
+        searchBox.preProcessKeyReleasedMap.put(KeyEvent.VK_END, releasedEnd);
+        searchBox.preProcessKeyReleasedMap.put(KeyEvent.VK_SPACE, releasedSpace);
+
+
+        AceKeyCommand pressedBackspace = new PressedBackspace(searchBox, aceFinder);
+        AceKeyCommand pressedEnter = new PressedEnter(searchBox, aceFinder);
+
+        pressedEnter.addObserver(showJumpObserver);
+
+        searchBox.preProcessKeyPressedMap.put(KeyEvent.VK_BACK_SPACE, pressedBackspace);
+        searchBox.preProcessKeyPressedMap.put(KeyEvent.VK_ENTER, pressedBackspace);
+
+
+        DefaultKeyCommand defaultKeyCommand = new DefaultKeyCommand(searchBox, aceFinder, aceJumper);
+        defaultKeyCommand.addObserver(showJumpObserver);
+
+        searchBox.setDefaultKeyCommand(defaultKeyCommand);
     }
+
 
 }

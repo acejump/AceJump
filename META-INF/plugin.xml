@@ -13,6 +13,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>1.0.3 Beta</dt>
+            <dd>Merging in a fix from Vlad for compatibility issues.</dd>
             <dt>1.0.2 Beta</dt>
             <dd>Now requires that your IDE is based on Intellij 11.1.1 or later (version 117.117). If you have the latest version of your IDE, you should be fine. I just rely on an api for the "FoldingModel" that was refactored in 11.1, so I won't be supporting older versions.</dd>
             <dt>1.0.1 Beta</dt>
@@ -28,14 +30,14 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <version>1.0.2 Beta</version>
+    <version>1.0.3 Beta</version>
     <category>Navigation</category>
     <vendor url="http://johnlindquist.com"
             email="johnlindquist@gmail.com">johnlindquist
     </vendor>
 
 
-    <idea-version since-build="117.117" />
+    <idea-version since-build="117.105" />
 
     <project-components>
         <!-- Add your project components here -->

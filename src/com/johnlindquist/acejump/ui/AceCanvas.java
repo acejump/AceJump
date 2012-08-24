@@ -1,4 +1,4 @@
-package com.johnlindquist.acejump;
+package com.johnlindquist.acejump.ui;
 
 import com.intellij.openapi.util.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +20,7 @@ public class AceCanvas extends JComponent {
     private int lineHeight;
 
 
-    public void setBallonInfos(@Nullable List<Pair<String, Point>> ballonInfos) {
+    public void setJumpInfos(@Nullable List<Pair<String, Point>> ballonInfos) {
         this.ballonInfos = ballonInfos;
     }
 
