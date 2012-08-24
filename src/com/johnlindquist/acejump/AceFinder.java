@@ -24,6 +24,14 @@ import java.util.List;
  */
 public class AceFinder extends Observable{
 
+    public static final CharSequence ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz";
+
+    public static final String END_OF_LINE = "\\n|\\Z";
+    public static final String BEGINNING_OF_LINE = "^.|\\n(?<!.\\n)";
+
+    private int startResult;
+    private int endResult;
+
     private Project project;
     private DocumentImpl document;
     private EditorImpl editor;
@@ -59,24 +67,15 @@ public class AceFinder extends Observable{
     }
 
     public CharSequence getAllowedCharacters() {
-        return allowedCharacters;
+        return ALLOWED_CHARACTERS;
     }
-
-    public void setAllowedCharacters(CharSequence allowedCharacters) {
-        this.allowedCharacters = allowedCharacters;
-    }
-
-    private int startResult;
-    private int endResult;
-    private CharSequence allowedCharacters = "abcdefghijklmnopqrstuvwxyz0123456789";//-=[];',./";
-
 
     public AceFinder(Project project, DocumentImpl document, EditorImpl editor, VirtualFile virtualFile) {
         this.project = project;
         this.document = document;
         this.editor = editor;
         this.virtualFile = virtualFile;
-        allowedCount = allowedCharacters.length();
+        allowedCount = ALLOWED_CHARACTERS.length();
     }
 
     protected FindModel createFindModel(FindManager findManager) {

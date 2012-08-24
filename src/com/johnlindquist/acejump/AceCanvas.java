@@ -39,6 +39,9 @@ public class AceCanvas extends JComponent {
         int rectHOffset = (int) (fontHeight * lineSpacing - fontHeight);
         int rectWidth = fontWidth + doubleRectMarginWidth;
 
+        float hOffset = font.getSize() - (font.getSize() * lineSpacing);
+
+
         for (Pair<String, Point> ballonInfo : ballonInfos) {
 
             String text = ballonInfo.getFirst();
@@ -46,6 +49,7 @@ public class AceCanvas extends JComponent {
             Color defaultForeground = colorPair.getSecond();
             Color defaultBackground = colorPair.getFirst();
 
+            originalPoint.translate(0, (int) -hOffset);
 
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 

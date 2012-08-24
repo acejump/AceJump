@@ -61,7 +61,7 @@ public class AceJumpAction extends AnAction {
     private boolean searchMode = true;
 
 
-    protected HashMap<String, Integer> offsetHash = new HashMap<String, Integer>();
+    protected HashMap<String, Integer> textAndOffsetHash = new HashMap<String, Integer>();
     private AceFinder aceFinder;
 
     public void actionPerformed(AnActionEvent e) {
@@ -142,7 +142,7 @@ public class AceJumpAction extends AnAction {
     protected void clearSelection() {
         aceCanvas.setBallonInfos(null);
         aceCanvas.repaint();
-        offsetHash.clear();
+        textAndOffsetHash.clear();
     }
 
     private void createAceCanvas(UISettings settings) {
@@ -181,34 +181,30 @@ public class AceJumpAction extends AnAction {
     }
 
 
-    private void showBalloons(List<Integer> results, int start, int end) {
-        offsetHash.clear();
+    private void showJumpLocations(List<Integer> results, int start, int end) {
+        textAndOffsetHash.clear();
         int size = results.size();
         if (end > size) {
             end = size;
         }
 
-        Vector<Pair<String, Point>> ballonInfos = new Vector<Pair<String, Point>>();
-        //todo: move all font-based positioning logic into the canvas
-        float hOffset = font.getSize() - (font.getSize() * scheme.getLineSpacing());
+        Vector<Pair<String, Point>> textPointPairs = new Vector<Pair<String, Point>>();
         for (int i = start; i < end; i++) {
 
             int textOffset = results.get(i);
             RelativePoint point = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset));
-            Point originalPoint = point.getOriginalPoint();
-            originalPoint.translate(0, (int) -hOffset);
             char resultChar = aceFinder.getAllowedCharacters().charAt(i % aceFinder.getAllowedCharacters().length());
             final String text = String.valueOf(resultChar);
 
-            ballonInfos.add(new Pair<String, Point>(text, originalPoint));
-            offsetHash.put(text, textOffset);
+            textPointPairs.add(new Pair<String, Point>(text, point.getOriginalPoint()));
+            textAndOffsetHash.put(text, textOffset);
         }
 
 
         aceCanvas.setFont(font);
         aceCanvas.setLineHeight(editor.getLineHeight());
         aceCanvas.setLineSpacing(scheme.getLineSpacing());
-        aceCanvas.setBallonInfos(Lists.reverse(ballonInfos));
+        aceCanvas.setBallonInfos(Lists.reverse(textPointPairs));
         aceCanvas.setBackgroundForegroundColors(new Pair<Color, Color>(scheme.getDefaultBackground(), scheme.getDefaultForeground()));
 
         aceCanvas.repaint();
@@ -229,7 +225,10 @@ public class AceJumpAction extends AnAction {
         }
 
 
-        //todo: clean up keys
+        //todo: clean up keys.
+        /*  This gets a bit tricky because I have to catch home/end/etc before the key is processed,
+            so this looks pretty ugly right now. Still playing with ideas on whether it is worth cleaning up.
+         */
         @Override
         protected void processKeyEvent(final KeyEvent e) {
 
@@ -237,21 +236,20 @@ public class AceJumpAction extends AnAction {
                 searchMode = true;
             }
 
-            //todo: refactor to behaviors, just spiking for now
+            //todo: refactor to lookup key behaviors (if desirable)
             boolean isSpecialChar = false;
 
             if (e.getID() == KeyEvent.KEY_RELEASED) {
                 switch (e.getKeyCode()) {
                     case KeyEvent.VK_HOME:
-                        findText("^.|\\n(?<!.\\n)", true);
-                        showBalloons(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
+                        findText(AceFinder.BEGINNING_OF_LINE, true);
                         //the textfield needs to have a char to read/delete for consistent behavior
                         setText(" ");
                         searchMode = false;
                         isSpecialChar = true;
                         break;
                     case KeyEvent.VK_END:
-                        findText("\\n|\\Z", true);
+                        findText(AceFinder.END_OF_LINE, true);
                         setText(" ");
                         searchMode = false;
                         isSpecialChar = true;
@@ -282,7 +280,7 @@ public class AceJumpAction extends AnAction {
 
                         aceFinder.checkForReset();
 
-                        showBalloons(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
+                        showJumpLocations(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
                         isSpecialChar = true;
                         break;
                 }
@@ -304,29 +302,16 @@ public class AceJumpAction extends AnAction {
             key = Character.getNumericValue(keyChar);
 
             if (!searchMode) {
-                Integer offset = offsetHash.get(AceKeyUtil.getLowerCaseStringFromChar(keyChar));
+                Integer offset = textAndOffsetHash.get(AceKeyUtil.getLowerCaseStringFromChar(keyChar));
                 if (offset != null) {
 
                     clearSelection();
                     popup.cancel();
                     if (e.isShiftDown()) {
-                        editor.getSelectionModel().removeSelection();
-                        int caretOffset = caretModel.getOffset();
-                        int offsetModifer = 1;
-                        if (offset < caretOffset) {
-                            offset = offset + searchBox.getText().length();
-                            offsetModifer = -2;
-                        }
-                        editor.getSelectionModel().setSelection(caretOffset, offset + offsetModifer);
+                        setSelectionFromCaretToOffset(offset);
                     } else if (e.isAltDown()) {
                         moveCaret(offset);
                         selectWordAtCaret();
-
-                        ActionManager actionManager = ActionManagerImpl.getInstance();
-                        final AnAction action = actionManager.getAction(IdeActions.ACTION_CODE_COMPLETION);
-                        AnActionEvent event = new AnActionEvent(null, editor.getDataContext(), IdeActions.ACTION_CODE_COMPLETION, inputEvent.getPresentation(), ActionManager.getInstance(), 0);
-                        action.actionPerformed(event);
-
                     } else {
                         moveCaret(offset);
                     }
@@ -352,11 +337,22 @@ public class AceJumpAction extends AnAction {
 
     }
 
+    private void setSelectionFromCaretToOffset(Integer offset) {
+        editor.getSelectionModel().removeSelection();
+        int caretOffset = caretModel.getOffset();
+        int offsetModifer = 1;
+        if (offset < caretOffset) {
+            offset = offset + searchBox.getText().length();
+            offsetModifer = -2;
+        }
+        editor.getSelectionModel().setSelection(caretOffset, offset + offsetModifer);
+    }
+
     private void findText(String textToFind, boolean isRegEx) {
         aceFinder.addObserver(new Observer() {
             @Override
             public void update(Observable o, Object arg) {
-                showBalloons(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
+                showJumpLocations(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
             }
         });
 
