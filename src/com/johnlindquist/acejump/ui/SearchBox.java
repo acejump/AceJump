@@ -41,7 +41,7 @@ public class SearchBox extends JTextField {
 
     @Override
     protected void processKeyEvent(final KeyEvent keyEvent) {
-
+        isPreProcessed = false;
         if (getText().length() == 0) {
             isSearchEnabled = true;
         }
