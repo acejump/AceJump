@@ -4,14 +4,11 @@ import com.google.common.collect.Lists;
 import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
-import com.intellij.openapi.editor.CaretModel;
 import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.impl.DocumentImpl;
 import com.intellij.openapi.editor.impl.EditorImpl;
-import com.intellij.openapi.editor.impl.FoldingModelImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.ComponentPopupBuilder;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
@@ -43,11 +40,8 @@ public class AceJumpAction extends AnAction {
     protected AbstractPopup popup;
     protected VirtualFile virtualFile;
     protected DocumentImpl document;
-    protected FoldingModelImpl foldingModel;
     protected SearchBox searchBox;
-    protected DataContext dataContext;
     protected AnActionEvent actionEvent;
-    protected CaretModel caretModel;
 
     private Font font;
     private AceCanvas aceCanvas;
@@ -67,22 +61,21 @@ public class AceJumpAction extends AnAction {
         editor = (EditorImpl) actionEvent.getData(PlatformDataKeys.EDITOR);
         virtualFile = actionEvent.getData(PlatformDataKeys.VIRTUAL_FILE);
         document = (DocumentImpl) editor.getDocument();
-        foldingModel = (FoldingModelImpl) editor.getFoldingModel();
-        dataContext = actionEvent.getDataContext();
-        caretModel = editor.getCaretModel();
+
+        scheme = EditorColorsManager.getInstance().getGlobalScheme();
+        font = new Font(scheme.getEditorFontName(), Font.BOLD, scheme.getEditorFontSize());
 
         aceFinder = new AceFinder(project, document, editor, virtualFile);
         aceJumper = new AceJumper(editor, document);
 
-        scheme = EditorColorsManager.getInstance().getGlobalScheme();
+        aceCanvas = new AceCanvas();
+        configureAceCanvas();
 
-        font = new Font(scheme.getEditorFontName(), Font.BOLD, scheme.getEditorFontSize());
-
-        createSearchBox();
+        searchBox = new SearchBox();
+        configureSearchBox();
     }
 
-    private void createSearchBox() {
-        searchBox = new SearchBox();
+    protected void configureSearchBox() {
 
         setupSearchBoxKeys();
 
@@ -104,7 +97,7 @@ public class AceJumpAction extends AnAction {
         searchBox.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                createAceCanvas();
+                addAceCanvas();
 
                 mnemonicsDisabled = settings.DISABLE_MNEMONICS;
                 if (!mnemonicsDisabled) {
@@ -127,7 +120,15 @@ public class AceJumpAction extends AnAction {
         searchBox.requestFocus();
     }
 
-    private void setupSearchBoxKeys() {
+    protected void configureAceCanvas() {
+        aceCanvas.setFont(font);
+        aceCanvas.setLineHeight(editor.getLineHeight());
+        aceCanvas.setLineSpacing(scheme.getLineSpacing());
+        aceCanvas.setBackgroundForegroundColors(new Pair<Color, Color>(scheme.getDefaultBackground(), scheme.getDefaultForeground()));
+
+    }
+
+    protected void setupSearchBoxKeys() {
         Observer showJumpObserver = new Observer() {
             @Override
             public void update(Observable o, Object arg) {
@@ -147,13 +148,13 @@ public class AceJumpAction extends AnAction {
         searchBox.preProcessKeyReleasedMap.put(KeyEvent.VK_SPACE, releasedSpace);
 
 
-        AceKeyCommand pressedBackspace = new PressedBackspace(searchBox, aceFinder);
+        AceKeyCommand pressedBackspace = new PressedBackspace(aceCanvas);
         AceKeyCommand pressedEnter = new PressedEnter(searchBox, aceFinder);
 
         pressedEnter.addObserver(showJumpObserver);
 
         searchBox.preProcessKeyPressedMap.put(KeyEvent.VK_BACK_SPACE, pressedBackspace);
-        searchBox.preProcessKeyPressedMap.put(KeyEvent.VK_ENTER, pressedBackspace);
+        searchBox.preProcessKeyPressedMap.put(KeyEvent.VK_ENTER, pressedEnter);
 
 
         DefaultKeyCommand defaultKeyCommand = new DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash);
@@ -162,9 +163,8 @@ public class AceJumpAction extends AnAction {
         searchBox.setDefaultKeyCommand(defaultKeyCommand);
     }
 
-    private void createAceCanvas() {
+    protected void addAceCanvas() {
         JComponent contentComponent = editor.getContentComponent();
-        aceCanvas = new AceCanvas();
 
         contentComponent.add(aceCanvas);
         JViewport viewport = editor.getScrollPane().getViewport();
@@ -176,7 +176,7 @@ public class AceJumpAction extends AnAction {
         aceCanvas.setLocation(-locationOnScreen.x, -locationOnScreen.y);
     }
 
-    private void setupJumpLocations(List<Integer> results, int start, int end) {
+    protected void setupJumpLocations(List<Integer> results, int start, int end) {
         textAndOffsetHash.clear();
         int size = results.size();
         if (end > size) {
@@ -200,22 +200,13 @@ public class AceJumpAction extends AnAction {
     }
 
 
-    private void showJumpers(Vector<Pair<String, Point>> textPointPairs) {
+    protected void showJumpers(Vector<Pair<String, Point>> textPointPairs) {
         aceCanvas.setJumpInfos(Lists.reverse(textPointPairs));
-        aceCanvas.setFont(font);
-        aceCanvas.setLineHeight(editor.getLineHeight());
-        aceCanvas.setLineSpacing(scheme.getLineSpacing());
-        aceCanvas.setBackgroundForegroundColors(new Pair<Color, Color>(scheme.getDefaultBackground(), scheme.getDefaultForeground()));
-
         aceCanvas.repaint();
     }
 
     protected void exit() {
-        aceCanvas.setJumpInfos(null);
-        aceCanvas.repaint();
+        aceCanvas.clear();
         textAndOffsetHash.clear();
     }
-
-
-
 }

@@ -13,6 +13,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>1.0</dt>
+            <dd>Cleaned up code base for release</dd>
             <dt>1.0.3 Beta</dt>
             <dd>Merging in a fix from Vlad for compatibility issues.</dd>
             <dt>1.0.2 Beta</dt>
@@ -30,7 +32,7 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <version>1.0.3 Beta</version>
+    <version>1.0</version>
     <category>Navigation</category>
     <vendor url="http://johnlindquist.com"
             email="johnlindquist@gmail.com">johnlindquist

@@ -50,11 +50,9 @@ public class AceJumper {
     public void setSelectionFromCaretToOffset(Integer offset) {
         editor.getSelectionModel().removeSelection();
         int caretOffset = editor.getCaretModel().getOffset();
-        int offsetModifier = 1;
-        if (offset < caretOffset) {
-            offset += 1;
-            offsetModifier = -2;
-        }
+        int offsetModifier =
+                offset > caretOffset
+                ? 1 : 0;
         editor.getSelectionModel().setSelection(caretOffset, offset + offsetModifier);
     }
 }

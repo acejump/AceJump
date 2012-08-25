@@ -1,6 +1,7 @@
 package com.johnlindquist.acejump.keycommands;
 
 import com.johnlindquist.acejump.AceFinder;
+import com.johnlindquist.acejump.ui.AceCanvas;
 import com.johnlindquist.acejump.ui.SearchBox;
 
 import java.awt.event.KeyEvent;
@@ -13,15 +14,14 @@ import java.awt.event.KeyEvent;
 * To change this template use File | Settings | File Templates.
 */
 public class PressedBackspace extends AceKeyCommand {
-    private SearchBox searchBox;
-    private AceFinder aceFinder;
 
-    public PressedBackspace(SearchBox searchBox, AceFinder aceFinder) {
-        this.searchBox = searchBox;
-        this.aceFinder = aceFinder;
+    private AceCanvas aceCanvas;
+
+    public PressedBackspace(AceCanvas aceCanvas) {
+        this.aceCanvas = aceCanvas;
     }
 
     public void execute(KeyEvent keyEvent) {
-        searchBox.disableSearch();
+        aceCanvas.clear();
     }
 }

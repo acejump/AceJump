@@ -41,22 +41,24 @@ public class SearchBox extends JTextField {
 
     @Override
     protected void processKeyEvent(final KeyEvent keyEvent) {
-        isPreProcessed = false;
         if (getText().length() == 0) {
             isSearchEnabled = true;
         }
 
+        AceKeyCommand aceKeyCommand = null;
         if (keyEvent.getID() == KeyEvent.KEY_RELEASED) {
-            AceKeyCommand aceKeyCommand = (AceKeyCommand) preProcessKeyReleasedMap.get(keyEvent.getKeyCode());
-            if (aceKeyCommand != null) aceKeyCommand.execute(keyEvent);
+            aceKeyCommand = (AceKeyCommand) preProcessKeyReleasedMap.get(keyEvent.getKeyCode());
         }
 
         if (keyEvent.getID() == KeyEvent.KEY_PRESSED) {
-            AceKeyCommand aceKeyCommand = (AceKeyCommand) preProcessKeyPressedMap.get(keyEvent.getKeyCode());
-            if (aceKeyCommand != null) aceKeyCommand.execute(keyEvent);
+            aceKeyCommand = (AceKeyCommand) preProcessKeyPressedMap.get(keyEvent.getKeyCode());
         }
 
-        if (isPreProcessed) return;
+        if (aceKeyCommand != null) {
+            aceKeyCommand.execute(keyEvent);
+            return;
+        }
+
         super.processKeyEvent(keyEvent);
         if (keyEvent.getID() != KeyEvent.KEY_TYPED) return;
 

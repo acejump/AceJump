@@ -89,4 +89,8 @@ public class AceCanvas extends JComponent {
     }
 
 
+    public void clear() {
+        setJumpInfos(null);
+        repaint();
+    }
 }
