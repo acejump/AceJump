@@ -189,7 +189,12 @@ public class AceFinder extends Observable{
 
 
     private int checkFolded(int offset) {
-        for (FoldRegion foldRegion : ((FoldingModelImpl) editor.getFoldingModel()).fetchCollapsedAt(offset)) {
+        /*
+            A contributor said casting as "FoldingModelImpl" fixes a bug on mac... So I'm leaving the casting in even
+            thought I can't verify.
+         */
+        FoldingModelImpl foldingModel = (FoldingModelImpl) editor.getFoldingModel();
+        for (FoldRegion foldRegion : foldingModel.fetchCollapsedAt(offset)) {
             offset = foldRegion.getEndOffset() + 1;
         }
         return offset;
