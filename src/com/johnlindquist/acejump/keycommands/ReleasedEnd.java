@@ -32,7 +32,6 @@ public class ReleasedEnd extends AceKeyCommand {
             }
         });
         aceFinder.findText(AceFinder.END_OF_LINE, true);
-        searchBox.addSpaceChar();
-        searchBox.disableSearchAndReturn();
+        searchBox.forceSpaceChar();
     }
 }

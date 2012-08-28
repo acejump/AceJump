@@ -99,6 +99,11 @@ public class AceJumpAction extends AnAction {
             public void focusGained(FocusEvent e) {
                 addAceCanvas();
 
+                /*
+                    this is the worst hack to allow you to hit "alt+*" to select the word. Any better suggestions would
+                    be much appreciated.
+                 */
+
                 mnemonicsDisabled = settings.DISABLE_MNEMONICS;
                 if (!mnemonicsDisabled) {
                     settings.DISABLE_MNEMONICS = true;
@@ -138,14 +143,13 @@ public class AceJumpAction extends AnAction {
 
         AceKeyCommand releasedHome = new ReleasedHome(searchBox, aceFinder);
         AceKeyCommand releasedEnd = new ReleasedEnd(searchBox, aceFinder);
-        AceKeyCommand releasedSpace = new ReleasedSpace(searchBox, aceFinder);
 
         releasedHome.addObserver(showJumpObserver);
         releasedEnd.addObserver(showJumpObserver);
 
-        searchBox.preProcessKeyReleasedMap.put(KeyEvent.VK_HOME, releasedHome);
-        searchBox.preProcessKeyReleasedMap.put(KeyEvent.VK_END, releasedEnd);
-        searchBox.preProcessKeyReleasedMap.put(KeyEvent.VK_SPACE, releasedSpace);
+        //todo: consider other "special" searches and loading these from a config. Tab, Insert, Delete, Page Up, etc?
+        searchBox.addPreProcessReleaseKey(KeyEvent.VK_HOME, releasedHome);
+        searchBox.addPreProcessReleaseKey(KeyEvent.VK_END, releasedEnd);
 
 
         AceKeyCommand pressedBackspace = new PressedBackspace(aceCanvas);
@@ -153,9 +157,8 @@ public class AceJumpAction extends AnAction {
 
         pressedEnter.addObserver(showJumpObserver);
 
-        searchBox.preProcessKeyPressedMap.put(KeyEvent.VK_BACK_SPACE, pressedBackspace);
-        searchBox.preProcessKeyPressedMap.put(KeyEvent.VK_ENTER, pressedEnter);
-
+        searchBox.addPreProcessPressedKey(KeyEvent.VK_BACK_SPACE, pressedBackspace);
+        searchBox.addPreProcessPressedKey(KeyEvent.VK_ENTER, pressedEnter);
 
         DefaultKeyCommand defaultKeyCommand = new DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash);
         defaultKeyCommand.addObserver(showJumpObserver);

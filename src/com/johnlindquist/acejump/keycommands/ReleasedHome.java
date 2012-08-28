@@ -32,7 +32,6 @@ public class ReleasedHome extends AceKeyCommand {
             }
         });
         aceFinder.findText(AceFinder.BEGINNING_OF_LINE, true);
-        searchBox.addSpaceChar();
-        searchBox.disableSearchAndReturn();
+        searchBox.forceSpaceChar();
     }
 }

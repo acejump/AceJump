@@ -33,23 +33,9 @@ public class DefaultKeyCommand extends AceKeyCommand {
     public void execute(KeyEvent keyEvent) {
         char keyChar = keyEvent.getKeyChar();
 
-        if (!searchBox.getIsSearchEnabled()) {
-            Integer offset = textAndOffsetHash.get(AceKeyUtil.getLowerCaseStringFromChar(keyChar));
-            if (offset != null) {
-                searchBox.getPopupContainer().cancel();
-                if (keyEvent.isShiftDown()) {
-                    aceJumper.setSelectionFromCaretToOffset(offset);
-                } else if (keyEvent.isAltDown()) {
-                    aceJumper.moveCaret(offset);
-                    aceJumper.selectWordAtCaret();
-                } else {
-                    aceJumper.moveCaret(offset);
-                }
-            }
-
-        }
-
-        if (searchBox.getIsSearchEnabled() && searchBox.getText().length() == 1) {
+        //Find or jump
+        if (searchBox.getIsSearchEnabled()) {
+            //Find
             aceFinder.addObserver(new Observer() {
                 @Override
                 public void update(Observable o, Object arg) {
@@ -59,15 +45,23 @@ public class DefaultKeyCommand extends AceKeyCommand {
             });
             aceFinder.findText(searchBox.getText(), false);
             searchBox.disableSearch();
-            return;
+        } else {
+            //Jump to offset!
+            Integer offset = textAndOffsetHash.get(AceKeyUtil.getLowerCaseStringFromChar(keyChar));
+            if (offset != null) {
+                searchBox.getPopupContainer().cancel();
+                if (keyEvent.isShiftDown()) {
+                    aceJumper.setSelectionFromCaretToOffset(offset);
+                } else {
+                    aceJumper.moveCaret(offset);
+                }
+
+                if (keyEvent.isAltDown()) {
+                    aceJumper.selectWordAtCaret();
+                }
+            }
+
         }
 
-        if (searchBox.getText().length() == 2) {
-            try {
-                searchBox.setText(searchBox.getText(0, 1));
-            } catch (BadLocationException e1) {
-                e1.printStackTrace();
-            }
-        }
     }
 }

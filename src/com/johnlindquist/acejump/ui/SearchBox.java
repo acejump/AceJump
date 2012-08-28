@@ -4,6 +4,7 @@ import com.intellij.ui.popup.AbstractPopup;
 import com.johnlindquist.acejump.keycommands.AceKeyCommand;
 
 import javax.swing.*;
+import javax.swing.text.BadLocationException;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
@@ -16,13 +17,13 @@ import java.util.HashMap;
 * To change this template use File | Settings | File Templates.
 */
 public class SearchBox extends JTextField {
-    public HashMap preProcessKeyReleasedMap = new HashMap<Integer, AceKeyCommand>();
-    public HashMap preProcessKeyPressedMap = new HashMap<Integer, AceKeyCommand>();
+    private HashMap<Integer, AceKeyCommand> preProcessKeyReleasedMap = new HashMap<Integer, AceKeyCommand>();
+    private HashMap<Integer, AceKeyCommand> preProcessKeyPressedMap = new HashMap<Integer, AceKeyCommand>();
 
     protected boolean isPreProcessed;
 
     public boolean getIsSearchEnabled() {
-        return isSearchEnabled;
+        return isSearchEnabled && getText().length() == 1;
     }
 
     protected boolean isSearchEnabled = true;
@@ -42,16 +43,21 @@ public class SearchBox extends JTextField {
     @Override
     protected void processKeyEvent(final KeyEvent keyEvent) {
         if (getText().length() == 0) {
+            //todo: rethink the "isSearchEnabled" state approach. Works great now, could be cleaner
             isSearchEnabled = true;
         }
 
         AceKeyCommand aceKeyCommand = null;
         if (keyEvent.getID() == KeyEvent.KEY_RELEASED) {
-            aceKeyCommand = (AceKeyCommand) preProcessKeyReleasedMap.get(keyEvent.getKeyCode());
+            /*
+                My lack of Java experience is probably showing here, but the only way I could find to handle "HOME" and
+                "END" was to on "release". Is there a better convention for this?
+             */
+            aceKeyCommand = preProcessKeyReleasedMap.get(keyEvent.getKeyCode());
         }
 
         if (keyEvent.getID() == KeyEvent.KEY_PRESSED) {
-            aceKeyCommand = (AceKeyCommand) preProcessKeyPressedMap.get(keyEvent.getKeyCode());
+            aceKeyCommand = preProcessKeyPressedMap.get(keyEvent.getKeyCode());
         }
 
         if (aceKeyCommand != null) {
@@ -63,14 +69,24 @@ public class SearchBox extends JTextField {
         if (keyEvent.getID() != KeyEvent.KEY_TYPED) return;
 
         if(defaultKeyCommand != null) defaultKeyCommand.execute(keyEvent);
+
+        if (getText().length() == 2) {
+            try {
+                setText(getText(0, 1));
+            } catch (BadLocationException e1) {
+                e1.printStackTrace();
+            }
+        }
+
     }
 
     public void setIsPreProcessed() {
         isPreProcessed = true;
     }
 
-    public void addSpaceChar() {
+    public void forceSpaceChar() {
         setText(" ");
+        disableSearchAndReturn();
     }
 
     public void disableSearchAndReturn() {
@@ -88,5 +104,13 @@ public class SearchBox extends JTextField {
 
     public void disableSearch() {
         isSearchEnabled = false;
+    }
+
+    public void addPreProcessReleaseKey(int key, AceKeyCommand keyCommand) {
+        preProcessKeyReleasedMap.put(key, keyCommand);
+    }
+
+    public void addPreProcessPressedKey(int key, AceKeyCommand keyCommand) {
+        preProcessKeyPressedMap.put(key, keyCommand);
     }
 }

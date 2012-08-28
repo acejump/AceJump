@@ -50,6 +50,13 @@ public class AceJumper {
     public void setSelectionFromCaretToOffset(Integer offset) {
         editor.getSelectionModel().removeSelection();
         int caretOffset = editor.getCaretModel().getOffset();
+
+        /*
+            I assume if you're selecting a point after the caret, you "really" want the offset after the actual offset
+            for selecting from a "{" to a "}"
+
+            todo: consider making this a setting
+         */
         int offsetModifier =
                 offset > caretOffset
                 ? 1 : 0;
