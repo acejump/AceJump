@@ -153,12 +153,14 @@ public class AceJumpAction extends AnAction {
 
 
         AceKeyCommand pressedBackspace = new PressedBackspace(aceCanvas);
-        AceKeyCommand pressedEnter = new PressedEnter(searchBox, aceFinder);
+        AceKeyCommand pressedEnter = new PressedEnter(searchBox, aceFinder, aceJumper);
 
         pressedEnter.addObserver(showJumpObserver);
 
         searchBox.addPreProcessPressedKey(KeyEvent.VK_BACK_SPACE, pressedBackspace);
         searchBox.addPreProcessPressedKey(KeyEvent.VK_ENTER, pressedEnter);
+
+
 
         DefaultKeyCommand defaultKeyCommand = new DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash);
         defaultKeyCommand.addObserver(showJumpObserver);

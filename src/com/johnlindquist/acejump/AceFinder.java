@@ -22,12 +22,13 @@ import java.util.List;
  * Date: 8/23/12
  * Time: 3:47 PM
  */
-public class AceFinder extends Observable{
+public class AceFinder extends Observable {
 
     public static final CharSequence ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz";
 
     public static final String END_OF_LINE = "\\n|\\Z";
     public static final String BEGINNING_OF_LINE = "^.|\\n(?<!.\\n)";
+    public static final String CODE_INDENTS = "^\\s*\\S";
 
     private int startResult;
     private int endResult;
@@ -39,6 +40,7 @@ public class AceFinder extends Observable{
     private FindManager findManager;
     private FindModel findModel;
     private final int allowedCount;
+    public boolean getEndOffset;
 
     public List<Integer> getResults() {
         return results;
@@ -167,7 +169,7 @@ public class AceFinder extends Observable{
         while (offset < endOffset) {
             //skip folded regions. Re-think approach.
             offset = checkFolded(offset);
-            if(offset > maxLength) offset = maxLength;
+            if (offset > maxLength) offset = maxLength;
 
 
             FindResult result = findManager.findString(text, offset, findModel, virtualFile);
@@ -175,17 +177,20 @@ public class AceFinder extends Observable{
                 //System.out.println(findModel.getStringToFind() + ": not found");
                 break;
             }
-            int startOffset = result.getStartOffset();
-            if(visibleArea.contains(editor.logicalPositionToXY(editor.offsetToLogicalPosition(startOffset))))
-            {
-                offsets.add(startOffset);
+            int resultOffset;
+            if (getEndOffset) {
+                resultOffset = result.getEndOffset() - 1;
+            } else {
+                resultOffset = result.getStartOffset();
+            }
+            if (visibleArea.contains(editor.logicalPositionToXY(editor.offsetToLogicalPosition(resultOffset)))) {
+                offsets.add(resultOffset);
             }
             offset = result.getEndOffset();
         }
 
         return offsets;
     }
-
 
 
     private int checkFolded(int offset) {
@@ -218,4 +223,6 @@ public class AceFinder extends Observable{
             endResult = allowedCount;
         }
     }
+
+
 }
