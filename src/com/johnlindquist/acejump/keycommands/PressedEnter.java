@@ -17,12 +17,10 @@ import java.util.Observer;
 public class PressedEnter extends AceKeyCommand {
     private final SearchBox searchBox;
     private final AceFinder aceFinder;
-    private final AceJumper aceJumper;
 
     public PressedEnter(SearchBox searchBox, AceFinder aceFinder, AceJumper aceJumper) {
         this.searchBox = searchBox;
         this.aceFinder = aceFinder;
-        this.aceJumper = aceJumper;
     }
 
     public void execute(KeyEvent keyEvent) {

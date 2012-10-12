@@ -41,7 +41,6 @@ public class AceJumpAction extends AnAction {
     protected VirtualFile virtualFile;
     protected DocumentImpl document;
     protected SearchBox searchBox;
-    protected AnActionEvent actionEvent;
 
     private Font font;
     private AceCanvas aceCanvas;
@@ -55,7 +54,6 @@ public class AceJumpAction extends AnAction {
 
 
     public void actionPerformed(AnActionEvent actionEvent) {
-        this.actionEvent = actionEvent;
 
         project = actionEvent.getData(PlatformDataKeys.PROJECT);
         editor = (EditorImpl) actionEvent.getData(PlatformDataKeys.EDITOR);

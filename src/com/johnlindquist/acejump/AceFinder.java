@@ -46,26 +46,14 @@ public class AceFinder extends Observable {
         return results;
     }
 
-    public void setResults(List<Integer> results) {
-        this.results = results;
-    }
-
     private List<Integer> results;
 
     public int getStartResult() {
         return startResult;
     }
 
-    public void setStartResult(int startResult) {
-        this.startResult = startResult;
-    }
-
     public int getEndResult() {
         return endResult;
-    }
-
-    public void setEndResult(int endResult) {
-        this.endResult = endResult;
     }
 
     public CharSequence getAllowedCharacters() {
@@ -104,7 +92,6 @@ public class AceFinder extends Observable {
         ApplicationManager.getApplication().runReadAction(new Runnable() {
             @Override
             public void run() {
-                results = new ArrayList<Integer>();
                 results = findAllVisible();
             }
 

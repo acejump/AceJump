@@ -20,8 +20,6 @@ public class SearchBox extends JTextField {
     private final HashMap<Integer, AceKeyCommand> preProcessKeyReleasedMap = new HashMap<Integer, AceKeyCommand>();
     private final HashMap<Integer, AceKeyCommand> preProcessKeyPressedMap = new HashMap<Integer, AceKeyCommand>();
 
-    protected boolean isPreProcessed;
-
     public boolean getIsSearchEnabled() {
         return isSearchEnabled && getText().length() == 1;
     }
@@ -81,7 +79,6 @@ public class SearchBox extends JTextField {
     }
 
     public void setIsPreProcessed() {
-        isPreProcessed = true;
     }
 
     public void forceSpaceChar() {
