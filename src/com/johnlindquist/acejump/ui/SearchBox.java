@@ -78,9 +78,6 @@ public class SearchBox extends JTextField {
 
     }
 
-    public void setIsPreProcessed() {
-    }
-
     public void forceSpaceChar() {
         setText(" ");
         disableSearchAndReturn();
@@ -88,7 +85,6 @@ public class SearchBox extends JTextField {
 
     public void disableSearchAndReturn() {
         disableSearch();
-        setIsPreProcessed();
     }
 
     public AbstractPopup getPopupContainer() {

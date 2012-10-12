@@ -46,7 +46,6 @@ public class ExpandResults extends AceKeyCommand {
         } else {
             aceFinder.expandResults();
         }
-        searchBox.setIsPreProcessed();
 
         setChanged();
         notifyObservers();
