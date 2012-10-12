@@ -186,7 +186,7 @@ public class AceJumpAction extends AnAction {
             end = size;
         }
 
-        Vector<Pair<String, Point>> textPointPairs = new Vector<Pair<String, Point>>();
+        ArrayList<Pair<String, Point>> textPointPairs = new ArrayList<Pair<String, Point>>();
         for (int i = start; i < end; i++) {
 
             int textOffset = results.get(i);
@@ -203,7 +203,7 @@ public class AceJumpAction extends AnAction {
     }
 
 
-    protected void showJumpers(Vector<Pair<String, Point>> textPointPairs) {
+    protected void showJumpers(ArrayList<Pair<String, Point>> textPointPairs) {
         aceCanvas.setJumpInfos(Lists.reverse(textPointPairs));
         aceCanvas.repaint();
     }
