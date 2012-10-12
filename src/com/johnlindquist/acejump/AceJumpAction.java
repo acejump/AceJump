@@ -211,7 +211,10 @@ public class AceJumpAction extends AnAction {
     }
 
     protected void exit() {
+        project = null;
         aceCanvas.clear();
+        aceCanvas.getParent().remove(aceCanvas);
+        aceCanvas = null;
         textAndOffsetHash.clear();
     }
 }
