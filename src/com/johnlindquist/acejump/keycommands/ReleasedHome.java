@@ -15,8 +15,8 @@ import java.util.Observer;
 * To change this template use File | Settings | File Templates.
 */
 public class ReleasedHome extends AceKeyCommand {
-    private SearchBox searchBox;
-    private AceFinder aceFinder;
+    private final SearchBox searchBox;
+    private final AceFinder aceFinder;
 
     public ReleasedHome(SearchBox searchBox, AceFinder aceFinder) {
         this.searchBox = searchBox;

@@ -18,10 +18,10 @@ import java.util.Observer;
  * Time: 11:54 AM
  */
 public class DefaultKeyCommand extends AceKeyCommand {
-    private SearchBox searchBox;
-    private AceFinder aceFinder;
-    private AceJumper aceJumper;
-    private HashMap<String, Integer> textAndOffsetHash;
+    private final SearchBox searchBox;
+    private final AceFinder aceFinder;
+    private final AceJumper aceJumper;
+    private final HashMap<String, Integer> textAndOffsetHash;
 
     public DefaultKeyCommand(SearchBox searchBox, AceFinder aceFinder, AceJumper aceJumper, HashMap<String, Integer> textAndOffsetHash) {
         this.searchBox = searchBox;

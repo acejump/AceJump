@@ -15,9 +15,9 @@ import java.util.Observer;
  * Time: 11:54 AM
  */
 public class PressedEnter extends AceKeyCommand {
-    private SearchBox searchBox;
-    private AceFinder aceFinder;
-    private AceJumper aceJumper;
+    private final SearchBox searchBox;
+    private final AceFinder aceFinder;
+    private final AceJumper aceJumper;
 
     public PressedEnter(SearchBox searchBox, AceFinder aceFinder, AceJumper aceJumper) {
         this.searchBox = searchBox;

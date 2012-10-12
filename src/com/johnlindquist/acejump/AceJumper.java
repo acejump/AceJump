@@ -16,8 +16,8 @@ import java.util.List;
  * Time: 2:37 PM
  */
 public class AceJumper {
-    private EditorImpl editor;
-    private DocumentImpl document;
+    private final EditorImpl editor;
+    private final DocumentImpl document;
 
 
     public AceJumper(EditorImpl editor, DocumentImpl document) {

@@ -15,7 +15,7 @@ import java.awt.event.KeyEvent;
 */
 public class PressedBackspace extends AceKeyCommand {
 
-    private AceCanvas aceCanvas;
+    private final AceCanvas aceCanvas;
 
     public PressedBackspace(AceCanvas aceCanvas) {
         this.aceCanvas = aceCanvas;

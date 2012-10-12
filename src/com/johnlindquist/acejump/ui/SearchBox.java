@@ -17,8 +17,8 @@ import java.util.HashMap;
 * To change this template use File | Settings | File Templates.
 */
 public class SearchBox extends JTextField {
-    private HashMap<Integer, AceKeyCommand> preProcessKeyReleasedMap = new HashMap<Integer, AceKeyCommand>();
-    private HashMap<Integer, AceKeyCommand> preProcessKeyPressedMap = new HashMap<Integer, AceKeyCommand>();
+    private final HashMap<Integer, AceKeyCommand> preProcessKeyReleasedMap = new HashMap<Integer, AceKeyCommand>();
+    private final HashMap<Integer, AceKeyCommand> preProcessKeyPressedMap = new HashMap<Integer, AceKeyCommand>();
 
     protected boolean isPreProcessed;
 

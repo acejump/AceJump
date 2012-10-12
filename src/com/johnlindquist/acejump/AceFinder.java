@@ -33,10 +33,10 @@ public class AceFinder extends Observable {
     private int startResult;
     private int endResult;
 
-    private Project project;
-    private DocumentImpl document;
-    private EditorImpl editor;
-    private VirtualFile virtualFile;
+    private final Project project;
+    private final DocumentImpl document;
+    private final EditorImpl editor;
+    private final VirtualFile virtualFile;
     private FindManager findManager;
     private FindModel findModel;
     private final int allowedCount;
