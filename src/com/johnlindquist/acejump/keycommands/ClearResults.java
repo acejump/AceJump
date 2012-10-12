@@ -13,11 +13,11 @@ import java.awt.event.KeyEvent;
 * Time: 11:54 AM
 * To change this template use File | Settings | File Templates.
 */
-public class PressedBackspace extends AceKeyCommand {
+public class ClearResults extends AceKeyCommand {
 
     private final AceCanvas aceCanvas;
 
-    public PressedBackspace(AceCanvas aceCanvas) {
+    public ClearResults(AceCanvas aceCanvas) {
         this.aceCanvas = aceCanvas;
     }
 

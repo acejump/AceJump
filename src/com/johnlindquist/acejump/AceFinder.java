@@ -195,14 +195,16 @@ public class AceFinder extends Observable {
     public void expandResults() {
         startResult += allowedCount;
         endResult += allowedCount;
+        checkForReset();
     }
 
     public void contractResults() {
         startResult -= allowedCount;
         endResult -= allowedCount;
+        checkForReset();
     }
 
-    public void checkForReset() {
+    protected void checkForReset() {
         if (startResult < 0) {
             startResult = 0;
         }

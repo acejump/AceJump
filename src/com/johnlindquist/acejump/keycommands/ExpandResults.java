@@ -14,11 +14,11 @@ import java.util.Observer;
  * Date: 8/24/12
  * Time: 11:54 AM
  */
-public class PressedEnter extends AceKeyCommand {
+public class ExpandResults extends AceKeyCommand {
     private final SearchBox searchBox;
     private final AceFinder aceFinder;
 
-    public PressedEnter(SearchBox searchBox, AceFinder aceFinder, AceJumper aceJumper) {
+    public ExpandResults(SearchBox searchBox, AceFinder aceFinder, AceJumper aceJumper) {
         this.searchBox = searchBox;
         this.aceFinder = aceFinder;
     }
@@ -46,7 +46,6 @@ public class PressedEnter extends AceKeyCommand {
         } else {
             aceFinder.expandResults();
         }
-        aceFinder.checkForReset();
         searchBox.setIsPreProcessed();
 
         setChanged();

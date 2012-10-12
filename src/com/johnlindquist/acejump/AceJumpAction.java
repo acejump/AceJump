@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.colors.EditorColorsManager;
 import com.intellij.openapi.editor.colors.EditorColorsScheme;
 import com.intellij.openapi.editor.impl.DocumentImpl;
 import com.intellij.openapi.editor.impl.EditorImpl;
+import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.ComponentPopupBuilder;
 import com.intellij.openapi.ui.popup.JBPopupFactory;
@@ -33,7 +34,7 @@ import java.util.List;
  * Date: 8/6/2012
  * Time: 12:10 AM
  */
-public class AceJumpAction extends AnAction {
+public class AceJumpAction extends DumbAwareAction {
 
     protected Project project;
     protected EditorImpl editor;
@@ -50,11 +51,15 @@ public class AceJumpAction extends AnAction {
     private AceFinder aceFinder;
     private AceJumper aceJumper;
 
-    public HashMap<String, Integer> textAndOffsetHash = new HashMap<String, Integer>();
+    private HashMap<String, Integer> textAndOffsetHash = new HashMap<String, Integer>();
 
+
+    @Override
+    public void update(AnActionEvent e) {
+        e.getPresentation().setEnabled(e.getData(PlatformDataKeys.EDITOR) != null);
+    }
 
     public void actionPerformed(AnActionEvent actionEvent) {
-
         project = actionEvent.getData(PlatformDataKeys.PROJECT);
         editor = (EditorImpl) actionEvent.getData(PlatformDataKeys.EDITOR);
         virtualFile = actionEvent.getData(PlatformDataKeys.VIRTUAL_FILE);
@@ -139,8 +144,8 @@ public class AceJumpAction extends AnAction {
             }
         };
 
-        AceKeyCommand releasedHome = new ReleasedHome(searchBox, aceFinder);
-        AceKeyCommand releasedEnd = new ReleasedEnd(searchBox, aceFinder);
+        AceKeyCommand releasedHome = new ShowBeginningOfLines(searchBox, aceFinder);
+        AceKeyCommand releasedEnd = new ShowEndOfLines(searchBox, aceFinder);
 
         releasedHome.addObserver(showJumpObserver);
         releasedEnd.addObserver(showJumpObserver);
@@ -150,8 +155,8 @@ public class AceJumpAction extends AnAction {
         searchBox.addPreProcessReleaseKey(KeyEvent.VK_END, releasedEnd);
 
 
-        AceKeyCommand pressedBackspace = new PressedBackspace(aceCanvas);
-        AceKeyCommand pressedEnter = new PressedEnter(searchBox, aceFinder, aceJumper);
+        AceKeyCommand pressedBackspace = new ClearResults(aceCanvas);
+        AceKeyCommand pressedEnter = new ExpandResults(searchBox, aceFinder, aceJumper);
 
         pressedEnter.addObserver(showJumpObserver);
 
@@ -201,7 +206,6 @@ public class AceJumpAction extends AnAction {
 
         showJumpers(textPointPairs);
     }
-
 
     protected void showJumpers(ArrayList<Pair<String, Point>> textPointPairs) {
         aceCanvas.setJumpInfos(Lists.reverse(textPointPairs));

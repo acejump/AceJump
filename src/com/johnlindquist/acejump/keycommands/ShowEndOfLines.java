@@ -14,11 +14,11 @@ import java.util.Observer;
 * Time: 11:54 AM
 * To change this template use File | Settings | File Templates.
 */
-public class ReleasedEnd extends AceKeyCommand {
+public class ShowEndOfLines extends AceKeyCommand {
     private final SearchBox searchBox;
     private final AceFinder aceFinder;
 
-    public ReleasedEnd(SearchBox searchBox, AceFinder aceFinder) {
+    public ShowEndOfLines(SearchBox searchBox, AceFinder aceFinder) {
         this.searchBox = searchBox;
         this.aceFinder = aceFinder;
     }
