@@ -22,6 +22,8 @@ import com.johnlindquist.acejump.ui.AceCanvas;
 import com.johnlindquist.acejump.ui.SearchBox;
 
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -137,9 +139,8 @@ public class AceJumpAction extends DumbAwareAction {
     }
 
     protected void setupSearchBoxKeys() {
-        Observer showJumpObserver = new Observer() {
-            @Override
-            public void update(Observable o, Object arg) {
+        ChangeListener showJumpObserver = new ChangeListener() {
+            public void stateChanged(final ChangeEvent e) {
                 setupJumpLocations(aceFinder.getResults(), aceFinder.getStartResult(), aceFinder.getEndResult());
             }
         };
@@ -147,8 +148,8 @@ public class AceJumpAction extends DumbAwareAction {
         AceKeyCommand releasedHome = new ShowBeginningOfLines(searchBox, aceFinder);
         AceKeyCommand releasedEnd = new ShowEndOfLines(searchBox, aceFinder);
 
-        releasedHome.addObserver(showJumpObserver);
-        releasedEnd.addObserver(showJumpObserver);
+        releasedHome.addListener(showJumpObserver);
+        releasedEnd.addListener(showJumpObserver);
 
         //todo: consider other "special" searches and loading these from a config. Tab, Insert, Delete, Page Up, etc?
         searchBox.addPreProcessReleaseKey(KeyEvent.VK_HOME, releasedHome);
@@ -158,7 +159,7 @@ public class AceJumpAction extends DumbAwareAction {
         AceKeyCommand pressedBackspace = new ClearResults(aceCanvas);
         AceKeyCommand pressedEnter = new ExpandResults(searchBox, aceFinder, aceJumper);
 
-        pressedEnter.addObserver(showJumpObserver);
+        pressedEnter.addListener(showJumpObserver);
 
         searchBox.addPreProcessPressedKey(KeyEvent.VK_BACK_SPACE, pressedBackspace);
         searchBox.addPreProcessPressedKey(KeyEvent.VK_ENTER, pressedEnter);
@@ -166,7 +167,7 @@ public class AceJumpAction extends DumbAwareAction {
 
 
         DefaultKeyCommand defaultKeyCommand = new DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash);
-        defaultKeyCommand.addObserver(showJumpObserver);
+        defaultKeyCommand.addListener(showJumpObserver);
 
         searchBox.setDefaultKeyCommand(defaultKeyCommand);
     }

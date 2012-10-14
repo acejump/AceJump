@@ -5,6 +5,8 @@ import com.johnlindquist.acejump.AceJumper;
 import com.johnlindquist.acejump.AceKeyUtil;
 import com.johnlindquist.acejump.ui.SearchBox;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
@@ -36,13 +38,14 @@ public class DefaultKeyCommand extends AceKeyCommand {
         //Find or jump
         if (searchBox.getIsSearchEnabled()) {
             //Find
-            aceFinder.addObserver(new Observer() {
+            aceFinder.addResultsReadyListener(new ChangeListener() {
                 @Override
-                public void update(Observable o, Object arg) {
-                    setChanged();
-                    notifyObservers();
+                public void stateChanged(ChangeEvent e) {
+                    eventDispatcher.getMulticaster().stateChanged(new ChangeEvent("ExpandResults"));
                 }
             });
+
+
             aceFinder.findText(searchBox.getText(), false);
             searchBox.disableSearch();
         } else {

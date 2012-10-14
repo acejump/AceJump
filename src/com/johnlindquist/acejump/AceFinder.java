@@ -10,8 +10,11 @@ import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.editor.impl.FoldingModelImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.util.EventDispatcher;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
@@ -22,7 +25,7 @@ import java.util.List;
  * Date: 8/23/12
  * Time: 3:47 PM
  */
-public class AceFinder extends Observable {
+public class AceFinder {
 
     public static final CharSequence ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz";
 
@@ -41,6 +44,9 @@ public class AceFinder extends Observable {
     private FindModel findModel;
     private final int allowedCount;
     public boolean getEndOffset;
+
+    private final EventDispatcher<ChangeListener> myEventDispatcher = EventDispatcher.create(ChangeListener.class);
+
 
     public List<Integer> getResults() {
         return results;
@@ -134,12 +140,18 @@ public class AceFinder extends Observable {
                 startResult = 0;
                 endResult = allowedCount;
 
-                setChanged();
+                /*setChanged();
                 synchronized (this) {
                     notifyObservers();
-                }
+                }*/
+                myEventDispatcher.getMulticaster().stateChanged(new ChangeEvent("AceFinder"));
+
             }
         });
+    }
+
+    public void addResultsReadyListener(ChangeListener changeListener){
+        myEventDispatcher.addListener(changeListener);
     }
 
     @Nullable

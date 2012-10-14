@@ -4,6 +4,8 @@ import com.johnlindquist.acejump.AceFinder;
 import com.johnlindquist.acejump.AceJumper;
 import com.johnlindquist.acejump.ui.SearchBox;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.event.KeyEvent;
 import java.util.Observable;
 import java.util.Observer;
@@ -25,13 +27,14 @@ public class ExpandResults extends AceKeyCommand {
 
     public void execute(KeyEvent keyEvent) {
         if (searchBox.getText().length() == 0) {
-            aceFinder.addObserver(new Observer() {
+
+            aceFinder.addResultsReadyListener(new ChangeListener() {
                 @Override
-                public void update(Observable o, Object arg) {
-                    setChanged();
-                    notifyObservers();
+                public void stateChanged(ChangeEvent e) {
+                    eventDispatcher.getMulticaster().stateChanged(new ChangeEvent("ExpandResults"));
                 }
             });
+
             aceFinder.getEndOffset = true;
             aceFinder.findText(AceFinder.CODE_INDENTS, true);
 
@@ -47,7 +50,6 @@ public class ExpandResults extends AceKeyCommand {
             aceFinder.expandResults();
         }
 
-        setChanged();
-        notifyObservers();
+        eventDispatcher.getMulticaster().stateChanged(new ChangeEvent("ExpandResults"));
     }
 }

@@ -3,6 +3,8 @@ package com.johnlindquist.acejump.keycommands;
 import com.johnlindquist.acejump.AceFinder;
 import com.johnlindquist.acejump.ui.SearchBox;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.event.KeyEvent;
 import java.util.Observable;
 import java.util.Observer;
@@ -24,11 +26,10 @@ public class ShowBeginningOfLines extends AceKeyCommand {
     }
 
     public void execute(KeyEvent keyEvent) {
-        aceFinder.addObserver(new Observer() {
+        aceFinder.addResultsReadyListener(new ChangeListener() {
             @Override
-            public void update(Observable o, Object arg) {
-                setChanged();
-                notifyObservers();
+            public void stateChanged(ChangeEvent e) {
+                eventDispatcher.getMulticaster().stateChanged(new ChangeEvent("ShowBeginningOfLines"));
             }
         });
         aceFinder.findText(AceFinder.BEGINNING_OF_LINE, true);
