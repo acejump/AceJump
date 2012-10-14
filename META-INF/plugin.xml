@@ -13,6 +13,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>1.0.2</dt>
+            <dd>Cleaning up minor bugs (npe when editor not in focus, not removing layers)<dd>
             <dt>1.0.1</dt>
             <dd>Adding a new jump: "Enter" will take you to the first non-whitespace char in a new line (compare to "Home" which takes you to a new line)</dd>
             <dt>1.0</dt>
@@ -24,7 +26,7 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <category>Navigation</category>
     <vendor url="http://johnlindquist.com"
             email="johnlindquist@gmail.com">johnlindquist
