@@ -198,9 +198,12 @@ public class AceJumpAction extends DumbAwareAction {
     }
 
     protected void exit() {
+        JComponent contentComponent = editor.getContentComponent();
+
         project = null;
-        aceCanvas.clear();
-        aceCanvas.getParent().remove(aceCanvas);
+
+        contentComponent.remove(aceCanvas);
+        contentComponent.repaint();
         aceCanvas = null;
         textAndOffsetHash.clear();
     }

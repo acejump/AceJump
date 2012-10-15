@@ -13,6 +13,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>1.0.3</dt>
+            <dd>Fixed minor visual lag when removing the "jumpers" from the editor<dd>
             <dt>1.0.2</dt>
             <dd>Cleaning up minor bugs (npe when editor not in focus, not removing layers)<dd>
             <dt>1.0.1</dt>
@@ -26,7 +28,7 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <version>1.0.2</version>
+    <version>1.0.3</version>
     <category>Navigation</category>
     <vendor url="http://johnlindquist.com"
             email="johnlindquist@gmail.com">johnlindquist
