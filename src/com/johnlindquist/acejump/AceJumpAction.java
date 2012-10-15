@@ -48,7 +48,6 @@ public class AceJumpAction extends DumbAwareAction {
     private Font font;
     private AceCanvas aceCanvas;
     private EditorColorsScheme scheme;
-    private boolean mnemonicsDisabled;
 
     private AceFinder aceFinder;
     private AceJumper aceJumper;
@@ -103,26 +102,11 @@ public class AceJumpAction extends DumbAwareAction {
             @Override
             public void focusGained(FocusEvent e) {
                 addAceCanvas();
-
-                /*
-                    this is the worst hack to allow you to hit "alt+*" to select the word. Any better suggestions would
-                    be much appreciated.
-                 */
-
-                mnemonicsDisabled = settings.DISABLE_MNEMONICS;
-                if (!mnemonicsDisabled) {
-                    settings.DISABLE_MNEMONICS = true;
-                    settings.fireUISettingsChanged();
-                }
             }
 
             @Override
             public void focusLost(FocusEvent e) {
                 exit();
-                if (!mnemonicsDisabled) {
-                    settings.DISABLE_MNEMONICS = false;
-                    settings.fireUISettingsChanged();
-                }
             }
         });
 

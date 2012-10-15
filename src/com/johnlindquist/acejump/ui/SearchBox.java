@@ -40,6 +40,7 @@ public class SearchBox extends JTextField {
 
     @Override
     protected void processKeyEvent(final KeyEvent keyEvent) {
+
         if (getText().length() == 0) {
             //todo: rethink the "isSearchEnabled" state approach. Works great now, could be cleaner
             isSearchEnabled = true;
@@ -47,15 +48,13 @@ public class SearchBox extends JTextField {
 
         AceKeyCommand aceKeyCommand = null;
         if (keyEvent.getID() == KeyEvent.KEY_RELEASED) {
-            /*
-                My lack of Java experience is probably showing here, but the only way I could find to handle "HOME" and
-                "END" was to on "release". Is there a better convention for this?
-             */
             aceKeyCommand = preProcessKeyReleasedMap.get(keyEvent.getKeyCode());
         }
 
         if (keyEvent.getID() == KeyEvent.KEY_PRESSED) {
             aceKeyCommand = preProcessKeyPressedMap.get(keyEvent.getKeyCode());
+            //prevent "alt" from triggering menu items
+            keyEvent.consume();
         }
 
         if (aceKeyCommand != null) {
@@ -64,9 +63,13 @@ public class SearchBox extends JTextField {
         }
 
         super.processKeyEvent(keyEvent);
+
         if (keyEvent.getID() != KeyEvent.KEY_TYPED) return;
 
-        if(defaultKeyCommand != null) defaultKeyCommand.execute(keyEvent);
+        if (defaultKeyCommand != null)
+        {
+            defaultKeyCommand.execute(keyEvent);
+        }
 
         if (getText().length() == 2) {
             try {
