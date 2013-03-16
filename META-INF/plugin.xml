@@ -13,6 +13,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>1.0.4</dt>
+            <dd>Fixing https://github.com/johnlindquist/AceJump/issues/9 and https://github.com/johnlindquist/AceJump/issues/6<dd>
             <dt>1.0.3</dt>
             <dd>Fixed minor visual lag when removing the "jumpers" from the editor<dd>
             <dt>1.0.2</dt>
@@ -28,14 +30,14 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <category>Navigation</category>
     <vendor url="http://johnlindquist.com"
             email="johnlindquist@gmail.com">johnlindquist
     </vendor>
 
 
-    <idea-version since-build="117.117" />
+    <idea-version since-build="117.117"/>
 
     <project-components>
         <!-- Add your project components here -->
@@ -49,6 +51,8 @@
                 description="Search and navigate to result">
             <keyboard-shortcut keymap="$default"
                                first-keystroke="ctrl SEMICOLON"/>
+            <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
+            <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
         </action>
     </actions>
 
