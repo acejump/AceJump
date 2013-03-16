@@ -13,6 +13,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>1.1.0</dt>
+            <dd>Switching to Kotlin for the code base<dd>
             <dt>1.0.4</dt>
             <dd>Fixing https://github.com/johnlindquist/AceJump/issues/9 and https://github.com/johnlindquist/AceJump/issues/6<dd>
             <dt>1.0.3</dt>
@@ -30,7 +32,7 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <version>1.0.4</version>
+    <version>1.1.0</version>
     <category>Navigation</category>
     <vendor url="http://johnlindquist.com"
             email="johnlindquist@gmail.com">johnlindquist

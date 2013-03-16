@@ -38,7 +38,7 @@ public open class AceJumpAction(): DumbAwareAction() {
         val project = actionEvent?.getData(PlatformDataKeys.PROJECT) as Project
         val editor = actionEvent?.getData(PlatformDataKeys.EDITOR) as EditorImpl
         val virtualFile = actionEvent?.getData(PlatformDataKeys.VIRTUAL_FILE) as VirtualFile
-        val document = editor.getDocument()!! as DocumentImpl
+        val document = editor.getDocument() as DocumentImpl
         val scheme = EditorColorsManager.getInstance()?.getGlobalScheme()
         val font = Font(scheme?.getEditorFontName(), Font.BOLD, scheme?.getEditorFontSize()!!)
         val aceFinder = AceFinder(project, document, editor, virtualFile)
@@ -58,14 +58,14 @@ public open class AceJumpAction(): DumbAwareAction() {
             textAndOffsetHash.clear()
         }
 
-        fun setupJumpLocations(results: MutableList<Int>, start: Int, var end: Int){
+        fun setupJumpLocations(results: MutableList<Int>, start: Int, var end: Int) {
             textAndOffsetHash.clear()
             var size: Int = results.size()
             if (end > size)
             {
                 end = size
             }
-            var textPointPairs:MutableList<Pair<String, Point>> = ArrayList<Pair<String, Point>>()
+            var textPointPairs: MutableList<Pair<String, Point>> = ArrayList<Pair<String, Point>>()
             for (i in start..end - 1) {
                 var textOffset: Int = results.get(i)
                 var point: RelativePoint? = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
@@ -100,8 +100,10 @@ public open class AceJumpAction(): DumbAwareAction() {
                 releasedHome.addListener(showJumpObserver)
                 releasedEnd.addListener(showJumpObserver)
                 searchBox.addPreProcessReleaseKey(KeyEvent.VK_HOME, releasedHome)
+                searchBox.addPreProcessReleaseKey(KeyEvent.VK_LEFT, releasedHome)
+                searchBox.addPreProcessReleaseKey(KeyEvent.VK_RIGHT, releasedEnd)
                 searchBox.addPreProcessReleaseKey(KeyEvent.VK_END, releasedEnd)
-                var pressedBackspace: AceKeyCommand = ClearResults(aceCanvas)
+                var pressedBackspace: AceKeyCommand = ClearResults(searchBox, aceCanvas)
                 var pressedEnter: AceKeyCommand = ExpandResults(searchBox, aceFinder, aceJumper)
                 pressedEnter.addListener(showJumpObserver)
                 searchBox.addPreProcessPressedKey(KeyEvent.VK_BACK_SPACE, pressedBackspace)
@@ -147,8 +149,8 @@ public open class AceJumpAction(): DumbAwareAction() {
 
         fun configureAceCanvas() {
             aceCanvas.setFont(font)
-            aceCanvas.lineHeight = (editor.getLineHeight())
-            aceCanvas.lineSpacing = scheme?.getLineSpacing()!!.toInt()
+            aceCanvas.lineHeight = editor.getLineHeight()
+            aceCanvas.lineSpacing = scheme?.getLineSpacing()!!
             aceCanvas.colorPair = Pair<Color?, Color?>(scheme?.getDefaultBackground(), scheme?.getDefaultForeground())
         }
 

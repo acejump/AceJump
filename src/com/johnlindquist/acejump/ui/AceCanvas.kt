@@ -15,9 +15,9 @@ public class AceCanvas: JComponent() {
         public set
     var colorPair = Pair<Color?, Color?>(Color.BLACK, Color.WHITE)
         public set
-    var lineSpacing = 0
+    var lineSpacing:Float = 0.toFloat()
         public set
-    var lineHeight = 0
+    var lineHeight:Int = 0
         public set
 
 
@@ -53,17 +53,17 @@ public class AceCanvas: JComponent() {
             val defaultForeground = colorPair.second
             val defaultBackground = colorPair.first
 
-            originalPoint.translate(0, -fbm.hOffset)
+            originalPoint.translate(0, -fbm.hOffset.toInt())
 
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
             //a slight border for "pop" against the background
             g2d.setColor(defaultBackground)
-            g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1, originalPoint.y - fbm.rectHOffset - 1, fbm.rectWidth + 1, lineHeight + 1)
+            g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1, originalPoint.y - fbm.rectHOffset.toInt() - 1, fbm.rectWidth + 1, lineHeight.toInt() + 1)
 
             //the background rectangle
             g2d.setColor(defaultForeground)
-            g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset, fbm.rectWidth, lineHeight)
+            g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset.toInt(), fbm.rectWidth, lineHeight.toInt())
 
             //just a touch of alpha
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.85.toFloat()))

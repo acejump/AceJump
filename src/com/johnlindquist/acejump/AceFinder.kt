@@ -43,7 +43,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
     public var startResult:Int = 0
     public var endResult:Int = 0
     public var allowedCount:Int = getAllowedCharacters()!!.length()
-    public var results:List<Int>? = null
+    public var results:List<Int?>? = null
     public var getEndOffset: Boolean = false
 
     fun createFindModel(findManager: FindManager): FindModel {
@@ -80,7 +80,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
                 var lineEndOffset = document.getLineEndOffset(lineNumber)
 
 
-                results!!.sort(object : Comparator<Int?>{
+                results = results!!.sort(object : Comparator<Int?>{
                     public override fun equals(p0: Any?): Boolean {
                         throw UnsupportedOperationException()
                     }
@@ -116,12 +116,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
                 startResult = 0;
                 endResult = allowedCount;
 
-                /*setChanged();
-                synchronized (this) {
-                    notifyObservers();
-                }*/
                 eventDispatcher?.getMulticaster()?.stateChanged(ChangeEvent("AceFinder"));
-
             }
 
         });
