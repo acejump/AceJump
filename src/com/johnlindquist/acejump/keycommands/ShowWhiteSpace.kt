@@ -6,7 +6,7 @@ import java.awt.event.KeyEvent
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
-public class ShowBeginningOfLines(val searchBox: SearchBox, val aceFinder: AceFinder): AceKeyCommand() {
+public class ShowWhiteSpace(val searchBox: SearchBox, val aceFinder: AceFinder): AceKeyCommand() {
     override fun execute(keyEvent: KeyEvent) {
         aceFinder.addResultsReadyListener(object :ChangeListener{
             public override fun stateChanged(p0: ChangeEvent) {
@@ -14,7 +14,7 @@ public class ShowBeginningOfLines(val searchBox: SearchBox, val aceFinder: AceFi
             }
         })
 
-        aceFinder.findText(AceFinder.BEGINNING_OF_LINE, true)
+        aceFinder.findText(AceFinder.WHITE_SPACE, true)
         searchBox.forceSpaceChar()
     }
 }

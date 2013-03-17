@@ -19,19 +19,13 @@ import com.intellij.openapi.editor.FoldRegion
 import java.util.Collections
 import java.util.Comparator
 
-/**
- * Created with IntelliJ IDEA.
- * User: johnlindquist
- * Date: 1/7/13
- * Time: 5:49 AM
- * To change this template use File | Settings | File Templates.
- */
 public class AceFinder(val project: Project, val document: DocumentImpl, val editor: EditorImpl, val virtualFile: VirtualFile) {
     class object {
         val ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
         val END_OF_LINE = "\\n|\\Z"
         val BEGINNING_OF_LINE = "^.|\\n(?<!.\\n)"
         val CODE_INDENTS = "^\\s*\\S"
+        val WHITE_SPACE = "\\s\\S"
     }
 
     val eventDispatcher: EventDispatcher<ChangeListener?>? = JavaInterop.createChangeListener()

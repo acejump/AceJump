@@ -34,7 +34,8 @@ public open class AceJumpAction(): DumbAwareAction() {
     override public fun update(e: AnActionEvent?) {
         e?.getPresentation()?.setEnabled((e?.getData(PlatformDataKeys.EDITOR)) != null)
     }
-    override public fun actionPerformed(actionEvent: AnActionEvent?) {
+    override public fun actionPerformed(p0: AnActionEvent?) {
+        val actionEvent = p0
         val project = actionEvent?.getData(PlatformDataKeys.PROJECT) as Project
         val editor = actionEvent?.getData(PlatformDataKeys.EDITOR) as EditorImpl
         val virtualFile = actionEvent?.getData(PlatformDataKeys.VIRTUAL_FILE) as VirtualFile
@@ -52,7 +53,7 @@ public open class AceJumpAction(): DumbAwareAction() {
             aceCanvas.repaint()
         }
         fun exit() {
-            var contentComponent: JComponent? = editor.getContentComponent()
+            val contentComponent: JComponent? = editor.getContentComponent()
             contentComponent?.remove(aceCanvas)
             contentComponent?.repaint()
             textAndOffsetHash.clear()
@@ -60,16 +61,16 @@ public open class AceJumpAction(): DumbAwareAction() {
 
         fun setupJumpLocations(results: MutableList<Int>, start: Int, var end: Int) {
             textAndOffsetHash.clear()
-            var size: Int = results.size()
+            val size: Int = results.size()
             if (end > size)
             {
                 end = size
             }
-            var textPointPairs: MutableList<Pair<String, Point>> = ArrayList<Pair<String, Point>>()
+            val textPointPairs: MutableList<Pair<String, Point>> = ArrayList<Pair<String, Point>>()
             for (i in start..end - 1) {
-                var textOffset: Int = results.get(i)
-                var point: RelativePoint? = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
-                var resultChar: Char = aceFinder.getAllowedCharacters()?.charAt(i % (aceFinder.getAllowedCharacters()?.length())!!)!!
+                val textOffset: Int = results.get(i)
+                val point: RelativePoint? = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
+                val resultChar: Char = aceFinder.getAllowedCharacters()?.charAt(i % (aceFinder.getAllowedCharacters()?.length())!!)!!
                 val text: String = resultChar.toString()
                 textPointPairs.add(Pair<String, Point>(text, point?.getOriginalPoint() as Point))
                 textAndOffsetHash.put(text, textOffset)
@@ -79,43 +80,53 @@ public open class AceJumpAction(): DumbAwareAction() {
 
 
         fun addAceCanvas() {
-            var contentComponent: JComponent? = editor.getContentComponent()
+            val contentComponent: JComponent? = editor.getContentComponent()
             contentComponent?.add(aceCanvas)
-            var viewport = editor.getScrollPane().getViewport()
+            val viewport = editor.getScrollPane().getViewport()
             aceCanvas.setBounds(0, 0, (viewport?.getWidth())!! + 1000, (viewport?.getHeight())!! + 1000)
-            var rootPane: JRootPane? = editor.getComponent().getRootPane()!!
-            var locationOnScreen: Point? = SwingUtilities.convertPoint(aceCanvas, (aceCanvas.getLocation()), rootPane)
+            val rootPane: JRootPane? = editor.getComponent().getRootPane()!!
+            val locationOnScreen: Point? = SwingUtilities.convertPoint(aceCanvas, (aceCanvas.getLocation()), rootPane)
             aceCanvas.setLocation(-locationOnScreen!!.x, -locationOnScreen!!.y)
         }
 
         fun configureSearchBox() {
             fun setupSearchBoxKeys() {
-                var showJumpObserver: ChangeListener = object : ChangeListener {
+                val showJumpObserver: ChangeListener = object : ChangeListener {
                     public override fun stateChanged(e: ChangeEvent) {
                         setupJumpLocations(aceFinder.results as MutableList<Int>, aceFinder.startResult, aceFinder.endResult)
                     }
                 }
-                var releasedHome: AceKeyCommand = ShowBeginningOfLines(searchBox, aceFinder)
-                var releasedEnd: AceKeyCommand = ShowEndOfLines(searchBox, aceFinder)
+                val releasedHome: AceKeyCommand = ShowBeginningOfLines(searchBox, aceFinder)
+                val releasedEnd: AceKeyCommand = ShowEndOfLines(searchBox, aceFinder)
                 releasedHome.addListener(showJumpObserver)
                 releasedEnd.addListener(showJumpObserver)
                 searchBox.addPreProcessReleaseKey(KeyEvent.VK_HOME, releasedHome)
                 searchBox.addPreProcessReleaseKey(KeyEvent.VK_LEFT, releasedHome)
                 searchBox.addPreProcessReleaseKey(KeyEvent.VK_RIGHT, releasedEnd)
                 searchBox.addPreProcessReleaseKey(KeyEvent.VK_END, releasedEnd)
-                var pressedBackspace: AceKeyCommand = ClearResults(searchBox, aceCanvas)
-                var pressedEnter: AceKeyCommand = ExpandResults(searchBox, aceFinder, aceJumper)
+
+                val releasedUp: AceKeyCommand = ShowFirstCharOfLines(searchBox, aceFinder)
+                releasedUp.addListener(showJumpObserver)
+                searchBox.addPreProcessReleaseKey(KeyEvent.VK_UP, releasedUp)
+
+                val pressedBackspace: AceKeyCommand = ClearResults(searchBox, aceCanvas)
+                val pressedEnter: AceKeyCommand = ExpandResults(searchBox, aceFinder, aceJumper)
                 pressedEnter.addListener(showJumpObserver)
                 searchBox.addPreProcessPressedKey(KeyEvent.VK_BACK_SPACE, pressedBackspace)
                 searchBox.addPreProcessPressedKey(KeyEvent.VK_ENTER, pressedEnter)
-                var defaultKeyCommand: DefaultKeyCommand? = DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash)
+
+                val pressedSpace: AceKeyCommand = ShowWhiteSpace(searchBox, aceFinder)
+                pressedSpace.addListener(showJumpObserver)
+                searchBox.addPreProcessPressedKey(KeyEvent.VK_SPACE, pressedSpace)
+
+                val defaultKeyCommand: DefaultKeyCommand? = DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash)
                 defaultKeyCommand?.addListener(showJumpObserver)
                 searchBox.defaultKeyCommand = defaultKeyCommand
             }
 
             setupSearchBoxKeys()
             searchBox.setFont(font)
-            var popupBuilder: ComponentPopupBuilder? = JBPopupFactory.getInstance()?.createComponentPopupBuilder(searchBox as JComponent, searchBox)
+            val popupBuilder: ComponentPopupBuilder? = JBPopupFactory.getInstance()?.createComponentPopupBuilder(searchBox as JComponent, searchBox)
             popupBuilder?.setCancelKeyEnabled(true)
             val popup = (popupBuilder?.createPopup() as AbstractPopup?)
             popup?.show(guessBestLocation(editor))
