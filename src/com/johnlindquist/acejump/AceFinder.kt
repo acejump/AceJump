@@ -22,6 +22,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
         val BEGINNING_OF_LINE = "^.|\\n(?<!.\\n)"
         val CODE_INDENTS = "^\\s*\\S"
         val WHITE_SPACE = "\\s+\\S(?<!^\\s*\\S)"
+        val DEFAULT = CODE_INDENTS + "|" + END_OF_LINE
     }
 
     val eventDispatcher: EventDispatcher<ChangeListener?>? = JavaInterop.createChangeListener()
@@ -195,7 +196,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
         return ALLOWED_CHARACTERS
     }
 
-//    todo: refactor (try a generator approach) or move out
+    //    todo: refactor (try a generator approach) or move out
     public fun generateString(i: Int, total: Int): String {
         val letters = getAllowedCharacters()!!
         val len = letters.length
@@ -206,7 +207,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
 
         var str = ""
 
-//        if(i % i1 == 0) print("================")
+        //        if(i % i1 == 0) print("================")
         var groupI = 0
         if(i > 0) groupI = Math.floor(i / i1.toDouble()).toInt()
         if(groupI > 0){

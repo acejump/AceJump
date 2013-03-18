@@ -52,7 +52,7 @@ public class SearchBox: JTextField() {
 
         if (p0.getID() != KeyEvent.KEY_TYPED) return
 
-        if (defaultKeyCommand != null){
+        if (defaultKeyCommand != null && p0.isConsumed()){
             defaultKeyCommand?.execute(p0)
         }
 

@@ -112,6 +112,10 @@ public open class AceJumpAction(): DumbAwareAction() {
                 pressedSpace.addListener(showJumpObserver)
                 searchBox.addPreProcessPressedKey(KeyEvent.VK_SPACE, pressedSpace)
 
+                val pressedSemi: AceKeyCommand = ShowFirstAndLast(searchBox, aceFinder, aceJumper, textAndOffsetHash)
+                pressedSemi.addListener(showJumpObserver)
+                searchBox.addPreProcessPressedKey(KeyEvent.VK_SEMICOLON, pressedSemi)
+
                 val defaultKeyCommand: DefaultKeyCommand? = DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash)
                 defaultKeyCommand?.addListener(showJumpObserver)
                 searchBox.defaultKeyCommand = defaultKeyCommand
