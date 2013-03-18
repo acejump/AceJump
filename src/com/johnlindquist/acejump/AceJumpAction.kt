@@ -58,15 +58,41 @@ public open class AceJumpAction(): DumbAwareAction() {
             textAndOffsetHash.clear()
         }
 
+        //todo: refactor
         fun setupJumpLocations(results: MutableList<Int>) {
             textAndOffsetHash.clear()
             val textPointPairs: MutableList<Pair<String, Point>> = ArrayList<Pair<String, Point>>()
-            for (i in 0..results.size - 1) {
+            val total = results.size -1
+
+            val letters = aceFinder.getAllowedCharacters()!!
+            var len = letters.length
+            var groups = Math.ceil(total.toDouble() / len)
+            print("groups: " + groups.toString())
+            val lenMinusGroups = len - groups.toInt()
+            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
+
+            for (i in 0..total) {
+
+                var str = ""
+
+                val iGroup = i - lenMinusGroups
+                val iModGroup = iGroup % len
+                if(iModGroup == 0) print("================\n")
+                if(groups > 1 && i >= lenMinusGroups){
+                    val i1 = Math.floor(lenMinusGroups.toDouble() + ((i + groups.toInt()) / len)).toInt()
+                    str += letters.charAt(i1)
+                    str += letters.charAt(iModGroup).toString()
+                }else {
+                    str += letters.charAt(i).toString()
+                }
+                print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
+
+
+
                 val textOffset: Int = results.get(i)
                 val point: RelativePoint? = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
-                val text: String = aceFinder.generateString(i, results.size - 1)
-                textPointPairs.add(Pair<String, Point>(text, point?.getOriginalPoint() as Point))
-                textAndOffsetHash.put(text, textOffset)
+                textPointPairs.add(Pair<String, Point>(str, point?.getOriginalPoint() as Point))
+                textAndOffsetHash.put(str, textOffset)
             }
             showJumpers(textPointPairs)
         }

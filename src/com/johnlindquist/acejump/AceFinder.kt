@@ -196,27 +196,4 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
         return ALLOWED_CHARACTERS
     }
 
-    //    todo: refactor (try a generator approach) or move out
-    public fun generateString(i: Int, total: Int): String {
-        val letters = getAllowedCharacters()!!
-        val len = letters.length
-        var groups = Math.ceil(total / len.toDouble())
-        //    print("groups: " + groups.toString())
-        val i1 = len - groups.toInt()
-        //    print("last letter: " + letters.charAt(i1).toString() + "\n")
-
-        var str = ""
-
-        //        if(i % i1 == 0) print("================")
-        var groupI = 0
-        if(i > 0) groupI = Math.floor(i / i1.toDouble()).toInt()
-        if(groupI > 0){
-            str += letters.charAt(letters.length - groupI.toInt())
-        }
-
-        str += letters.charAt(i % i1).toString()
-        //        print(i.toString() + ": " + str + "\n")
-
-        return str
-    }
 }
