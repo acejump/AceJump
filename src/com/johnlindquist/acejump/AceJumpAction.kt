@@ -78,8 +78,8 @@ public open class AceJumpAction(): DumbAwareAction() {
                 val iGroup = i - lenMinusGroups
                 val iModGroup = iGroup % len
                 if(iModGroup == 0) print("================\n")
+                val i1 = Math.floor(lenMinusGroups.toDouble() + ((i + groups.toInt()) / len)).toInt() - 1
                 if(groups > 1 && i >= lenMinusGroups){
-                    val i1 = Math.floor(lenMinusGroups.toDouble() + ((i + groups.toInt()) / len)).toInt()
                     str += letters.charAt(i1)
                     str += letters.charAt(iModGroup).toString()
                 }else {
