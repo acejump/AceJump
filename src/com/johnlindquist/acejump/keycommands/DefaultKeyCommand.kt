@@ -27,7 +27,15 @@ public class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinde
             searchBox.disableSearch()
         } else {
             //Jump to offset!
-            val offset = textAndOffsetHash.get(AceKeyUtil.getLowerCaseStringFromChar(keyChar))
+            var char = AceKeyUtil.getLowerCaseStringFromChar(keyChar)
+            if(char == " ") return
+
+            if(aceFinder.firstChar != ""){
+                char = aceFinder.firstChar + char
+                aceFinder.firstChar = ""
+            }
+            val offset = textAndOffsetHash.get(char)
+
             if (offset != null) {
                 searchBox.popupContainer?.cancel();
                 if (keyEvent.isShiftDown()) {
@@ -44,6 +52,9 @@ public class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinde
                 if (keyEvent.isAltDown()) {
                     aceJumper.selectWordAtCaret()
                 }
+            }
+            else{
+                aceFinder.firstChar = char!!
             }
 
         }

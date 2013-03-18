@@ -1,31 +1,27 @@
 package com.johnlindquist.acejump
 
-import com.intellij.openapi.project.Project
-import com.intellij.openapi.editor.impl.DocumentImpl
-import com.intellij.openapi.editor.impl.EditorImpl
-import com.intellij.openapi.vfs.VirtualFile
-import javax.swing.event.ChangeListener
-import javax.swing.event.ChangeEvent;
-
-import com.intellij.util.EventDispatcher
 import com.intellij.find.FindManager
 import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager
-import java.util.ArrayList
+import com.intellij.openapi.editor.impl.DocumentImpl
+import com.intellij.openapi.editor.impl.EditorImpl
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.util.EventDispatcher
+import com.maddyhome.idea.vim.helper.EditorHelper
 import java.awt.Rectangle
-import com.intellij.find.FindResult
-import java.awt.geom.Rectangle2D
-import com.intellij.openapi.editor.FoldRegion
-import java.util.Collections
+import java.util.ArrayList
 import java.util.Comparator
+import javax.swing.event.ChangeEvent
+import javax.swing.event.ChangeListener
 
 public class AceFinder(val project: Project, val document: DocumentImpl, val editor: EditorImpl, val virtualFile: VirtualFile) {
     class object {
         val ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
-        val END_OF_LINE = "\\n|\\Z"
+        val END_OF_LINE = "\\n"
         val BEGINNING_OF_LINE = "^.|\\n(?<!.\\n)"
         val CODE_INDENTS = "^\\s*\\S"
-        val WHITE_SPACE = "\\s\\S"
+        val WHITE_SPACE = "\\s+\\S(?<!^\\s*\\S)"
     }
 
     val eventDispatcher: EventDispatcher<ChangeListener?>? = JavaInterop.createChangeListener()
@@ -34,11 +30,13 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
     val findManager = FindManager.getInstance(project)!!
     val findModel: FindModel = createFindModel(findManager);
 
-    public var startResult:Int = 0
-    public var endResult:Int = 0
-    public var allowedCount:Int = getAllowedCharacters()!!.length()
-    public var results:List<Int?>? = null
+    public var startResult: Int = 0
+    public var endResult: Int = 0
+    public var allowedCount: Int = getAllowedCharacters()!!.length()
+    public var results: List<Int?>? = null
     public var getEndOffset: Boolean = false
+    public var firstChar: String = ""
+    public var customOffset: Int = 0
 
     fun createFindModel(findManager: FindManager): FindModel {
         val clone = findManager.getFindInFileModel().clone() as FindModel
@@ -117,10 +115,19 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
     }
     fun findAllVisible(): List<Int> {
         //System.out.println("----- findAllVisible");
-        var offset = 0;//searchArea.getOffset();
-        var endOffset = document.getTextLength();//searchArea.getEndOffset();
-        var text = document.getCharsSequence();//searchArea.getText();
-        var offsets = ArrayList<Int>();
+        val visualLineAtTopOfScreen = EditorHelper.getVisualLineAtTopOfScreen(editor)
+        var offset = EditorHelper.getLineStartOffset(editor, visualLineAtTopOfScreen)
+
+        var line = EditorHelper.getScreenHeight(editor) - 1
+
+        val height = EditorHelper.getScreenHeight(editor)
+        val top = EditorHelper.getVisualLineAtTopOfScreen(editor)
+
+        line = top + height
+
+        var endOffset = EditorHelper.normalizeOffset(editor, line, EditorHelper.getLineEndOffset(editor, line, true), true)
+        var text = document.getCharsSequence().toString().get(offset, endOffset)!!
+        var offsets = ArrayList<Int>()
         var visibleArea: Rectangle = editor.getScrollingModel().getVisibleArea()
         //add a lineHeight of padding
         val vax = visibleArea.x.toDouble()
@@ -129,13 +136,11 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
         var vah = visibleArea.getHeight().toDouble() + editor.getLineHeight() * 2
         visibleArea.setRect(vax, vay, vaw, vah);
         var maxLength = document.getCharsSequence().length();
-        while (offset < endOffset) {
+
+        var foundOffset = 0
+        while (0 < text.length) {
             //skip folded regions. Re-think approach.
-            offset = checkFolded(offset);
-            if (offset > maxLength) offset = maxLength;
-
-
-            var result = findManager.findString(text, offset, findModel, virtualFile);
+            var result = findManager.findString(text, foundOffset, findModel, virtualFile);
             if (!result.isStringFound()) {
                 //System.out.println(findModel.getStringToFind() + ": not found");
                 break;
@@ -146,10 +151,10 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
             } else {
                 resultOffset = result.getStartOffset();
             }
-            if (visibleArea.contains(editor.logicalPositionToXY(editor.offsetToLogicalPosition(resultOffset)))) {
-                offsets.add(resultOffset);
-            }
-            offset = result.getEndOffset();
+            //            if (visibleArea.contains(editor.logicalPositionToXY(editor.offsetToLogicalPosition(resultOffset)))) {
+            offsets.add(resultOffset + offset + customOffset);
+            //            }
+            foundOffset = result.getEndOffset();
         }
 
         return offsets;
@@ -182,11 +187,35 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
         return offset
     }
 
-    public fun addResultsReadyListener(changeListener:ChangeListener) {
+    public fun addResultsReadyListener(changeListener: ChangeListener) {
         eventDispatcher?.addListener(changeListener)
     }
 
-    public fun getAllowedCharacters() : CharSequence? {
+    public fun getAllowedCharacters(): CharSequence? {
         return ALLOWED_CHARACTERS
+    }
+
+//    todo: refactor (try a generator approach) or move out
+    public fun generateString(i: Int, total: Int): String {
+        val letters = getAllowedCharacters()!!
+        val len = letters.length
+        var groups = Math.ceil(total / len.toDouble())
+        //    print("groups: " + groups.toString())
+        val i1 = len - groups.toInt()
+        //    print("last letter: " + letters.charAt(i1).toString() + "\n")
+
+        var str = ""
+
+//        if(i % i1 == 0) print("================")
+        var groupI = 0
+        if(i > 0) groupI = Math.floor(i / i1.toDouble()).toInt()
+        if(groupI > 0){
+            str += letters.charAt(letters.length - groupI.toInt())
+        }
+
+        str += letters.charAt(i % i1).toString()
+        //        print(i.toString() + ": " + str + "\n")
+
+        return str
     }
 }

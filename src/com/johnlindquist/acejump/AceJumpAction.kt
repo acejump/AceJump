@@ -1,6 +1,5 @@
 package com.johnlindquist.acejump
 
-import com.google.common.collect.Lists
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.PlatformDataKeys
 import com.intellij.openapi.editor.colors.EditorColorsManager
@@ -49,7 +48,7 @@ public open class AceJumpAction(): DumbAwareAction() {
         val textAndOffsetHash = HashMap<String, Int>()
 
         fun showJumpers(textPointPairs: List<Pair<String, Point>>?) {
-            aceCanvas.jumpInfos = Lists.reverse(textPointPairs)
+            aceCanvas.jumpInfos = textPointPairs?.reverse()
             aceCanvas.repaint()
         }
         fun exit() {
@@ -59,19 +58,13 @@ public open class AceJumpAction(): DumbAwareAction() {
             textAndOffsetHash.clear()
         }
 
-        fun setupJumpLocations(results: MutableList<Int>, start: Int, var end: Int) {
+        fun setupJumpLocations(results: MutableList<Int>) {
             textAndOffsetHash.clear()
-            val size: Int = results.size()
-            if (end > size)
-            {
-                end = size
-            }
             val textPointPairs: MutableList<Pair<String, Point>> = ArrayList<Pair<String, Point>>()
-            for (i in start..end - 1) {
+            for (i in 0..results.size - 1) {
                 val textOffset: Int = results.get(i)
                 val point: RelativePoint? = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
-                val resultChar: Char = aceFinder.getAllowedCharacters()?.charAt(i % (aceFinder.getAllowedCharacters()?.length())!!)!!
-                val text: String = resultChar.toString()
+                val text: String = aceFinder.generateString(i, results.size - 1)
                 textPointPairs.add(Pair<String, Point>(text, point?.getOriginalPoint() as Point))
                 textAndOffsetHash.put(text, textOffset)
             }
@@ -93,7 +86,7 @@ public open class AceJumpAction(): DumbAwareAction() {
             fun setupSearchBoxKeys() {
                 val showJumpObserver: ChangeListener = object : ChangeListener {
                     public override fun stateChanged(e: ChangeEvent) {
-                        setupJumpLocations(aceFinder.results as MutableList<Int>, aceFinder.startResult, aceFinder.endResult)
+                        setupJumpLocations(aceFinder.results as MutableList<Int>)
                     }
                 }
                 val releasedHome: AceKeyCommand = ShowBeginningOfLines(searchBox, aceFinder)

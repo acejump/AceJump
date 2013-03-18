@@ -57,13 +57,26 @@ public class AceCanvas: JComponent() {
 
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
+
             //a slight border for "pop" against the background
             g2d.setColor(defaultBackground)
-            g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1, originalPoint.y - fbm.rectHOffset.toInt() - 1, fbm.rectWidth + 1, lineHeight.toInt() + 1)
+
+            if(text.length == 2){
+                g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1, originalPoint.y - fbm.rectHOffset.toInt() - 1, fbm.rectWidth + fbm.fontWidth + 1, lineHeight.toInt() + 1)
+            }else{
+                g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1, originalPoint.y - fbm.rectHOffset.toInt() - 1, fbm.rectWidth + 1, lineHeight.toInt() + 1)
+            }
 
             //the background rectangle
             g2d.setColor(defaultForeground)
-            g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset.toInt(), fbm.rectWidth, lineHeight.toInt())
+
+            if(text.length == 2){
+                g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset.toInt(), fbm.rectWidth + fbm.fontWidth, lineHeight.toInt())
+            }else{
+                g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset.toInt(), fbm.rectWidth, lineHeight.toInt())
+            }
+
+
 
             //just a touch of alpha
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.85.toFloat()))

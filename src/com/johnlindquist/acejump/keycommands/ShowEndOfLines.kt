@@ -14,6 +14,8 @@ public class ShowEndOfLines(val searchBox: SearchBox, val aceFinder: AceFinder):
                 eventDispatcher?.getMulticaster()?.stateChanged(ChangeEvent(toString()))
             }
         })
+
+        aceFinder.getEndOffset = true
         aceFinder.findText(AceFinder.END_OF_LINE, true)
         searchBox.forceSpaceChar()
     }
