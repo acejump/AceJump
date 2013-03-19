@@ -29,7 +29,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
 
 
     val findManager = FindManager.getInstance(project)!!
-    val findModel: FindModel = createFindModel(findManager);
+    val findModel: FindModel = createFindModel(findManager)
 
     public var startResult: Int = 0
     public var endResult: Int = 0
@@ -38,6 +38,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
     public var getEndOffset: Boolean = false
     public var firstChar: String = ""
     public var customOffset: Int = 0
+    public var isTargetMode:Boolean = false
 
     fun createFindModel(findManager: FindManager): FindModel {
         val clone = findManager.getFindInFileModel().clone() as FindModel

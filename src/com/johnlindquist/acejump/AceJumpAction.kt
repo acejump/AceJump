@@ -9,12 +9,17 @@ import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.popup.ComponentPopupBuilder
 import com.intellij.openapi.ui.popup.JBPopupFactory
+import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.ui.AceCanvas
 import com.johnlindquist.acejump.ui.SearchBox
+import java.awt.Color
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.Point
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent
@@ -22,11 +27,6 @@ import java.util.*
 import javax.swing.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
-import java.awt.Point
-import java.awt.Font
-import java.awt.Dimension
-import java.awt.Color
-import com.intellij.openapi.util.SystemInfo
 
 public open class AceJumpAction(): DumbAwareAction() {
 
@@ -59,17 +59,24 @@ public open class AceJumpAction(): DumbAwareAction() {
         }
 
         //todo: refactor
+        /*
+            If there are 26 or less points, use A-Z
+            If there are >26, then start A-Y then ZA-ZZ
+            A huge list would be like A-C then DA-ZZ
+        */
         fun setupJumpLocations(results: MutableList<Int>) {
+
             textAndOffsetHash.clear()
             val textPointPairs: MutableList<Pair<String, Point>> = ArrayList<Pair<String, Point>>()
-            val total = results.size -1
+            val total = results.size - 1
+            if(total == 0) return //todo: hack, in case random keystrokes make it through
 
             val letters = aceFinder.getAllowedCharacters()!!
             var len = letters.length
-            var groups = Math.ceil(total.toDouble() / len)
-            print("groups: " + groups.toString())
+            var groups = Math.floor(total.toDouble() / len)
+//            print("groups: " + groups.toString())
             val lenMinusGroups = len - groups.toInt()
-            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
+//            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
 
             for (i in 0..total) {
 
@@ -77,22 +84,25 @@ public open class AceJumpAction(): DumbAwareAction() {
 
                 val iGroup = i - lenMinusGroups
                 val iModGroup = iGroup % len
-                if(iModGroup == 0) print("================\n")
+//                if(iModGroup == 0) print("================\n")
                 val i1 = Math.floor(lenMinusGroups.toDouble() + ((i + groups.toInt()) / len)).toInt() - 1
-                if(groups > 1 && i >= lenMinusGroups){
+                if(i >= lenMinusGroups){
                     str += letters.charAt(i1)
                     str += letters.charAt(iModGroup).toString()
                 }else {
                     str += letters.charAt(i).toString()
                 }
-                print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
-
+//                print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
 
 
                 val textOffset: Int = results.get(i)
                 val point: RelativePoint? = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
                 textPointPairs.add(Pair<String, Point>(str, point?.getOriginalPoint() as Point))
                 textAndOffsetHash.put(str, textOffset)
+
+                if(str == "zz"){
+                    break
+                }
             }
             showJumpers(textPointPairs)
         }
@@ -129,22 +139,21 @@ public open class AceJumpAction(): DumbAwareAction() {
                 searchBox.addPreProcessReleaseKey(KeyEvent.VK_UP, releasedUp)
 
                 val pressedBackspace: AceKeyCommand = ClearResults(searchBox, aceCanvas)
-                val pressedEnter: AceKeyCommand = ExpandResults(searchBox, aceFinder, aceJumper)
-                pressedEnter.addListener(showJumpObserver)
                 searchBox.addPreProcessPressedKey(KeyEvent.VK_BACK_SPACE, pressedBackspace)
-                searchBox.addPreProcessPressedKey(KeyEvent.VK_ENTER, pressedEnter)
 
                 val pressedSpace: AceKeyCommand = ShowWhiteSpace(searchBox, aceFinder)
                 pressedSpace.addListener(showJumpObserver)
                 searchBox.addPreProcessPressedKey(KeyEvent.VK_SPACE, pressedSpace)
 
-                val pressedSemi: AceKeyCommand = ShowFirstAndLast(searchBox, aceFinder, aceJumper, textAndOffsetHash)
-                pressedSemi.addListener(showJumpObserver)
-                searchBox.addPreProcessPressedKey(KeyEvent.VK_SEMICOLON, pressedSemi)
-
                 val defaultKeyCommand: DefaultKeyCommand? = DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash)
                 defaultKeyCommand?.addListener(showJumpObserver)
                 searchBox.defaultKeyCommand = defaultKeyCommand
+
+
+                //todo: refactor - edge cases...
+                val pressedSemi: AceKeyCommand = ChangeToTargetMode(searchBox, aceFinder)
+                pressedSemi.addListener(showJumpObserver)
+                searchBox.addPreProcessPressedKey(KeyEvent.VK_SEMICOLON, pressedSemi)
             }
 
             setupSearchBoxKeys()

@@ -7,8 +7,9 @@ import java.awt.event.KeyEvent
 import java.util.HashMap
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
+import java.awt.Color
 
-public class ShowFirstAndLast(val searchBox: SearchBox, val aceFinder: AceFinder, val aceJumper: AceJumper, val textAndOffsetHash: HashMap<String, Int>): AceKeyCommand() {
+public class ChangeToTargetMode(val searchBox: SearchBox, val aceFinder: AceFinder):AceKeyCommand() {
     override fun execute(keyEvent: KeyEvent) {
         aceFinder.addResultsReadyListener(object :ChangeListener{
             public override fun stateChanged(p0: ChangeEvent) {
@@ -17,13 +18,16 @@ public class ShowFirstAndLast(val searchBox: SearchBox, val aceFinder: AceFinder
         })
 
         if(keyEvent.isMetaDown() || keyEvent.isControlDown()){
-            aceFinder.getEndOffset = true
-            aceFinder.findText(AceFinder.DEFAULT, true)
-            searchBox.forceSpaceChar()
+            if(aceFinder.isTargetMode){
+                aceFinder.isTargetMode = false
+                searchBox.setBackground(Color.WHITE)
+            }else{
+                aceFinder.isTargetMode = true
+                searchBox.setBackground(Color.RED)
+            }
         }
         else{
-            val defaultKeyCommand = DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash)
-            defaultKeyCommand.execute(keyEvent)
+
         }
     }
 }

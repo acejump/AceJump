@@ -21,12 +21,16 @@ public class SearchBox: JTextField() {
     var defaultKeyCommand: AceKeyCommand? = null
 
 
+    public override fun requestFocus() {
+        setTransferHandler(null);
+        super<JTextField>.requestFocus()
+    }
     override fun paintBorder(p0: Graphics?) {
     }
 
 
+    //todo: I need to really rethink this entire approach
     override fun processKeyEvent(p0: KeyEvent) {
-
         if (getText()?.length() == 0) {
             //todo: rethink the "isSearchEnabled" state approach. Works great now, could be cleaner
             isSearchEnabled = true
@@ -51,6 +55,7 @@ public class SearchBox: JTextField() {
         super.processKeyEvent(p0)
 
         if (p0.getID() != KeyEvent.KEY_TYPED) return
+
 
         if (defaultKeyCommand != null && p0.isConsumed()){
             defaultKeyCommand?.execute(p0)

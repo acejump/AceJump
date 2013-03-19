@@ -38,18 +38,14 @@ public class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinde
 
             if (offset != null) {
                 searchBox.popupContainer?.cancel();
-                if (keyEvent.isShiftDown()) {
+                if (keyEvent.isShiftDown() && !keyEvent.isMetaDown()) {
                     aceJumper.setSelectionFromCaretToOffset(offset)
                     aceJumper.moveCaret(offset)
                 } else {
                     aceJumper.moveCaret(offset)
                 }
 
-                if (SystemInfo.isMac && keyEvent.isControlDown()) {
-                    aceJumper.selectWordAtCaret()
-                }
-
-                if (keyEvent.isAltDown()) {
+                if (aceFinder.isTargetMode) {
                     aceJumper.selectWordAtCaret()
                 }
             }
