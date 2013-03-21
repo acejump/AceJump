@@ -137,7 +137,6 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
         val vaw = visibleArea.getWidth().toDouble()
         var vah = visibleArea.getHeight().toDouble() + editor.getLineHeight() * 2
         visibleArea.setRect(vax, vay, vaw, vah);
-        var maxLength = document.getCharsSequence().length();
 
         var foundOffset = 0
         while (0 < text.length) {

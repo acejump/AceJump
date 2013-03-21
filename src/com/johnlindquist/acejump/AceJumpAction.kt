@@ -28,6 +28,8 @@ import javax.swing.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.wm.impl.IdeFocusManagerImpl
+import com.intellij.openapi.wm.IdeFocusManager
 
 public open class AceJumpAction(): DumbAwareAction() {
 
@@ -200,11 +202,10 @@ public open class AceJumpAction(): DumbAwareAction() {
 
         configureAceCanvas()
 
+
         ApplicationManager.getApplication()?.invokeLater(object:Runnable{
             public override fun run() {
-                searchBox.grabFocus()
-                searchBox.requestFocus()
-                searchBox.requestFocusInWindow() //just to be sure on Linux ;)
+                IdeFocusManager.getInstance(project)?.requestFocus(searchBox, true)
             }
 
         });
