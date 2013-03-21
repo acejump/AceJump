@@ -27,6 +27,7 @@ import java.util.*
 import javax.swing.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
+import com.intellij.openapi.application.ApplicationManager
 
 public open class AceJumpAction(): DumbAwareAction() {
 
@@ -185,7 +186,7 @@ public open class AceJumpAction(): DumbAwareAction() {
                     exit()
                 }
             })
-            searchBox.requestFocus()
+
         }
 
         configureSearchBox()
@@ -198,6 +199,15 @@ public open class AceJumpAction(): DumbAwareAction() {
         }
 
         configureAceCanvas()
+
+        ApplicationManager.getApplication()?.invokeLater(object:Runnable{
+            public override fun run() {
+                searchBox.grabFocus()
+                searchBox.requestFocus()
+                searchBox.requestFocusInWindow() //just to be sure on Linux ;)
+            }
+
+        });
     }
 
 }
