@@ -67,10 +67,10 @@ public open class AceJumpAction(): DumbAwareAction() {
         */
         fun setupJumpLocations(results: MutableList<Int>) {
 
+            if(results.size == 0) return //todo: hack, in case random keystrokes make it through
             textAndOffsetHash.clear()
             val textPointPairs: MutableList<Pair<String, Point>> = ArrayList<Pair<String, Point>>()
             val total = results.size - 1
-            if(total == 0) return //todo: hack, in case random keystrokes make it through
 
             val letters = aceFinder.getAllowedCharacters()!!
             var len = letters.length

@@ -13,6 +13,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>2.0.2</dt>
+            <dd>Fixed bug when there's only 1 search result<dd>
             <dt>2.0.1</dt>
             <dd>Fixing Ubuntu focus bug<dd>
             <dt>2.0.0</dt>
@@ -36,7 +38,7 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <version>2.0.1</version>
+    <version>2.0.2</version>
     <category>Navigation</category>
     <vendor url="http://johnlindquist.com"
             email="johnlindquist@gmail.com">johnlindquist
