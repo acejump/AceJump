@@ -38,7 +38,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
     public var getEndOffset: Boolean = false
     public var firstChar: String = ""
     public var customOffset: Int = 0
-    public var isTargetMode:Boolean = false
+    public var isTargetMode: Boolean = false
 
     fun createFindModel(findManager: FindManager): FindModel {
         val clone = findManager.getFindInFileModel().clone() as FindModel
@@ -118,29 +118,21 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
     fun findAllVisible(): List<Int> {
         //System.out.println("----- findAllVisible");
         val visualLineAtTopOfScreen = EditorHelper.getVisualLineAtTopOfScreen(editor)
-        var offset = EditorHelper.getLineStartOffset(editor, visualLineAtTopOfScreen)
-
-        var line = EditorHelper.getScreenHeight(editor) - 1
+        val firstLine = EditorHelper.visualLineToLogicalLine(editor, visualLineAtTopOfScreen)
+        var offset = EditorHelper.getLineStartOffset(editor, firstLine)
 
         val height = EditorHelper.getScreenHeight(editor)
         val top = EditorHelper.getVisualLineAtTopOfScreen(editor)
 
-        line = top + height
+        var lastLine = top + height
+        lastLine = EditorHelper.visualLineToLogicalLine(editor, lastLine)
 
-        var endOffset = EditorHelper.normalizeOffset(editor, line, EditorHelper.getLineEndOffset(editor, line, true), true)
+        var endOffset = EditorHelper.normalizeOffset(editor, lastLine, EditorHelper.getLineEndOffset(editor, lastLine, true), true)
         var text = document.getCharsSequence().toString().get(offset, endOffset)!!
         var offsets = ArrayList<Int>()
-        var visibleArea: Rectangle = editor.getScrollingModel().getVisibleArea()
-        //add a lineHeight of padding
-        val vax = visibleArea.x.toDouble()
-        val vay = visibleArea.y.toDouble() - editor.getLineHeight()
-        val vaw = visibleArea.getWidth().toDouble()
-        var vah = visibleArea.getHeight().toDouble() + editor.getLineHeight() * 2
-        visibleArea.setRect(vax, vay, vaw, vah);
 
         var foundOffset = 0
         while (0 < text.length) {
-            //skip folded regions. Re-think approach.
             var result = findManager.findString(text, foundOffset, findModel, virtualFile);
             if (!result.isStringFound()) {
                 //System.out.println(findModel.getStringToFind() + ": not found");
@@ -152,9 +144,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
             } else {
                 resultOffset = result.getStartOffset();
             }
-            //            if (visibleArea.contains(editor.logicalPositionToXY(editor.offsetToLogicalPosition(resultOffset)))) {
             offsets.add(resultOffset + offset + customOffset);
-            //            }
             foundOffset = result.getEndOffset();
         }
 
