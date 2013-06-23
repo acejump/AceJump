@@ -25,7 +25,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
         val DEFAULT = CODE_INDENTS + "|" + END_OF_LINE
     }
 
-    val eventDispatcher: EventDispatcher<ChangeListener?>? = JavaInterop.createChangeListener()
+    val eventDispatcher: EventDispatcher<ChangeListener>? = EventDispatcher.create(javaClass<ChangeListener>())
 
 
     val findManager = FindManager.getInstance(project)!!
@@ -168,14 +168,15 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
         if(endResult < allowedCount) endResult = allowedCount
     }
 
-    private fun checkFolded(var offset: Int): Int {
+    private fun checkFolded(offset: Int): Int {
         val foldingModelImpl = editor.getFoldingModel()
 
+        var offsetResult:Int = offset;
         for(foldRegion in foldingModelImpl.fetchCollapsedAt(offset)?.iterator()){
-            offset = foldRegion!!.getEndOffset() + 1
+            offsetResult = foldRegion.getEndOffset() + 1
         }
 
-        return offset
+        return offsetResult
     }
 
     public fun addResultsReadyListener(changeListener: ChangeListener) {

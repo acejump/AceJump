@@ -21,7 +21,7 @@ public class AceCanvas: JComponent() {
         public set
 
 
-    class FontBasedMeasurements() {
+    inner class FontBasedMeasurements() {
         var font = getFont()
         val fontWidth = getFontMetrics(font)?.stringWidth("w")!!
         val fontHeight = font?.getSize()!!

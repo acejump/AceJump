@@ -45,7 +45,7 @@ public open class AceJumpAction(): DumbAwareAction() {
         val scheme = EditorColorsManager.getInstance()?.getGlobalScheme()
         val font = Font(scheme?.getEditorFontName(), Font.BOLD, scheme?.getEditorFontSize()!!)
         val aceFinder = AceFinder(project, document, editor, virtualFile)
-        val aceJumper = AceJumper(editor, document as DocumentImpl)
+        val aceJumper = AceJumper(editor, document)
         val aceCanvas = AceCanvas()
         val searchBox = SearchBox()
         val textAndOffsetHash = HashMap<String, Int>()
@@ -118,7 +118,7 @@ public open class AceJumpAction(): DumbAwareAction() {
             aceCanvas.setBounds(0, 0, (viewport?.getWidth())!! + 1000, (viewport?.getHeight())!! + 1000)
             val rootPane: JRootPane? = editor.getComponent().getRootPane()!!
             val locationOnScreen: Point? = SwingUtilities.convertPoint(aceCanvas, (aceCanvas.getLocation()), rootPane)
-            aceCanvas.setLocation(-locationOnScreen!!.x, -locationOnScreen!!.y)
+            aceCanvas.setLocation(-locationOnScreen!!.x, -locationOnScreen.y)
         }
 
         fun configureSearchBox() {
@@ -161,7 +161,7 @@ public open class AceJumpAction(): DumbAwareAction() {
 
             setupSearchBoxKeys()
             searchBox.setFont(font)
-            val popupBuilder: ComponentPopupBuilder? = JBPopupFactory.getInstance()?.createComponentPopupBuilder(searchBox as JComponent, searchBox)
+            val popupBuilder: ComponentPopupBuilder? = JBPopupFactory.getInstance()?.createComponentPopupBuilder(searchBox, searchBox)
             popupBuilder?.setCancelKeyEnabled(true)
             val popup = (popupBuilder?.createPopup() as AbstractPopup?)
             popup?.show(guessBestLocation(editor))

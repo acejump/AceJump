@@ -14,6 +14,9 @@ public class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinde
     override fun execute(keyEvent: KeyEvent) {
         val keyChar: Char = keyEvent.getKeyChar()
 
+        //fixes the delete bug
+        if (keyChar == '\b') return
+        println(searchBox.isSearchEnabled)
         //Find or jump
         if (searchBox.isSearchEnabled) {
             //Find
@@ -21,7 +24,7 @@ public class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinde
                 public override fun stateChanged(p0: ChangeEvent) {
                     eventDispatcher?.getMulticaster()?.stateChanged(ChangeEvent(toString()))
                 }
-            });
+            })
 
             aceFinder.findText(searchBox.getText()!!, false)
             searchBox.disableSearch()
@@ -49,7 +52,7 @@ public class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinde
                     aceJumper.selectWordAtCaret()
                 }
             }
-            else{
+            else if(textAndOffsetHash.size > 25){
                 aceFinder.firstChar = char!!
             }
 
