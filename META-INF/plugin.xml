@@ -14,25 +14,25 @@
         <html>
         <dl>
             <dt>2.0.5</dt>
-            <dd>Fixing "backspace" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/20<dd>
+            <dd>Fixing "backspace" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/20</dd>
             <dt>2.0.4</dt>
-            <dd>Fixing "code folding" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/24<dd>
+            <dd>Fixing "code folding" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/24</dd>
             <dt>2.0.3</dt>
-            <dd>More work on Ubuntu focus bug<dd>
+            <dd>More work on Ubuntu focus bug</dd>
             <dt>2.0.2</dt>
-            <dd>Fixed bug when there's only 1 search result<dd>
+            <dd>Fixed bug when there's only 1 search result</dd>
             <dt>2.0.1</dt>
-            <dd>Fixing Ubuntu focus bug<dd>
+            <dd>Fixing Ubuntu focus bug</dd>
             <dt>2.0.0</dt>
-            <dd>Major release: Added "target mode", many speed increases, mutli-char search implemented<dd>
+            <dd>Major release: Added "target mode", many speed increases, mutli-char search implemented</dd>
             <dt>1.1.0</dt>
-            <dd>Switching to Kotlin for the code base<dd>
+            <dd>Switching to Kotlin for the code base</dd>
             <dt>1.0.4</dt>
-            <dd>Fixing https://github.com/johnlindquist/AceJump/issues/9 and https://github.com/johnlindquist/AceJump/issues/6<dd>
+            <dd>Fixing https://github.com/johnlindquist/AceJump/issues/9 and https://github.com/johnlindquist/AceJump/issues/6</dd>
             <dt>1.0.3</dt>
-            <dd>Fixed minor visual lag when removing the "jumpers" from the editor<dd>
+            <dd>Fixed minor visual lag when removing the "jumpers" from the editor</dd>
             <dt>1.0.2</dt>
-            <dd>Cleaning up minor bugs (npe when editor not in focus, not removing layers)<dd>
+            <dd>Cleaning up minor bugs (npe when editor not in focus, not removing layers)</dd>
             <dt>1.0.1</dt>
             <dd>Adding a new jump: "Enter" will take you to the first non-whitespace char in a new line (compare to "Home" which takes you to a new line)</dd>
             <dt>1.0</dt>
