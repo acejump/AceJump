@@ -22,9 +22,9 @@ public class AceCanvas: JComponent() {
 
 
     inner class FontBasedMeasurements() {
-        var font = getFont()
-        val fontWidth = getFontMetrics(font)?.stringWidth("w")!!
-        val fontHeight = font?.getSize()!!
+        var font = getFont()!!
+        val fontWidth = getFontMetrics(font).stringWidth("w")
+        val fontHeight = font.getSize()
 
         val rectMarginWidth = fontWidth / 2
         val doubleRectMarginWidth = rectMarginWidth * 2

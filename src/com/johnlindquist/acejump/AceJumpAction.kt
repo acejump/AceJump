@@ -28,19 +28,23 @@ import javax.swing.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.wm.impl.IdeFocusManagerImpl
 import com.intellij.openapi.wm.IdeFocusManager
+import com.intellij.openapi.actionSystem.CommonDataKeys
 
 public open class AceJumpAction(): DumbAwareAction() {
 
     override public fun update(e: AnActionEvent?) {
-        e?.getPresentation()?.setEnabled((e?.getData(PlatformDataKeys.EDITOR)) != null)
+        e?.getPresentation()?.setEnabled((e?.getData(CommonDataKeys.EDITOR)) != null)
+//        e?.getPresentation()?.setEnabled((e?.getData(PlatformDataKeys.EDITOR)) != null)
     }
     override public fun actionPerformed(p0: AnActionEvent?) {
         val actionEvent = p0
-        val project = actionEvent?.getData(PlatformDataKeys.PROJECT) as Project
-        val editor = actionEvent?.getData(PlatformDataKeys.EDITOR) as EditorImpl
-        val virtualFile = actionEvent?.getData(PlatformDataKeys.VIRTUAL_FILE) as VirtualFile
+        val project = actionEvent?.getData(CommonDataKeys.PROJECT) as Project
+//        val project = actionEvent?.getData(PlatformDataKeys.PROJECT) as Project
+        val editor = actionEvent?.getData(CommonDataKeys.EDITOR) as EditorImpl
+//        val editor = actionEvent?.getData(PlatformDataKeys.EDITOR) as EditorImpl
+        val virtualFile = actionEvent?.getData(CommonDataKeys.VIRTUAL_FILE) as VirtualFile
+//        val virtualFile = actionEvent?.getData(PlatformDataKeys.VIRTUAL_FILE) as VirtualFile
         val document = editor.getDocument() as DocumentImpl
         val scheme = EditorColorsManager.getInstance()?.getGlobalScheme()
         val font = Font(scheme?.getEditorFontName(), Font.BOLD, scheme?.getEditorFontSize()!!)
@@ -114,8 +118,8 @@ public open class AceJumpAction(): DumbAwareAction() {
         fun addAceCanvas() {
             val contentComponent: JComponent? = editor.getContentComponent()
             contentComponent?.add(aceCanvas)
-            val viewport = editor.getScrollPane().getViewport()
-            aceCanvas.setBounds(0, 0, (viewport?.getWidth())!! + 1000, (viewport?.getHeight())!! + 1000)
+            val viewport = editor.getScrollPane().getViewport()!!
+            aceCanvas.setBounds(0, 0, viewport.getWidth() + 1000, viewport.getHeight() + 1000)
             val rootPane: JRootPane? = editor.getComponent().getRootPane()!!
             val locationOnScreen: Point? = SwingUtilities.convertPoint(aceCanvas, (aceCanvas.getLocation()), rootPane)
             aceCanvas.setLocation(-locationOnScreen!!.x, -locationOnScreen.y)
@@ -165,7 +169,7 @@ public open class AceJumpAction(): DumbAwareAction() {
             popupBuilder?.setCancelKeyEnabled(true)
             val popup = (popupBuilder?.createPopup() as AbstractPopup?)
             popup?.show(guessBestLocation(editor))
-            val width = searchBox.getFontMetrics(font)?.stringWidth("w")
+            val width = searchBox.getFontMetrics(font).stringWidth("w")
             var dimension: Dimension? = null
             if(width != null){
                 dimension = Dimension(width * 2, (editor.getLineHeight()))
