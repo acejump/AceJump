@@ -31,20 +31,16 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.wm.IdeFocusManager
 import com.intellij.openapi.actionSystem.CommonDataKeys
 
-public open class AceJumpAction(): DumbAwareAction() {
+public open class AceJumpAction() : DumbAwareAction() {
 
     override public fun update(e: AnActionEvent?) {
         e?.getPresentation()?.setEnabled((e?.getData(CommonDataKeys.EDITOR)) != null)
-//        e?.getPresentation()?.setEnabled((e?.getData(PlatformDataKeys.EDITOR)) != null)
     }
     override public fun actionPerformed(p0: AnActionEvent?) {
         val actionEvent = p0
         val project = actionEvent?.getData(CommonDataKeys.PROJECT) as Project
-//        val project = actionEvent?.getData(PlatformDataKeys.PROJECT) as Project
         val editor = actionEvent?.getData(CommonDataKeys.EDITOR) as EditorImpl
-//        val editor = actionEvent?.getData(PlatformDataKeys.EDITOR) as EditorImpl
         val virtualFile = actionEvent?.getData(CommonDataKeys.VIRTUAL_FILE) as VirtualFile
-//        val virtualFile = actionEvent?.getData(PlatformDataKeys.VIRTUAL_FILE) as VirtualFile
         val document = editor.getDocument() as DocumentImpl
         val scheme = EditorColorsManager.getInstance()?.getGlobalScheme()
         val font = Font(scheme?.getEditorFontName(), Font.BOLD, scheme?.getEditorFontSize()!!)
@@ -73,7 +69,7 @@ public open class AceJumpAction(): DumbAwareAction() {
         */
         fun setupJumpLocations(results: MutableList<Int>) {
 
-            if(results.size == 0) return //todo: hack, in case random keystrokes make it through
+            if (results.size == 0) return //todo: hack, in case random keystrokes make it through
             textAndOffsetHash.clear()
             val textPointPairs: MutableList<Pair<String, Point>> = ArrayList<Pair<String, Point>>()
             val total = results.size - 1
@@ -81,9 +77,9 @@ public open class AceJumpAction(): DumbAwareAction() {
             val letters = aceFinder.getAllowedCharacters()!!
             var len = letters.length
             var groups = Math.floor(total.toDouble() / len)
-//            print("groups: " + groups.toString())
+            //            print("groups: " + groups.toString())
             val lenMinusGroups = len - groups.toInt()
-//            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
+            //            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
 
             for (i in 0..total) {
 
@@ -91,15 +87,15 @@ public open class AceJumpAction(): DumbAwareAction() {
 
                 val iGroup = i - lenMinusGroups
                 val iModGroup = iGroup % len
-//                if(iModGroup == 0) print("================\n")
+                //                if(iModGroup == 0) print("================\n")
                 val i1 = Math.floor(lenMinusGroups.toDouble() + ((i + groups.toInt()) / len)).toInt() - 1
-                if(i >= lenMinusGroups){
+                if (i >= lenMinusGroups) {
                     str += letters.charAt(i1)
                     str += letters.charAt(iModGroup).toString()
-                }else {
+                } else {
                     str += letters.charAt(i).toString()
                 }
-//                print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
+                //                print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
 
 
                 val textOffset: Int = results.get(i)
@@ -107,7 +103,7 @@ public open class AceJumpAction(): DumbAwareAction() {
                 textPointPairs.add(Pair<String, Point>(str, point?.getOriginalPoint() as Point))
                 textAndOffsetHash.put(str, textOffset)
 
-                if(str == "zz"){
+                if (str == "zz") {
                     break
                 }
             }
@@ -169,9 +165,11 @@ public open class AceJumpAction(): DumbAwareAction() {
             popupBuilder?.setCancelKeyEnabled(true)
             val popup = (popupBuilder?.createPopup() as AbstractPopup?)
             popup?.show(guessBestLocation(editor))
+            popup?.setRequestFocus(true);
+
             val width = searchBox.getFontMetrics(font).stringWidth("w")
             var dimension: Dimension? = null
-            if(width != null){
+            if (width != null) {
                 dimension = Dimension(width * 2, (editor.getLineHeight()))
                 if (SystemInfo.isMac) {
                     dimension?.setSize(dimension!!.width * 2, dimension!!.height * 2)
@@ -207,12 +205,13 @@ public open class AceJumpAction(): DumbAwareAction() {
         configureAceCanvas()
 
 
-        ApplicationManager.getApplication()?.invokeLater(object:Runnable{
+        ApplicationManager.getApplication()?.invokeLater(object:Runnable {
             public override fun run() {
-                IdeFocusManager.getInstance(project)?.requestFocus(searchBox, true)
-            }
+                val manager = IdeFocusManager.getInstance(project)
+                manager?.requestFocus(searchBox, false)
 
+            }
         });
     }
-
 }
+
