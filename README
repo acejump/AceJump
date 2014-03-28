@@ -1,2 +1,4 @@
-Updated for Intellij v12 (build 120.000 and later)
-This file was modified by IntelliJ IDEA (Leda) IU-120.305 for binding GitHub repository
+Fix bug #41 for Intellij v13.1.1 (build 135.480)
+
+Put **the content** of AceJump.zip to .IdeaIC13/config/plugins/ or .IntellijIdea13/config/plugins/.
+
