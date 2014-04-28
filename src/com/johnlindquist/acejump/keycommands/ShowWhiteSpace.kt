@@ -10,7 +10,8 @@ public class ShowWhiteSpace(val searchBox: SearchBox, val aceFinder: AceFinder):
     override fun execute(keyEvent: KeyEvent) {
         aceFinder.addResultsReadyListener(object :ChangeListener{
             public override fun stateChanged(p0: ChangeEvent) {
-                eventDispatcher?.getMulticaster()?.stateChanged(ChangeEvent(toString()))
+                eventDispatcher?.getMulticaster()?.stateChanged(p0)
+//                eventDispatcher?.getMulticaster()?.stateChanged(ChangeEvent(toString()))
             }
         })
 
