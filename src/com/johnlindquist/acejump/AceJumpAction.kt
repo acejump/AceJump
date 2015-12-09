@@ -1,7 +1,8 @@
 package com.johnlindquist.acejump
 
 import com.intellij.openapi.actionSystem.AnActionEvent
-import com.intellij.openapi.actionSystem.PlatformDataKeys
+import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
@@ -11,6 +12,7 @@ import com.intellij.openapi.ui.popup.ComponentPopupBuilder
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.wm.IdeFocusManager
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
@@ -24,12 +26,11 @@ import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent
 import java.util.*
-import javax.swing.*
+import javax.swing.JComponent
+import javax.swing.JRootPane
+import javax.swing.SwingUtilities
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.wm.IdeFocusManager
-import com.intellij.openapi.actionSystem.CommonDataKeys
 
 public open class AceJumpAction() : DumbAwareAction() {
 
@@ -51,7 +52,7 @@ public open class AceJumpAction() : DumbAwareAction() {
         val textAndOffsetHash = HashMap<String, Int>()
 
         fun showJumpers(textPointPairs: List<Pair<String, Point>>?) {
-            aceCanvas.jumpInfos = textPointPairs?.reverse()
+            aceCanvas.jumpInfos = textPointPairs?.reversed()
             aceCanvas.repaint()
         }
         fun exit() {

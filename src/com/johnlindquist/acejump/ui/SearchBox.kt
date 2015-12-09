@@ -1,20 +1,20 @@
 package com.johnlindquist.acejump.ui
 
-import com.johnlindquist.acejump.keycommands.AceKeyCommand
-import java.util.HashMap
-import javax.swing.JTextField
 import com.intellij.ui.popup.AbstractPopup
+import com.johnlindquist.acejump.keycommands.AceKeyCommand
 import java.awt.Graphics
 import java.awt.event.KeyEvent
+import java.util.*
+import javax.swing.JTextField
 import javax.swing.text.BadLocationException
 
 public class SearchBox: JTextField() {
     val preProcessKeyReleasedMap = HashMap<Int, AceKeyCommand>()
     val preProcessKeyPressedMap = HashMap<Int, AceKeyCommand>()
 
-    var isSearchEnabled = true
+    var isSearchEnabled: Boolean = true
         get(){
-            return $isSearchEnabled && getText()?.length() == 1
+            return field && getText()?.length() == 1
         }
 
     var popupContainer: AbstractPopup? = null
