@@ -10,8 +10,8 @@ Hitting the keyboard shortcut for AceJump (<kbd>Ctrl</kbd>+<kbd>;</kbd> by defau
 
 AceJump can be installed by the unzipping the contents of `AceJump.zip` into:
 
-- `$HOME/.IdeaIC`<MAJOR_VERSION>`/config/plugins/` if you are using IntelliJ IDEA Community, or
-- `$HOME/.IntellijIdea`<MAJOR_VERSION>`/config/plugins/` if you are using IntelliJ IDEA Ultimate
+- `$HOME/.IdeaIC`&lt;MAJOR VERSION&gt;`/config/plugins/` if you are using IntelliJ IDEA Community, or
+- `$HOME/.IntellijIdea`&lt;MAJOR VERSION&gt;`/config/plugins/` if you are using IntelliJ IDEA Ultimate
 
 Alternately, you can install AceJump directly from IntelliJ IDEA, through **File \| Settings \| Plugins \| Browse Repositories... \| 🔍 "AceJump"**.
 
