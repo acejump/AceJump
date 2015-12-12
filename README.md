@@ -30,6 +30,7 @@ In order to build AceJump from the source, clone this repository and run `gradle
 
 ## History
 
+- 2.0.6 Fixing "lost focus" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/41
 - 2.0.5 Fixing "backspace" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/20
 - 2.0.4 Fixing "code folding" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/24
 - 2.0.3 More work on Ubuntu focus bug

@@ -14,9 +14,9 @@
         <html>
         <dl>
             <dt>2.0.7</dt>
-            <dd>Language update for Kotlin 1.0 release.<dd>
+            <dd>Language update for Kotlin 1.0 release.</dd>
             <dt>2.0.6</dt>
-            <dd>Fixing "lost focus" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/41<dd>
+            <dd>Fixing "lost focus" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/41</dd>
             <dt>2.0.5</dt>
             <dd>Fixing "backspace" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/20</dd>
             <dt>2.0.4</dt>
