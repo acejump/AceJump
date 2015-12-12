@@ -53,12 +53,17 @@ public class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinde
                     aceJumper.selectWordAtCaret()
                 }
             }
-            else if(textAndOffsetHash.size > 25){
+            else if(textAndOffsetHash.size > 25 && couldPossiblyMatch(char!!)){
                 aceFinder.firstChar = char!!
             }
 
         }
 
+    }
+
+    // we don't want to collect chars which would lead us to nowhere
+    private fun couldPossiblyMatch(char: String): Boolean {
+        return textAndOffsetHash.keys.any { it.startsWith(char) }
     }
 
 
