@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.keycommands
 
+import com.johnlindquist.acejump.keycommands.AceKeyCommand
 import com.johnlindquist.acejump.ui.AceCanvas
 import java.awt.event.KeyEvent
 import com.johnlindquist.acejump.ui.SearchBox

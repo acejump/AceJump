@@ -1,10 +1,10 @@
 package com.johnlindquist.acejump
 
+import com.intellij.codeInsight.editorActions.SelectWordUtil
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.util.TextRange
-import java.util.ArrayList
-import com.intellij.codeInsight.editorActions.SelectWordUtil
+import java.util.*
 
 public open class AceJumper(var editor: EditorImpl, var document: DocumentImpl) {
 

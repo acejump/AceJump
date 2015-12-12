@@ -1,13 +1,7 @@
 package com.johnlindquist.acejump.ui
 
-import java.awt.Color
-import java.awt.Graphics
-import java.awt.Graphics2D
-import java.awt.Point
+import java.awt.*
 import javax.swing.JComponent
-import java.awt.RenderingHints
-import java.awt.AlphaComposite
-import java.awt.Font
 
 
 public class AceCanvas: JComponent() {
@@ -15,9 +9,9 @@ public class AceCanvas: JComponent() {
         public set
     var colorPair = Pair<Color?, Color?>(Color.BLACK, Color.WHITE)
         public set
-    var lineSpacing:Float = 0.toFloat()
+    var lineSpacing: Float = 0.toFloat()
         public set
-    var lineHeight:Int = 0
+    var lineHeight: Int = 0
         public set
 
 

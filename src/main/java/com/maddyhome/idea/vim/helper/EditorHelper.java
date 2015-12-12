@@ -24,12 +24,12 @@ import com.intellij.openapi.editor.*;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.maddyhome.idea.vim.common.CharacterPosition;
-import com.maddyhome.idea.vim.common.TextRange;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
+import com.maddyhome.idea.vim.common.CharacterPosition;
+import com.maddyhome.idea.vim.common.TextRange;
 import java.nio.CharBuffer;
 
 /**

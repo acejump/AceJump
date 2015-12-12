@@ -1,10 +1,10 @@
 package com.johnlindquist.acejump.keycommands
 
-import com.johnlindquist.acejump.AceFinder
-import com.johnlindquist.acejump.ui.SearchBox
 import java.awt.event.KeyEvent
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
+import com.johnlindquist.acejump.AceFinder
+import com.johnlindquist.acejump.ui.SearchBox
 
 public class ShowEndOfLines(val searchBox: SearchBox, val aceFinder: AceFinder): AceKeyCommand() {
 

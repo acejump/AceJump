@@ -9,6 +9,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.EventDispatcher
 import com.maddyhome.idea.vim.helper.EditorHelper
+
 import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
@@ -72,7 +73,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
                 var lineEndOffset = document.getLineEndOffset(lineNumber)
 
 
-                results = results!!.sortedWith(object : Comparator<Int?>{
+                results = results!!.sortedWith(object : Comparator<Int?> {
                     public override fun equals(p0: Any?): Boolean {
                         throw UnsupportedOperationException()
                     }
@@ -169,7 +170,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
     private fun checkFolded(offset: Int): Int {
         val foldingModelImpl = editor.getFoldingModel()
 
-        var offsetResult:Int = offset;
+        var offsetResult: Int = offset;
         for(foldRegion in foldingModelImpl.fetchCollapsedAt(offset)?.iterator()){
             offsetResult = foldRegion.getEndOffset() + 1
         }

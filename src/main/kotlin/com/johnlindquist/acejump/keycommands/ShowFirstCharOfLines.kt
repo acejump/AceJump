@@ -8,7 +8,7 @@ import javax.swing.event.ChangeListener
 
 public class ShowFirstCharOfLines(val searchBox: SearchBox, val aceFinder: AceFinder): AceKeyCommand() {
     override fun execute(keyEvent: KeyEvent) {
-        aceFinder.addResultsReadyListener(object :ChangeListener{
+        aceFinder.addResultsReadyListener(object : ChangeListener {
             public override fun stateChanged(p0: ChangeEvent) {
                 eventDispatcher?.getMulticaster()?.stateChanged(p0)
 //                eventDispatcher?.getMulticaster()?.stateChanged(ChangeEvent(toString()))

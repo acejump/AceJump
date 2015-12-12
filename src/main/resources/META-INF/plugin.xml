@@ -5,7 +5,7 @@
 
     <description><![CDATA[
     AceJump allows you to quickly navigate the cursor to any position visible in the editor.
-    See a demo in action here: http://johnlindquist.com/2012/08/14/ace_jump.html
+    See a demo of <a href="https://www.youtube.com/watch?v=yK8eM50DsAY">AceJump in action</a>!
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump.
     ]]>
