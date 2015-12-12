@@ -9,14 +9,12 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.EventDispatcher
 import com.maddyhome.idea.vim.helper.EditorHelper
-import java.awt.Rectangle
-import java.util.ArrayList
-import java.util.Comparator
+import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
 public class AceFinder(val project: Project, val document: DocumentImpl, val editor: EditorImpl, val virtualFile: VirtualFile) {
-    class object {
+    companion object {
         val ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
         val END_OF_LINE = "\\n"
         val BEGINNING_OF_LINE = "^.|\\n(?<!.\\n)"
@@ -74,7 +72,7 @@ public class AceFinder(val project: Project, val document: DocumentImpl, val edi
                 var lineEndOffset = document.getLineEndOffset(lineNumber)
 
 
-                results = results!!.sort(object : Comparator<Int?>{
+                results = results!!.sortedWith(object : Comparator<Int?>{
                     public override fun equals(p0: Any?): Boolean {
                         throw UnsupportedOperationException()
                     }
