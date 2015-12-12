@@ -1,6 +1,6 @@
 # AceJump
 
-AceJump is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you rapidly navigate to any textual position in the editor with just a few keystrokes.
+[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you rapidly navigate to any textual position in the editor with just a few keystrokes.
 
 ![Jump Locations](https://cloud.githubusercontent.com/assets/175716/11759145/f50fcab6-a042-11e5-8662-c67deef1900a.png)
 
@@ -8,7 +8,7 @@ Hitting the keyboard shortcut for AceJump (<kbd>Ctrl</kbd>+<kbd>;</kbd> by defau
 
 ## Installing
 
-[AceJump](https://plugins.jetbrains.com/plugin/7086) can be installed by the unzipping the content of AceJump.zip into:
+AceJum can be installed by the unzipping the content of `AceJump.zip` into:
 
 - `$HOME/.IdeaIC`<MAJOR_VERSION>`/config/plugins/` if you are using IntelliJ IDEA Community, or
 - `$HOME/.IntellijIdea`<MAJOR_VERSION>`/config/plugins/` if you are using IntelliJ IDEA Ultimate
