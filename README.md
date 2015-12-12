@@ -8,7 +8,7 @@ Hitting the keyboard shortcut for AceJump (<kbd>Ctrl</kbd>+<kbd>;</kbd> by defau
 
 ## Installing
 
-[AceJump](https://plugins.jetbrains.com/plugin/7086) can be installed by the unzipping **the content** of AceJump.zip into:
+[AceJump](https://plugins.jetbrains.com/plugin/7086) can be installed by the unzipping the content of AceJump.zip into:
 
 - `$HOME/.IdeaIC`<MAJOR_VERSION>`/config/plugins/` if you are using IntelliJ IDEA Community, or
 - `$HOME/.IntellijIdea`<MAJOR_VERSION>`/config/plugins/` if you are using IntelliJ IDEA Ultimate
@@ -22,3 +22,23 @@ Alternately, you can install AceJump directly from IntelliJ IDEA, through **File
 You can configure the keyboard shortcut bound to AceJump, by visiting **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter</kbd>.
 
 ![Keymap](https://cloud.githubusercontent.com/assets/175716/11759286/7efe7ebe-a045-11e5-9585-420aed8232a4.png)
+
+## Building
+
+In order to build AceJump, clone this repository in IntelliJ IDEA (**VCS \| Checkout from Version Control \| GitHub**).
+
+![Yes](https://cloud.githubusercontent.com/assets/175716/11759555/92cfa288-a04a-11e5-870a-86105515879e.png)
+
+After cloning the repository, select, "Yes", to create an IntelliJ IDEA project for the AceJump sources.
+
+![Import](https://cloud.githubusercontent.com/assets/175716/11759574/14898906-a04b-11e5-88e4-df6b86da715b.png)
+
+Step through the **Import Project** wizard, leaving all of the default settings. Reuse the existing `AceJump.iml` file.
+
+![Reuse](https://cloud.githubusercontent.com/assets/175716/11759599/a3656532-a04b-11e5-838a-e11adf520997.png)
+
+If you are new to plugin development, follow the IntelliJ Platform SDK guide to [Setting Up a Development Environment](http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/setting_up_environment.html). Recommend using at least IntelliJ Platform SDK 143+.
+
+![Deployment](https://cloud.githubusercontent.com/assets/175716/11759627/a563878c-a04c-11e5-8420-f55d75a71c04.png)
+
+Now press **Build \| Prepare Plugin Module 'AceJump' for Deployment**. This will compile `AceJump.jar` in the project directory.
