@@ -10,15 +10,15 @@ Hitting the keyboard shortcut for AceJump (<kbd>Ctrl</kbd>+<kbd>;</kbd> by defau
 
 [AceJump](https://plugins.jetbrains.com/plugin/7086) can be installed by the unzipping **the content** of AceJump.zip into:
 
-- `$HOME/.IdeaIC<major version>/config/plugins/` if you are using IntelliJ IDEA Community, or
-- `$HOME/.IntellijIdea<major version>/config/plugins/`. if you are using IntelliJ IDEA Ultimate
+- `$HOME/.IdeaIC`<MAJOR_VERSION>`/config/plugins/` if you are using IntelliJ IDEA Community, or
+- `$HOME/.IntellijIdea`<MAJOR_VERSION>`/config/plugins/` if you are using IntelliJ IDEA Ultimate
 
-Alternately, you can install AceJump directly from IntelliJ IDEA, via **File \| Settings \| Plugins \| Browse Repositories... \| 🔍 "AceJump"**
+Alternately, you can install AceJump directly from IntelliJ IDEA, through **File \| Settings \| Plugins \| Browse Repositories... \| 🔍 "AceJump"**.
 
 ![Install](https://cloud.githubusercontent.com/assets/175716/11759317/3e581f2c-a046-11e5-9456-c186c6adee18.png)
 
 ## Configuring
 
-You can configure the keyboard shortcut bound to AceJump, by visiting **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter</kbd>
+You can configure the keyboard shortcut bound to AceJump, by visiting **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter</kbd>.
 
 ![Keymap](https://cloud.githubusercontent.com/assets/175716/11759286/7efe7ebe-a045-11e5-9585-420aed8232a4.png)
