@@ -19,7 +19,7 @@ Alternately, you can install AceJump directly from IntelliJ IDEA, through **File
 
 ## Configuring
 
-You can configure the keyboard shortcut bound to AceJump, by visiting **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter</kbd>.
+You can change the default keyboard shortcut, by visiting **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter</kbd>.
 
 ![Keymap](https://cloud.githubusercontent.com/assets/175716/11760350/911aed4c-a065-11e5-8f17-49bc97ad1dad.png)
 
