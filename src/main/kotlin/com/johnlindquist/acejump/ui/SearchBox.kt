@@ -8,21 +8,21 @@ import java.util.*
 import javax.swing.JTextField
 import javax.swing.text.BadLocationException
 
-public class SearchBox: JTextField() {
+class SearchBox: JTextField() {
     val preProcessKeyReleasedMap = HashMap<Int, AceKeyCommand>()
     val preProcessKeyPressedMap = HashMap<Int, AceKeyCommand>()
 
     var isSearchEnabled: Boolean = true
         get(){
-            return field && getText()?.length() == 1
+            return field && text?.length == 1
         }
 
     var popupContainer: AbstractPopup? = null
     var defaultKeyCommand: AceKeyCommand? = null
 
 
-    public override fun requestFocus() {
-        setTransferHandler(null);
+    override fun requestFocus() {
+        transferHandler = null;
         super<JTextField>.requestFocus()
     }
     override fun paintBorder(p0: Graphics?) {
@@ -31,39 +31,39 @@ public class SearchBox: JTextField() {
 
     //todo: I need to really rethink this entire approach
     override fun processKeyEvent(p0: KeyEvent) {
-        if (getText()?.length() == 0) {
+        if (text?.length == 0) {
             //todo: rethink the "isSearchEnabled" state approach. Works great now, could be cleaner
             isSearchEnabled = true
         }
 
         var aceKeyCommand: AceKeyCommand? = null
-        if (p0.getID() == KeyEvent.KEY_RELEASED) {
-            aceKeyCommand = preProcessKeyReleasedMap.get(p0.getKeyCode())
+        if (p0.id == KeyEvent.KEY_RELEASED) {
+            aceKeyCommand = preProcessKeyReleasedMap[p0.keyCode]
         }
 
-        if (p0.getID() == KeyEvent.KEY_PRESSED) {
-            aceKeyCommand = preProcessKeyPressedMap.get(p0.getKeyCode())
+        if (p0.id == KeyEvent.KEY_PRESSED) {
+            aceKeyCommand = preProcessKeyPressedMap[p0.keyCode]
             //prevent "alt" from triggering menu items
             p0.consume()
         }
 
         if (aceKeyCommand != null) {
-            aceKeyCommand?.execute(p0)
+            aceKeyCommand.execute(p0)
             return
         }
 
         super.processKeyEvent(p0)
 
-        if (p0.getID() != KeyEvent.KEY_TYPED) return
+        if (p0.id != KeyEvent.KEY_TYPED) return
 
 
-        if (defaultKeyCommand != null && p0.isConsumed()){
+        if (defaultKeyCommand != null && p0.isConsumed){
             defaultKeyCommand?.execute(p0)
         }
 
-        if (getText()?.length() == 2) {
+        if (text?.length == 2) {
             try{
-                setText(getText(0, 1))
+                text = getText(0, 1)
             }
             catch (e1: BadLocationException) {
                 e1.printStackTrace()
@@ -72,7 +72,7 @@ public class SearchBox: JTextField() {
     }
 
     fun forceSpaceChar() {
-        setText(" ")
+        text = " "
         disableSearch()
     }
 

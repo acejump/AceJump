@@ -12,53 +12,54 @@ public class AceKeyUtil {
     public static String getLowerCaseStringFromChar(char keyChar) {
 
         String s = String.valueOf(keyChar);
-        if (s.equals("!")) {
-            return "1";
+        switch (s) {
+            case "!":
+                return "1";
 
-        } else if (s.equals("@")) {
-            return "2";
+            case "@":
+                return "2";
 
-        } else if (s.equals("#")) {
-            return "3";
+            case "#":
+                return "3";
 
-        } else if (s.equals("$")) {
-            return "4";
+            case "$":
+                return "4";
 
-        } else if (s.equals("%")) {
-            return "5";
+            case "%":
+                return "5";
 
-        } else if (s.equals("^")) {
-            return "6";
+            case "^":
+                return "6";
 
-        } else if (s.equals("&")) {
-            return "7";
+            case "&":
+                return "7";
 
-        } else if (s.equals("*")) {
-            return "8";
+            case "*":
+                return "8";
 
-        } else if (s.equals("(")) {
-            return "9";
+            case "(":
+                return "9";
 
-        } else if (s.equals(")")) {
-            return "0";
-        } else if (s.equals("_")) {
-            return "-";
-        } else if (s.equals("+")) {
-            return "=";
-        } else if (s.equals("{")) {
-            return "[";
-        } else if (s.equals("}")) {
-            return "]";
-        } else if (s.equals("|")) {
-            return "\\";
-        } else if (s.equals(":")) {
-            return ";";
-        } else if (s.equals("<")) {
-            return ",";
-        } else if (s.equals(">")) {
-            return ".";
-        } else if (s.equals("?")) {
-            return "/";
+            case ")":
+                return "0";
+            case "_":
+                return "-";
+            case "+":
+                return "=";
+            case "{":
+                return "[";
+            case "}":
+                return "]";
+            case "|":
+                return "\\";
+            case ":":
+                return ";";
+            case "<":
+                return ",";
+            case ">":
+                return ".";
+            case "?":
+                return "/";
         }
         return s.toLowerCase();
     }

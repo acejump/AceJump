@@ -1,13 +1,12 @@
 package com.johnlindquist.acejump.keycommands
 
-import com.johnlindquist.acejump.keycommands.AceKeyCommand
 import com.johnlindquist.acejump.ui.AceCanvas
-import java.awt.event.KeyEvent
 import com.johnlindquist.acejump.ui.SearchBox
+import java.awt.event.KeyEvent
 
-public class ClearResults(val searchBox: SearchBox, val aceCanvas: AceCanvas): AceKeyCommand() {
+class ClearResults(val searchBox: SearchBox, val aceCanvas: AceCanvas): AceKeyCommand() {
     override fun execute(keyEvent: KeyEvent) {
-        searchBox.setText("");
+        searchBox.text = "";
         aceCanvas.clear()
     }
 }

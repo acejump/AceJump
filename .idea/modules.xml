@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/AceJump.iml" filepath="$PROJECT_DIR$/AceJump.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AceJump.iml" filepath="$PROJECT_DIR$/.idea/modules/AceJump.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AceJump_main.iml" filepath="$PROJECT_DIR$/.idea/modules/AceJump_main.iml" group="AceJump" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/AceJump_test.iml" filepath="$PROJECT_DIR$/.idea/modules/AceJump_test.iml" group="AceJump" />
     </modules>
   </component>
 </project>

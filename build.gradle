@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.0.0-beta-3595'
+    ext.kotlin_version = '1.0.0-rc-1036'
 
     repositories {
         mavenCentral()
@@ -13,7 +13,7 @@ buildscript {
 }
 
 plugins {
-    id "org.jetbrains.intellij" version "0.0.32"
+    id "org.jetbrains.intellij" version "0.0.39"
 }
 
 apply plugin: 'org.jetbrains.intellij'
@@ -28,7 +28,7 @@ compileJava {
 apply plugin: 'kotlin'
 
 intellij {
-    version '15.0.1'
+    version 'LATEST-EAP-SNAPSHOT'
     plugins 'coverage'
     pluginName 'AceJump'
 }
