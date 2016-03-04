@@ -18,7 +18,6 @@ import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.ui.AceCanvas
 import com.johnlindquist.acejump.ui.SearchBox
-import java.awt.Color
 import java.awt.Dimension
 import java.awt.Font
 import java.awt.Point
@@ -36,6 +35,7 @@ open class AceJumpAction() : DumbAwareAction() {
     override fun update(e: AnActionEvent?) {
         e?.presentation?.isEnabled = (e?.getData(CommonDataKeys.EDITOR)) != null
     }
+
     override fun actionPerformed(p0: AnActionEvent?) {
         val actionEvent = p0
         val project = actionEvent?.getData(CommonDataKeys.PROJECT) as Project
@@ -54,6 +54,7 @@ open class AceJumpAction() : DumbAwareAction() {
             aceCanvas.jumpInfos = textPointPairs?.reversed()
             aceCanvas.repaint()
         }
+
         fun exit() {
             val contentComponent: JComponent? = editor.contentComponent
             contentComponent?.remove(aceCanvas)
@@ -90,7 +91,7 @@ open class AceJumpAction() : DumbAwareAction() {
                 //                if(iModGroup == 0) print("================\n")
                 val i1 = Math.floor(lenMinusGroups.toDouble() + ((i + groups.toInt()) / len)).toInt() - 1
                 if (i >= lenMinusGroups) {
-                    str +=  letters.elementAt(i1)
+                    str += letters.elementAt(i1)
                     str += letters.elementAt(iModGroup).toString()
                 } else {
                     str += letters.elementAt(i).toString()
@@ -148,7 +149,6 @@ open class AceJumpAction() : DumbAwareAction() {
                 defaultKeyCommand?.addListener(showJumpObserver)
                 searchBox.defaultKeyCommand = defaultKeyCommand
 
-
                 //todo: refactor - edge cases...
                 val pressedSemi: AceKeyCommand = ChangeToTargetMode(searchBox, aceFinder)
                 pressedSemi.addListener(showJumpObserver)
@@ -164,24 +164,20 @@ open class AceJumpAction() : DumbAwareAction() {
             popup?.setRequestFocus(true);
 
             val width = searchBox.getFontMetrics(font).stringWidth("w")
-            var dimension: Dimension? = null
-            if (width != null) {
-                dimension = Dimension(width * 2, (editor.lineHeight))
-                if (SystemInfo.isMac) {
-                    dimension.setSize(dimension.width * 2, dimension.height * 2)
-                }
-
+            var dimension: Dimension = Dimension(width * 2, (editor.lineHeight))
+            if (SystemInfo.isMac) {
+                dimension.setSize(dimension.width * 2, dimension.height * 2)
             }
 
-
-            popup?.size = dimension as Dimension
+            popup?.size = dimension
             searchBox.popupContainer = popup
-            searchBox.size = dimension as Dimension
+            searchBox.size = dimension
             searchBox.isFocusable = true
             searchBox.addFocusListener(object : FocusListener {
                 override fun focusGained(p0: FocusEvent) {
                     addAceCanvas()
                 }
+
                 override fun focusLost(p0: FocusEvent) {
                     exit()
                 }

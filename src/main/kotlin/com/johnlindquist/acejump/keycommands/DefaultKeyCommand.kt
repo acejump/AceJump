@@ -2,19 +2,19 @@ package com.johnlindquist.acejump.keycommands
 
 import com.johnlindquist.acejump.AceFinder
 import com.johnlindquist.acejump.AceJumper
-import com.johnlindquist.acejump.AceKeyUtil
+import com.johnlindquist.acejump.getLowerCaseStringFromChar
 import com.johnlindquist.acejump.ui.SearchBox
 import java.awt.event.KeyEvent
 import java.util.*
 import javax.swing.event.ChangeListener
 
-class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinder, val aceJumper: AceJumper, val textAndOffsetHash: HashMap<String, Int>): AceKeyCommand() {
+class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinder, val aceJumper: AceJumper, val textAndOffsetHash: HashMap<String, Int>) : AceKeyCommand() {
     override fun execute(keyEvent: KeyEvent) {
         val keyChar: Char = keyEvent.keyChar
 
         //fixes the delete bug
         if (keyChar == '\b') return
-        println(searchBox.isSearchEnabled)
+
         //Find or jump
         if (searchBox.isSearchEnabled) {
             //Find
@@ -27,10 +27,10 @@ class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinder, val 
             searchBox.disableSearch()
         } else {
             //Jump to offset!
-            var char = AceKeyUtil.getLowerCaseStringFromChar(keyChar)
-            if(char == " ") return
+            var char = getLowerCaseStringFromChar(keyChar)
+            if (char == " ") return
 
-            if(aceFinder.firstChar != ""){
+            if (aceFinder.firstChar != "") {
                 char = aceFinder.firstChar + char
                 aceFinder.firstChar = ""
             }
@@ -48,8 +48,7 @@ class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinder, val 
                 if (aceFinder.isTargetMode) {
                     aceJumper.selectWordAtCaret()
                 }
-            }
-            else if(textAndOffsetHash.size > 25 && couldPossiblyMatch(char!!)){
+            } else if (textAndOffsetHash.size > 25 && couldPossiblyMatch(char)) {
                 aceFinder.firstChar = char
             }
 

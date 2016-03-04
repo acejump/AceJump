@@ -6,24 +6,21 @@ import java.awt.Color
 import java.awt.event.KeyEvent
 import javax.swing.event.ChangeListener
 
-class ChangeToTargetMode(val searchBox: SearchBox, val aceFinder: AceFinder): AceKeyCommand() {
+class ChangeToTargetMode(val searchBox: SearchBox, val aceFinder: AceFinder) : AceKeyCommand() {
     override fun execute(keyEvent: KeyEvent) {
         aceFinder.addResultsReadyListener(ChangeListener { p0 ->
             eventDispatcher?.multicaster?.stateChanged(p0)
             //                eventDispatcher?.getMulticaster()?.stateChanged(ChangeEvent(toString()))
         })
 
-        if(keyEvent.isMetaDown || keyEvent.isControlDown){
-            if(aceFinder.isTargetMode){
+        if (keyEvent.isMetaDown || keyEvent.isControlDown) {
+            if (aceFinder.isTargetMode) {
                 aceFinder.isTargetMode = false
                 searchBox.background = Color.WHITE
-            }else{
+            } else {
                 aceFinder.isTargetMode = true
                 searchBox.background = Color.RED
             }
-        }
-        else{
-
         }
     }
 }

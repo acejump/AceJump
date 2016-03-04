@@ -8,12 +8,12 @@ import java.util.*
 import javax.swing.JTextField
 import javax.swing.text.BadLocationException
 
-class SearchBox: JTextField() {
+class SearchBox : JTextField() {
     val preProcessKeyReleasedMap = HashMap<Int, AceKeyCommand>()
     val preProcessKeyPressedMap = HashMap<Int, AceKeyCommand>()
 
     var isSearchEnabled: Boolean = true
-        get(){
+        get() {
             return field && text?.length == 1
         }
 
@@ -23,49 +23,47 @@ class SearchBox: JTextField() {
 
     override fun requestFocus() {
         transferHandler = null;
-        super<JTextField>.requestFocus()
+        super.requestFocus()
     }
+
     override fun paintBorder(p0: Graphics?) {
     }
 
 
     //todo: I need to really rethink this entire approach
-    override fun processKeyEvent(p0: KeyEvent) {
+    override fun processKeyEvent(keyEvent: KeyEvent) {
         if (text?.length == 0) {
             //todo: rethink the "isSearchEnabled" state approach. Works great now, could be cleaner
             isSearchEnabled = true
         }
 
         var aceKeyCommand: AceKeyCommand? = null
-        if (p0.id == KeyEvent.KEY_RELEASED) {
-            aceKeyCommand = preProcessKeyReleasedMap[p0.keyCode]
+        if (keyEvent.id == KeyEvent.KEY_RELEASED) {
+            aceKeyCommand = preProcessKeyReleasedMap[keyEvent.keyCode]
         }
 
-        if (p0.id == KeyEvent.KEY_PRESSED) {
-            aceKeyCommand = preProcessKeyPressedMap[p0.keyCode]
+        if (keyEvent.id == KeyEvent.KEY_PRESSED) {
+            aceKeyCommand = preProcessKeyPressedMap[keyEvent.keyCode]
             //prevent "alt" from triggering menu items
-            p0.consume()
+            keyEvent.consume()
         }
 
         if (aceKeyCommand != null) {
-            aceKeyCommand.execute(p0)
             return
         }
 
-        super.processKeyEvent(p0)
+        super.processKeyEvent(keyEvent)
 
-        if (p0.id != KeyEvent.KEY_TYPED) return
+        if (keyEvent.id != KeyEvent.KEY_TYPED) return
 
-
-        if (defaultKeyCommand != null && p0.isConsumed){
-            defaultKeyCommand?.execute(p0)
+        if (defaultKeyCommand != null && keyEvent.isConsumed) {
+            defaultKeyCommand?.execute(keyEvent)
         }
 
         if (text?.length == 2) {
-            try{
+            try {
                 text = getText(0, 1)
-            }
-            catch (e1: BadLocationException) {
+            } catch (e1: BadLocationException) {
                 e1.printStackTrace()
             }
         }

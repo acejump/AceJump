@@ -67,7 +67,7 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
 
 
             results = results!!.sortedWith(object : Comparator<Int?> {
-                override fun equals(p0: Any?): Boolean {
+                override fun equals(other: Any?): Boolean {
                     throw UnsupportedOperationException()
                 }
 
@@ -99,6 +99,7 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
             eventDispatcher?.multicaster?.stateChanged(ChangeEvent("AceFinder"));
         });
     }
+
     fun findAllVisible(): List<Int> {
         //System.out.println("----- findAllVisible");
         val visualLineAtTopOfScreen = EditorHelper.getVisualLineAtTopOfScreen(editor)
@@ -148,8 +149,8 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
     }
 
     fun checkForReset() {
-        if(startResult < 0) startResult = 0
-        if(endResult < allowedCount) endResult = allowedCount
+        if (startResult < 0) startResult = 0
+        if (endResult < allowedCount) endResult = allowedCount
     }
 
     fun addResultsReadyListener(changeListener: ChangeListener) {
@@ -159,5 +160,4 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
     fun getAllowedCharacters(): CharSequence? {
         return ALLOWED_CHARACTERS
     }
-
 }

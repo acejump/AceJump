@@ -4,7 +4,7 @@ import java.awt.*
 import javax.swing.JComponent
 
 
-class AceCanvas: JComponent() {
+class AceCanvas : JComponent() {
     var jumpInfos: List<Pair<String, Point>>? = null
         set
     var colorPair = Pair<Color?, Color?>(Color.BLACK, Color.WHITE)
@@ -31,15 +31,15 @@ class AceCanvas: JComponent() {
     }
 
     override fun paint(p0: Graphics) {
-        super<JComponent>.paint(p0)
+        super.paint(p0)
 
-        if(jumpInfos == null)
+        if (jumpInfos == null)
             return
         val g2d = p0 as Graphics2D
         val fbm = FontBasedMeasurements()
 
 
-        for (jumpInfo: Pair<String, Point> in jumpInfos.orEmpty()){
+        for (jumpInfo: Pair<String, Point> in jumpInfos.orEmpty()) {
 
 
             val text = jumpInfo.first
@@ -55,18 +55,18 @@ class AceCanvas: JComponent() {
             //a slight border for "pop" against the background
             g2d.color = defaultBackground
 
-            if(text.length == 2){
-                g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1, originalPoint.y - fbm.rectHOffset.toInt() - 1, fbm.rectWidth + fbm.fontWidth + 1, lineHeight.toInt() + 1)
-            }else{
+            if (text.length == 2) {
+                g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1, originalPoint.y - fbm.rectHOffset.toInt() - 1, fbm.rectWidth + fbm.fontWidth + 5, lineHeight.toInt() + 1)
+            } else {
                 g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1, originalPoint.y - fbm.rectHOffset.toInt() - 1, fbm.rectWidth + 1, lineHeight.toInt() + 1)
             }
 
             //the background rectangle
             g2d.color = defaultForeground
 
-            if(text.length == 2){
-                g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset.toInt(), fbm.rectWidth + fbm.fontWidth, lineHeight.toInt())
-            }else{
+            if (text.length == 2) {
+                g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset.toInt(), fbm.rectWidth + fbm.fontWidth + 5, lineHeight.toInt())
+            } else {
                 g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset.toInt(), fbm.rectWidth, lineHeight.toInt())
             }
 

@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.0.0-rc-1036'
+    ext.kotlin_version = '1.0.0'
 
     repositories {
         mavenCentral()
@@ -28,7 +28,7 @@ compileJava {
 apply plugin: 'kotlin'
 
 intellij {
-    version 'LATEST-EAP-SNAPSHOT'
+    version '144.3600.7'
     plugins 'coverage'
     pluginName 'AceJump'
 }
@@ -42,4 +42,5 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
 }
