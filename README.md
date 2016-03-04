@@ -25,8 +25,7 @@ You can change the default keyboard shortcut, by visiting **File \| Settings \| 
 
 ## Building
 
-In order to build AceJump from the source, clone this repository and run `gradlew buildIdea`.
-
+In order to build AceJump from the source, clone this repository and run `./gradlew buildPlugin`.
 
 ## History
 
