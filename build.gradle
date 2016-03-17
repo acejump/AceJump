@@ -29,8 +29,8 @@ apply plugin: 'kotlin'
 
 intellij {
     version '144.3600.7'
-    plugins 'coverage'
     pluginName 'AceJump'
+    updateSinceUntilBuild false
 }
 
 group 'com.johnlindquist'

@@ -55,7 +55,8 @@
     </vendor>
 
 
-    <idea-version since-build="143.379"/>
+    <idea-version since-build="143.379" until-build="145.9999"/>
+
 
     <project-components>
         <!-- Add your project components here -->
