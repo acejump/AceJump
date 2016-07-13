@@ -17,7 +17,6 @@ fun getPointFromVisualPosition(editor: Editor, logicalPosition: VisualPosition):
 
 /*todo: I hate this, but I keep debating whether I wanted to allow numbers and special chars in the "AllowedCharacters" set. Strict mapping to my USA keyboard :(*/
 fun getLowerCaseStringFromChar(keyChar: Char): String {
-
     val s = keyChar.toString()
     when (s) {
         "!" -> return "1"
