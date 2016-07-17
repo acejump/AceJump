@@ -8,7 +8,7 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.EventDispatcher
-import com.maddyhome.idea.vim.helper.EditorHelper
+import com.johnlindquist.acejump.EditorHelper
 
 import java.util.*
 import javax.swing.event.ChangeEvent

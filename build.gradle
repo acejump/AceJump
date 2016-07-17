@@ -18,12 +18,6 @@ plugins {
 
 apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'kotlin'
-apply plugin: 'java'
-
-compileJava {
-    sourceCompatibility = 1.7
-    targetCompatibility = 1.7
-}
 
 apply plugin: 'kotlin'
 
