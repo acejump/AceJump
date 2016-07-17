@@ -29,7 +29,7 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
 
     var startResult: Int = 0
     var endResult: Int = 0
-    var allowedCount: Int = getAllowedCharacters()!!.length
+    var allowedCount: Int = getAllowedCharacters().length
     var results: List<Int>? = null
     var getEndOffset: Boolean = false
     var firstChar: String = ""
@@ -155,7 +155,7 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
         eventDispatcher?.addListener(changeListener)
     }
 
-    fun getAllowedCharacters(): CharSequence? {
+    fun getAllowedCharacters(): CharSequence {
         return ALLOWED_CHARACTERS
     }
 }

@@ -75,7 +75,7 @@ open class AceJumpAction() : DumbAwareAction() {
             val textPointPairs: MutableList<Pair<String, Point>> = ArrayList()
             val total = results.size - 1
 
-            val letters = aceFinder.getAllowedCharacters()!!
+            val letters = aceFinder.getAllowedCharacters()
             val len = letters.length
             val groups = Math.floor(total.toDouble() / len)
             //            print("groups: " + groups.toString())
