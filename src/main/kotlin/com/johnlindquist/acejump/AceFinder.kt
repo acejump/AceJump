@@ -100,17 +100,17 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
 
     fun findAllVisible(): List<Int> {
         //System.out.println("----- findAllVisible");
-        val visualLineAtTopOfScreen = EditorHelper.getVisualLineAtTopOfScreen(editor)
-        val firstLine = EditorHelper.visualLineToLogicalLine(editor, visualLineAtTopOfScreen)
-        val offset = EditorHelper.getLineStartOffset(editor, firstLine)
+        val visualLineAtTopOfScreen = getVisualLineAtTopOfScreen(editor)
+        val firstLine = visualLineToLogicalLine(editor, visualLineAtTopOfScreen)
+        val offset = getLineStartOffset(editor, firstLine)
 
-        val height = EditorHelper.getScreenHeight(editor)
-        val top = EditorHelper.getVisualLineAtTopOfScreen(editor)
+        val height = getScreenHeight(editor)
+        val top = getVisualLineAtTopOfScreen(editor)
 
         var lastLine = top + height
-        lastLine = EditorHelper.visualLineToLogicalLine(editor, lastLine)
+        lastLine = visualLineToLogicalLine(editor, lastLine)
 
-        val endOffset = EditorHelper.normalizeOffset(editor, lastLine, EditorHelper.getLineEndOffset(editor, lastLine, true), true)
+        val endOffset = normalizeOffset(editor, lastLine, getLineEndOffset(editor, lastLine, true), true)
         val text: String = document.charsSequence.toString().substring(offset, endOffset)
         val offsets = ArrayList<Int>()
 

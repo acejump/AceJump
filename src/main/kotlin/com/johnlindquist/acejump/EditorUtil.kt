@@ -34,7 +34,7 @@ fun getVisualLineAtTopOfScreen(editor: Editor): Int {
  * Gets the number of actual lines in the file
 
  * @param editor The editor
- * *
+
  * @return The file line count
  */
 fun getLineCount(editor: Editor): Int {
@@ -50,9 +50,9 @@ fun getLineCount(editor: Editor): Int {
  * Gets the actual number of characters in the file
 
  * @param editor            The editor
- * *
+
  * @param includeEndNewLine True include newline
- * *
+
  * @return The file's character count
  */
 @JvmOverloads fun getFileSize(editor: Editor, includeEndNewLine: Boolean = false): Int {
@@ -68,7 +68,7 @@ fun getLineCount(editor: Editor): Int {
  * nearest whole line if there is a partial line visible at the bottom of the screen.
 
  * @param editor The editor
- * *
+
  * @return The number of screen lines
  */
 fun getScreenHeight(editor: Editor): Int {
@@ -81,9 +81,9 @@ fun getScreenHeight(editor: Editor): Int {
  * Converts a visual line number to a logical line number.
 
  * @param editor The editor
- * *
+
  * @param line   The visual line number to convert
- * *
+
  * @return The logical line number
  */
 fun visualLineToLogicalLine(editor: Editor, line: Int): Int {
@@ -95,9 +95,9 @@ fun visualLineToLogicalLine(editor: Editor, line: Int): Int {
  * Returns the offset of the start of the requested line.
 
  * @param editor The editor
- * *
+
  * @param line   The logical line to get the start offset for.
- * *
+
  * @return 0 if line is &lt 0, file size of line is bigger than file, else the start offset for the line
  */
 fun getLineStartOffset(editor: Editor, line: Int): Int {
@@ -114,11 +114,11 @@ fun getLineStartOffset(editor: Editor, line: Int): Int {
  * Returns the offset of the end of the requested line.
 
  * @param editor   The editor
- * *
+
  * @param line     The logical line to get the end offset for
- * *
+
  * @param allowEnd True include newline
- * *
+
  * @return 0 if line is &lt 0, file size of line is bigger than file, else the end offset for the line
  */
 fun getLineEndOffset(editor: Editor, line: Int, allowEnd: Boolean): Int {
@@ -136,9 +136,9 @@ fun getLineEndOffset(editor: Editor, line: Int, allowEnd: Boolean): Int {
  * (excl).
 
  * @param editor The editor
- * *
+
  * @param line   The logical line number to normalize
- * *
+
  * @return The normalized logical line number
  */
 fun normalizeLine(editor: Editor, line: Int): Int {
@@ -150,13 +150,13 @@ fun normalizeLine(editor: Editor, line: Int): Int {
  * is true, the range will allow for the offset to be one past the last character on the line.
 
  * @param editor   The editor
- * *
+
  * @param line     The logical line number
- * *
+
  * @param offset   The offset to normalize
- * *
+
  * @param allowEnd true if the offset can be one past the last character on the line, false if not
- * *
+
  * @return The normalized column number
  */
 fun normalizeOffset(editor: Editor,
