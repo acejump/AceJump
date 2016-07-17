@@ -36,11 +36,11 @@ open class AceJumpAction() : DumbAwareAction() {
         e?.presentation?.isEnabled = (e?.getData(CommonDataKeys.EDITOR)) != null
     }
 
-    override fun actionPerformed(p0: AnActionEvent?) {
+    override fun actionPerformed(p0: AnActionEvent) {
         val actionEvent = p0
-        val project = actionEvent?.getData(CommonDataKeys.PROJECT) as Project
-        val editor = actionEvent?.getData(CommonDataKeys.EDITOR) as EditorImpl
-        val virtualFile = actionEvent?.getData(CommonDataKeys.VIRTUAL_FILE) as VirtualFile
+        val project = actionEvent.getData(CommonDataKeys.PROJECT) as Project
+        val editor = actionEvent.getData(CommonDataKeys.EDITOR) as EditorImpl
+        val virtualFile = actionEvent.getData(CommonDataKeys.VIRTUAL_FILE) as VirtualFile
         val document = editor.document as DocumentImpl
         val scheme = EditorColorsManager.getInstance()?.globalScheme
         val font = Font(scheme?.editorFontName, Font.BOLD, scheme?.editorFontSize!!)
@@ -50,8 +50,8 @@ open class AceJumpAction() : DumbAwareAction() {
         val searchBox = SearchBox()
         val textAndOffsetHash = HashMap<String, Int>()
 
-        fun showJumpers(textPointPairs: List<Pair<String, Point>>?) {
-            aceCanvas.jumpInfos = textPointPairs?.reversed()
+        fun showJumpers(textPointPairs: List<Pair<String, Point>>) {
+            aceCanvas.jumpInfos = textPointPairs.reversed()
             aceCanvas.repaint()
         }
 
@@ -145,8 +145,8 @@ open class AceJumpAction() : DumbAwareAction() {
                 pressedSpace.addListener(showJumpObserver)
                 searchBox.addPreProcessPressedKey(KeyEvent.VK_SPACE, pressedSpace)
 
-                val defaultKeyCommand: DefaultKeyCommand? = DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash)
-                defaultKeyCommand?.addListener(showJumpObserver)
+                val defaultKeyCommand: DefaultKeyCommand = DefaultKeyCommand(searchBox, aceFinder, aceJumper, textAndOffsetHash)
+                defaultKeyCommand.addListener(showJumpObserver)
                 searchBox.defaultKeyCommand = defaultKeyCommand
 
                 //todo: refactor - edge cases...

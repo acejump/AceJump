@@ -49,6 +49,7 @@ class SearchBox : JTextField() {
         }
 
         if (aceKeyCommand != null) {
+            aceKeyCommand.execute(keyEvent)
             return
         }
 

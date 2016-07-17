@@ -6,14 +6,9 @@ import javax.swing.JComponent
 
 class AceCanvas : JComponent() {
     var jumpInfos: List<Pair<String, Point>>? = null
-        set
     var colorPair = Pair<Color?, Color?>(Color.BLACK, Color.WHITE)
-        set
     var lineSpacing: Float = 0.toFloat()
-        set
     var lineHeight: Int = 0
-        set
-
 
     inner class FontBasedMeasurements() {
         var font = getFont()!!
@@ -30,18 +25,16 @@ class AceCanvas : JComponent() {
         val hOffset = fontHeight - fontSpacing
     }
 
-    override fun paint(p0: Graphics) {
-        super.paint(p0)
-
+    override fun paint(graphics: Graphics) {
         if (jumpInfos == null)
             return
-        val g2d = p0 as Graphics2D
+
+        super.paint(graphics)
+
+        val g2d = graphics as Graphics2D
         val fbm = FontBasedMeasurements()
 
-
         for (jumpInfo: Pair<String, Point> in jumpInfos.orEmpty()) {
-
-
             val text = jumpInfo.first
             val originalPoint = jumpInfo.second
             val defaultForeground = colorPair.second
@@ -50,7 +43,6 @@ class AceCanvas : JComponent() {
             originalPoint.translate(0, -fbm.hOffset.toInt())
 
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
-
 
             //a slight border for "pop" against the background
             g2d.color = defaultBackground

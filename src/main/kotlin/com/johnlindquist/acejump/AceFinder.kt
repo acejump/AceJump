@@ -102,33 +102,28 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
         //System.out.println("----- findAllVisible");
         val visualLineAtTopOfScreen = getVisualLineAtTopOfScreen(editor)
         val firstLine = visualLineToLogicalLine(editor, visualLineAtTopOfScreen)
-        val offset = getLineStartOffset(editor, firstLine)
+        val startOffset = getLineStartOffset(editor, firstLine)
 
         val height = getScreenHeight(editor)
-        val top = getVisualLineAtTopOfScreen(editor)
-
-        var lastLine = top + height
-        lastLine = visualLineToLogicalLine(editor, lastLine)
-
+        val lastLine = visualLineToLogicalLine(editor, visualLineAtTopOfScreen + height)
         val endOffset = normalizeOffset(editor, lastLine, getLineEndOffset(editor, lastLine, true), true)
-        val text: String = document.charsSequence.toString().substring(offset, endOffset)
+
+        val text = document.charsSequence.toString().substring(startOffset, endOffset)
         val offsets = ArrayList<Int>()
 
-        var foundOffset = 0
-        while (0 < text.length) {
-            val result = findManager.findString(text, foundOffset, findModel, virtualFile)
-            if (!result.isStringFound) {
-                //System.out.println(findModel.getStringToFind() + ": not found");
-                break
-            }
-            var resultOffset: Int
-            if (getEndOffset) {
-                resultOffset = result.endOffset - 1
-            } else {
-                resultOffset = result.startOffset
-            }
-            offsets.add(resultOffset + offset + customOffset)
-            foundOffset = result.endOffset
+        var offset = 0
+        var result = findManager.findString(text, offset, findModel, virtualFile)
+        while (result.isStringFound) {
+            var resultOffset =
+                    if (getEndOffset)
+                        result.endOffset - 1
+                    else
+                        result.startOffset
+
+            offsets.add(startOffset + resultOffset + customOffset)
+            offset = result.endOffset
+
+            result = findManager.findString(text, offset, findModel, virtualFile)
         }
 
         return offsets

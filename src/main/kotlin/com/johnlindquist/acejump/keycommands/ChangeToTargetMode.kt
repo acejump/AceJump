@@ -6,7 +6,7 @@ import java.awt.Color
 import java.awt.event.KeyEvent
 import javax.swing.event.ChangeListener
 
-class ChangeToTargetMode(val searchBox: SearchBox, val aceFinder: AceFinder) : AceKeyCommand() {
+class ChangeToTargetMode(override val searchBox: SearchBox, val aceFinder: AceFinder) : AceKeyCommand() {
     override fun execute(keyEvent: KeyEvent) {
         aceFinder.addResultsReadyListener(ChangeListener { p0 ->
             eventDispatcher?.multicaster?.stateChanged(p0)
