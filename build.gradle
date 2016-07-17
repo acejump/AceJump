@@ -31,10 +31,14 @@ intellij {
     version '144.3600.7'
     pluginName 'AceJump'
     updateSinceUntilBuild false
+
+    pluginId '7910'
+    username publishUsername
+    password publishPassword
 }
 
 group 'com.johnlindquist'
-version '2.0.9'
+version '2.0.10'
 
 repositories {
     mavenCentral()

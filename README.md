@@ -29,13 +29,17 @@ In order to build AceJump from the source, clone this repository and run `./grad
 
 ## History
 
+- 2.0.10 Support 2016.2, remove upper version limit, update internal Kotlin version
+- 2.0.9 Compile on Java 7 to address: https://github.com/johnlindquist/AceJump/issues/61
+- 2.0.8 Compile on Java 6 to address: https://github.com/johnlindquist/AceJump/issues/59
+- 2.0.7 Language update for Kotlin 1.0 release.
 - 2.0.6 Fixing "lost focus" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/41
 - 2.0.5 Fixing "backspace" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/20
 - 2.0.4 Fixing "code folding" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/24
 - 2.0.3 More work on Ubuntu focus bug
 - 2.0.2 Fixed bug when there's only 1 search result
 - 2.0.1 Fixing Ubuntu focus bug
-- 2.0.0 Major release: Added "target mode", many speed increases, mutli-char search implemented
+- 2.0.0 Major release: Added "target mode", many speed increases, multi-char search implemented
 - 1.1.0 Switching to Kotlin for the code base
 - 1.0.4 Fixing https://github.com/johnlindquist/AceJump/issues/9 and https://github.com/johnlindquist/AceJump/issues/6
 - 1.0.3 Fixed minor visual lag when removing the "jumpers" from the editor

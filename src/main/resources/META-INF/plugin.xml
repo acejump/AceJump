@@ -13,6 +13,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>2.0.10</dt>
+            <dd>Support 2016.2, remove upper version limit, update internal Kotlin version</dd>
             <dt>2.0.9</dt>
             <dd>Compile on Java 7 to address: https://github.com/johnlindquist/AceJump/issues/61</dd>
             <dt>2.0.8</dt>
@@ -32,7 +34,7 @@
             <dt>2.0.1</dt>
             <dd>Fixing Ubuntu focus bug</dd>
             <dt>2.0.0</dt>
-            <dd>Major release: Added "target mode", many speed increases, mutli-char search implemented</dd>
+            <dd>Major release: Added "target mode", many speed increases, multi-char search implemented</dd>
             <dt>1.1.0</dt>
             <dd>Switching to Kotlin for the code base</dd>
             <dt>1.0.4</dt>
@@ -58,7 +60,7 @@
             email="johnlindquist@gmail.com">johnlindquist
     </vendor>
 
-    <idea-version since-build="143.379" until-build="145.9999"/>
+    <idea-version since-build="143.379"/>
 
 
     <project-components>

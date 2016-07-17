@@ -196,7 +196,6 @@ open class AceJumpAction() : DumbAwareAction() {
 
         configureAceCanvas()
 
-
         ApplicationManager.getApplication()?.invokeLater({
             val manager = IdeFocusManager.getInstance(project)
             manager?.requestFocus(searchBox, false)

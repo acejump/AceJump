@@ -20,7 +20,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="AceJump_main" target="1.8" />
+      <module name="AceJump_main" target="1.7" />
       <module name="AceJump_test" target="1.8" />
     </bytecodeTargetLevel>
   </component>
