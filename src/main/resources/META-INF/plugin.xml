@@ -13,6 +13,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>2.0.11</dt>
+            <dd>One hundred percent all natural Kotlin.</dd>
             <dt>2.0.10</dt>
             <dd>Support 2016.2, remove upper version limit, update internal Kotlin version</dd>
             <dt>2.0.9</dt>

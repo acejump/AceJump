@@ -29,6 +29,7 @@ In order to build AceJump from the source, clone this repository and run `./grad
 
 ## History
 
+- 2.0.11 One hundred percent all natural Kotlin.
 - 2.0.10 Support 2016.2, remove upper version limit, update internal Kotlin version
 - 2.0.9 Compile on Java 7 to address: https://github.com/johnlindquist/AceJump/issues/61
 - 2.0.8 Compile on Java 6 to address: https://github.com/johnlindquist/AceJump/issues/59
