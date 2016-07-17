@@ -32,9 +32,10 @@ intellij {
     pluginName 'AceJump'
     updateSinceUntilBuild false
 
-    pluginId '7910'
-    username publishUsername
-    password publishPassword
+    publish {
+        username publishUsername
+        password publishPassword
+    }
 }
 
 group 'com.johnlindquist'
