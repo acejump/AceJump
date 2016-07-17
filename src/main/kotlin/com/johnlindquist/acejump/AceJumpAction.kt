@@ -68,16 +68,16 @@ open class AceJumpAction() : DumbAwareAction() {
             If there are >26, then start A-Y then ZA-ZZ
             A huge list would be like A-C then DA-ZZ
         */
-        fun setupJumpLocations(results: MutableList<Int>) {
+        fun setupJumpLocations(results: List<Int>?) {
 
-            if (results.size == 0) return //todo: hack, in case random keystrokes make it through
+            if (results == null || results.size == 0) return //todo: hack, in case random keystrokes make it through
             textAndOffsetHash.clear()
             val textPointPairs: MutableList<Pair<String, Point>> = ArrayList()
             val total = results.size - 1
 
             val letters = aceFinder.getAllowedCharacters()!!
-            var len = letters.length
-            var groups = Math.floor(total.toDouble() / len)
+            val len = letters.length
+            val groups = Math.floor(total.toDouble() / len)
             //            print("groups: " + groups.toString())
             val lenMinusGroups = len - groups.toInt()
             //            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
@@ -124,7 +124,7 @@ open class AceJumpAction() : DumbAwareAction() {
 
         fun configureSearchBox() {
             fun setupSearchBoxKeys() {
-                val showJumpObserver: ChangeListener = ChangeListener { setupJumpLocations(aceFinder.results as MutableList<Int>) }
+                val showJumpObserver: ChangeListener = ChangeListener { setupJumpLocations(aceFinder.results) }
                 val releasedHome: AceKeyCommand = ShowBeginningOfLines(searchBox, aceFinder)
                 val releasedEnd: AceKeyCommand = ShowEndOfLines(searchBox, aceFinder)
                 releasedHome.addListener(showJumpObserver)
@@ -164,7 +164,7 @@ open class AceJumpAction() : DumbAwareAction() {
             popup?.setRequestFocus(true);
 
             val width = searchBox.getFontMetrics(font).stringWidth("w")
-            var dimension: Dimension = Dimension(width * 2, (editor.lineHeight))
+            val dimension: Dimension = Dimension(width * 2, (editor.lineHeight))
             if (SystemInfo.isMac) {
                 dimension.setSize(dimension.width * 2, dimension.height * 2)
             }

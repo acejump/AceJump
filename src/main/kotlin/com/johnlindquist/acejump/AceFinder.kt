@@ -8,8 +8,6 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.EventDispatcher
-import com.johnlindquist.acejump.EditorHelper
-
 import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
@@ -32,7 +30,7 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
     var startResult: Int = 0
     var endResult: Int = 0
     var allowedCount: Int = getAllowedCharacters()!!.length
-    var results: List<Int?>? = null
+    var results: List<Int>? = null
     var getEndOffset: Boolean = false
     var firstChar: String = ""
     var customOffset: Int = 0
@@ -60,22 +58,22 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
         application?.runReadAction({ results = findAllVisible() })
 
         application?.invokeLater({
-            var caretOffset = editor.caretModel.offset
-            var lineNumber = document.getLineNumber(caretOffset)
-            var lineStartOffset = document.getLineStartOffset(lineNumber)
-            var lineEndOffset = document.getLineEndOffset(lineNumber)
+            val caretOffset = editor.caretModel.offset
+            val lineNumber = document.getLineNumber(caretOffset)
+            val lineStartOffset = document.getLineStartOffset(lineNumber)
+            val lineEndOffset = document.getLineEndOffset(lineNumber)
 
 
-            results = results!!.sortedWith(object : Comparator<Int?> {
+            results = results?.sortedWith(object : Comparator<Int?> {
                 override fun equals(other: Any?): Boolean {
                     throw UnsupportedOperationException()
                 }
 
                 override fun compare(p0: Int?, p1: Int?): Int {
-                    var i1: Int = Math.abs(caretOffset - p0!!)
-                    var i2: Int = Math.abs(caretOffset - p1!!)
-                    var o1OnSameLine: Boolean = p0 >= lineStartOffset && p0 <= lineEndOffset
-                    var o2OnSameLine: Boolean = p1 >= lineStartOffset && p1 <= lineEndOffset
+                    val i1: Int = Math.abs(caretOffset - p0!!)
+                    val i2: Int = Math.abs(caretOffset - p1!!)
+                    val o1OnSameLine: Boolean = p0 >= lineStartOffset && p0 <= lineEndOffset
+                    val o2OnSameLine: Boolean = p1 >= lineStartOffset && p1 <= lineEndOffset
                     if (i1 > i2) {
                         if (!o2OnSameLine && o1OnSameLine) {
                             return -1
@@ -93,18 +91,18 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
                 }
             })
 
-            startResult = 0;
-            endResult = allowedCount;
+            startResult = 0
+            endResult = allowedCount
 
-            eventDispatcher?.multicaster?.stateChanged(ChangeEvent("AceFinder"));
-        });
+            eventDispatcher?.multicaster?.stateChanged(ChangeEvent("AceFinder"))
+        })
     }
 
     fun findAllVisible(): List<Int> {
         //System.out.println("----- findAllVisible");
         val visualLineAtTopOfScreen = EditorHelper.getVisualLineAtTopOfScreen(editor)
         val firstLine = EditorHelper.visualLineToLogicalLine(editor, visualLineAtTopOfScreen)
-        var offset = EditorHelper.getLineStartOffset(editor, firstLine)
+        val offset = EditorHelper.getLineStartOffset(editor, firstLine)
 
         val height = EditorHelper.getScreenHeight(editor)
         val top = EditorHelper.getVisualLineAtTopOfScreen(editor)
@@ -112,28 +110,28 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
         var lastLine = top + height
         lastLine = EditorHelper.visualLineToLogicalLine(editor, lastLine)
 
-        var endOffset = EditorHelper.normalizeOffset(editor, lastLine, EditorHelper.getLineEndOffset(editor, lastLine, true), true)
-        var text: String = document.charsSequence.toString().substring(offset, endOffset)
-        var offsets = ArrayList<Int>()
+        val endOffset = EditorHelper.normalizeOffset(editor, lastLine, EditorHelper.getLineEndOffset(editor, lastLine, true), true)
+        val text: String = document.charsSequence.toString().substring(offset, endOffset)
+        val offsets = ArrayList<Int>()
 
         var foundOffset = 0
         while (0 < text.length) {
-            var result = findManager.findString(text, foundOffset, findModel, virtualFile);
+            val result = findManager.findString(text, foundOffset, findModel, virtualFile)
             if (!result.isStringFound) {
                 //System.out.println(findModel.getStringToFind() + ": not found");
-                break;
+                break
             }
             var resultOffset: Int
             if (getEndOffset) {
-                resultOffset = result.endOffset - 1;
+                resultOffset = result.endOffset - 1
             } else {
-                resultOffset = result.startOffset;
+                resultOffset = result.startOffset
             }
-            offsets.add(resultOffset + offset + customOffset);
-            foundOffset = result.endOffset;
+            offsets.add(resultOffset + offset + customOffset)
+            foundOffset = result.endOffset
         }
 
-        return offsets;
+        return offsets
     }
 
     fun expandResults() {

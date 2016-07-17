@@ -37,7 +37,7 @@ class DefaultKeyCommand(val searchBox: SearchBox, val aceFinder: AceFinder, val 
             val offset = textAndOffsetHash[char]
 
             if (offset != null) {
-                searchBox.popupContainer?.cancel();
+                searchBox.popupContainer?.cancel()
                 if (keyEvent.isShiftDown && !keyEvent.isMetaDown) {
                     aceJumper.setSelectionFromCaretToOffset(offset)
                     aceJumper.moveCaret(offset)
