@@ -4,7 +4,7 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="createEmptyContentRootDirectories" value="true" />
-        <option name="distributionType" value="WRAPPED" />
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleHome" value="C:/Program Files (x86)/Gradle/gradle-2.9" />
         <option name="gradleJvm" value="1.8" />

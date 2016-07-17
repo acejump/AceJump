@@ -13,6 +13,8 @@
     <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>2.0.12</dt>
+            <dd>Fix ClassCastException when input letter not present: https://github.com/johnlindquist/AceJump/issues/73</dd>
             <dt>2.0.11</dt>
             <dd>One hundred percent all natural Kotlin.</dd>
             <dt>2.0.10</dt>
@@ -56,7 +58,7 @@
 
     <depends>com.intellij.modules.platform</depends>
 
-    <version>2.0.11</version>
+    <version>2.0.12</version>
     <category>Navigation</category>
     <vendor url="http://johnlindquist.com"
             email="johnlindquist@gmail.com">johnlindquist
