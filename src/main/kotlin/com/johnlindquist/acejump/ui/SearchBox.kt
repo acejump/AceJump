@@ -22,7 +22,7 @@ class SearchBox : JTextField() {
 
 
     override fun requestFocus() {
-        transferHandler = null;
+        transferHandler = null
         super.requestFocus()
     }
 
@@ -80,11 +80,11 @@ class SearchBox : JTextField() {
     }
 
     fun addPreProcessReleaseKey(key: Int, keyCommand: AceKeyCommand) {
-        preProcessKeyReleasedMap.put(key, keyCommand);
+        preProcessKeyReleasedMap.put(key, keyCommand)
     }
 
     fun addPreProcessPressedKey(key: Int, keyCommand: AceKeyCommand) {
-        preProcessKeyPressedMap.put(key, keyCommand);
+        preProcessKeyPressedMap.put(key, keyCommand)
     }
 
 }

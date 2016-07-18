@@ -99,7 +99,7 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
     }
 
     fun findAllVisible(): List<Int> {
-        //System.out.println("----- findAllVisible");
+        //System.out.println("----- findAllVisible")
         val visualLineAtTopOfScreen = getVisualLineAtTopOfScreen(editor)
         val firstLine = visualLineToLogicalLine(editor, visualLineAtTopOfScreen)
         val startOffset = getLineStartOffset(editor, firstLine)

@@ -28,7 +28,8 @@ You can change the default keyboard shortcut, by visiting **File \| Settings \| 
 In order to build AceJump from the source, clone this repository and run `./gradlew buildPlugin`.
 
 ## History
-
+- 2.0.13  Fix a regression affecting target mode and line-based navigation: https://github.com/johnlindquist/AceJump/commit/cc3a23a3bd6754d11100f15f3dddc4d8529926df#diff-a483c757116bde46e566a8b01520a807L51</dd>
+- 2.0.12 Fix ClassCastException when input letter not present: https://github.com/johnlindquist/AceJump/issues/73
 - 2.0.11 One hundred percent all natural Kotlin.
 - 2.0.10 Support 2016.2, remove upper version limit, update internal Kotlin version
 - 2.0.9 Compile on Java 7 to address: https://github.com/johnlindquist/AceJump/issues/61
