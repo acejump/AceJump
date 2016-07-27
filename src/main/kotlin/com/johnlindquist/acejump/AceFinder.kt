@@ -12,7 +12,7 @@ import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
-class AceFinder(project: Project, val document: DocumentImpl, val editor: EditorImpl, val virtualFile: VirtualFile) {
+class AceFinder(val document: DocumentImpl, val editor: EditorImpl, val virtualFile: VirtualFile) {
     companion object {
         val ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
         val END_OF_LINE = "\\n"
@@ -22,10 +22,6 @@ class AceFinder(project: Project, val document: DocumentImpl, val editor: Editor
     }
 
     val eventDispatcher: EventDispatcher<ChangeListener>? = EventDispatcher.create(ChangeListener::class.java)
-
-
-    val findManager = FindManager.getInstance(project)!!
-    val findModel: FindModel = createFindModel(findManager)
 
     var startResult: Int = 0
     var endResult: Int = 0
@@ -51,8 +47,6 @@ class AceFinder(project: Project, val document: DocumentImpl, val editor: Editor
     }
 
     fun findText(text: String, isRegEx: Boolean) {
-        findModel.stringToFind = text
-        findModel.isRegularExpressions = isRegEx
 
         val application = ApplicationManager.getApplication()
         application?.runReadAction({ results = findAllVisible() })
@@ -99,7 +93,6 @@ class AceFinder(project: Project, val document: DocumentImpl, val editor: Editor
     }
 
     fun findAllVisible(): List<Int> {
-        //System.out.println("----- findAllVisible")
         val visualLineAtTopOfScreen = getVisualLineAtTopOfScreen(editor)
         val firstLine = visualLineToLogicalLine(editor, visualLineAtTopOfScreen)
         val startOffset = getLineStartOffset(editor, firstLine)

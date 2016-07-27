@@ -44,7 +44,7 @@ open class AceJumpAction() : DumbAwareAction() {
         val document = editor.document as DocumentImpl
         val scheme = EditorColorsManager.getInstance()?.globalScheme
         val font = Font(scheme?.editorFontName, Font.BOLD, scheme?.editorFontSize!!)
-        val aceFinder = AceFinder(project, document, editor, virtualFile)
+        val aceFinder = AceFinder(document, editor, virtualFile)
         val aceJumper = AceJumper(editor, document)
         val aceCanvas = AceCanvas()
         val searchBox = SearchBox()
@@ -69,8 +69,9 @@ open class AceJumpAction() : DumbAwareAction() {
             A huge list would be like A-C then DA-ZZ
         */
         fun setupJumpLocations(results: List<Int>?) {
+            if (results == null || results.size == 0)
+                return //todo: hack, in case random keystrokes make it through
 
-            if (results == null || results.size == 0) return //todo: hack, in case random keystrokes make it through
             textAndOffsetHash.clear()
             val textPointPairs: MutableList<Pair<String, Point>> = ArrayList()
             val total = results.size - 1
@@ -83,7 +84,6 @@ open class AceJumpAction() : DumbAwareAction() {
             //            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
 
             for (i in 0..total) {
-
                 var str = ""
 
                 val iGroup = i - lenMinusGroups
@@ -97,7 +97,6 @@ open class AceJumpAction() : DumbAwareAction() {
                     str += letters.elementAt(i).toString()
                 }
                 //                print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
-
 
                 val textOffset: Int = results[i]
                 val point: RelativePoint? = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
@@ -182,7 +181,6 @@ open class AceJumpAction() : DumbAwareAction() {
                     exit()
                 }
             })
-
         }
 
         configureSearchBox()
