@@ -12,7 +12,7 @@ import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
-class AceFinder(val project: Project, val document: DocumentImpl, val editor: EditorImpl, val virtualFile: VirtualFile) {
+class AceFinder(project: Project, val document: DocumentImpl, val editor: EditorImpl, val virtualFile: VirtualFile) {
     companion object {
         val ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
         val END_OF_LINE = "\\n"
@@ -114,7 +114,7 @@ class AceFinder(val project: Project, val document: DocumentImpl, val editor: Ed
         var offset = 0
         var result = findManager.findString(text, offset, findModel, virtualFile)
         while (result.isStringFound) {
-            var resultOffset =
+            val resultOffset =
                     if (getEndOffset)
                         result.endOffset - 1
                     else

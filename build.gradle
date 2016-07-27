@@ -24,10 +24,10 @@ intellij {
     pluginName 'AceJump'
     updateSinceUntilBuild false
 
-    publish {
-        username publishUsername
-        password publishPassword
-    }
+//    publish {
+//        username publishUsername
+//        password publishPassword
+//    }
 }
 
 group 'com.johnlindquist'
