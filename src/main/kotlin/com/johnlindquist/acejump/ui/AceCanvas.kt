@@ -7,8 +7,8 @@ import javax.swing.JComponent
 class AceCanvas : JComponent() {
     var jumpInfos: List<Pair<String, Point>>? = null
     var colorPair = Pair<Color?, Color?>(Color.BLACK, Color.WHITE)
-    var lineSpacing: Float = 0.toFloat()
-    var lineHeight: Int = 0
+    var lineSpacing = 0.toFloat()
+    var lineHeight = 0
 
     inner class FontBasedMeasurements() {
         var font = getFont()!!

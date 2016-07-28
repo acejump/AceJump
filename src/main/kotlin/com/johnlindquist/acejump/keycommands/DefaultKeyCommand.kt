@@ -8,9 +8,9 @@ import java.awt.event.KeyEvent
 import java.util.*
 import javax.swing.event.ChangeListener
 
-class DefaultKeyCommand(override val searchBox: SearchBox, val aceFinder: AceFinder, val aceJumper: AceJumper, val textAndOffsetHash: HashMap<String, Int>) : AceKeyCommand() {
+class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinder: AceFinder, val aceJumper: AceJumper) : AceKeyCommand() {
     override fun execute(keyEvent: KeyEvent) {
-        val keyChar: Char = keyEvent.keyChar
+        val keyChar = keyEvent.keyChar
 
         //fixes the delete bug
         if (keyChar == '\b') return

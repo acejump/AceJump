@@ -23,42 +23,25 @@ class AceFinder(val document: DocumentImpl, val editor: EditorImpl, val virtualF
 
     val eventDispatcher: EventDispatcher<ChangeListener>? = EventDispatcher.create(ChangeListener::class.java)
 
-    var startResult: Int = 0
-    var endResult: Int = 0
-    var allowedCount: Int = getAllowedCharacters().length
-    var results: List<Int>? = null
-    var getEndOffset: Boolean = false
-    var firstChar: String = ""
-    var customOffset: Int = 0
-    var isTargetMode: Boolean = false
-
-    fun createFindModel(findManager: FindManager): FindModel {
-        val clone = findManager.findInFileModel.clone()
-        clone.isFindAll = true
-        clone.isFromCursor = true
-        clone.isForward = true
-        clone.isRegularExpressions = false
-        clone.isWholeWordsOnly = false
-        clone.isCaseSensitive = false
-        clone.setSearchHighlighters(true)
-        clone.isPreserveCase = false
-
-        return clone
-    }
+    var startResult = 0
+    var endResult = 0
+    var allowedCount = getAllowedCharacters().length
+    var results: List<Int> = listOf()
+    var getEndOffset = false
+    var firstChar = ""
+    var customOffset = 0
+    var isTargetMode = false
 
     fun findText(text: String, isRegEx: Boolean) {
-
         val application = ApplicationManager.getApplication()
         application?.runReadAction({ results = findAllVisible() })
-
         application?.invokeLater({
             val caretOffset = editor.caretModel.offset
             val lineNumber = document.getLineNumber(caretOffset)
             val lineStartOffset = document.getLineStartOffset(lineNumber)
             val lineEndOffset = document.getLineEndOffset(lineNumber)
 
-
-            results = results?.sortedWith(object : Comparator<Int?> {
+            results = results.sortedWith(object : Comparator<Int?> {
                 override fun equals(other: Any?): Boolean {
                     throw UnsupportedOperationException()
                 }
@@ -66,22 +49,19 @@ class AceFinder(val document: DocumentImpl, val editor: EditorImpl, val virtualF
                 override fun compare(p0: Int?, p1: Int?): Int {
                     val i1: Int = Math.abs(caretOffset - p0!!)
                     val i2: Int = Math.abs(caretOffset - p1!!)
-                    val o1OnSameLine: Boolean = p0 >= lineStartOffset && p0 <= lineEndOffset
-                    val o2OnSameLine: Boolean = p1 >= lineStartOffset && p1 <= lineEndOffset
+                    val o1OnSameLine = p0 >= lineStartOffset && p0 <= lineEndOffset
+                    val o2OnSameLine = p1 >= lineStartOffset && p1 <= lineEndOffset
                     if (i1 > i2) {
                         if (!o2OnSameLine && o1OnSameLine) {
                             return -1
                         }
                         return 1
-                    } else
-                        if (i1 == i2) {
-                            return 0
-                        } else {
-                            if (!o1OnSameLine && o2OnSameLine) {
-                                return 1
-                            }
-                            return -1
-                        }
+                    } else if (i1 == i2) {
+                        return 0
+                    } else if (!o1OnSameLine && o2OnSameLine) {
+                        return 1
+                    }
+                    return -1
                 }
             })
 

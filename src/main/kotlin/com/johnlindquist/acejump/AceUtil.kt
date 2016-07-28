@@ -6,8 +6,7 @@ import com.intellij.ui.awt.RelativePoint
 import java.awt.Point
 
 fun guessBestLocation(editor: Editor): RelativePoint {
-    val logicalPosition: VisualPosition = editor.caretModel.visualPosition
-    return getPointFromVisualPosition(editor, logicalPosition)
+    return getPointFromVisualPosition(editor, editor.caretModel.visualPosition)
 }
 
 fun getPointFromVisualPosition(editor: Editor, logicalPosition: VisualPosition): RelativePoint {

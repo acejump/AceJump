@@ -20,7 +20,6 @@ class SearchBox : JTextField() {
     var popupContainer: AbstractPopup? = null
     var defaultKeyCommand: AceKeyCommand? = null
 
-
     override fun requestFocus() {
         transferHandler = null
         super.requestFocus()
@@ -28,7 +27,6 @@ class SearchBox : JTextField() {
 
     override fun paintBorder(p0: Graphics?) {
     }
-
 
     //todo: I need to really rethink this entire approach
     override fun processKeyEvent(keyEvent: KeyEvent) {

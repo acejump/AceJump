@@ -62,9 +62,7 @@
 
     <version>2.0.13</version>
     <category>Navigation</category>
-    <vendor url="http://johnlindquist.com"
-            email="johnlindquist@gmail.com">johnlindquist
-    </vendor>
+    <vendor url="https://github.com/johnlindquist/AceJump">AceJump</vendor>
 
     <idea-version since-build="143.379"/>
 
@@ -74,8 +72,7 @@
                 class="com.johnlindquist.acejump.AceJumpAction"
                 text="Ace Jump"
                 description="Search and navigate to result">
-            <keyboard-shortcut keymap="$default"
-                               first-keystroke="ctrl SEMICOLON"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
             <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
             <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
         </action>
