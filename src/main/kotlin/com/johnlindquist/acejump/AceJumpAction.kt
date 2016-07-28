@@ -13,7 +13,6 @@ import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.IdeFocusManager
-import com.intellij.ui.awt.RelativePoint
 import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.ui.AceCanvas
@@ -24,7 +23,6 @@ import java.awt.Point
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent
-import java.util.*
 import javax.swing.JComponent
 import javax.swing.JRootPane
 import javax.swing.SwingUtilities
@@ -46,13 +44,9 @@ open class AceJumpAction() : DumbAwareAction() {
         val font = Font(scheme?.editorFontName, Font.BOLD, scheme?.editorFontSize!!)
         val aceFinder = AceFinder(document, editor, virtualFile)
         val aceJumper = AceJumper(editor, document)
-        val aceCanvas = AceCanvas()
+        val aceCanvas = AceCanvas(editor)
         val searchBox = SearchBox()
 
-        fun showJumpers(textPointPairs: List<Pair<String, Point>>) {
-            aceCanvas.jumpInfos = textPointPairs.reversed()
-            aceCanvas.repaint()
-        }
 
         fun exit() {
             val contentComponent: JComponent? = editor.contentComponent
@@ -66,47 +60,6 @@ open class AceJumpAction() : DumbAwareAction() {
             If there are >26, then start A-Y then ZA-ZZ
             A huge list would be like A-C then DA-ZZ
         */
-        fun setupJumpLocations(results: Map<Int, String>) {
-            if (results.size == 0)
-                return //todo: hack, in case random keystrokes make it through
-
-            val textPointPairs: MutableList<Pair<String, Point>> = ArrayList()
-            val total = results.size - 1
-
-            val letters = aceFinder.getAllowedCharacters()
-            val len = letters.length
-            val groups = Math.floor(total.toDouble() / len)
-            //            print("groups: " + groups.toString())
-            val lenMinusGroups = len - groups.toInt()
-            //            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
-
-            var i = 0
-            for (textOffset in results.keys) {
-                var str = ""
-
-                val iGroup = i - lenMinusGroups
-                val iModGroup = iGroup % len
-                //                if(iModGroup == 0) print("================\n")
-                val i1 = Math.floor(lenMinusGroups.toDouble() + ((i + groups.toInt()) / len)).toInt() - 1
-                if (i >= lenMinusGroups) {
-                    str += letters.elementAt(i1)
-                    str += letters.elementAt(iModGroup).toString()
-                } else {
-                    str += letters.elementAt(i).toString()
-                }
-                //                print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
-
-                val point: RelativePoint? = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
-                textPointPairs.add(Pair(str, point?.originalPoint as Point))
-
-                if (str == "zz") {
-                    break
-                }
-                i++
-            }
-            showJumpers(textPointPairs)
-        }
-
 
         fun addAceCanvas() {
             val contentComponent: JComponent? = editor.contentComponent
@@ -129,7 +82,7 @@ open class AceJumpAction() : DumbAwareAction() {
                 searchBox.addPreProcessReleaseKey(KeyEvent.VK_UP, ShowFirstCharOfLines(searchBox, aceFinder))
                 searchBox.addPreProcessPressedKey(KeyEvent.VK_BACK_SPACE, ClearResults(searchBox, aceCanvas))
                 searchBox.addPreProcessPressedKey(KeyEvent.VK_SPACE, ShowWhiteSpace(searchBox, aceFinder))
-                searchBox.preProcessKeyPressedMap.values.forEach { it.addListener(ChangeListener { setupJumpLocations(aceFinder.results) }) }
+                searchBox.preProcessKeyPressedMap.values.forEach { it.addListener(ChangeListener { aceCanvas.setupJumpLocations(aceFinder.results) }) }
 
                 val defaultKeyCommand: DefaultKeyCommand = DefaultKeyCommand(searchBox, aceFinder, aceJumper)
                 searchBox.defaultKeyCommand = defaultKeyCommand

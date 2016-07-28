@@ -26,7 +26,7 @@ class AceFinder(val document: DocumentImpl, val editor: EditorImpl, val virtualF
     var startResult = 0
     var endResult = 0
     var allowedCount = getAllowedCharacters().length
-    var results: List<Int> = listOf()
+    var results: Map<Int, String> = listOf()
     var getEndOffset = false
     var firstChar = ""
     var customOffset = 0

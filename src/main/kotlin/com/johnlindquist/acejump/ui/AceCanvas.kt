@@ -1,11 +1,14 @@
 package com.johnlindquist.acejump.ui
 
+import com.intellij.openapi.editor.impl.EditorImpl
+import com.intellij.ui.awt.RelativePoint
+import com.johnlindquist.acejump.getPointFromVisualPosition
 import java.awt.*
+import java.util.*
 import javax.swing.JComponent
 
-
-class AceCanvas : JComponent() {
-    var jumpInfos: List<Pair<String, Point>>? = null
+class AceCanvas(val editor: EditorImpl) : JComponent() {
+    var jumpInfos: MutableList<Pair<String, Point>> = arrayListOf()
     var colorPair = Pair<Color?, Color?>(Color.BLACK, Color.WHITE)
     var lineSpacing = 0.toFloat()
     var lineHeight = 0
@@ -26,7 +29,7 @@ class AceCanvas : JComponent() {
     }
 
     override fun paint(graphics: Graphics) {
-        if (jumpInfos == null)
+        if (jumpInfos.isEmpty())
             return
 
         super.paint(graphics)
@@ -62,8 +65,6 @@ class AceCanvas : JComponent() {
                 g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset.toInt(), fbm.rectWidth, lineHeight.toInt())
             }
 
-
-
             //just a touch of alpha
             g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.85.toFloat())
 
@@ -71,12 +72,57 @@ class AceCanvas : JComponent() {
             g2d.font = fbm.font
             g2d.color = defaultBackground
             g2d.drawString(text.toUpperCase(), originalPoint.x, originalPoint.y + fbm.fontHeight)
-
         }
     }
 
     fun clear() {
-        jumpInfos = null
+        jumpInfos.removeAll { true }
+        repaint()
+    }
+
+    fun setupJumpLocations(results: Map<Int, String>) {
+        if (results.size == 0)
+            return //todo: hack, in case random keystrokes make it through
+
+        val textPointPairs: MutableList<Pair<String, Point>> = ArrayList()
+        val total = results.size - 1
+
+        val letters = "abcdefghijklmnopqrstuvwxyz"
+        val len = letters.length
+        val groups = Math.floor(total.toDouble() / len)
+        //            print("groups: " + groups.toString())
+        val lenMinusGroups = len - groups.toInt()
+        //            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
+
+        var i = 0
+        for (textOffset in results.keys) {
+            var str = ""
+
+            val iGroup = i - lenMinusGroups
+            val iModGroup = iGroup % len
+            //                if(iModGroup == 0) print("================\n")
+            val i1 = Math.floor(lenMinusGroups.toDouble() + ((i + groups.toInt()) / len)).toInt() - 1
+            if (i >= lenMinusGroups) {
+                str += letters.elementAt(i1)
+                str += letters.elementAt(iModGroup).toString()
+            } else {
+                str += letters.elementAt(i).toString()
+            }
+            //                print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
+
+            val point: RelativePoint? = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
+            textPointPairs.add(Pair(str, point?.originalPoint as Point))
+
+            if (str == "zz") {
+                break
+            }
+            i++
+        }
+        showJumpers(textPointPairs)
+    }
+
+    fun showJumpers(textPointPairs: List<Pair<String, Point>>) {
+        textPointPairs.reversed()
         repaint()
     }
 }
