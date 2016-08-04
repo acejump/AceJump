@@ -8,33 +8,33 @@ import java.util.*
 
 open class AceJumper(var editor: EditorImpl, var document: DocumentImpl) {
 
-    fun moveCaret(offset: Int) {
-        editor.caretModel.moveToOffset(offset)
-    }
+  fun moveCaret(offset: Int) {
+    editor.caretModel.moveToOffset(offset)
+  }
 
-    fun selectWordAtCaret() {
-        val text = document.charsSequence
-        val ranges = ArrayList<TextRange>()
+  fun selectWordAtCaret() {
+    val text = document.charsSequence
+    val ranges = ArrayList<TextRange>()
 
-        SelectWordUtil.addWordSelection(false, text, editor.caretModel.offset, ranges)
+    SelectWordUtil.addWordSelection(false, text, editor.caretModel.offset, ranges)
 
-        if (ranges.isEmpty())
-            return
+    if (ranges.isEmpty())
+      return
 
-        val startWordOffset = Math.max(0, ranges[0].startOffset)
-        val endWordOffset = Math.min(ranges[0].endOffset, document.textLength)
+    val startWordOffset = Math.max(0, ranges[0].startOffset)
+    val endWordOffset = Math.min(ranges[0].endOffset, document.textLength)
 
-        /*        if(ranges.size() == 2 && editor.getSelectionModel().getSelectionStart() == startWordOffset && editor.getSelectionModel().getSelectionEnd() == endWordOffset)
-                    startWordOffset = Math.max(0, ranges.get(1).getStartOffset())
-                endWordOffset = Math.min(ranges.get(1).getEndOffset(), document.getTextLength())*/
+    /*        if(ranges.size() == 2 && editor.getSelectionModel().getSelectionStart() == startWordOffset && editor.getSelectionModel().getSelectionEnd() == endWordOffset)
+                startWordOffset = Math.max(0, ranges.get(1).getStartOffset())
+            endWordOffset = Math.min(ranges.get(1).getEndOffset(), document.getTextLength())*/
 
-        editor.selectionModel.setSelection(startWordOffset, endWordOffset)
-    }
+    editor.selectionModel.setSelection(startWordOffset, endWordOffset)
+  }
 
-    fun setSelectionFromCaretToOffset(offset: Int) {
-        editor.selectionModel.removeSelection()
-        val caretOffset = editor.caretModel.offset
-        editor.selectionModel.setSelection(caretOffset, offset)
-    }
+  fun setSelectionFromCaretToOffset(offset: Int) {
+    editor.selectionModel.removeSelection()
+    val caretOffset = editor.caretModel.offset
+    editor.selectionModel.setSelection(caretOffset, offset)
+  }
 
 }

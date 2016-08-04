@@ -7,20 +7,23 @@ import java.awt.event.KeyEvent
 import javax.swing.event.ChangeListener
 
 class ChangeToTargetMode(override val searchBox: SearchBox, override val aceFinder: AceFinder) : AceKeyCommand() {
-    override fun execute(keyEvent: KeyEvent) {
-        aceFinder.addResultsReadyListener(ChangeListener { p0 ->
-            eventDispatcher?.multicaster?.stateChanged(p0)
-            //                eventDispatcher?.getMulticaster()?.stateChanged(ChangeEvent(toString()))
-        })
+  init {
+    addListener(defaultChangeListener)
+  }
 
-        if (keyEvent.isMetaDown || keyEvent.isControlDown) {
-            if (aceFinder.isTargetMode) {
-                aceFinder.isTargetMode = false
-                searchBox.background = Color.WHITE
-            } else {
-                aceFinder.isTargetMode = true
-                searchBox.background = Color.RED
-            }
-        }
+  override fun execute(keyEvent: KeyEvent) {
+    aceFinder.addResultsReadyListener(ChangeListener {
+      eventDispatcher.multicaster.stateChanged(it)
+    })
+
+    if (keyEvent.isMetaDown || keyEvent.isControlDown) {
+      if (aceFinder.isTargetMode) {
+        aceFinder.isTargetMode = false
+        searchBox.background = Color.WHITE
+      } else {
+        aceFinder.isTargetMode = true
+        searchBox.background = Color.RED
+      }
     }
+  }
 }

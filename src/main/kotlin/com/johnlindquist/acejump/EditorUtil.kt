@@ -26,8 +26,8 @@ import com.intellij.openapi.editor.VisualPosition
  * This is a set of helper methods for working with editors. All line and column values are zero based.
  */
 fun getVisualLineAtTopOfScreen(editor: Editor): Int {
-    val lh = editor.lineHeight
-    return (editor.scrollingModel.verticalScrollOffset + lh - 1) / lh
+  val lh = editor.lineHeight
+  return (editor.scrollingModel.verticalScrollOffset + lh - 1) / lh
 }
 
 /**
@@ -38,12 +38,12 @@ fun getVisualLineAtTopOfScreen(editor: Editor): Int {
  * @return The file line count
  */
 fun getLineCount(editor: Editor): Int {
-    var len = editor.document.lineCount
-    if (editor.document.textLength > 0 && editor.document.charsSequence[editor.document.textLength - 1] == '\n') {
-        len--
-    }
+  var len = editor.document.lineCount
+  if (editor.document.textLength > 0 && editor.document.charsSequence[editor.document.textLength - 1] == '\n') {
+    len--
+  }
 
-    return len
+  return len
 }
 
 /**
@@ -56,11 +56,11 @@ fun getLineCount(editor: Editor): Int {
  * @return The file's character count
  */
 @JvmOverloads fun getFileSize(editor: Editor, includeEndNewLine: Boolean = false): Int {
-    val len = editor.document.textLength
-    return if (includeEndNewLine || len == 0 || editor.document.charsSequence[len - 1] != '\n')
-        len
-    else
-        len - 1
+  val len = editor.document.textLength
+  return if (includeEndNewLine || len == 0 || editor.document.charsSequence[len - 1] != '\n')
+    len
+  else
+    len - 1
 }
 
 /**
@@ -72,9 +72,9 @@ fun getLineCount(editor: Editor): Int {
  * @return The number of screen lines
  */
 fun getScreenHeight(editor: Editor): Int {
-    val lh = editor.lineHeight
-    val height = editor.scrollingModel.visibleArea.y + editor.scrollingModel.visibleArea.height - getVisualLineAtTopOfScreen(editor) * lh
-    return height / lh
+  val lh = editor.lineHeight
+  val height = editor.scrollingModel.visibleArea.y + editor.scrollingModel.visibleArea.height - getVisualLineAtTopOfScreen(editor) * lh
+  return height / lh
 }
 
 /**
@@ -87,8 +87,8 @@ fun getScreenHeight(editor: Editor): Int {
  * @return The logical line number
  */
 fun visualLineToLogicalLine(editor: Editor, line: Int): Int {
-    val logicalLine = editor.visualToLogicalPosition(VisualPosition(line, 0)).line
-    return normalizeLine(editor, logicalLine)
+  val logicalLine = editor.visualToLogicalPosition(VisualPosition(line, 0)).line
+  return normalizeLine(editor, logicalLine)
 }
 
 /**
@@ -101,13 +101,13 @@ fun visualLineToLogicalLine(editor: Editor, line: Int): Int {
  * @return 0 if line is &lt 0, file size of line is bigger than file, else the start offset for the line
  */
 fun getLineStartOffset(editor: Editor, line: Int): Int {
-    if (line < 0) {
-        return 0
-    } else if (line >= getLineCount(editor)) {
-        return getFileSize(editor)
-    } else {
-        return editor.document.getLineStartOffset(line)
-    }
+  if (line < 0) {
+    return 0
+  } else if (line >= getLineCount(editor)) {
+    return getFileSize(editor)
+  } else {
+    return editor.document.getLineStartOffset(line)
+  }
 }
 
 /**
@@ -122,13 +122,13 @@ fun getLineStartOffset(editor: Editor, line: Int): Int {
  * @return 0 if line is &lt 0, file size of line is bigger than file, else the end offset for the line
  */
 fun getLineEndOffset(editor: Editor, line: Int, allowEnd: Boolean): Int {
-    if (line < 0) {
-        return 0
-    } else if (line >= getLineCount(editor)) {
-        return getFileSize(editor, allowEnd)
-    } else {
-        return editor.document.getLineEndOffset(line) - if (allowEnd) 0 else 1
-    }
+  if (line < 0) {
+    return 0
+  } else if (line >= getLineCount(editor)) {
+    return getFileSize(editor, allowEnd)
+  } else {
+    return editor.document.getLineEndOffset(line) - if (allowEnd) 0 else 1
+  }
 }
 
 /**
@@ -142,7 +142,7 @@ fun getLineEndOffset(editor: Editor, line: Int, allowEnd: Boolean): Int {
  * @return The normalized logical line number
  */
 fun normalizeLine(editor: Editor, line: Int): Int {
-    return Math.max(0, Math.min(line, getLineCount(editor) - 1))
+  return Math.max(0, Math.min(line, getLineCount(editor) - 1))
 }
 
 /**
@@ -163,11 +163,11 @@ fun normalizeOffset(editor: Editor,
                     line: Int,
                     offset: Int,
                     allowEnd: Boolean): Int {
-    if (getFileSize(editor, allowEnd) == 0) {
-        return 0
-    }
+  if (getFileSize(editor, allowEnd) == 0) {
+    return 0
+  }
 
-    val min = getLineStartOffset(editor, line)
-    val max = getLineEndOffset(editor, line, allowEnd)
-    return Math.max(Math.min(offset, max), min)
+  val min = getLineStartOffset(editor, line)
+  val max = getLineEndOffset(editor, line, allowEnd)
+  return Math.max(Math.min(offset, max), min)
 }

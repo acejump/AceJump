@@ -3,138 +3,32 @@ package com.johnlindquist.acejump
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.ui.popup.ComponentPopupBuilder
-import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.openapi.util.SystemInfo
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.IdeFocusManager
-import com.intellij.ui.popup.AbstractPopup
-import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.ui.AceCanvas
 import com.johnlindquist.acejump.ui.SearchBox
-import java.awt.Dimension
-import java.awt.Font
-import java.awt.Point
-import java.awt.event.FocusEvent
-import java.awt.event.FocusListener
-import java.awt.event.KeyEvent
-import javax.swing.JComponent
-import javax.swing.JRootPane
-import javax.swing.SwingUtilities
-import javax.swing.event.ChangeListener
 
 open class AceJumpAction() : DumbAwareAction() {
+  override fun update(e: AnActionEvent?) {
+    e?.presentation?.isEnabled = (e?.getData(CommonDataKeys.EDITOR)) != null
+  }
 
-    override fun update(e: AnActionEvent?) {
-        e?.presentation?.isEnabled = (e?.getData(CommonDataKeys.EDITOR)) != null
-    }
+  override fun actionPerformed(actionEvent: AnActionEvent) {
+    val project = actionEvent.getData(CommonDataKeys.PROJECT) as Project
+    val editor = actionEvent.getData(CommonDataKeys.EDITOR) as EditorImpl
+    val virtualFile = actionEvent.getData(CommonDataKeys.VIRTUAL_FILE) as VirtualFile
+    val document = editor.document as DocumentImpl
+    val aceFinder = AceFinder(document, editor, virtualFile)
+    val aceJumper = AceJumper(editor, document)
+    val aceCanvas = AceCanvas(editor)
+    val searchBox = SearchBox(aceFinder, aceJumper, aceCanvas, editor)
 
-    override fun actionPerformed(p0: AnActionEvent) {
-        val actionEvent = p0
-        val project = actionEvent.getData(CommonDataKeys.PROJECT) as Project
-        val editor = actionEvent.getData(CommonDataKeys.EDITOR) as EditorImpl
-        val virtualFile = actionEvent.getData(CommonDataKeys.VIRTUAL_FILE) as VirtualFile
-        val document = editor.document as DocumentImpl
-        val scheme = EditorColorsManager.getInstance()?.globalScheme
-        val font = Font(scheme?.editorFontName, Font.BOLD, scheme?.editorFontSize!!)
-        val aceFinder = AceFinder(document, editor, virtualFile)
-        val aceJumper = AceJumper(editor, document)
-        val aceCanvas = AceCanvas(editor)
-        val searchBox = SearchBox()
-
-
-        fun exit() {
-            val contentComponent: JComponent? = editor.contentComponent
-            contentComponent?.remove(aceCanvas)
-            contentComponent?.repaint()
-        }
-
-        //todo: refactor
-        /*
-            If there are 26 or less points, use A-Z
-            If there are >26, then start A-Y then ZA-ZZ
-            A huge list would be like A-C then DA-ZZ
-        */
-
-        fun addAceCanvas() {
-            val contentComponent: JComponent? = editor.contentComponent
-            contentComponent?.add(aceCanvas)
-            val viewport = editor.scrollPane.viewport!!
-            aceCanvas.setBounds(0, 0, viewport.width + 1000, viewport.height + 1000)
-            val rootPane: JRootPane? = editor.component.rootPane!!
-            val locationOnScreen: Point? = SwingUtilities.convertPoint(aceCanvas, (aceCanvas.location), rootPane)
-            aceCanvas.setLocation(-locationOnScreen!!.x, -locationOnScreen.y)
-        }
-
-        fun configureSearchBox() {
-            fun setupSearchBoxKeys() {
-                val releasedHome: AceKeyCommand = ShowBeginningOfLines(searchBox, aceFinder)
-                val releasedEnd: AceKeyCommand = ShowEndOfLines(searchBox, aceFinder)
-                searchBox.addPreProcessReleaseKey(KeyEvent.VK_HOME, releasedHome)
-                searchBox.addPreProcessReleaseKey(KeyEvent.VK_LEFT, releasedHome)
-                searchBox.addPreProcessReleaseKey(KeyEvent.VK_RIGHT, releasedEnd)
-                searchBox.addPreProcessReleaseKey(KeyEvent.VK_END, releasedEnd)
-                searchBox.addPreProcessReleaseKey(KeyEvent.VK_UP, ShowFirstCharOfLines(searchBox, aceFinder))
-                searchBox.addPreProcessPressedKey(KeyEvent.VK_BACK_SPACE, ClearResults(searchBox, aceCanvas))
-                searchBox.addPreProcessPressedKey(KeyEvent.VK_SPACE, ShowWhiteSpace(searchBox, aceFinder))
-                searchBox.preProcessKeyPressedMap.values.forEach { it.addListener(ChangeListener { aceCanvas.setupJumpLocations(aceFinder.results) }) }
-
-                val defaultKeyCommand: DefaultKeyCommand = DefaultKeyCommand(searchBox, aceFinder, aceJumper)
-                searchBox.defaultKeyCommand = defaultKeyCommand
-
-                //todo: refactor - edge cases...
-                val pressedSemi: AceKeyCommand = ChangeToTargetMode(searchBox, aceFinder)
-                searchBox.addPreProcessPressedKey(KeyEvent.VK_SEMICOLON, pressedSemi)
-            }
-
-            setupSearchBoxKeys()
-            searchBox.font = font
-            val popupBuilder: ComponentPopupBuilder? = JBPopupFactory.getInstance()?.createComponentPopupBuilder(searchBox, searchBox)
-            popupBuilder?.setCancelKeyEnabled(true)
-            val popup = (popupBuilder?.createPopup() as AbstractPopup?)
-            popup?.show(guessBestLocation(editor))
-            popup?.setRequestFocus(true)
-
-            val width = searchBox.getFontMetrics(font).stringWidth("w")
-            val dimension: Dimension = Dimension(width * 2, (editor.lineHeight))
-            if (SystemInfo.isMac) {
-                dimension.setSize(dimension.width * 2, dimension.height * 2)
-            }
-
-            popup?.size = dimension
-            searchBox.popupContainer = popup
-            searchBox.size = dimension
-            searchBox.isFocusable = true
-            searchBox.addFocusListener(object : FocusListener {
-                override fun focusGained(p0: FocusEvent) {
-                    addAceCanvas()
-                }
-
-                override fun focusLost(p0: FocusEvent) {
-                    exit()
-                }
-            })
-        }
-
-        configureSearchBox()
-
-        fun configureAceCanvas() {
-            aceCanvas.font = font
-            aceCanvas.lineHeight = editor.lineHeight
-            aceCanvas.lineSpacing = scheme?.lineSpacing!!
-            aceCanvas.colorPair = Pair(scheme?.defaultBackground, scheme?.defaultForeground)
-        }
-
-        configureAceCanvas()
-
-        ApplicationManager.getApplication()?.invokeLater({
-            val manager = IdeFocusManager.getInstance(project)
-            manager?.requestFocus(searchBox, false)
-        })
-    }
+    ApplicationManager.getApplication().invokeLater({
+      IdeFocusManager.getInstance(project).requestFocus(searchBox, false)
+    })
+  }
 }

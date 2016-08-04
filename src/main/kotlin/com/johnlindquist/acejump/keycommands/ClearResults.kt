@@ -7,14 +7,14 @@ import java.awt.event.KeyEvent
 import javax.swing.event.ChangeListener
 
 class ClearResults(override val searchBox: SearchBox, val aceCanvas: AceCanvas) : AceKeyCommand() {
-    override val aceFinder: AceFinder
-        get() = throw UnsupportedOperationException()
+  override val aceFinder: AceFinder
+    get() = throw UnsupportedOperationException()
 
-    override fun execute(keyEvent: KeyEvent) {
-        searchBox.text = ""
-        aceCanvas.clear()
-    }
+  override fun execute(keyEvent: KeyEvent) {
+    searchBox.text = ""
+    aceCanvas.clear()
+  }
 
-    override fun addListener(changeListener: ChangeListener) {
-    }
+  override fun addListener(changeListener: ChangeListener) {
+  }
 }

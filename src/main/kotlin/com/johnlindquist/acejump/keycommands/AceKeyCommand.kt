@@ -7,13 +7,18 @@ import java.awt.event.KeyEvent
 import javax.swing.event.ChangeListener
 
 abstract class AceKeyCommand {
-    open val eventDispatcher: EventDispatcher<ChangeListener>? = EventDispatcher.create(ChangeListener::class.java)
-    abstract val searchBox: SearchBox
-    abstract val aceFinder: AceFinder
+  abstract val searchBox: SearchBox
+  abstract val aceFinder: AceFinder
+  open val defaultChangeListener = ChangeListener {
+    //Gotta be a nicer way to do this
+    searchBox.aceCanvas.jumpInfos = aceFinder.setupJumpLocations()
+    searchBox.aceCanvas.repaint()
+  }
 
-    abstract fun execute(keyEvent: KeyEvent)
+  open val eventDispatcher: EventDispatcher<ChangeListener> = EventDispatcher.create(ChangeListener::class.java)
+  abstract fun execute(keyEvent: KeyEvent)
 
-    open fun addListener(changeListener: ChangeListener) {
-        eventDispatcher?.addListener(changeListener)
-    }
+  open fun addListener(changeListener: ChangeListener) {
+    eventDispatcher.addListener(changeListener)
+  }
 }
