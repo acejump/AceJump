@@ -4,7 +4,6 @@ import com.johnlindquist.acejump.search.AceFinder
 import com.johnlindquist.acejump.ui.AceCanvas
 import com.johnlindquist.acejump.ui.SearchBox
 import java.awt.event.KeyEvent
-import javax.swing.event.ChangeListener
 
 class ClearResults(override val searchBox: SearchBox, val aceCanvas: AceCanvas) : AceKeyCommand() {
   override val aceFinder: AceFinder
@@ -13,8 +12,5 @@ class ClearResults(override val searchBox: SearchBox, val aceCanvas: AceCanvas) 
   override fun execute(keyEvent: KeyEvent) {
     searchBox.text = ""
     aceCanvas.clear()
-  }
-
-  override fun addListener(changeListener: ChangeListener) {
   }
 }

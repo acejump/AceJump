@@ -21,11 +21,14 @@ import java.util.*
 import javax.swing.JRootPane
 import javax.swing.JTextField
 import javax.swing.SwingUtilities
+import javax.swing.event.ChangeListener
 import javax.swing.text.BadLocationException
 
-class SearchBox(var aceFinder: AceFinder, var aceCanvas: AceCanvas, var editor: EditorImpl) : JTextField() {
+class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField() {
   val keyReleasedMap = HashMap<Int, AceKeyCommand>()
   val keyPressedMap = HashMap<Int, AceKeyCommand>()
+
+  var aceCanvas: AceCanvas = AceCanvas(editor)
   var popupContainer: AbstractPopup? = null
   var defaultKeyCommand: AceKeyCommand = DefaultKeyCommand(this, aceFinder)
   var isSearchEnabled = true
@@ -71,6 +74,11 @@ class SearchBox(var aceFinder: AceFinder, var aceCanvas: AceCanvas, var editor: 
       override fun focusLost(p0: FocusEvent) {
         exit()
       }
+    })
+
+    aceFinder.addResultsReadyListener(ChangeListener {
+      aceCanvas.jumpInfos = aceFinder.setupJumpLocations()
+      aceCanvas.repaint()
     })
   }
 

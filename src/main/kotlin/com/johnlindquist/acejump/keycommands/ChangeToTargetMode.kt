@@ -4,13 +4,8 @@ import com.johnlindquist.acejump.search.AceFinder
 import com.johnlindquist.acejump.ui.SearchBox
 import java.awt.Color
 import java.awt.event.KeyEvent
-import javax.swing.event.ChangeListener
 
 class ChangeToTargetMode(override val searchBox: SearchBox, override val aceFinder: AceFinder) : AceKeyCommand() {
-  init {
-    addListener(defaultChangeListener)
-  }
-
   override fun execute(keyEvent: KeyEvent) {
     if (keyEvent.isMetaDown || keyEvent.isControlDown) {
       if (aceFinder.isTargetMode) {

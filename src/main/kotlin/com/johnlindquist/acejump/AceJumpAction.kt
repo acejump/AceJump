@@ -23,11 +23,10 @@ open class AceJumpAction() : DumbAwareAction() {
     val project = actionEvent.getData(CommonDataKeys.PROJECT) as Project
     val editor = actionEvent.getData(CommonDataKeys.EDITOR) as EditorImpl
     val virtualFile = actionEvent.getData(CommonDataKeys.VIRTUAL_FILE) as VirtualFile
-    val document = editor.document as DocumentImpl
     val findManager = FindManager.getInstance(project)!!
 
-    val aceFinder = AceFinder(findManager, document, editor, virtualFile)
-    val searchBox = SearchBox(aceFinder, AceCanvas(editor), editor)
+    val aceFinder = AceFinder(findManager, editor, virtualFile)
+    val searchBox = SearchBox(aceFinder, editor)
 
     ApplicationManager.getApplication().invokeLater({
       IdeFocusManager.getInstance(project).requestFocus(searchBox, false)

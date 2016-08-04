@@ -10,13 +10,12 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.EventDispatcher
-import com.johnlindquist.acejump.search.ResultComparator
 import java.awt.Point
 import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
-class AceFinder(var findManager: FindManager, var document: DocumentImpl, val editor: EditorImpl, var virtualFile: VirtualFile) {
+class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtualFile: VirtualFile) {
   companion object {
     val ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
     val END_OF_LINE = "\\n"
@@ -25,8 +24,8 @@ class AceFinder(var findManager: FindManager, var document: DocumentImpl, val ed
     val WHITE_SPACE = "\\s+\\S(?<!^\\s*\\S)"
   }
 
+  val document: DocumentImpl = editor.document as DocumentImpl
   val eventDispatcher: EventDispatcher<ChangeListener> = EventDispatcher.create(ChangeListener::class.java)
-
   val findModel: FindModel = createFindModel(findManager)
   var startResult = 0
   var endResult = 0
