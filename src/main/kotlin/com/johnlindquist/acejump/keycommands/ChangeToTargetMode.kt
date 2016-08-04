@@ -12,10 +12,6 @@ class ChangeToTargetMode(override val searchBox: SearchBox, override val aceFind
   }
 
   override fun execute(keyEvent: KeyEvent) {
-    aceFinder.addResultsReadyListener(ChangeListener {
-      eventDispatcher.multicaster.stateChanged(it)
-    })
-
     if (keyEvent.isMetaDown || keyEvent.isControlDown) {
       if (aceFinder.isTargetMode) {
         aceFinder.isTargetMode = false

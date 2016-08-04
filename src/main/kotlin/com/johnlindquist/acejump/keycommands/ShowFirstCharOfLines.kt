@@ -11,10 +11,6 @@ class ShowFirstCharOfLines(override val searchBox: SearchBox, override val aceFi
   }
 
   override fun execute(keyEvent: KeyEvent) {
-    aceFinder.addResultsReadyListener(ChangeListener {
-      eventDispatcher.multicaster.stateChanged(it)
-    })
-
     aceFinder.getEndOffset = true
     aceFinder.findText(AceFinder.CODE_INDENTS, true)
     searchBox.forceSpaceChar()

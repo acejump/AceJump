@@ -11,10 +11,6 @@ class ShowEndOfLines(override val searchBox: SearchBox, override val aceFinder: 
   }
 
   override fun execute(keyEvent: KeyEvent) {
-    aceFinder.addResultsReadyListener(ChangeListener {
-      eventDispatcher.multicaster.stateChanged(it)
-    })
-
     aceFinder.getEndOffset = true
     aceFinder.findText(AceFinder.END_OF_LINE, true)
     searchBox.forceSpaceChar()

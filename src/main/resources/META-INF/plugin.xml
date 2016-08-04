@@ -60,7 +60,7 @@
 
   <depends>com.intellij.modules.platform</depends>
 
-  <version>2.0.13</version>
+  <version>2.0.14</version>
   <category>Navigation</category>
   <vendor url="https://github.com/johnlindquist/AceJump">AceJump</vendor>
 

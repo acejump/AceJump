@@ -22,11 +22,6 @@ class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinde
 
     //Find or jump
     if (searchBox.isSearchEnabled) {
-      //Find
-      aceFinder.addResultsReadyListener(ChangeListener {
-        eventDispatcher.multicaster.stateChanged(it)
-      })
-
       aceFinder.findText(searchBox.text!!, false)
       searchBox.disableSearch()
     } else {

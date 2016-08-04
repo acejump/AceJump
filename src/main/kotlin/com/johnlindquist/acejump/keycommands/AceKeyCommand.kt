@@ -20,5 +20,8 @@ abstract class AceKeyCommand {
 
   open fun addListener(changeListener: ChangeListener) {
     eventDispatcher.addListener(changeListener)
+    aceFinder.addResultsReadyListener(ChangeListener {
+      eventDispatcher.multicaster.stateChanged(it)
+    })
   }
 }
