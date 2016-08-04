@@ -24,7 +24,7 @@ import javax.swing.JTextField
 import javax.swing.SwingUtilities
 import javax.swing.text.BadLocationException
 
-class SearchBox(aceFinder: AceFinder, aceJumper: AceJumper, var aceCanvas: AceCanvas, var editor: EditorImpl) : JTextField() {
+class SearchBox(var aceFinder: AceFinder, aceJumper: AceJumper, var aceCanvas: AceCanvas, var editor: EditorImpl) : JTextField() {
   val keyReleasedMap = HashMap<Int, AceKeyCommand>()
   val keyPressedMap = HashMap<Int, AceKeyCommand>()
   var popupContainer: AbstractPopup? = null
@@ -37,14 +37,14 @@ class SearchBox(aceFinder: AceFinder, aceJumper: AceJumper, var aceCanvas: AceCa
   init {
     val releasedHome = ShowBeginningOfLines(this, aceFinder)
     val releasedEnd = ShowEndOfLines(this, aceFinder)
-    keyReleasedMap.put(VK_HOME, releasedHome)
-    keyReleasedMap.put(VK_LEFT, releasedHome)
-    keyReleasedMap.put(VK_RIGHT, releasedEnd)
-    keyReleasedMap.put(VK_END, releasedEnd)
-    keyReleasedMap.put(VK_UP, ShowFirstCharOfLines(this, aceFinder))
-    keyPressedMap.put(VK_BACK_SPACE, ClearResults(this, aceCanvas))
-    keyPressedMap.put(VK_SPACE, ShowWhiteSpace(this, aceFinder))
-    keyPressedMap.put(VK_SEMICOLON, ChangeToTargetMode(this, aceFinder))
+    keyReleasedMap[VK_HOME] = releasedHome
+    keyReleasedMap[VK_LEFT] = releasedHome
+    keyReleasedMap[VK_RIGHT] = releasedEnd
+    keyReleasedMap[VK_END] = releasedEnd
+    keyReleasedMap[VK_UP] = ShowFirstCharOfLines(this, aceFinder)
+    keyPressedMap[VK_BACK_SPACE] = ClearResults(this, aceCanvas)
+    keyPressedMap[VK_SPACE] = ShowWhiteSpace(this, aceFinder)
+    keyPressedMap[VK_SEMICOLON] = ChangeToTargetMode(this, aceFinder)
 
     val scheme = EditorColorsManager.getInstance().globalScheme
     val font = Font(scheme.editorFontName, Font.BOLD, scheme.editorFontSize)
@@ -145,5 +145,6 @@ class SearchBox(aceFinder: AceFinder, aceJumper: AceJumper, var aceCanvas: AceCa
     val contentComponent = editor.contentComponent
     contentComponent.remove(aceCanvas)
     contentComponent.repaint()
+    aceFinder.textAndOffsetHash.clear()
   }
 }

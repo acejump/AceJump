@@ -23,14 +23,11 @@ class AceCanvas(editor: EditorImpl) : JComponent() {
     var font = getFont()!!
     val fontWidth = getFontMetrics(font).stringWidth("w")
     val fontHeight = font.size
-
     val rectMarginWidth = fontWidth / 2
     val doubleRectMarginWidth = rectMarginWidth * 2
-
     val fontSpacing = fontHeight * lineSpacing
     val rectHOffset = fontSpacing - fontHeight
     val rectWidth = fontWidth + doubleRectMarginWidth
-
     val hOffset = fontHeight - fontSpacing
   }
 

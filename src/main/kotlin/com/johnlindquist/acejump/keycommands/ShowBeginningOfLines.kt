@@ -11,8 +11,8 @@ class ShowBeginningOfLines(override val searchBox: SearchBox, override val aceFi
   }
 
   override fun execute(keyEvent: KeyEvent) {
-    aceFinder.addResultsReadyListener(ChangeListener { p0 ->
-      eventDispatcher.multicaster.stateChanged(p0)
+    aceFinder.addResultsReadyListener(ChangeListener {
+      eventDispatcher.multicaster.stateChanged(it)
     })
 
     aceFinder.findText(AceFinder.BEGINNING_OF_LINE, true)

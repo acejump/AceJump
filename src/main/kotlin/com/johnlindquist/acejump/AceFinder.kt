@@ -2,9 +2,12 @@ package com.johnlindquist.acejump
 
 import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
+import com.intellij.find.FindManager
+import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
+import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.EventDispatcher
@@ -13,7 +16,7 @@ import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
-class AceFinder(val document: DocumentImpl, val editor: EditorImpl, val virtualFile: VirtualFile) {
+class AceFinder(project: Project, var document: DocumentImpl, val editor: EditorImpl, var virtualFile: VirtualFile) {
   companion object {
     val ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
     val END_OF_LINE = "\\n"
@@ -24,18 +27,28 @@ class AceFinder(val document: DocumentImpl, val editor: EditorImpl, val virtualF
 
   val eventDispatcher: EventDispatcher<ChangeListener> = EventDispatcher.create(ChangeListener::class.java)
 
+  val findManager = FindManager.getInstance(project)!!
+  val findModel: FindModel = createFindModel(findManager)
+
+
   var startResult = 0
   var endResult = 0
   var allowedCount = ALLOWED_CHARACTERS.length
-  var results: Map<Int, String> = mapOf()
+  var results: List<Int> = emptyList()
+//  var results: Map<Int, String> = mapOf()
   var stringToIndex: Multimap<String, Int> = LinkedListMultimap.create()
   var getEndOffset = false
   var firstChar = ""
   var customOffset = 0
   var isTargetMode = false
   val resultComparator = ResultComparator(document, editor)
+  val textAndOffsetHash = HashMap<String, Int>()
+
 
   fun findText(text: String, isRegEx: Boolean) {
+    findModel.stringToFind = text
+    findModel.isRegularExpressions = isRegEx
+
     val application = ApplicationManager.getApplication()
     application.runReadAction({ results = findAllVisible() })
     application.invokeLater({
@@ -48,7 +61,9 @@ class AceFinder(val document: DocumentImpl, val editor: EditorImpl, val virtualF
     })
   }
 
+
   fun findAllVisible(): List<Int> {
+    //System.out.println("----- findAllVisible")
     val visualLineAtTopOfScreen = getVisualLineAtTopOfScreen(editor)
     val firstLine = visualLineToLogicalLine(editor, visualLineAtTopOfScreen)
     val startOffset = getLineStartOffset(editor, firstLine)
@@ -78,6 +93,20 @@ class AceFinder(val document: DocumentImpl, val editor: EditorImpl, val virtualF
     return offsets
   }
 
+  fun createFindModel(findManager: FindManager): FindModel {
+    val clone = findManager.findInFileModel.clone()
+    clone.isFindAll = true
+    clone.isFromCursor = true
+    clone.isForward = true
+    clone.isRegularExpressions = false
+    clone.isWholeWordsOnly = false
+    clone.isCaseSensitive = false
+    clone.setSearchHighlighters(true)
+    clone.isPreserveCase = false
+
+    return clone
+  }
+
   fun addResultsReadyListener(changeListener: ChangeListener) {
     eventDispatcher.addListener(changeListener)
   }
@@ -88,6 +117,7 @@ class AceFinder(val document: DocumentImpl, val editor: EditorImpl, val virtualF
     if (results.size == 0)
       return textPointPairs //todo: hack, in case random keystrokes make it through
 
+    textAndOffsetHash.clear()
     val total = results.size - 1
 
     val letters = "abcdefghijklmnopqrstuvwxyz"
@@ -98,7 +128,7 @@ class AceFinder(val document: DocumentImpl, val editor: EditorImpl, val virtualF
     //            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
 
     var i = 0
-    for (textOffset in results.keys) {
+    for (textOffset in results) {
       var str = ""
 
       val iGroup = i - lenMinusGroups
@@ -115,6 +145,7 @@ class AceFinder(val document: DocumentImpl, val editor: EditorImpl, val virtualF
 
       val point: RelativePoint = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
       textPointPairs.add(Pair(str, point.originalPoint as Point))
+      textAndOffsetHash[str] = textOffset
 
       if (str == "zz") {
         break

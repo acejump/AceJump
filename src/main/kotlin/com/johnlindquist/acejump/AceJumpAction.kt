@@ -22,7 +22,7 @@ open class AceJumpAction() : DumbAwareAction() {
     val editor = actionEvent.getData(CommonDataKeys.EDITOR) as EditorImpl
     val virtualFile = actionEvent.getData(CommonDataKeys.VIRTUAL_FILE) as VirtualFile
     val document = editor.document as DocumentImpl
-    val aceFinder = AceFinder(document, editor, virtualFile)
+    val aceFinder = AceFinder(project, document, editor, virtualFile)
     val aceJumper = AceJumper(editor, document)
     val aceCanvas = AceCanvas(editor)
     val searchBox = SearchBox(aceFinder, aceJumper, aceCanvas, editor)

@@ -1,7 +1,6 @@
 package com.johnlindquist.acejump.keycommands
 
 import com.johnlindquist.acejump.AceFinder
-
 import com.johnlindquist.acejump.AceJumper
 import com.johnlindquist.acejump.getLowerCaseStringFromChar
 import com.johnlindquist.acejump.ui.SearchBox
@@ -22,8 +21,8 @@ class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinde
     //Find or jump
     if (searchBox.isSearchEnabled) {
       //Find
-      aceFinder.addResultsReadyListener(ChangeListener { p0 ->
-        eventDispatcher.multicaster.stateChanged(p0)
+      aceFinder.addResultsReadyListener(ChangeListener {
+        eventDispatcher.multicaster.stateChanged(it)
       })
 
       aceFinder.findText(searchBox.text!!, false)
@@ -37,7 +36,7 @@ class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinde
         char = aceFinder.firstChar + char
         aceFinder.firstChar = ""
       }
-      val offset = textAndOffsetHash[char]
+      val offset = aceFinder.textAndOffsetHash[char]
 
       if (offset != null) {
         searchBox.popupContainer?.cancel()
@@ -51,9 +50,15 @@ class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinde
         if (aceFinder.isTargetMode) {
           aceJumper.selectWordAtCaret()
         }
-      } else if (textAndOffsetHash.size > 25) {
+      } else if (aceFinder.textAndOffsetHash.size > 25 && couldPossiblyMatch(char)) {
         aceFinder.firstChar = char
       }
     }
   }
+
+  // we don't want to collect chars which would lead us to nowhere
+  private fun couldPossiblyMatch(char: String): Boolean {
+    return aceFinder.textAndOffsetHash.keys.any { it.startsWith(char) }
+  }
+
 }

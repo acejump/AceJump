@@ -1,16 +1,16 @@
 <idea-plugin url="https://github.com/johnlindquist/AceJump"
              version="2">
-    <name>AceJump</name>
-    <id>AceJump</id>
+  <name>AceJump</name>
+  <id>AceJump</id>
 
-    <description><![CDATA[
+  <description><![CDATA[
     AceJump allows you to quickly navigate the cursor to any position visible in the editor.
     See a demo of <a href="https://www.youtube.com/watch?v=yK8eM50DsAY">AceJump in action</a>!
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump.
     ]]>
-    </description>
-    <change-notes><![CDATA[
+  </description>
+  <change-notes><![CDATA[
         <html>
         <dl>
             <dt>2.0.13</dt>
@@ -56,25 +56,25 @@
         </dl>
         </html>
         ]]>
-    </change-notes>
+  </change-notes>
 
-    <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.platform</depends>
 
-    <version>2.0.13</version>
-    <category>Navigation</category>
-    <vendor url="https://github.com/johnlindquist/AceJump">AceJump</vendor>
+  <version>2.0.13</version>
+  <category>Navigation</category>
+  <vendor url="https://github.com/johnlindquist/AceJump">AceJump</vendor>
 
-    <idea-version since-build="143.379"/>
+  <idea-version since-build="143.379"/>
 
-    <actions>
-        <!-- Add your actions here -->
-        <action id="AceJumpAction"
-                class="com.johnlindquist.acejump.AceJumpAction"
-                text="Ace Jump"
-                description="Search and navigate to result">
-            <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
-            <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
-            <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
-        </action>
-    </actions>
+  <actions>
+    <!-- Add your actions here -->
+    <action id="AceJumpAction"
+            class="com.johnlindquist.acejump.AceJumpAction"
+            text="Ace Jump"
+            description="Search and navigate to result">
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
+      <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
+      <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
+    </action>
+  </actions>
 </idea-plugin>

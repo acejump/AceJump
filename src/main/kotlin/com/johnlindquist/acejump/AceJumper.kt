@@ -36,5 +36,4 @@ open class AceJumper(var editor: EditorImpl, var document: DocumentImpl) {
     val caretOffset = editor.caretModel.offset
     editor.selectionModel.setSelection(caretOffset, offset)
   }
-
 }

@@ -9,10 +9,10 @@ class ShowWhiteSpace(override val searchBox: SearchBox, override val aceFinder: 
   init {
     addListener(defaultChangeListener)
   }
-  
+
   override fun execute(keyEvent: KeyEvent) {
-    aceFinder.addResultsReadyListener(ChangeListener { p0 ->
-      eventDispatcher.multicaster.stateChanged(p0)
+    aceFinder.addResultsReadyListener(ChangeListener {
+      eventDispatcher.multicaster.stateChanged(it)
     })
 
     aceFinder.findText(AceFinder.WHITE_SPACE, true)
