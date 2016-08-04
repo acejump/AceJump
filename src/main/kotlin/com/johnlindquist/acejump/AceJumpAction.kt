@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump
 
+import com.intellij.find.FindManager
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
 import com.intellij.openapi.application.ApplicationManager
@@ -9,6 +10,7 @@ import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.openapi.wm.IdeFocusManager
+import com.johnlindquist.acejump.search.AceFinder
 import com.johnlindquist.acejump.ui.AceCanvas
 import com.johnlindquist.acejump.ui.SearchBox
 
@@ -22,10 +24,10 @@ open class AceJumpAction() : DumbAwareAction() {
     val editor = actionEvent.getData(CommonDataKeys.EDITOR) as EditorImpl
     val virtualFile = actionEvent.getData(CommonDataKeys.VIRTUAL_FILE) as VirtualFile
     val document = editor.document as DocumentImpl
-    val aceFinder = AceFinder(project, document, editor, virtualFile)
-    val aceJumper = AceJumper(editor, document)
-    val aceCanvas = AceCanvas(editor)
-    val searchBox = SearchBox(aceFinder, aceJumper, aceCanvas, editor)
+    val findManager = FindManager.getInstance(project)!!
+
+    val aceFinder = AceFinder(findManager, document, editor, virtualFile)
+    val searchBox = SearchBox(aceFinder, AceCanvas(editor), editor)
 
     ApplicationManager.getApplication().invokeLater({
       IdeFocusManager.getInstance(project).requestFocus(searchBox, false)

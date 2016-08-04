@@ -1,4 +1,4 @@
-package com.johnlindquist.acejump
+package com.johnlindquist.acejump.search
 
 import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
@@ -7,16 +7,16 @@ import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.EventDispatcher
+import com.johnlindquist.acejump.search.ResultComparator
 import java.awt.Point
 import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
-class AceFinder(project: Project, var document: DocumentImpl, val editor: EditorImpl, var virtualFile: VirtualFile) {
+class AceFinder(var findManager: FindManager, var document: DocumentImpl, val editor: EditorImpl, var virtualFile: VirtualFile) {
   companion object {
     val ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
     val END_OF_LINE = "\\n"
@@ -27,10 +27,7 @@ class AceFinder(project: Project, var document: DocumentImpl, val editor: Editor
 
   val eventDispatcher: EventDispatcher<ChangeListener> = EventDispatcher.create(ChangeListener::class.java)
 
-  val findManager = FindManager.getInstance(project)!!
   val findModel: FindModel = createFindModel(findManager)
-
-
   var startResult = 0
   var endResult = 0
   var allowedCount = ALLOWED_CHARACTERS.length
@@ -86,7 +83,6 @@ class AceFinder(project: Project, var document: DocumentImpl, val editor: Editor
 
       offsets.add(startOffset + resultOffset + customOffset)
       offset = result.endOffset
-
       result = findManager.findString(text, offset, findModel, virtualFile)
     }
 

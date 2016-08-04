@@ -1,4 +1,4 @@
-package com.johnlindquist.acejump
+package com.johnlindquist.acejump.search
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.VisualPosition

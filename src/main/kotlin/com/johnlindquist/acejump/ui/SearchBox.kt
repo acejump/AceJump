@@ -6,9 +6,8 @@ import com.intellij.openapi.ui.popup.ComponentPopupBuilder
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.popup.AbstractPopup
-import com.johnlindquist.acejump.AceFinder
-import com.johnlindquist.acejump.AceJumper
-import com.johnlindquist.acejump.guessBestLocation
+import com.johnlindquist.acejump.search.AceFinder
+import com.johnlindquist.acejump.search.guessBestLocation
 import com.johnlindquist.acejump.keycommands.*
 import java.awt.Dimension
 import java.awt.Font
@@ -24,11 +23,11 @@ import javax.swing.JTextField
 import javax.swing.SwingUtilities
 import javax.swing.text.BadLocationException
 
-class SearchBox(var aceFinder: AceFinder, aceJumper: AceJumper, var aceCanvas: AceCanvas, var editor: EditorImpl) : JTextField() {
+class SearchBox(var aceFinder: AceFinder, var aceCanvas: AceCanvas, var editor: EditorImpl) : JTextField() {
   val keyReleasedMap = HashMap<Int, AceKeyCommand>()
   val keyPressedMap = HashMap<Int, AceKeyCommand>()
   var popupContainer: AbstractPopup? = null
-  var defaultKeyCommand: AceKeyCommand = DefaultKeyCommand(this, aceFinder, aceJumper)
+  var defaultKeyCommand: AceKeyCommand = DefaultKeyCommand(this, aceFinder)
   var isSearchEnabled = true
     get() {
       return field

@@ -1,4 +1,4 @@
-package com.johnlindquist.acejump
+package com.johnlindquist.acejump.search
 
 /*
  * IdeaVim - A Vim emulator plugin for IntelliJ Idea

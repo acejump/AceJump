@@ -1,4 +1,4 @@
-package com.johnlindquist.acejump
+package com.johnlindquist.acejump.keycommands
 
 import com.intellij.codeInsight.editorActions.SelectWordUtil
 import com.intellij.openapi.editor.impl.DocumentImpl
@@ -7,7 +7,6 @@ import com.intellij.openapi.util.TextRange
 import java.util.*
 
 open class AceJumper(var editor: EditorImpl, var document: DocumentImpl) {
-
   fun moveCaret(offset: Int) {
     editor.caretModel.moveToOffset(offset)
   }

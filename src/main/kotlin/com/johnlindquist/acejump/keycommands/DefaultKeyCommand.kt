@@ -1,13 +1,15 @@
 package com.johnlindquist.acejump.keycommands
 
-import com.johnlindquist.acejump.AceFinder
-import com.johnlindquist.acejump.AceJumper
-import com.johnlindquist.acejump.getLowerCaseStringFromChar
+import com.johnlindquist.acejump.search.AceFinder
+import com.johnlindquist.acejump.keycommands.AceJumper
+import com.johnlindquist.acejump.search.getLowerCaseStringFromChar
 import com.johnlindquist.acejump.ui.SearchBox
 import java.awt.event.KeyEvent
 import javax.swing.event.ChangeListener
 
-class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinder: AceFinder, val aceJumper: AceJumper) : AceKeyCommand() {
+class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinder: AceFinder) : AceKeyCommand() {
+  val aceJumper = AceJumper(aceFinder.editor, aceFinder.document)
+
   init {
     addListener(defaultChangeListener)
   }
