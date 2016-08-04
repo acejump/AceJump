@@ -23,7 +23,7 @@ open class AceJumper(var editor: EditorImpl, var document: DocumentImpl) {
     val startWordOffset = Math.max(0, ranges[0].startOffset)
     val endWordOffset = Math.min(ranges[0].endOffset, document.textLength)
 
-    /*        if(ranges.size() == 2 && editor.getSelectionModel().getSelectionStart() == startWordOffset && editor.getSelectionModel().getSelectionEnd() == endWordOffset)
+    /*if(ranges.size() == 2 && editor.getSelectionModel().getSelectionStart() == startWordOffset && editor.getSelectionModel().getSelectionEnd() == endWordOffset)
                 startWordOffset = Math.max(0, ranges.get(1).getStartOffset())
             endWordOffset = Math.min(ranges.get(1).getEndOffset(), document.getTextLength())*/
 

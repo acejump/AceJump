@@ -51,5 +51,4 @@ class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinde
   private fun couldPossiblyMatch(char: String): Boolean {
     return aceFinder.textAndOffsetHash.keys.any { it.startsWith(char) }
   }
-
 }

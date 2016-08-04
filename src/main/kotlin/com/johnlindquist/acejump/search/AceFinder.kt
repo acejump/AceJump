@@ -118,9 +118,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     val letters = "abcdefghijklmnopqrstuvwxyz"
     val len = letters.length
     val groups = Math.floor(total.toDouble() / len)
-    //            print("groups: " + groups.toString())
+    //print("groups: " + groups.toString())
     val lenMinusGroups = len - groups.toInt()
-    //            print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
+    //print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
 
     var i = 0
     for (textOffset in results) {
@@ -128,7 +128,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
 
       val iGroup = i - lenMinusGroups
       val iModGroup = iGroup % len
-      //                if(iModGroup == 0) print("================\n")
+      //if(iModGroup == 0) print("================\n")
       val i1 = Math.floor(lenMinusGroups.toDouble() + ((i + groups.toInt()) / len)).toInt() - 1
       if (i >= lenMinusGroups) {
         str += letters.elementAt(i1)
@@ -136,7 +136,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
       } else {
         str += letters.elementAt(i).toString()
       }
-      //                print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
+      //print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
 
       val point: RelativePoint = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
       textPointPairs.add(Pair(str, point.originalPoint as Point))
