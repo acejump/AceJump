@@ -7,7 +7,7 @@ import java.awt.event.KeyEvent
 
 class ChangeToTargetMode(override val searchBox: SearchBox, override val aceFinder: AceFinder) : AceKeyCommand() {
   override fun execute(keyEvent: KeyEvent) {
-    if (keyEvent.isMetaDown || keyEvent.isControlDown) {
+    if (keyEvent.id == KeyEvent.KEY_PRESSED && (keyEvent.isMetaDown || keyEvent.isControlDown)) {
       if (aceFinder.isTargetMode) {
         aceFinder.isTargetMode = false
         searchBox.background = Color.WHITE

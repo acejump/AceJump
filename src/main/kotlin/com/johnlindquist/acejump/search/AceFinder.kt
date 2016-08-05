@@ -24,7 +24,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     val WHITE_SPACE = "\\s+\\S(?<!^\\s*\\S)"
   }
 
-  val document: DocumentImpl = editor.document as DocumentImpl
+  val document = editor.document as DocumentImpl
   val eventDispatcher: EventDispatcher<ChangeListener> = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = createFindModel(findManager)
   var startResult = 0
@@ -39,7 +39,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
   var isTargetMode = false
   val resultComparator = ResultComparator(document, editor)
   val textAndOffsetHash = HashMap<String, Int>()
-
 
   fun findText(text: String, isRegEx: Boolean) {
     findModel.stringToFind = text
@@ -56,7 +55,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
       eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
     })
   }
-
 
   fun findAllVisible(): List<Int> {
     //System.out.println("----- findAllVisible")
