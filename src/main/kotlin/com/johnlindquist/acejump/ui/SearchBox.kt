@@ -27,10 +27,7 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
   var aceCanvas = AceCanvas(editor)
   var popupContainer: AbstractPopup? = null
   var defaultKeyCommand = DefaultKeyCommand(this, aceFinder)
-  var isSearchEnabled = true
-    get() {
-      return field
-    }
+  var searchEnabled = true
 
   init {
     val showBeginningOfLines = ShowBeginningOfLines(this, aceFinder)
@@ -73,7 +70,7 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     })
 
     aceFinder.addResultsReadyListener(ChangeListener {
-      aceCanvas.jumpInfos = aceFinder.setupJumpLocations()
+      aceCanvas.jumpInfos = aceFinder.markJumpLocations()
       aceCanvas.repaint()
     })
   }
@@ -88,10 +85,9 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
 
   //todo: I need to really rethink this entire approach
   override fun processKeyEvent(keyEvent: KeyEvent) {
-    println(keyEvent)
     if (text.length == 0) {
       //todo: rethink the "isSearchEnabled" state approach. Works great now, could be cleaner
-      isSearchEnabled = true
+      searchEnabled = true
     }
 
     if (keyMap.contains(keyEvent.keyCode)) {
@@ -108,7 +104,7 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
       defaultKeyCommand.execute(keyEvent)
     }
 
-    if (text?.length == 2) {
+    if (text.length == 2) {
       try {
         text = getText(0, 1)
       } catch (e1: BadLocationException) {
@@ -123,7 +119,7 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
   }
 
   fun disableSearch() {
-    isSearchEnabled = false
+    searchEnabled = false
   }
 
   fun addAceCanvas() {

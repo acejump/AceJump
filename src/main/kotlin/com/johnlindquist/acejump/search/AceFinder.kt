@@ -8,8 +8,10 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.psi.search.SearchScope
 import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.EventDispatcher
+import sun.text.normalizer.Trie
 import java.awt.Point
 import java.util.*
 import javax.swing.event.ChangeEvent
@@ -24,19 +26,23 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     val WHITE_SPACE = "\\s+\\S(?<!^\\s*\\S)"
   }
 
+  init {
+
+  }
+
   val document = editor.document as DocumentImpl
   val eventDispatcher: EventDispatcher<ChangeListener> = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = createFindModel(findManager)
   var startResult = 0
   var endResult = 0
   var allowedCount = ALLOWED_CHARACTERS.length
-  var results: List<Int> = emptyList()
-//  var results: Map<Int, String> = mapOf()
-  var stringToIndex: Multimap<String, Int> = LinkedListMultimap.create()
+  var jumpLocations: List<Int> = emptyList()
+  //  var results: Map<Int, String> = mapOf()
+  var stringToIndex = LinkedListMultimap.create<String, Int>()
   var getEndOffset = false
   var firstChar = ""
-  var customOffset = 0
   var isTargetMode = false
+
   val resultComparator = ResultComparator(document, editor)
   val textAndOffsetHash = HashMap<String, Int>()
 
@@ -45,9 +51,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     findModel.isRegularExpressions = isRegEx
 
     val application = ApplicationManager.getApplication()
-    application.runReadAction({ results = findAllVisible() })
+    application.runReadAction({ jumpLocations = findJumpLocations() })
     application.invokeLater({
-      results = results.sortedWith(resultComparator)
+      jumpLocations = jumpLocations.sortedWith(resultComparator)
 
       startResult = 0
       endResult = allowedCount
@@ -56,34 +62,31 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     })
   }
 
-  fun findAllVisible(): List<Int> {
-    //System.out.println("----- findAllVisible")
-    val visualLineAtTopOfScreen = getVisualLineAtTopOfScreen(editor)
-    val firstLine = visualLineToLogicalLine(editor, visualLineAtTopOfScreen)
-    val startOffset = getLineStartOffset(editor, firstLine)
+  fun findJumpLocations(): List<Int> {
+    val (startIndex, endIndex) = getVisibleRange()
+    val text = document.charsSequence.toString().substring(startIndex, endIndex)
 
-    val height = getScreenHeight(editor)
-    val lastLine = visualLineToLogicalLine(editor, visualLineAtTopOfScreen + height)
-    val endOffset = normalizeOffset(editor, lastLine, getLineEndOffset(editor, lastLine, true), true)
-
-    val text = document.charsSequence.toString().substring(startOffset, endOffset)
     val offsets = ArrayList<Int>()
-
-    var offset = 0
-    var result = findManager.findString(text, offset, findModel, virtualFile)
-    while (result.isStringFound) {
-      val resultOffset =
-              if (getEndOffset)
-                result.endOffset - 1
-              else
-                result.startOffset
-
-      offsets.add(startOffset + resultOffset + customOffset)
-      offset = result.endOffset
-      result = findManager.findString(text, offset, findModel, virtualFile)
+    var match = findManager.findString(text, 0, findModel, virtualFile)
+    while (match.isStringFound) {
+      offsets.add(startIndex + match.startOffset)
+      match = findManager.findString(text, match.endOffset, findModel, virtualFile)
     }
 
     return offsets
+  }
+
+  private fun getVisibleRange(): Pair<Int, Int> {
+    val firstVisibleLine = getVisualLineAtTopOfScreen(editor)
+    val firstLine = visualLineToLogicalLine(editor, firstVisibleLine)
+    val startOffset = getLineStartOffset(editor, firstLine)
+
+    val height = getScreenHeight(editor)
+    val lastLine = visualLineToLogicalLine(editor, firstVisibleLine + height)
+    var endOffset = getLineEndOffset(editor, lastLine, true)
+    endOffset = normalizeOffset(editor, lastLine, endOffset, true)
+
+    return Pair(startOffset, endOffset)
   }
 
   fun createFindModel(findManager: FindManager): FindModel {
@@ -104,14 +107,14 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     eventDispatcher.addListener(changeListener)
   }
 
-  fun setupJumpLocations(): MutableList<Pair<String, Point>> {
+  fun markJumpLocations(): MutableList<Pair<String, Point>> {
     val textPointPairs: MutableList<Pair<String, Point>> = ArrayList()
 
-    if (results.size == 0)
+    if (jumpLocations.size == 0)
       return textPointPairs //todo: hack, in case random keystrokes make it through
 
     textAndOffsetHash.clear()
-    val total = results.size - 1
+    val total = jumpLocations.size - 1
 
     val letters = "abcdefghijklmnopqrstuvwxyz"
     val len = letters.length
@@ -121,7 +124,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     //print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
 
     var i = 0
-    for (textOffset in results) {
+    for (textOffset in jumpLocations) {
       var str = ""
 
       val iGroup = i - lenMinusGroups

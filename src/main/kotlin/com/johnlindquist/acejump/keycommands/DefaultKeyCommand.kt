@@ -15,7 +15,7 @@ class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinde
     if (keyChar == '\b') return
 
     //Find or jump
-    if (searchBox.isSearchEnabled) {
+    if (searchBox.searchEnabled) {
       aceFinder.findText(searchBox.text!!, false)
       searchBox.disableSearch()
     } else {

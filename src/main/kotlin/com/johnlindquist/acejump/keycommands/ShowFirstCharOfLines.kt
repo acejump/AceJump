@@ -6,7 +6,6 @@ import java.awt.event.KeyEvent
 
 class ShowFirstCharOfLines(override val searchBox: SearchBox, override val aceFinder: AceFinder) : AceKeyCommand() {
   override fun execute(keyEvent: KeyEvent) {
-    aceFinder.getEndOffset = true
     aceFinder.findText(AceFinder.CODE_INDENTS, true)
     searchBox.forceSpaceChar()
   }

@@ -55,7 +55,7 @@ fun getLineCount(editor: Editor): Int {
 
  * @return The file's character count
  */
-@JvmOverloads fun getFileSize(editor: Editor, includeEndNewLine: Boolean = false): Int {
+fun getFileSize(editor: Editor, includeEndNewLine: Boolean = false): Int {
   val len = editor.document.textLength
   return if (includeEndNewLine || len == 0 || editor.document.charsSequence[len - 1] != '\n')
     len

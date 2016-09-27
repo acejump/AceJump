@@ -30,9 +30,8 @@ open class AceJumper(var editor: EditorImpl, var document: DocumentImpl) {
     editor.selectionModel.setSelection(startWordOffset, endWordOffset)
   }
 
-  fun setSelectionFromCaretToOffset(offset: Int) {
+  fun setSelectionFromCaretToOffset(toOffset: Int) {
     editor.selectionModel.removeSelection()
-    val caretOffset = editor.caretModel.offset
-    editor.selectionModel.setSelection(caretOffset, offset)
+    editor.selectionModel.setSelection(editor.caretModel.offset, toOffset)
   }
 }
