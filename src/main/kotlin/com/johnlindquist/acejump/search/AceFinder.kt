@@ -30,7 +30,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
   val eventDispatcher: EventDispatcher<ChangeListener> = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = createFindModel(findManager)
   var jumpLocations: Collection<Int> = emptyList()
-  var uniqueJumpLocations: BiMap<String, Int> = HashBiMap.create()
+  var textAndOffsetHash: BiMap<String, Int> = HashBiMap.create()
   var isTargetMode = false
   var qwertyAdjacentKeys =
     mapOf('1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
@@ -43,69 +43,57 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
       'l' to "lkop", 'z' to "zasx", 'x' to "xzsdc", 'c' to "cxdfv",
       'v' to "vcfgb", 'b' to "bvghn", 'n' to "nbhjm", 'm' to "mnjk")
 
-  val textAndOffsetHash = HashMap<String, Int>()
+  private fun findJumpLocations(target: String): Collection<Int> {
+    val (startIndex, endIndex) = getVisibleRange()
+    val fullText = document.charsSequence
+    val window = fullText.substring(startIndex, endIndex)
 
-  private fun findUniqueJumpLocations(target: String): BiMap<String, Int> {
-    var (startIndex, endIndex) = getVisibleRange()
-    val uniqueJumpLocations = HashBiMap.create<String, Int>()
-    val stringToIndex = LinkedListMultimap.create<String, Int>()
-    val text = document.charsSequence.toString().substring(startIndex, endIndex)
-
-    if (!target.isEmpty()) {
-      val pattern = Pattern.compile("(?i)$target")
-      val matcher = pattern.matcher(text)
-      while (matcher.find()) {
-        if (matcher.end() < endIndex && text[matcher.end()].isLetterOrDigit()) {
-          stringToIndex.put(text[matcher.end()].toString(), matcher.start())
-          if (matcher.end() + 1 < endIndex) {
-            val nextTwoChars = text.substring(matcher.end(), matcher.end() + 2)
-            if (nextTwoChars.matches(Regex("[a-z0-9]{2}")))
-              stringToIndex.put(nextTwoChars, matcher.end())
-          }
+    val sitesToCheck =
+      if (target.isEmpty())
+        startIndex..(endIndex - 1)
+      else {
+        val indicesToCheck = arrayListOf<Int>()
+        val match = Pattern.compile("(?i)$target").matcher(window)
+        while (match.find()) {
+          indicesToCheck.add(match.end())
         }
+        indicesToCheck + startIndex
       }
-    } else {
-      // Unique digraphs tend to bunch-up. Let's try to spread them out.
-      var lastGoodIndex = 0
-      var previousChar = text.first()
-      for (char in text.substring(1)) {
-        if (char.isLetterOrDigit() &&
-          previousChar.isLetterOrDigit() &&
-          ((startIndex - lastGoodIndex) > 10)) {
-          lastGoodIndex = startIndex
-          stringToIndex.put("$previousChar$char".toLowerCase(), startIndex)
+
+    val existingDigraphs = findDigraphs(fullText, sitesToCheck)
+    val completeDigraphs = assignRemainingDigraphs(existingDigraphs)
+    textAndOffsetHash = completeDigraphs
+
+    return completeDigraphs.values
+  }
+
+  private fun findDigraphs(text: CharSequence, sites: Iterable<Int>):
+    Multimap<String, Int> {
+    val stringToIndex: Multimap<String, Int> = LinkedListMultimap.create()
+    for (site in sites) {
+      val (c1, c2) = Pair(text[site], text[site + 1])
+      if (c1.isLetterOrDigit()) {
+        stringToIndex.put("$c1", site)
+        if (c2.isLetterOrDigit()) {
+          stringToIndex.put("$c1$c2", site)
         }
-        stringToIndex.put("$char".toLowerCase(), startIndex)
-        startIndex++
-        previousChar = char
       }
     }
 
-    assignRemainingDigraphs(stringToIndex, uniqueJumpLocations, text)
-    return uniqueJumpLocations
+    return stringToIndex
   }
 
-  private fun assignRemainingDigraphs(stringToIndex: Multimap<String, Int>,
-                                      jumpLocations: BiMap<String, Int>,
-                                      text: String) {
-    for (key in stringToIndex.keys()) {
-      val value = stringToIndex[key]
+  private fun assignRemainingDigraphs(currentDigraphs: Multimap<String, Int>): BiMap<String, Int> {
+    val jumpLocations: BiMap<String, Int> = HashBiMap.create()
+    for (key in currentDigraphs.keys()) {
+      val value = currentDigraphs[key]
       if (value.size == 1)
         jumpLocations[key] = value.first()
     }
 
-    for (c1 in 'a'..'z') {
-      for (c2 in 'a'..'z') {
-        if (!stringToIndex.containsKey("$c2$c1")) {
-          val pattern = Pattern.compile("(?i)$c2[\\w]+$c1")
-          val matcher = pattern.matcher(text)
-          if (matcher.find() && !matcher.find()) {
-            matcher.find(0)
-            stringToIndex.put("$c2$c1", matcher.start())
-          }
-        }
-      }
-    }
+
+
+    return jumpLocations
   }
 
   fun findText(text: String, isRegEx: Boolean) {
@@ -114,30 +102,12 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
 
     val application = ApplicationManager.getApplication()
     application.runReadAction({
-      uniqueJumpLocations = findUniqueJumpLocations(text)
-      if (text.isNotEmpty())
-        jumpLocations = findJumpLocations()
-      else jumpLocations = uniqueJumpLocations.values
+      jumpLocations = findJumpLocations(text)
     })
     application.invokeLater({
-      uniqueJumpLocations = findUniqueJumpLocations(text)
       if (text.isNotEmpty())
         eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
     })
-  }
-
-  private fun findJumpLocations(): List<Int> {
-    val (startIndex, endIndex) = getVisibleRange()
-    val text = document.charsSequence.toString().substring(startIndex, endIndex)
-
-    val offsets = ArrayList<Int>()
-    var match = findManager.findString(text, 0, findModel, virtualFile)
-    while (match.isStringFound) {
-      offsets.add(startIndex + match.startOffset)
-      match = findManager.findString(text, match.endOffset, findModel, virtualFile)
-    }
-
-    return offsets
   }
 
   private fun getVisibleRange(): Pair<Int, Int> {
@@ -180,7 +150,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     textAndOffsetHash.clear()
 
     for (textOffset in jumpLocations) {
-      val str = uniqueJumpLocations.inverse()[textOffset]!!
+      val str = textAndOffsetHash.inverse()[textOffset]!!
 
       if (text.isEmpty() || str.startsWith(text)) {
         val point: RelativePoint = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))

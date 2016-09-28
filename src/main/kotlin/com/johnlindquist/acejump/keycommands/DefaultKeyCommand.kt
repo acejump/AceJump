@@ -24,11 +24,6 @@ class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinde
       //Jump to offset!
       var char = getLowerCaseStringFromChar(keyChar)
       if (char == " ") return
-
-      if (aceFinder.firstChar != "") {
-        char = aceFinder.firstChar + char
-        aceFinder.firstChar = ""
-      }
       val offset = aceFinder.textAndOffsetHash[char]
 
       if (offset != null) {
@@ -44,8 +39,6 @@ class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinde
           aceJumper.selectWordAtCaret()
         }
       } else if (aceFinder.textAndOffsetHash.size > 25 && couldPossiblyMatch(char)) {
-        aceFinder.firstChar = char
-
         aceFinder.eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
       }
     }
