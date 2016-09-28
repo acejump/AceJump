@@ -6,7 +6,7 @@ import java.awt.*
 import javax.swing.JComponent
 
 class AceCanvas(editor: EditorImpl) : JComponent() {
-  var jumpInfos: MutableList<Pair<String, Point>> = arrayListOf()
+  val jumpInfos: MutableList<Pair<String, Point>> = arrayListOf()
   var colorPair = Pair<Color, Color>(Color.BLACK, Color.WHITE)
   var lineSpacing = 0.toFloat()
   var lineHeight = 0

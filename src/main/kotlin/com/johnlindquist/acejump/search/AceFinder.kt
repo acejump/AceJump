@@ -3,6 +3,7 @@ package com.johnlindquist.acejump.search
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.google.common.collect.LinkedListMultimap
+import com.google.common.collect.Multimap
 import com.intellij.find.FindManager
 import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager
@@ -19,7 +20,6 @@ import javax.swing.event.ChangeListener
 
 class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtualFile: VirtualFile) {
   companion object {
-    val ALLOWED_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
     val END_OF_LINE = "\\n"
     val BEGINNING_OF_LINE = "^.|\\n(?<!.\\n)"
     val CODE_INDENTS = "^\\s*\\S"
@@ -29,41 +29,69 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
   val document = editor.document as DocumentImpl
   val eventDispatcher: EventDispatcher<ChangeListener> = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = createFindModel(findManager)
-  var startResult = 0
-  var endResult = 0
-  var allowedCount = ALLOWED_CHARACTERS.length
   var jumpLocations: Collection<Int> = emptyList()
   var uniqueJumpLocations: BiMap<String, Int> = HashBiMap.create()
-  //  var results: Map<Int, String> = mapOf()
-  var firstChar = ""
   var isTargetMode = false
+  var qwertyAdjacentKeys =
+    mapOf('1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
+      '5' to "56tr4", '6' to "67yt5", '7' to "78uy6", '8' to "89iu7",
+      '9' to "90oi8", '0' to "0po9", 'q' to "q12wa", 'w' to "w3esaq2",
+      'e' to "e4rdsw3", 'r' to "r5tfde4", 't' to "t6ygfr5", 'y' to "y7uhgt6",
+      'u' to "u8ijhy7", 'i' to "i9okju8", 'o' to "o0plki9", 'p' to "plo0",
+      'a' to "aqwsz", 's' to "sedxzaw", 'd' to "drfcxse", 'f' to "ftgvcdr",
+      'g' to "gyhbvft", 'h' to "hujnbgy", 'j' to "jikmnhu", 'k' to "kolmji",
+      'l' to "lkop", 'z' to "zasx", 'x' to "xzsdc", 'c' to "cxdfv",
+      'v' to "vcfgb", 'b' to "bvghn", 'n' to "nbhjm", 'm' to "mnjk")
 
-  val resultComparator = ResultComparator(document, editor)
   val textAndOffsetHash = HashMap<String, Int>()
 
-  fun findUniqueJumpLocations(): BiMap<String, Int> {
+  private fun findUniqueJumpLocations(target: String): BiMap<String, Int> {
     var (startIndex, endIndex) = getVisibleRange()
     val uniqueJumpLocations = HashBiMap.create<String, Int>()
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     val text = document.charsSequence.toString().substring(startIndex, endIndex)
 
-    // Unique digraphs tend to bunch-up. Let's try to spread them out.
-    var lastGoodIdx = 0
-    var previousChar = text.first()
-    for (char in text.substring(1)) {
-      if (char.isLetter() && previousChar.isLetter() && ((startIndex -
-              lastGoodIdx) > 10)) {
-        lastGoodIdx = startIndex
-        stringToIndex.put("$previousChar$char".toLowerCase(), startIndex)
+    if (!target.isEmpty()) {
+      val pattern = Pattern.compile("(?i)$target")
+      val matcher = pattern.matcher(text)
+      while (matcher.find()) {
+        if (matcher.end() < endIndex && text[matcher.end()].isLetterOrDigit()) {
+          stringToIndex.put(text[matcher.end()].toString(), matcher.start())
+          if (matcher.end() + 1 < endIndex) {
+            val nextTwoChars = text.substring(matcher.end(), matcher.end() + 2)
+            if (nextTwoChars.matches(Regex("[a-z0-9]{2}")))
+              stringToIndex.put(nextTwoChars, matcher.end())
+          }
+        }
       }
-      startIndex++
-      previousChar = char
+    } else {
+      // Unique digraphs tend to bunch-up. Let's try to spread them out.
+      var lastGoodIndex = 0
+      var previousChar = text.first()
+      for (char in text.substring(1)) {
+        if (char.isLetterOrDigit() &&
+          previousChar.isLetterOrDigit() &&
+          ((startIndex - lastGoodIndex) > 10)) {
+          lastGoodIndex = startIndex
+          stringToIndex.put("$previousChar$char".toLowerCase(), startIndex)
+        }
+        stringToIndex.put("$char".toLowerCase(), startIndex)
+        startIndex++
+        previousChar = char
+      }
     }
 
+    assignRemainingDigraphs(stringToIndex, uniqueJumpLocations, text)
+    return uniqueJumpLocations
+  }
+
+  private fun assignRemainingDigraphs(stringToIndex: Multimap<String, Int>,
+                                      jumpLocations: BiMap<String, Int>,
+                                      text: String) {
     for (key in stringToIndex.keys()) {
       val value = stringToIndex[key]
       if (value.size == 1)
-        uniqueJumpLocations[key] = value.first()
+        jumpLocations[key] = value.first()
     }
 
     for (c1 in 'a'..'z') {
@@ -78,8 +106,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
         }
       }
     }
-
-    return uniqueJumpLocations
   }
 
   fun findText(text: String, isRegEx: Boolean) {
@@ -88,22 +114,19 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
 
     val application = ApplicationManager.getApplication()
     application.runReadAction({
-      uniqueJumpLocations = findUniqueJumpLocations()
+      uniqueJumpLocations = findUniqueJumpLocations(text)
       if (text.isNotEmpty())
         jumpLocations = findJumpLocations()
       else jumpLocations = uniqueJumpLocations.values
     })
     application.invokeLater({
-      jumpLocations = jumpLocations.sortedWith(resultComparator)
-
-      startResult = 0
-      endResult = allowedCount
-
-      eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
+      uniqueJumpLocations = findUniqueJumpLocations(text)
+      if (text.isNotEmpty())
+        eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
     })
   }
 
-  fun findJumpLocations(): List<Int> {
+  private fun findJumpLocations(): List<Int> {
     val (startIndex, endIndex) = getVisibleRange()
     val text = document.charsSequence.toString().substring(startIndex, endIndex)
 
@@ -117,7 +140,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     return offsets
   }
 
-  fun getVisibleRange(): Pair<Int, Int> {
+  private fun getVisibleRange(): Pair<Int, Int> {
     val firstVisibleLine = getVisualLineAtTopOfScreen(editor)
     val firstLine = visualLineToLogicalLine(editor, firstVisibleLine)
     val startOffset = getLineStartOffset(editor, firstLine)
@@ -148,48 +171,22 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     eventDispatcher.addListener(changeListener)
   }
 
-  fun markJumpLocations(): MutableList<Pair<String, Point>> {
-    val textPointPairs: MutableList<Pair<String, Point>> = ArrayList()
+  fun markJumpLocations(text: String): MutableList<Pair<String, Point>> {
+    val textPointPairs = ArrayList<Pair<String, Point>>()
 
     if (jumpLocations.size == 0)
       return textPointPairs //todo: hack, in case random keystrokes make it through
 
     textAndOffsetHash.clear()
-    val total = jumpLocations.size - 1
 
-    val letters = "abcdefghijklmnopqrstuvwxyz"
-    val len = letters.length
-    val groups = Math.floor(total.toDouble() / len)
-    //print("groups: " + groups.toString())
-    val lenMinusGroups = len - groups.toInt()
-    //print("last letter: " + letters.charAt(lenMinusGroups).toString() + "\n")
-
-    var i = 0
     for (textOffset in jumpLocations) {
-      var str = uniqueJumpLocations.inverse()[textOffset]!!
+      val str = uniqueJumpLocations.inverse()[textOffset]!!
 
-//      val iGroup = i - lenMinusGroups
-//      val iModGroup = iGroup % len
-//      //if(iModGroup == 0) print("================\n")
-//      val i1 = Math.floor(lenMinusGroups.toDouble() + ((i + groups.toInt()) / len)).toInt() - 1
-//      if (i >= lenMinusGroups) {
-//        str += letters.elementAt(i1)
-//        str += letters.elementAt(iModGroup).toString()
-//      } else {
-//        str += letters.elementAt(i).toString()
-//      }
-//      //print(i.toString() + ": " + str + "     iModGroup:" + iModGroup.toString() + "\n")
-
-      if (firstChar.isEmpty() || str.startsWith(firstChar)) {
+      if (text.isEmpty() || str.startsWith(text)) {
         val point: RelativePoint = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
         textPointPairs.add(Pair(str, point.originalPoint as Point))
         textAndOffsetHash[str] = textOffset
       }
-
-//      if (str == "zz") {
-//        break
-//      }
-      i++
     }
 
     return textPointPairs

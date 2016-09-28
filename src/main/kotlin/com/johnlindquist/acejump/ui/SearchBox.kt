@@ -70,7 +70,7 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     })
 
     aceFinder.addResultsReadyListener(ChangeListener {
-      aceCanvas.jumpInfos = aceFinder.markJumpLocations()
+      aceCanvas.jumpInfos.addAll(aceFinder.markJumpLocations(text))
       aceCanvas.repaint()
     })
   }
@@ -101,15 +101,6 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     super.processKeyEvent(keyEvent)
 
     if (keyEvent.id != KeyEvent.KEY_TYPED) return
-
-
-    if (text.length == 2) {
-      try {
-        text = getText(0, 1)
-      } catch (e1: BadLocationException) {
-        e1.printStackTrace()
-      }
-    }
   }
 
   fun forceSpaceChar() {
