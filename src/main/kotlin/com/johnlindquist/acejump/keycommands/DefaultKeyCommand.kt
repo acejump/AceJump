@@ -4,6 +4,8 @@ import com.johnlindquist.acejump.search.AceFinder
 import com.johnlindquist.acejump.search.getLowerCaseStringFromChar
 import com.johnlindquist.acejump.ui.SearchBox
 import java.awt.event.KeyEvent
+import java.util.*
+import javax.swing.event.ChangeEvent
 
 class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinder: AceFinder) : AceKeyCommand() {
   val aceJumper = AceJumper(aceFinder.editor, aceFinder.document)
@@ -16,7 +18,7 @@ class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinde
 
     //Find or jump
     if (searchBox.searchEnabled) {
-      aceFinder.findText(searchBox.text!!, false)
+      aceFinder.findText(searchBox.text, false)
       searchBox.disableSearch()
     } else {
       //Jump to offset!
@@ -43,6 +45,8 @@ class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinde
         }
       } else if (aceFinder.textAndOffsetHash.size > 25 && couldPossiblyMatch(char)) {
         aceFinder.firstChar = char
+
+        aceFinder.eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
       }
     }
   }

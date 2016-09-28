@@ -90,6 +90,8 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
       searchEnabled = true
     }
 
+    defaultKeyCommand.execute(keyEvent)
+
     if (keyMap.contains(keyEvent.keyCode)) {
       keyEvent.consume()
       keyMap[keyEvent.keyCode]?.execute(keyEvent)
@@ -100,9 +102,6 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
 
     if (keyEvent.id != KeyEvent.KEY_TYPED) return
 
-    if (keyEvent.isConsumed) {
-      defaultKeyCommand.execute(keyEvent)
-    }
 
     if (text.length == 2) {
       try {
