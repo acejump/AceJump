@@ -9,8 +9,6 @@ import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
-import com.intellij.openapi.vfs.VirtualFile
-import com.intellij.ui.awt.RelativePoint
 import com.intellij.util.EventDispatcher
 import java.awt.Point
 import java.util.*
@@ -18,21 +16,12 @@ import java.util.regex.Pattern
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
-class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtualFile: VirtualFile) {
-  companion object {
-    val END_OF_LINE = "\\n"
-    val BEGINNING_OF_LINE = "^.|\\n(?<!.\\n)"
-    val CODE_INDENTS = "^\\s*\\S"
-    val WHITE_SPACE = "\\s+\\S(?<!^\\s*\\S)"
-    val REGEXES = arrayOf(END_OF_LINE, BEGINNING_OF_LINE, CODE_INDENTS, WHITE_SPACE)
-  }
-
+class AceFinder(findManager: FindManager, val editor: EditorImpl) {
   val document = editor.document as DocumentImpl
-  val eventDispatcher: EventDispatcher<ChangeListener> = EventDispatcher.create(ChangeListener::class.java)
+  val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = createFindModel(findManager)
   var jumpLocations: Collection<Int> = emptyList()
   var textAndOffsetHash: BiMap<String, Int> = HashBiMap.create()
-  var isTargetMode = false
   var qwertyAdjacentKeys =
     mapOf('1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
       '5' to "56tr4", '6' to "67yt5", '7' to "78uy6", '8' to "89iu7",
@@ -62,11 +51,11 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
       }
     println(sitesToCheck)
     val existingDigraphs = findDigraphs(fullText, sitesToCheck)
-    textAndOffsetHash = assignRemainingDigraphs(existingDigraphs)
+    textAndOffsetHash = mapUniqueDigraphs(existingDigraphs)
     return textAndOffsetHash.values
   }
 
-  private fun findDigraphs(text: CharSequence, sites: Iterable<Int>):
+  fun findDigraphs(text: CharSequence, sites: Iterable<Int>):
     Multimap<String, Int> {
     val stringToIndex: Multimap<String, Int> = LinkedListMultimap.create()
     for (site in sites) {
@@ -80,15 +69,15 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     return stringToIndex
   }
 
-  private fun assignRemainingDigraphs(currentDigraphs: Multimap<String, Int>): BiMap<String, Int> {
+  fun mapUniqueDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
     val jumpLocations: BiMap<String, Int> = HashBiMap.create()
-    for ((key, value) in currentDigraphs.asMap()) {
+    for ((key, value) in digraphs.asMap()) {
       if (value.size == 1 && !jumpLocations.containsValue(value.first()))
         jumpLocations[key.toLowerCase()] = value.first()
     }
 
     for (c1 in 'a'..'z') {
-      if (!currentDigraphs.containsKey("$c1")) {
+      if (!digraphs.containsKey("$c1")) {
         val inverse = jumpLocations.inverse()
         for (index in inverse.keys) {
           if (!hasNearbyTag(index, inverse)) {
@@ -161,19 +150,29 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
   fun markJumpLocations(text: String): MutableList<Pair<String, Point>> {
     val textPointPairs = ArrayList<Pair<String, Point>>()
 
+    //todo: hack, in case random keystrokes make it through
     if (jumpLocations.size == 0)
-      return textPointPairs //todo: hack, in case random keystrokes make it through
+      return textPointPairs
 
     for (textOffset in jumpLocations) {
       val str = textAndOffsetHash.inverse()[textOffset]!!
 
       if (text.isEmpty() || str.startsWith(text)) {
-        val point: RelativePoint = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(textOffset))
-        textPointPairs.add(Pair(str, point.originalPoint as Point))
+        val point = getPointFromVisualPosition(editor, editor
+          .offsetToVisualPosition(textOffset))
+        textPointPairs.add(Pair(str, point.originalPoint))
         textAndOffsetHash[str] = textOffset
       }
     }
 
     return textPointPairs
+  }
+
+  fun findText(text: REGEX) {
+    findText(text.pattern, true)
+  }
+
+  fun findText(text: String) {
+    findText(text, false)
   }
 }

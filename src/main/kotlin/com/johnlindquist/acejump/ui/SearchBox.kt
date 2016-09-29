@@ -9,10 +9,7 @@ import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.search.AceFinder
 import com.johnlindquist.acejump.search.guessBestLocation
-import java.awt.Dimension
-import java.awt.Font
-import java.awt.Graphics
-import java.awt.Point
+import java.awt.*
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent
@@ -24,27 +21,29 @@ import javax.swing.SwingUtilities
 import javax.swing.event.ChangeListener
 
 class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField() {
-  val keyMap = HashMap<Int, AceKeyCommand>()
-
   var aceCanvas = AceCanvas(editor)
+  val keyMap = HashMap<Int, AceKeyCommand>()
   var popupContainer: AbstractPopup? = null
-  var defaultKeyCommand = DefaultKeyCommand(this, aceFinder)
+  var defaultKeyCommand = DefaultKeyCommand(aceFinder)
 
   init {
-    val showBeginningOfLines = ShowBeginningOfLines(this, aceFinder)
-    val showEndOfLines = ShowEndOfLines(this, aceFinder)
-    keyMap[VK_HOME] = showBeginningOfLines
-    keyMap[VK_LEFT] = showBeginningOfLines
-    keyMap[VK_RIGHT] = showEndOfLines
-    keyMap[VK_END] = showEndOfLines
-    keyMap[VK_UP] = ShowFirstCharOfLines(this, aceFinder)
-    keyMap[VK_BACK_SPACE] = ClearResults(this, aceCanvas)
-    keyMap[VK_SPACE] = ShowWhiteSpace(this, aceFinder)
-    keyMap[VK_SEMICOLON] = ChangeToTargetMode(this, aceFinder)
+    configureKeyMap()
+    configurePopup()
 
+    aceFinder.addResultsReadyListener(ChangeListener {
+      val tags = aceFinder.markJumpLocations(text)
+      aceCanvas.jumpInfos.addAll(tags)
+      if (tags.size == 1)
+        popupContainer?.cancel()
+      aceCanvas.repaint()
+    })
+  }
+
+  private fun configurePopup() {
     val scheme = EditorColorsManager.getInstance().globalScheme
     val font = Font(scheme.editorFontName, Font.BOLD, scheme.editorFontSize)
-    val popupBuilder: ComponentPopupBuilder? = JBPopupFactory.getInstance()?.createComponentPopupBuilder(this, this)
+    val popupBuilder: ComponentPopupBuilder? =
+      JBPopupFactory.getInstance()?.createComponentPopupBuilder(this, this)
     popupBuilder?.setCancelKeyEnabled(true)
     val popup = popupBuilder?.createPopup() as AbstractPopup?
     popup?.show(guessBestLocation(editor))
@@ -69,11 +68,17 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
         exit()
       }
     })
+  }
 
-    aceFinder.addResultsReadyListener(ChangeListener {
-      aceCanvas.jumpInfos.addAll(aceFinder.markJumpLocations(text))
-      aceCanvas.repaint()
-    })
+  private fun configureKeyMap() {
+    val showBeginningOfLines = ShowBeginningOfLines(aceFinder)
+    val showEndOfLines = ShowEndOfLines(aceFinder)
+    keyMap[VK_HOME] = showBeginningOfLines
+    keyMap[VK_LEFT] = showBeginningOfLines
+    keyMap[VK_RIGHT] = showEndOfLines
+    keyMap[VK_END] = showEndOfLines
+    keyMap[VK_UP] = ShowFirstCharOfLines(aceFinder)
+    keyMap[VK_SPACE] = ShowWhiteSpace(aceFinder)
   }
 
   override fun requestFocus() {
@@ -86,11 +91,20 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
 
   //todo: I need to really rethink this entire approach
   override fun processKeyEvent(keyEvent: KeyEvent) {
-    defaultKeyCommand.execute(keyEvent)
+    if (keyEvent.id == KeyEvent.KEY_PRESSED &&
+      (keyEvent.isMetaDown || keyEvent.isControlDown)) {
+      if (defaultKeyCommand.toggleTargetMode()) {
+        background = Color.RED
+      } else {
+        background = Color.WHITE
+      }
+    }
+
+    defaultKeyCommand.execute(keyEvent, text)
 
     if (keyMap.contains(keyEvent.keyCode)) {
       keyEvent.consume()
-      keyMap[keyEvent.keyCode]?.execute(keyEvent)
+      keyMap[keyEvent.keyCode]?.execute(keyEvent, text)
       return
     }
 

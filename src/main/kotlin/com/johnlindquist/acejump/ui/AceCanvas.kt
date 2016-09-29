@@ -7,7 +7,7 @@ import javax.swing.JComponent
 
 class AceCanvas(editor: EditorImpl) : JComponent() {
   val jumpInfos: MutableList<Pair<String, Point>> = arrayListOf()
-  var colorPair = Pair<Color, Color>(Color.BLACK, Color.WHITE)
+  var colors = Pair<Color, Color>(Color.BLACK, Color.WHITE)
   var lineSpacing = 0.toFloat()
   var lineHeight = 0
 
@@ -16,7 +16,7 @@ class AceCanvas(editor: EditorImpl) : JComponent() {
     font = Font(scheme.editorFontName, Font.BOLD, scheme.editorFontSize)
     lineHeight = editor.lineHeight
     lineSpacing = scheme.lineSpacing
-    colorPair = Pair(scheme.defaultBackground, scheme.defaultForeground)
+    colors = Pair(scheme.defaultBackground, scheme.defaultForeground)
   }
 
   inner class FontBasedMeasurements() {
@@ -43,15 +43,15 @@ class AceCanvas(editor: EditorImpl) : JComponent() {
     for (jumpInfo: Pair<String, Point> in jumpInfos.orEmpty()) {
       val text = jumpInfo.first
       val originalPoint = jumpInfo.second
-      val defaultForeground = colorPair.second
-      val defaultBackground = colorPair.first
+      val foregroundColor = colors.second
+      val backgroundColor = if (text[0] == ' ') Color.YELLOW else colors.first
 
       originalPoint.translate(0, -fbm.hOffset.toInt())
 
       g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
       //a slight border for "pop" against the background
-      g2d.color = defaultBackground
+      g2d.color = backgroundColor
 
       if (text.length == 2) {
         g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1, originalPoint.y - fbm.rectHOffset.toInt() - 1, fbm.rectWidth + fbm.fontWidth + 5, lineHeight.toInt() + 1)
@@ -60,7 +60,7 @@ class AceCanvas(editor: EditorImpl) : JComponent() {
       }
 
       //the background rectangle
-      g2d.color = defaultForeground
+      g2d.color = foregroundColor
 
       if (text.length == 2) {
         g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset.toInt(), fbm.rectWidth + fbm.fontWidth + 5, lineHeight.toInt())
@@ -73,7 +73,7 @@ class AceCanvas(editor: EditorImpl) : JComponent() {
 
       //the foreground text
       g2d.font = fbm.font
-      g2d.color = defaultBackground
+      g2d.color = backgroundColor
       g2d.drawString(text.toUpperCase(), originalPoint.x, originalPoint.y + fbm.fontHeight)
     }
   }

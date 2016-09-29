@@ -24,7 +24,7 @@ open class AceJumpAction() : DumbAwareAction() {
     val editor = actionEvent.getData(CommonDataKeys.EDITOR) as EditorImpl
     val virtualFile = actionEvent.getData(CommonDataKeys.VIRTUAL_FILE) as VirtualFile
     val findManager = FindManager.getInstance(project)!!
-    val aceFinder = AceFinder(findManager, editor, virtualFile)
+    val aceFinder = AceFinder(findManager, editor)
     val searchBox = SearchBox(aceFinder, editor)
 
     ApplicationManager.getApplication().invokeLater({
