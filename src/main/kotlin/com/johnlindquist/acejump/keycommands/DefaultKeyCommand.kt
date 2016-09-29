@@ -17,31 +17,24 @@ class DefaultKeyCommand(override val searchBox: SearchBox, override val aceFinde
     if (keyChar == '\b') return
 
     //Find or jump
-    if (searchBox.searchEnabled) {
-      aceFinder.findText(searchBox.text, false)
-      searchBox.disableSearch()
-    } else {
-      //Jump to offset!
-      var char = getLowerCaseStringFromChar(keyChar)
-      if (char == " ") return
-      val offset = aceFinder.textAndOffsetHash[char]
+    aceFinder.findText(searchBox.text, false)
+    aceFinder.eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
+    //Jump to offset!
+    val offset = aceFinder.textAndOffsetHash[searchBox.text]
+    if (offset != null) {
+      searchBox.popupContainer?.cancel()
+      if (keyEvent.isShiftDown && !keyEvent.isMetaDown) {
+        aceJumper.setSelectionFromCaretToOffset(offset)
+        aceJumper.moveCaret(offset)
+      } else {
+        aceJumper.moveCaret(offset)
+      }
 
-      if (offset != null) {
-        searchBox.popupContainer?.cancel()
-        if (keyEvent.isShiftDown && !keyEvent.isMetaDown) {
-          aceJumper.setSelectionFromCaretToOffset(offset)
-          aceJumper.moveCaret(offset)
-        } else {
-          aceJumper.moveCaret(offset)
-        }
-
-        if (aceFinder.isTargetMode) {
-          aceJumper.selectWordAtCaret()
-        }
-      } else if (aceFinder.textAndOffsetHash.size > 25 && couldPossiblyMatch(char)) {
-        aceFinder.eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
+      if (aceFinder.isTargetMode) {
+        aceJumper.selectWordAtCaret()
       }
     }
+
   }
 
   // we don't want to collect chars which would lead us to nowhere

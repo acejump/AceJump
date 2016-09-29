@@ -7,6 +7,5 @@ import java.awt.event.KeyEvent
 class ShowBeginningOfLines(override val searchBox: SearchBox, override val aceFinder: AceFinder) : AceKeyCommand() {
   override fun execute(keyEvent: KeyEvent) {
     aceFinder.findText(AceFinder.BEGINNING_OF_LINE, true)
-    searchBox.forceSpaceChar()
   }
 }

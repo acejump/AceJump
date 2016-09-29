@@ -6,10 +6,13 @@ import com.intellij.openapi.ui.popup.ComponentPopupBuilder
 import com.intellij.openapi.ui.popup.JBPopupFactory
 import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.popup.AbstractPopup
+import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.search.AceFinder
 import com.johnlindquist.acejump.search.guessBestLocation
-import com.johnlindquist.acejump.keycommands.*
-import java.awt.*
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.Graphics
+import java.awt.Point
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent
@@ -19,7 +22,6 @@ import javax.swing.JRootPane
 import javax.swing.JTextField
 import javax.swing.SwingUtilities
 import javax.swing.event.ChangeListener
-import javax.swing.text.BadLocationException
 
 class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField() {
   val keyMap = HashMap<Int, AceKeyCommand>()
@@ -27,7 +29,6 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
   var aceCanvas = AceCanvas(editor)
   var popupContainer: AbstractPopup? = null
   var defaultKeyCommand = DefaultKeyCommand(this, aceFinder)
-  var searchEnabled = true
 
   init {
     val showBeginningOfLines = ShowBeginningOfLines(this, aceFinder)
@@ -85,11 +86,6 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
 
   //todo: I need to really rethink this entire approach
   override fun processKeyEvent(keyEvent: KeyEvent) {
-    if (text.length == 0) {
-      //todo: rethink the "isSearchEnabled" state approach. Works great now, could be cleaner
-      searchEnabled = true
-    }
-
     defaultKeyCommand.execute(keyEvent)
 
     if (keyMap.contains(keyEvent.keyCode)) {
@@ -101,15 +97,6 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     super.processKeyEvent(keyEvent)
 
     if (keyEvent.id != KeyEvent.KEY_TYPED) return
-  }
-
-  fun forceSpaceChar() {
-    text = " "
-    disableSearch()
-  }
-
-  fun disableSearch() {
-    searchEnabled = false
   }
 
   fun addAceCanvas() {

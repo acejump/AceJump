@@ -24,6 +24,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     val BEGINNING_OF_LINE = "^.|\\n(?<!.\\n)"
     val CODE_INDENTS = "^\\s*\\S"
     val WHITE_SPACE = "\\s+\\S(?<!^\\s*\\S)"
+    val REGEXES = arrayOf(END_OF_LINE, BEGINNING_OF_LINE, CODE_INDENTS, WHITE_SPACE)
   }
 
   val document = editor.document as DocumentImpl
@@ -50,21 +51,19 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
 
     val sitesToCheck =
       if (target.isEmpty())
-        startIndex..(endIndex - 1)
+        startIndex..(endIndex - 2)
       else {
         val indicesToCheck = arrayListOf<Int>()
         val match = Pattern.compile("(?i)$target").matcher(window)
         while (match.find()) {
-          indicesToCheck.add(match.end())
+          indicesToCheck.add(match.end() + startIndex)
         }
-        indicesToCheck + startIndex
+        indicesToCheck
       }
-
+    println(sitesToCheck)
     val existingDigraphs = findDigraphs(fullText, sitesToCheck)
-    val completeDigraphs = assignRemainingDigraphs(existingDigraphs)
-    textAndOffsetHash = completeDigraphs
-
-    return completeDigraphs.values
+    textAndOffsetHash = assignRemainingDigraphs(existingDigraphs)
+    return textAndOffsetHash.values
   }
 
   private fun findDigraphs(text: CharSequence, sites: Iterable<Int>):
@@ -72,11 +71,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
     val stringToIndex: Multimap<String, Int> = LinkedListMultimap.create()
     for (site in sites) {
       val (c1, c2) = Pair(text[site], text[site + 1])
-      if (c1.isLetterOrDigit()) {
-        stringToIndex.put("$c1", site)
-        if (c2.isLetterOrDigit()) {
-          stringToIndex.put("$c1$c2", site)
-        }
+      stringToIndex.put("$c1", site)
+      if (c1.isLetterOrDigit() && c2.isLetterOrDigit()) {
+        stringToIndex.put("$c1$c2", site)
       }
     }
 
@@ -85,18 +82,38 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
 
   private fun assignRemainingDigraphs(currentDigraphs: Multimap<String, Int>): BiMap<String, Int> {
     val jumpLocations: BiMap<String, Int> = HashBiMap.create()
-    for (key in currentDigraphs.keys()) {
-      val value = currentDigraphs[key]
-      if (value.size == 1)
-        jumpLocations[key] = value.first()
+    for ((key, value) in currentDigraphs.asMap()) {
+      if (value.size == 1 && !jumpLocations.containsValue(value.first()))
+        jumpLocations[key.toLowerCase()] = value.first()
     }
 
-
+    for (c1 in 'a'..'z') {
+      if (!currentDigraphs.containsKey("$c1")) {
+        val inverse = jumpLocations.inverse()
+        for (index in inverse.keys) {
+          if (!hasNearbyTag(index, inverse)) {
+            jumpLocations.put("$c1", index)
+          }
+        }
+      }
+    }
 
     return jumpLocations
   }
 
+  private fun hasNearbyTag(index: Int, assigned: BiMap<Int, String>): Boolean {
+    val SPACING = 5
+
+    for (i in (index - SPACING)..(index + SPACING)) {
+      if (assigned.containsKey(i))
+        return true
+    }
+
+    return false
+  }
+
   fun findText(text: String, isRegEx: Boolean) {
+    println("Search box contents: " + text)
     findModel.stringToFind = text
     findModel.isRegularExpressions = isRegEx
 
@@ -146,8 +163,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl, val virtua
 
     if (jumpLocations.size == 0)
       return textPointPairs //todo: hack, in case random keystrokes make it through
-
-    textAndOffsetHash.clear()
 
     for (textOffset in jumpLocations) {
       val str = textAndOffsetHash.inverse()[textOffset]!!
