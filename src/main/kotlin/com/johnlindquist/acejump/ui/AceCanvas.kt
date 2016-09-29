@@ -40,39 +40,51 @@ class AceCanvas(editor: EditorImpl) : JComponent() {
     val g2d = graphics as Graphics2D
     val fbm = FontBasedMeasurements()
     for (jumpInfo: Pair<String, Point> in jumpInfos.orEmpty()) {
-      val text = jumpInfo.first
+      var text = jumpInfo.first
       val originalPoint = jumpInfo.second
-      val foregroundColor = colors.second
       val backgroundColor = if (text[0] == ' ') Color.YELLOW else colors.first
+      val foregroundColor = if (text[0] == ' ') Color.YELLOW else colors.second
 
       originalPoint.translate(0, -fbm.hOffset.toInt())
 
-      g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+      g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+                           RenderingHints.VALUE_ANTIALIAS_ON)
 
       //a slight border for "pop" against the background
       g2d.color = backgroundColor
 
       if (text.length == 2) {
-        g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1, originalPoint.y - fbm.rectHOffset.toInt() - 1, fbm.rectWidth + fbm.fontWidth + 5, lineHeight.toInt() + 1)
+        g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1,
+                     originalPoint.y - fbm.rectHOffset.toInt() - 1,
+                     fbm.rectWidth + fbm.fontWidth + 5, lineHeight.toInt() + 1)
       } else {
-        g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1, originalPoint.y - fbm.rectHOffset.toInt() - 1, fbm.rectWidth + 1, lineHeight.toInt() + 1)
+        g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1,
+                     originalPoint.y - fbm.rectHOffset.toInt() - 1,
+                     fbm .rectWidth + 1, lineHeight.toInt() + 1)
       }
 
       //the background rectangle
       g2d.color = foregroundColor
 
       if (text.length == 2) {
-        g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset.toInt(), fbm.rectWidth + fbm.fontWidth + 5, lineHeight.toInt())
+        g2d.fillRect(originalPoint.x - fbm.rectMarginWidth,
+                     originalPoint.y - fbm.rectHOffset.toInt(),
+                     fbm.rectWidth + fbm.fontWidth + 5, lineHeight.toInt())
       } else {
-        g2d.fillRect(originalPoint.x - fbm.rectMarginWidth, originalPoint.y - fbm.rectHOffset.toInt(), fbm.rectWidth, lineHeight.toInt())
+        g2d.fillRect(originalPoint.x - fbm.rectMarginWidth,
+                     originalPoint.y - fbm.rectHOffset.toInt(),
+                     fbm .rectWidth, lineHeight.toInt())
       }
 
       //just a touch of alpha
-      g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.85.toFloat())
+      g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
+        if (text[0] == ' ') 0.25.toFloat() else 0.85.toFloat())
 
       //the foreground text
       g2d.font = fbm.font
-      g2d.color = backgroundColor
+      g2d.color = Color.BLACK
+      if (text[0] == ' ')
+        text = text.substring(0, text.lastIndexOf(' ') + 1)
       g2d.drawString(text.toUpperCase(), originalPoint.x, originalPoint.y + fbm.fontHeight)
     }
   }

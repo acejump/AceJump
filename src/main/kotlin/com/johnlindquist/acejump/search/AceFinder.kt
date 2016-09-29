@@ -10,6 +10,7 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.util.EventDispatcher
+import java.util.*
 import java.util.regex.Pattern
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
@@ -31,6 +32,20 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       'l' to "lkop", 'z' to "zasx", 'x' to "xzsdc", 'c' to "cxdfv",
       'v' to "vcfgb", 'b' to "bvghn", 'n' to "nbhjm", 'm' to "mnjk")
 
+  fun findText(text: String) {
+    println("Search box contents: " + text)
+    findModel.stringToFind = text
+
+    val application = ApplicationManager.getApplication()
+    application.runReadAction({
+      jumpLocations = determineJumpLocations()
+    })
+    application.invokeLater({
+      if (text.isNotEmpty())
+        eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
+    })
+  }
+
   private fun determineJumpLocations(): Collection<Int> {
     val (startIndex, endIndex) = getVisibleRange()
     val fullText = document.charsSequence
@@ -49,7 +64,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     var result = findManager.findString(window, 0, findModel)
     while (result.isStringFound) {
       indicesToCheck.add(result.endOffset)
-      result = findManager.findString(window, 0, findModel)
+      result = findManager.findString(window, result.endOffset, findModel)
     }
     return indicesToCheck
   }
@@ -74,11 +89,13 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       if (value.size == 1 && !tagMap.containsValue(value.first())) {
         var tag = key.toLowerCase()
         if (findModel.stringToFind.isEmpty())
-          tag = tag.toLowerCase().replace(Regex("."), " ")
+          tag = tag.toLowerCase().replace(Regex("."), " ") + tag
         else
-          tag = findModel.stringToFind.replace(Regex("."), " ") + tag
+          tag = (findModel.stringToFind).replace(Regex("."), " ") + tag
 
-        tagMap[tag] = value.first() - findModel.stringToFind.length
+        val tagIndex = value.first() - findModel.stringToFind.length
+        if (!hasNearbyTag(tagIndex, tagMap.inverse()))
+          tagMap[tag] = tagIndex
       }
     }
 
@@ -105,20 +122,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     }
 
     return false
-  }
-
-  fun findText(text: String) {
-    println("Search box contents: " + text)
-    findModel.stringToFind = text
-
-    val application = ApplicationManager.getApplication()
-    application.runReadAction({
-      jumpLocations = determineJumpLocations()
-    })
-    application.invokeLater({
-      if (text.isNotEmpty())
-        eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
-    })
   }
 
   private fun getVisibleRange(): Pair<Int, Int> {

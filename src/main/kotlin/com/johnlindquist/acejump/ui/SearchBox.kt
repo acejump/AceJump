@@ -33,7 +33,7 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     configurePopup()
 
     aceFinder.addResultsReadyListener(ChangeListener {
-      val tags = plotJumpLocations(aceFinder.tagMap, text)
+      val tags = plotJumpLocations(aceFinder.tagMap)
       if (tags.size == 1)
         popupContainer?.cancel()
       aceCanvas.jumpInfos.addAll(tags)
@@ -41,9 +41,8 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     })
   }
 
-  fun plotJumpLocations(tagMap: BiMap<String, Int>, text: String):
-    MutableList<Pair<String,
-    Point>> {
+  fun plotJumpLocations(tagMap: BiMap<String, Int>):
+    MutableList<Pair<String, Point>> {
     val textPointPairs = ArrayList<Pair<String, Point>>()
 
     val jumpLocations = tagMap.values
@@ -51,14 +50,12 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     if (jumpLocations.size == 0)
       return textPointPairs
 
-    for (offset in jumpLocations) {
-      val str = tagMap.inverse()[offset]!!
-
-      if (text.isEmpty() || str.startsWith(text)) {
-        val point = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(offset))
-        textPointPairs.add(Pair(str, point.originalPoint))
-        tagMap[str] = offset
-      }
+    jumpLocations.forEach {
+      val str = tagMap.inverse()[it]!!
+      val point = getPointFromVisualPosition(editor, editor
+        .offsetToVisualPosition(it)).originalPoint
+      textPointPairs.add(Pair(str, point))
+      tagMap[str] = it
     }
 
     return textPointPairs
@@ -129,7 +126,7 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
 
     if (keyMap.contains(keyEvent.keyCode)) {
       keyEvent.consume()
-      keyMap[keyEvent.keyCode]?.execute(keyEvent, text)
+      keyMap[keyEvent.keyCode]?.execute(keyEvent)
       return
     }
 
