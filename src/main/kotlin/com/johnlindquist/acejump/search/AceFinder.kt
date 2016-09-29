@@ -10,18 +10,16 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.util.EventDispatcher
-import java.awt.Point
-import java.util.*
 import java.util.regex.Pattern
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
-class AceFinder(findManager: FindManager, val editor: EditorImpl) {
+class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   val document = editor.document as DocumentImpl
   val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = createFindModel(findManager)
   var jumpLocations: Collection<Int> = emptyList()
-  var textAndOffsetHash: BiMap<String, Int> = HashBiMap.create()
+  var tagMap: BiMap<String, Int> = HashBiMap.create()
   var qwertyAdjacentKeys =
     mapOf('1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
       '5' to "56tr4", '6' to "67yt5", '7' to "78uy6", '8' to "89iu7",
@@ -33,26 +31,27 @@ class AceFinder(findManager: FindManager, val editor: EditorImpl) {
       'l' to "lkop", 'z' to "zasx", 'x' to "xzsdc", 'c' to "cxdfv",
       'v' to "vcfgb", 'b' to "bvghn", 'n' to "nbhjm", 'm' to "mnjk")
 
-  private fun findJumpLocations(target: String): Collection<Int> {
+  private fun determineJumpLocations(): Collection<Int> {
     val (startIndex, endIndex) = getVisibleRange()
     val fullText = document.charsSequence
     val window = fullText.substring(startIndex, endIndex)
-
-    val sitesToCheck =
-      if (target.isEmpty())
-        startIndex..(endIndex - 2)
-      else {
-        val indicesToCheck = arrayListOf<Int>()
-        val match = Pattern.compile("(?i)$target").matcher(window)
-        while (match.find()) {
-          indicesToCheck.add(match.end() + startIndex)
-        }
-        indicesToCheck
-      }
-    println(sitesToCheck)
+    val sitesToCheck = getSitesToCheck(window).map { it + startIndex }
     val existingDigraphs = findDigraphs(fullText, sitesToCheck)
-    textAndOffsetHash = mapUniqueDigraphs(existingDigraphs)
-    return textAndOffsetHash.values
+    tagMap = mapUniqueDigraphs(existingDigraphs)
+    return tagMap.values
+  }
+
+  fun getSitesToCheck(window: String): Iterable<Int> {
+    if (findModel.stringToFind.isEmpty())
+      return 0..(window.length - 2)
+
+    val indicesToCheck = arrayListOf<Int>()
+    var result = findManager.findString(window, 0, findModel)
+    while (result.isStringFound) {
+      indicesToCheck.add(result.endOffset)
+      result = findManager.findString(window, 0, findModel)
+    }
+    return indicesToCheck
   }
 
   fun findDigraphs(text: CharSequence, sites: Iterable<Int>):
@@ -70,24 +69,31 @@ class AceFinder(findManager: FindManager, val editor: EditorImpl) {
   }
 
   fun mapUniqueDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
-    val jumpLocations: BiMap<String, Int> = HashBiMap.create()
+    val tagMap: BiMap<String, Int> = HashBiMap.create()
     for ((key, value) in digraphs.asMap()) {
-      if (value.size == 1 && !jumpLocations.containsValue(value.first()))
-        jumpLocations[key.toLowerCase()] = value.first()
+      if (value.size == 1 && !tagMap.containsValue(value.first())) {
+        var tag = key.toLowerCase()
+        if (findModel.stringToFind.isEmpty())
+          tag = tag.toLowerCase().replace(Regex("."), " ")
+        else
+          tag = findModel.stringToFind.replace(Regex("."), " ") + tag
+
+        tagMap[tag] = value.first() - findModel.stringToFind.length
+      }
     }
 
     for (c1 in 'a'..'z') {
       if (!digraphs.containsKey("$c1")) {
-        val inverse = jumpLocations.inverse()
+        val inverse = tagMap.inverse()
         for (index in inverse.keys) {
           if (!hasNearbyTag(index, inverse)) {
-            jumpLocations.put("$c1", index)
+            tagMap.put("$c1", index)
           }
         }
       }
     }
 
-    return jumpLocations
+    return tagMap
   }
 
   private fun hasNearbyTag(index: Int, assigned: BiMap<Int, String>): Boolean {
@@ -101,14 +107,13 @@ class AceFinder(findManager: FindManager, val editor: EditorImpl) {
     return false
   }
 
-  fun findText(text: String, isRegEx: Boolean) {
+  fun findText(text: String) {
     println("Search box contents: " + text)
     findModel.stringToFind = text
-    findModel.isRegularExpressions = isRegEx
 
     val application = ApplicationManager.getApplication()
     application.runReadAction({
-      jumpLocations = findJumpLocations(text)
+      jumpLocations = determineJumpLocations()
     })
     application.invokeLater({
       if (text.isNotEmpty())
@@ -147,32 +152,9 @@ class AceFinder(findManager: FindManager, val editor: EditorImpl) {
     eventDispatcher.addListener(changeListener)
   }
 
-  fun markJumpLocations(text: String): MutableList<Pair<String, Point>> {
-    val textPointPairs = ArrayList<Pair<String, Point>>()
-
-    //todo: hack, in case random keystrokes make it through
-    if (jumpLocations.size == 0)
-      return textPointPairs
-
-    for (textOffset in jumpLocations) {
-      val str = textAndOffsetHash.inverse()[textOffset]!!
-
-      if (text.isEmpty() || str.startsWith(text)) {
-        val point = getPointFromVisualPosition(editor, editor
-          .offsetToVisualPosition(textOffset))
-        textPointPairs.add(Pair(str, point.originalPoint))
-        textAndOffsetHash[str] = textOffset
-      }
-    }
-
-    return textPointPairs
-  }
-
   fun findText(text: REGEX) {
-    findText(text.pattern, true)
-  }
-
-  fun findText(text: String) {
-    findText(text, false)
+    findModel.isRegularExpressions = true
+    findText(text.pattern)
+    findModel.isRegularExpressions = false
   }
 }

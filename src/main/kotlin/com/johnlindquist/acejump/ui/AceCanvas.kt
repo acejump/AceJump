@@ -39,7 +39,6 @@ class AceCanvas(editor: EditorImpl) : JComponent() {
 
     val g2d = graphics as Graphics2D
     val fbm = FontBasedMeasurements()
-
     for (jumpInfo: Pair<String, Point> in jumpInfos.orEmpty()) {
       val text = jumpInfo.first
       val originalPoint = jumpInfo.second

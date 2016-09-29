@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.ui
 
+import com.google.common.collect.BiMap
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.ui.popup.ComponentPopupBuilder
@@ -8,6 +9,7 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.search.AceFinder
+import com.johnlindquist.acejump.search.getPointFromVisualPosition
 import com.johnlindquist.acejump.search.guessBestLocation
 import java.awt.*
 import java.awt.event.FocusEvent
@@ -31,12 +33,35 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     configurePopup()
 
     aceFinder.addResultsReadyListener(ChangeListener {
-      val tags = aceFinder.markJumpLocations(text)
-      aceCanvas.jumpInfos.addAll(tags)
+      val tags = plotJumpLocations(aceFinder.tagMap, text)
       if (tags.size == 1)
         popupContainer?.cancel()
+      aceCanvas.jumpInfos.addAll(tags)
       aceCanvas.repaint()
     })
+  }
+
+  fun plotJumpLocations(tagMap: BiMap<String, Int>, text: String):
+    MutableList<Pair<String,
+    Point>> {
+    val textPointPairs = ArrayList<Pair<String, Point>>()
+
+    val jumpLocations = tagMap.values
+    //todo: hack, in case random keystrokes make it through
+    if (jumpLocations.size == 0)
+      return textPointPairs
+
+    for (offset in jumpLocations) {
+      val str = tagMap.inverse()[offset]!!
+
+      if (text.isEmpty() || str.startsWith(text)) {
+        val point = getPointFromVisualPosition(editor, editor.offsetToVisualPosition(offset))
+        textPointPairs.add(Pair(str, point.originalPoint))
+        tagMap[str] = offset
+      }
+    }
+
+    return textPointPairs
   }
 
   private fun configurePopup() {
@@ -126,6 +151,6 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     val contentComponent = editor.contentComponent
     contentComponent.remove(aceCanvas)
     contentComponent.repaint()
-    aceFinder.textAndOffsetHash.clear()
+    aceFinder.tagMap.clear()
   }
 }
