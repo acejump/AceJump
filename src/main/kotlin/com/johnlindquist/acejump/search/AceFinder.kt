@@ -105,9 +105,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   }
 
   fun mapUniqueDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
-    val tagMap: BiMap<String, Int> = HashBiMap.create()
+    val newTagMap: BiMap<String, Int> = HashBiMap.create()
     for ((key, value) in digraphs.asMap()) {
-      if (value.size == 1 && !tagMap.containsValue(value.first())) {
+      if (value.size == 1 && !newTagMap.containsValue(value.first())) {
         var tag = key.toLowerCase()
         if (findModel.stringToFind.isEmpty())
           tag = tag.toLowerCase().replace(Regex("."), " ") + tag
@@ -116,14 +116,14 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
         val tagIndex = value.first() - findModel.stringToFind.length
         if (!hasNearbyTag(tagIndex))
-          mapTagToIndex(tagMap, tag, tagIndex)
+          mapTagToIndex(newTagMap, tag, tagIndex)
       }
     }
 
     for (index in digraphs.values()) {
       if (unusedDigraphs.isNotEmpty()) {
         if (!hasNearbyTag(index)) {
-          tagMap.put(unusedDigraphs.first(), index)
+          newTagMap.put(unusedDigraphs.first(), index)
           unusedDigraphs.remove(unusedDigraphs.first())
           break
         }
@@ -132,7 +132,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       }
     }
 
-    return tagMap
+    return newTagMap
   }
 
   private fun mapTagToIndex(tags: BiMap<String, Int>, tag: String, index: Int) {
@@ -175,7 +175,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     eventDispatcher.addListener(changeListener)
   }
 
-  fun findText(text: REGEX): Int? {
+  fun findText(text: Regexp): Int? {
     findModel.isRegularExpressions = true
     return findText(text.pattern)
     findModel.isRegularExpressions = false

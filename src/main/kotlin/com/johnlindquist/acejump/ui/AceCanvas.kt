@@ -2,27 +2,25 @@ package com.johnlindquist.acejump.ui
 
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.EditorImpl
+import com.johnlindquist.acejump.ui.JumpInfo
 import java.awt.*
 import javax.swing.JComponent
 
-class AceCanvas(editor: EditorImpl) : JComponent() {
-  var jumpInfos: MutableList<Pair<String, Point>> = arrayListOf()
-  var colors = Pair<Color, Color>(Color.BLACK, Color.WHITE)
-  var lineSpacing = 0.toFloat()
-  var lineHeight = 0
+class AceCanvas(val editor: EditorImpl) : JComponent() {
+  var jumpInfos: List<JumpInfo> = arrayListOf()
+  val scheme = EditorColorsManager.getInstance().globalScheme
+  val colors = Pair(scheme.defaultBackground, scheme.defaultForeground)
 
   init {
-    val scheme = EditorColorsManager.getInstance().globalScheme
     font = Font(scheme.editorFontName, Font.BOLD, scheme.editorFontSize)
-    lineHeight = editor.lineHeight
-    lineSpacing = scheme.lineSpacing
-    colors = Pair(scheme.defaultBackground, scheme.defaultForeground)
   }
 
   inner class FontBasedMeasurements() {
     var font = getFont()!!
     val fontWidth = getFontMetrics(font).stringWidth("w")
     val fontHeight = font.size
+    val lineHeight = editor.lineHeight
+    val lineSpacing = scheme.lineSpacing
     val rectMarginWidth = fontWidth / 2
     val doubleRectMarginWidth = rectMarginWidth * 2
     val fontSpacing = fontHeight * lineSpacing
@@ -39,58 +37,6 @@ class AceCanvas(editor: EditorImpl) : JComponent() {
 
     val g2d = graphics as Graphics2D
     val fbm = FontBasedMeasurements()
-    for (jumpInfo: Pair<String, Point> in jumpInfos.orEmpty()) {
-      var text = jumpInfo.first
-      val originalPoint = jumpInfo.second
-      val backgroundColor = if (text[0] == ' ') Color.YELLOW else colors.first
-      val foregroundColor = if (text[0] == ' ') Color.YELLOW else colors.second
-
-      originalPoint.translate(0, -fbm.hOffset.toInt())
-
-      g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                           RenderingHints.VALUE_ANTIALIAS_ON)
-
-      //a slight border for "pop" against the background
-      g2d.color = backgroundColor
-
-      if (text.length == 2) {
-        g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1,
-                     originalPoint.y - fbm.rectHOffset.toInt() - 1,
-                     fbm.rectWidth + fbm.fontWidth + 5, lineHeight.toInt() + 1)
-      } else {
-        g2d.drawRect(originalPoint.x - fbm.rectMarginWidth - 1,
-                     originalPoint.y - fbm.rectHOffset.toInt() - 1,
-                     fbm .rectWidth + 1, lineHeight.toInt() + 1)
-      }
-
-      //the background rectangle
-      g2d.color = foregroundColor
-
-      if (text.length == 2) {
-        g2d.fillRect(originalPoint.x - fbm.rectMarginWidth,
-                     originalPoint.y - fbm.rectHOffset.toInt(),
-                     fbm.rectWidth + fbm.fontWidth + 5, lineHeight.toInt())
-      } else {
-        g2d.fillRect(originalPoint.x - fbm.rectMarginWidth,
-                     originalPoint.y - fbm.rectHOffset.toInt(),
-                     fbm .rectWidth, lineHeight.toInt())
-      }
-
-      //just a touch of alpha
-      g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-        if (text[0] == ' ') 0.25.toFloat() else 0.85.toFloat())
-
-      //the foreground text
-      g2d.font = fbm.font
-      g2d.color = Color.BLACK
-//      if (text[0] == ' ')
-//        text = text.substring(0, text.lastIndexOf(' ') + 1)
-      g2d.drawString(text.toUpperCase(), originalPoint.x, originalPoint.y + fbm.fontHeight)
-    }
-  }
-
-  fun clear() {
-    jumpInfos.removeAll { true }
-    repaint()
+    jumpInfos.orEmpty().forEach { it.drawRect(g2d, fbm, colors) }
   }
 }

@@ -1,6 +1,6 @@
 package com.johnlindquist.acejump.search
 
-enum class REGEX(val pattern: String) {
+enum class Regexp(val pattern: String) {
   END_OF_LINE("\\n"),
   BEGINNING_OF_LINE("^.|\\n(?<!.\\n)"),
   CODE_INDENTS("^\\s*\\S"),
@@ -8,7 +8,7 @@ enum class REGEX(val pattern: String) {
 
   companion object {
     fun contains(regex: String): Boolean {
-      return REGEX.values().any { it.name == regex }
+      return Regexp.values().any { it.name == regex }
     }
   }
 }

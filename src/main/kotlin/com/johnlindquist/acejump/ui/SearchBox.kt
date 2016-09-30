@@ -9,6 +9,7 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.search.AceFinder
+import com.johnlindquist.acejump.ui.JumpInfo
 import com.johnlindquist.acejump.search.getPointFromVisualPosition
 import com.johnlindquist.acejump.search.guessBestLocation
 import java.awt.*
@@ -33,32 +34,17 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     configurePopup()
 
     aceFinder.addResultsReadyListener(ChangeListener {
-      val tags = plotJumpLocations(aceFinder.tagMap)
-      if (tags.size == 1)
+      aceCanvas.jumpInfos = plotJumpLocations(aceFinder.tagMap)
+      if (aceCanvas.jumpInfos.size == 1)
         popupContainer?.cancel()
-      aceCanvas.jumpInfos = tags
       aceCanvas.repaint()
     })
   }
 
-  fun plotJumpLocations(tagMap: BiMap<String, Int>):
-    MutableList<Pair<String, Point>> {
-    val textPointPairs = ArrayList<Pair<String, Point>>()
-
-    val jumpLocations = tagMap.values
-    //todo: hack, in case random keystrokes make it through
-    if (jumpLocations.size == 0)
-      return textPointPairs
-
-    jumpLocations.forEach {
-      val str = tagMap.inverse()[it]!!
-      val point = getPointFromVisualPosition(editor, editor
-        .offsetToVisualPosition(it)).originalPoint
-      textPointPairs.add(Pair(str, point))
-      tagMap[str] = it
+  fun plotJumpLocations(tagMap: BiMap<String, Int>): List<JumpInfo> {
+    return tagMap.values.map {
+      JumpInfo(tagMap.inverse()[it]!!, this@SearchBox.text, it, editor)
     }
-
-    return textPointPairs
   }
 
   private fun configurePopup() {
