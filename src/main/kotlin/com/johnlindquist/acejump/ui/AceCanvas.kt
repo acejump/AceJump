@@ -6,7 +6,7 @@ import java.awt.*
 import javax.swing.JComponent
 
 class AceCanvas(editor: EditorImpl) : JComponent() {
-  val jumpInfos: MutableList<Pair<String, Point>> = arrayListOf()
+  var jumpInfos: MutableList<Pair<String, Point>> = arrayListOf()
   var colors = Pair<Color, Color>(Color.BLACK, Color.WHITE)
   var lineSpacing = 0.toFloat()
   var lineHeight = 0
@@ -83,8 +83,8 @@ class AceCanvas(editor: EditorImpl) : JComponent() {
       //the foreground text
       g2d.font = fbm.font
       g2d.color = Color.BLACK
-      if (text[0] == ' ')
-        text = text.substring(0, text.lastIndexOf(' ') + 1)
+//      if (text[0] == ' ')
+//        text = text.substring(0, text.lastIndexOf(' ') + 1)
       g2d.drawString(text.toUpperCase(), originalPoint.x, originalPoint.y + fbm.fontHeight)
     }
   }

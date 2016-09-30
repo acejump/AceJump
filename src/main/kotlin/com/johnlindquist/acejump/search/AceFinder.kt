@@ -10,8 +10,8 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.util.EventDispatcher
+import com.intellij.vcs.log.Hash
 import java.util.*
-import java.util.regex.Pattern
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
@@ -21,6 +21,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   val findModel: FindModel = createFindModel(findManager)
   var jumpLocations: Collection<Int> = emptyList()
   var tagMap: BiMap<String, Int> = HashBiMap.create()
+  val maxTags = 26
+  var unusedDigraphs: HashSet<String> = LinkedHashSet(maxTags)
+  var approximateTagLocations: HashSet<Int> = HashSet(maxTags)
   var qwertyAdjacentKeys =
     mapOf('1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
       '5' to "56tr4", '6' to "67yt5", '7' to "78uy6", '8' to "89iu7",
@@ -32,9 +35,14 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       'l' to "lkop", 'z' to "zasx", 'x' to "xzsdc", 'c' to "cxdfv",
       'v' to "vcfgb", 'b' to "bvghn", 'n' to "nbhjm", 'm' to "mnjk")
 
-  fun findText(text: String) {
-    println("Search box contents: " + text)
+  fun findText(text: String): Int? {
+    if(text.isNotEmpty() && tagMap.containsKey(text.last().toString())) {
+      return tagMap.get(text.last().toString())
+    }
+
     findModel.stringToFind = text
+    populateUnusedDigraphs()
+    approximateTagLocations = HashSet(maxTags)
 
     val application = ApplicationManager.getApplication()
     application.runReadAction({
@@ -44,6 +52,18 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       if (text.isNotEmpty())
         eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
     })
+    return null
+  }
+
+  private fun populateUnusedDigraphs() {
+    var population = 0
+    for (c1 in 'a'..'z') {
+      if (population >= maxTags) {
+        break
+      }
+      unusedDigraphs.add("$c1")
+      population++
+    }
   }
 
   private fun determineJumpLocations(): Collection<Int> {
@@ -69,14 +89,15 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return indicesToCheck
   }
 
-  fun findDigraphs(text: CharSequence, sites: Iterable<Int>):
-    Multimap<String, Int> {
-    val stringToIndex: Multimap<String, Int> = LinkedListMultimap.create()
+  fun findDigraphs(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
+    val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
       val (c1, c2) = Pair(text[site], text[site + 1])
       stringToIndex.put("$c1", site)
+      unusedDigraphs.remove("$c1")
       if (c1.isLetterOrDigit() && c2.isLetterOrDigit()) {
         stringToIndex.put("$c1$c2", site)
+        unusedDigraphs.remove("$c1$c2")
       }
     }
 
@@ -94,34 +115,33 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
           tag = (findModel.stringToFind).replace(Regex("."), " ") + tag
 
         val tagIndex = value.first() - findModel.stringToFind.length
-        if (!hasNearbyTag(tagIndex, tagMap.inverse()))
-          tagMap[tag] = tagIndex
+        if (!hasNearbyTag(tagIndex))
+          mapTagToIndex(tagMap, tag, tagIndex)
       }
     }
 
-    for (c1 in 'a'..'z') {
-      if (!digraphs.containsKey("$c1")) {
-        val inverse = tagMap.inverse()
-        for (index in inverse.keys) {
-          if (!hasNearbyTag(index, inverse)) {
-            tagMap.put("$c1", index)
-          }
+    for (index in digraphs.values()) {
+      if (unusedDigraphs.isNotEmpty()) {
+        if (!hasNearbyTag(index)) {
+          tagMap.put(unusedDigraphs.first(), index)
+          unusedDigraphs.remove(unusedDigraphs.first())
+          break
         }
+      } else {
+        break
       }
     }
 
     return tagMap
   }
 
-  private fun hasNearbyTag(index: Int, assigned: BiMap<Int, String>): Boolean {
-    val SPACING = 5
+  private fun mapTagToIndex(tags: BiMap<String, Int>, tag: String, index: Int) {
+    tags[tag] = index
+    approximateTagLocations.add(index / 10)
+  }
 
-    for (i in (index - SPACING)..(index + SPACING)) {
-      if (assigned.containsKey(i))
-        return true
-    }
-
-    return false
+  private fun hasNearbyTag(index: Int): Boolean {
+    return approximateTagLocations.contains(index / 10)
   }
 
   private fun getVisibleRange(): Pair<Int, Int> {
@@ -155,9 +175,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     eventDispatcher.addListener(changeListener)
   }
 
-  fun findText(text: REGEX) {
+  fun findText(text: REGEX): Int? {
     findModel.isRegularExpressions = true
-    findText(text.pattern)
+    return findText(text.pattern)
     findModel.isRegularExpressions = false
   }
 }

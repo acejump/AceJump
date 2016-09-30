@@ -13,13 +13,12 @@ class DefaultKeyCommand(override val aceFinder: AceFinder) : AceKeyCommand() {
     if (keyEvent.keyChar == '\b') return
 
     //Find or jump
-    aceFinder.findText(text)
+    val offset = aceFinder.findText(text)
     aceFinder.eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
-    jumpToOffset(keyEvent, text)
+    jumpToOffset(keyEvent, offset)
   }
 
-  private fun jumpToOffset(keyEvent: KeyEvent, text: String) {
-    val offset = aceFinder.tagMap[text]
+  private fun jumpToOffset(keyEvent: KeyEvent, offset: Int?) {
     if (offset != null) {
       if (keyEvent.isShiftDown && !keyEvent.isMetaDown) {
         aceJumper.setSelectionFromCaretToOffset(offset)

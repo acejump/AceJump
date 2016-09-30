@@ -36,7 +36,7 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
       val tags = plotJumpLocations(aceFinder.tagMap)
       if (tags.size == 1)
         popupContainer?.cancel()
-      aceCanvas.jumpInfos.addAll(tags)
+      aceCanvas.jumpInfos = tags
       aceCanvas.repaint()
     })
   }
@@ -120,6 +120,13 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
       } else {
         background = Color.WHITE
       }
+    }
+
+    if (keyEvent.keyCode == VK_BACK_SPACE) {
+      if (text.isNotEmpty())
+        text = text.substring(0, text.length - 1)
+
+      return
     }
 
     defaultKeyCommand.execute(keyEvent, text)
