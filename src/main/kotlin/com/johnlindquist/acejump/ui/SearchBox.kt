@@ -100,7 +100,7 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
   override fun processKeyEvent(keyEvent: KeyEvent) {
     if (keyEvent.id == KeyEvent.KEY_PRESSED &&
       (keyEvent.isMetaDown || keyEvent.isControlDown)) {
-      if (defaultKeyCommand.toggleTargetMode()) {
+      if (aceFinder.toggleTargetMode()) {
         background = Color.RED
       } else {
         background = Color.WHITE

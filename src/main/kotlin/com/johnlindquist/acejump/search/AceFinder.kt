@@ -11,6 +11,8 @@ import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.util.EventDispatcher
 import com.intellij.vcs.log.Hash
+import com.johnlindquist.acejump.keycommands.AceJumper
+import java.awt.event.KeyEvent
 import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
@@ -23,7 +25,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   var tagMap: BiMap<String, Int> = HashBiMap.create()
   val maxTags = 26
   var unusedDigraphs: HashSet<String> = LinkedHashSet(maxTags)
-  var approximateTagLocations: HashSet<Int> = HashSet(maxTags)
+  var tagLocations: HashSet<Int> = HashSet(maxTags)
   var qwertyAdjacentKeys =
     mapOf('1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
       '5' to "56tr4", '6' to "67yt5", '7' to "78uy6", '8' to "89iu7",
@@ -35,26 +37,28 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       'l' to "lkop", 'z' to "zasx", 'x' to "xzsdc", 'c' to "cxdfv",
       'v' to "vcfgb", 'b' to "bvghn", 'n' to "nbhjm", 'm' to "mnjk")
 
-  fun findText(text: String): Int? {
-    if (text.isNotEmpty() &&
-        !findModel.isRegularExpressions &&
-        tagMap.containsKey(text.last().toString())) {
-      return tagMap[text.last().toString()]!! - text.length
-    }
-
+  val aceJumper = AceJumper(editor, document)
+  fun findText(text: String, keyEvent: KeyEvent?) {
     findModel.stringToFind = text
     populateUnusedDigraphs()
-    approximateTagLocations = HashSet(maxTags)
+    tagLocations = HashSet(maxTags)
 
     val application = ApplicationManager.getApplication()
     application.runReadAction({
       jumpLocations = determineJumpLocations()
+      if (text.isNotEmpty() &&
+        !findModel.isRegularExpressions &&
+        tagMap.containsKey(text.last().toString())) {
+        jumpToOffset(keyEvent!!, tagMap[text.last().toString()]!! - text.length)
+      } else if (jumpLocations.size == 1) {
+        jumpToOffset(keyEvent!!, jumpLocations.first() - text.length)
+      }
     })
+
     application.invokeLater({
       if (text.isNotEmpty())
         eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
     })
-    return null
   }
 
   private fun populateUnusedDigraphs() {
@@ -73,7 +77,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     val fullText = document.charsSequence.toString().toLowerCase()
     val window = fullText.substring(startIndex, endIndex)
     val sitesToCheck = getSitesToCheck(window).map { it + startIndex }
-    val existingDigraphs = findDigraphs(fullText, sitesToCheck)
+    if (sitesToCheck.size <= 1)
+      return sitesToCheck
+    val existingDigraphs = makeMap(fullText, sitesToCheck)
     tagMap = mapUniqueDigraphs(existingDigraphs)
     return tagMap.values
   }
@@ -91,7 +97,13 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return indicesToCheck
   }
 
-  fun findDigraphs(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
+  var targetModeEnabled = false
+  fun toggleTargetMode(): Boolean {
+    targetModeEnabled = !targetModeEnabled
+    return targetModeEnabled
+  }
+
+  fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
       val (c1, c2) = Pair(text[site], text[site + 1])
@@ -136,11 +148,11 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
   private fun mapTagToIndex(tags: BiMap<String, Int>, tag: String, index: Int) {
     tags[tag] = index
-    approximateTagLocations.add(index)
+    tagLocations.add(index)
   }
 
   private fun hasNearbyTag(index: Int): Boolean {
-    return ((index - 2)..(index + 2)).any { approximateTagLocations.contains(it) }
+    return ((index - 2)..(index + 2)).any { tagLocations.contains(it) }
   }
 
   private fun getVisibleRange(): Pair<Int, Int> {
@@ -174,10 +186,27 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     eventDispatcher.addListener(changeListener)
   }
 
-  fun findText(text: Regexp): Int? {
+  private fun jumpToOffset(keyEvent: KeyEvent, offset: Int?) {
+    if (offset == null)
+      return
+
+    if (keyEvent.isShiftDown && !keyEvent.isMetaDown) {
+      aceJumper.setSelectionFromCaretToOffset(offset)
+      aceJumper.moveCaret(offset)
+    } else {
+      aceJumper.moveCaret(offset)
+    }
+
+    if (targetModeEnabled) {
+      aceJumper.selectWordAtCaret()
+    }
+
+    tagMap = HashBiMap.create()
+  }
+
+  fun findText(text: Regexp, keyEvent: KeyEvent? = null) {
     findModel.isRegularExpressions = true
-    val index = findText(text.pattern)
+    findText(text.pattern, keyEvent)
     findModel.isRegularExpressions = false
-    return index
   }
 }
