@@ -9,15 +9,12 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.search.AceFinder
-import com.johnlindquist.acejump.ui.JumpInfo
-import com.johnlindquist.acejump.search.getPointFromVisualPosition
 import com.johnlindquist.acejump.search.guessBestLocation
 import java.awt.*
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent.*
-import java.util.*
 import javax.swing.JRootPane
 import javax.swing.JTextField
 import javax.swing.SwingUtilities
@@ -25,18 +22,20 @@ import javax.swing.event.ChangeListener
 
 class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField() {
   var aceCanvas = AceCanvas(editor)
-  val keyMap = HashMap<Int, AceKeyCommand>()
+  var keyMap: Map<Int, AceKeyCommand> = hashMapOf()
   var popupContainer: AbstractPopup? = null
   var defaultKeyCommand = DefaultKeyCommand(aceFinder)
 
   init {
-    configureKeyMap()
-    configurePopup()
+    keyMap = configureKeyMap()
+    popupContainer = configurePopup()
 
     aceFinder.addResultsReadyListener(ChangeListener {
       aceCanvas.jumpInfos = plotJumpLocations(aceFinder.tagMap)
-      if (aceCanvas.jumpInfos.size == 1)
+      if (aceCanvas.jumpInfos.isEmpty() || aceCanvas.jumpInfos.size == 1) {
         popupContainer?.cancel()
+        exit()
+      }
       aceCanvas.repaint()
     })
   }
@@ -47,7 +46,7 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     }
   }
 
-  private fun configurePopup() {
+  private fun configurePopup(): AbstractPopup? {
     val scheme = EditorColorsManager.getInstance().globalScheme
     val font = Font(scheme.editorFontName, Font.BOLD, scheme.editorFontSize)
     val popupBuilder: ComponentPopupBuilder? =
@@ -64,7 +63,6 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     }
 
     popup?.size = dimension
-    popupContainer = popup
     size = dimension
     isFocusable = true
     addFocusListener(object : FocusListener {
@@ -76,17 +74,18 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
         exit()
       }
     })
+    return popup
   }
 
-  private fun configureKeyMap() {
+  private fun configureKeyMap(): Map<Int, AceKeyCommand> {
     val showBeginningOfLines = ShowBeginningOfLines(aceFinder)
     val showEndOfLines = ShowEndOfLines(aceFinder)
-    keyMap[VK_HOME] = showBeginningOfLines
-    keyMap[VK_LEFT] = showBeginningOfLines
-    keyMap[VK_RIGHT] = showEndOfLines
-    keyMap[VK_END] = showEndOfLines
-    keyMap[VK_UP] = ShowFirstCharOfLines(aceFinder)
-    keyMap[VK_SPACE] = ShowWhiteSpace(aceFinder)
+    return mapOf(VK_HOME to showBeginningOfLines,
+      VK_LEFT to showBeginningOfLines,
+      VK_RIGHT to showEndOfLines,
+      VK_END to showEndOfLines,
+      VK_UP to ShowFirstCharOfLines(aceFinder),
+      VK_SPACE to ShowWhiteSpace(aceFinder))
   }
 
   override fun requestFocus() {
@@ -132,9 +131,9 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     editor.contentComponent.add(aceCanvas)
     val viewport = editor.scrollPane.viewport
     aceCanvas.setBounds(0, 0, viewport.width + 1000, viewport.height + 1000)
-    val rootPane: JRootPane = editor.component.rootPane
-    val locationOnScreen: Point = SwingUtilities.convertPoint(aceCanvas, aceCanvas.location, rootPane)
-    aceCanvas.setLocation(-locationOnScreen.x, -locationOnScreen.y)
+    val root: JRootPane = editor.component.rootPane
+    val loc = SwingUtilities.convertPoint(aceCanvas, aceCanvas.location, root)
+    aceCanvas.setLocation(-loc.x, -loc.y)
   }
 
   fun exit() {

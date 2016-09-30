@@ -14,22 +14,23 @@ class DefaultKeyCommand(override val aceFinder: AceFinder) : AceKeyCommand() {
 
     //Find or jump
     val offset = aceFinder.findText(text)
-    aceFinder.eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
     jumpToOffset(keyEvent, offset)
+    aceFinder.eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
   }
 
   private fun jumpToOffset(keyEvent: KeyEvent, offset: Int?) {
-    if (offset != null) {
-      if (keyEvent.isShiftDown && !keyEvent.isMetaDown) {
-        aceJumper.setSelectionFromCaretToOffset(offset)
-        aceJumper.moveCaret(offset)
-      } else {
-        aceJumper.moveCaret(offset)
-      }
+    if (offset == null)
+      return
 
-      if (targetModeEnabled) {
-        aceJumper.selectWordAtCaret()
-      }
+    if (keyEvent.isShiftDown && !keyEvent.isMetaDown) {
+      aceJumper.setSelectionFromCaretToOffset(offset)
+      aceJumper.moveCaret(offset)
+    } else {
+      aceJumper.moveCaret(offset)
+    }
+
+    if (targetModeEnabled) {
+      aceJumper.selectWordAtCaret()
     }
   }
 

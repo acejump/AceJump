@@ -13,7 +13,8 @@ class JumpInfo(private val tag: String, val search: String, val index: Int, val 
   val searchPoint = getPointFromVisualPosition(editor, searchOffset).originalPoint
 
   fun renderTag(): String {
-    return tag.mapIndexed { i, c -> if (source[i] == c) ' ' else c }.joinToString { "" }
+    return tag.mapIndexed { i, c -> if (source.isEmpty() || source[i] == c) ' ' else c }
+      .joinToString("")
   }
 
   fun getStartOfSearch(): Point {
@@ -23,8 +24,8 @@ class JumpInfo(private val tag: String, val search: String, val index: Int, val 
   fun drawRect(g2d: Graphics2D, fbm: AceCanvas.FontBasedMeasurements, colors: Pair<Color, Color>) {
     val text = renderTag()
     val originalPoint = tagPoint
-    val backgroundColor = if (text[0] == ' ') Color.YELLOW else colors.first
-    val foregroundColor = if (text[0] == ' ') Color.YELLOW else colors.second
+    val backgroundColor = Color.yellow//if (text[0] == ' ') Color.YELLOW else colors.first
+    val foregroundColor = Color.yellow//if (text[0] == ' ') Color.YELLOW else colors.second
 
     originalPoint.translate(0, -fbm.hOffset.toInt())
 
