@@ -10,7 +10,7 @@ class JumpInfo(private val tag: String, val search: String, val index: Int, val 
   val tagOffset = editor.offsetToVisualPosition(index)
   val tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
   val searchOffset = editor.offsetToVisualPosition(index - search.length)
-  val searchPoint = getPointFromVisualPosition(editor, searchOffset).originalPoint
+  val offset = index - search.length
 
   fun renderTag(): String {
     return tag.mapIndexed { i, c -> if (source.isEmpty() || source[i] == c) ' ' else c }

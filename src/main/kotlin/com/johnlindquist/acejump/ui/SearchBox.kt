@@ -31,19 +31,13 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     popupContainer = configurePopup()
 
     aceFinder.eventDispatcher.addListener(ChangeListener {
-      aceCanvas.jumpInfos = plotJumpLocations(aceFinder.tagMap)
+      aceCanvas.jumpInfos = aceFinder.plotJumpLocations()
       if (aceCanvas.jumpInfos.isEmpty() || aceCanvas.jumpInfos.size == 1) {
         popupContainer?.cancel()
         exit()
       }
       aceCanvas.repaint()
     })
-  }
-
-  fun plotJumpLocations(tagMap: BiMap<String, Int>): List<JumpInfo> {
-    return tagMap.values.map {
-      JumpInfo(tagMap.inverse()[it]!!, this@SearchBox.text, it, editor)
-    }
   }
 
   private fun configurePopup(): AbstractPopup? {
@@ -98,33 +92,29 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
 
   //todo: I need to really rethink this entire approach
   override fun processKeyEvent(keyEvent: KeyEvent) {
-    if (keyEvent.id == KeyEvent.KEY_PRESSED &&
-      (keyEvent.isMetaDown || keyEvent.isControlDown)) {
-      if (aceFinder.toggleTargetMode()) {
-        background = Color.RED
-      } else {
-        background = Color.WHITE
+    if (keyEvent.id == KEY_PRESSED) {
+      if ((keyEvent.isMetaDown || keyEvent.isControlDown)) {
+        if (aceFinder.toggleTargetMode())
+          background = Color.RED
+        else
+          background = Color.WHITE
+      }
+
+      if (keyEvent.keyCode == VK_BACK_SPACE) {
+        if (text.isNotEmpty())
+          text = text.substring(0, text.length - 1)
+
+        return
+      }
+
+      defaultKeyCommand.execute(keyEvent, text)
+      if (keyMap.contains(keyEvent.keyCode)) {
+        keyEvent.consume()
+        keyMap[keyEvent.keyCode]?.execute(keyEvent)
+        return
       }
     }
-
-    if (keyEvent.keyCode == VK_BACK_SPACE) {
-      if (text.isNotEmpty())
-        text = text.substring(0, text.length - 1)
-
-      return
-    }
-
-    defaultKeyCommand.execute(keyEvent, text)
-
-    if (keyMap.contains(keyEvent.keyCode)) {
-      keyEvent.consume()
-      keyMap[keyEvent.keyCode]?.execute(keyEvent)
-      return
-    }
-
     super.processKeyEvent(keyEvent)
-
-    if (keyEvent.id != KeyEvent.KEY_TYPED) return
   }
 
   fun addAceCanvas() {
