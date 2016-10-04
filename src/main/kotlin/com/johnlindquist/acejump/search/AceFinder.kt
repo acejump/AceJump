@@ -168,7 +168,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
     for ((tag, indices) in digraphs.asMap()) {
       if (indices.size == 1 && !newTagMap.containsValue(indices.first())) {
-        val tagIndex = indices.first() - findModel.stringToFind.length
+        val tagIndex = indices.first()
         if (!hasNearbyTag(tagIndex))
           mapTagToIndex(tag.toLowerCase(), tagIndex)
       }
