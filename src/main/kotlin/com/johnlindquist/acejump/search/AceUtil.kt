@@ -41,3 +41,16 @@ fun getLowerCaseStringFromChar(keyChar: Char): String {
 
   return s.toLowerCase()
 }
+
+fun getVisibleRange(editor: Editor): Pair<Int, Int> {
+  val firstVisibleLine = getVisualLineAtTopOfScreen(editor)
+  val firstLine = visualLineToLogicalLine(editor, firstVisibleLine)
+  val startOffset = getLineStartOffset(editor, firstLine)
+
+  val height = getScreenHeight(editor)
+  val lastLine = visualLineToLogicalLine(editor, firstVisibleLine + height)
+  var endOffset = getLineEndOffset(editor, lastLine, true)
+  endOffset = normalizeOffset(editor, lastLine, endOffset, true)
+
+  return Pair(startOffset, endOffset)
+}

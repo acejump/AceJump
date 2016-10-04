@@ -10,7 +10,6 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.util.EventDispatcher
-import com.intellij.vcs.log.Hash
 import com.johnlindquist.acejump.keycommands.AceJumper
 import java.awt.event.KeyEvent
 import java.util.*
@@ -20,11 +19,11 @@ import javax.swing.event.ChangeListener
 class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   val document = editor.document as DocumentImpl
   val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
-  val findModel: FindModel = createFindModel(findManager)
+  val findModel: FindModel = findManager.findInFileModel.clone()
   var jumpLocations: Collection<Int> = emptyList()
   var tagMap: BiMap<String, Int> = HashBiMap.create()
   val maxTags = 26
-  var unusedDigraphs: HashSet<String> = LinkedHashSet(maxTags)
+  var unusedDigraphs: LinkedHashSet<String> = linkedSetOf()
   var tagLocations: HashSet<Int> = HashSet(maxTags)
   var qwertyAdjacentKeys =
     mapOf('1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
@@ -37,23 +36,24 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       'l' to "lkop", 'z' to "zasx", 'x' to "xzsdc", 'c' to "cxdfv",
       'v' to "vcfgb", 'b' to "bvghn", 'n' to "nbhjm", 'm' to "mnjk")
 
-  val aceJumper = AceJumper(editor, document)
+  init {
+    findModel.isFindAll = true
+    findModel.isFromCursor = true
+    findModel.isForward = true
+    findModel.isRegularExpressions = false
+    findModel.isWholeWordsOnly = false
+    findModel.isCaseSensitive = false
+    findModel.setSearchHighlighters(true)
+    findModel.isPreserveCase = false
+  }
+
   fun findText(text: String, keyEvent: KeyEvent?) {
     findModel.stringToFind = text
-    populateUnusedDigraphs()
+    unusedDigraphs = ('a'..'z').mapTo(linkedSetOf(), { "$it" })
     tagLocations = HashSet(maxTags)
 
     val application = ApplicationManager.getApplication()
-    application.runReadAction({
-      jumpLocations = determineJumpLocations()
-      if (text.isNotEmpty() &&
-        !findModel.isRegularExpressions &&
-        tagMap.containsKey(text.last().toString())) {
-        jumpToOffset(keyEvent!!, tagMap[text.last().toString()]!! - text.length)
-      } else if (jumpLocations.size == 1) {
-        jumpToOffset(keyEvent!!, jumpLocations.first() - text.length)
-      }
-    })
+    application.runReadAction(jump(keyEvent, text))
 
     application.invokeLater({
       if (text.isNotEmpty())
@@ -61,20 +61,64 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     })
   }
 
-  private fun populateUnusedDigraphs() {
-    var population = 0
-    for (c1 in 'a'..'z') {
-      if (population >= maxTags) {
-        break
+  val aceJumper = AceJumper(editor, document)
+  private fun jump(keyEvent: KeyEvent?, text: String): () -> Unit {
+    fun jumpToOffset(keyEvent: KeyEvent, offset: Int?) {
+      if (offset == null)
+        return
+
+      if (keyEvent.isShiftDown && !keyEvent.isMetaDown) {
+        aceJumper.setSelectionFromCaretToOffset(offset)
+        aceJumper.moveCaret(offset)
+      } else {
+        aceJumper.moveCaret(offset)
       }
-      unusedDigraphs.add("$c1")
-      population++
+
+      if (targetModeEnabled) {
+        aceJumper.selectWordAtCaret()
+      }
+
+      tagMap = HashBiMap.create()
+    }
+
+    fun isReadyToJump(text: String): Boolean {
+      return (text.isNotEmpty() && !findModel.isRegularExpressions &&
+        tagMap.containsKey(text.last().toString()) &&
+        !tagMap.containsKey(text) &&
+        document.charsSequence[tagMap[text.last().toString()]!!] != text.last())
+      || (text.isNotEmpty() && !findModel.isRegularExpressions &&
+        tagMap.containsKey(text.last().toString()) &&
+        tagMap.containsKey(text) &&
+        document.charsSequence[tagMap[text.last().toString()]!!] == text.last())
+    }
+
+    return {
+      jumpLocations = determineJumpLocations()
+      if (isReadyToJump(text)) {
+        jumpToOffset(keyEvent!!, tagMap[text.last().toString()]!! - text.length)
+      } else if (jumpLocations.size == 1) {
+        jumpToOffset(keyEvent!!, jumpLocations.first() - text.length)
+      }
     }
   }
 
   private fun determineJumpLocations(): Collection<Int> {
-    val (startIndex, endIndex) = getVisibleRange()
-    val fullText = document.charsSequence.toString().toLowerCase()
+    fun getSitesToCheck(window: String): Iterable<Int> {
+      if (findModel.stringToFind.isEmpty())
+        return 0..(window.length - 2)
+
+      val indicesToCheck = arrayListOf<Int>()
+      var result = findManager.findString(window, 0, findModel)
+      while (result.isStringFound) {
+        indicesToCheck.add(result.endOffset)
+        result = findManager.findString(window, result.endOffset, findModel)
+      }
+
+      return indicesToCheck
+    }
+
+    val (startIndex, endIndex) = getVisibleRange(editor)
+    val fullText = document.charsSequence
     val window = fullText.substring(startIndex, endIndex)
     val sitesToCheck = getSitesToCheck(window).map { it + startIndex }
     if (sitesToCheck.size <= 1)
@@ -82,19 +126,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     val existingDigraphs = makeMap(fullText, sitesToCheck)
     tagMap = mapUniqueDigraphs(existingDigraphs)
     return tagMap.values
-  }
-
-  fun getSitesToCheck(window: String): Iterable<Int> {
-    if (findModel.stringToFind.isEmpty())
-      return 0..(window.length - 2)
-
-    val indicesToCheck = arrayListOf<Int>()
-    var result = findManager.findString(window, 0, findModel)
-    while (result.isStringFound) {
-      indicesToCheck.add(result.endOffset)
-      result = findManager.findString(window, result.endOffset, findModel)
-    }
-    return indicesToCheck
   }
 
   var targetModeEnabled = false
@@ -120,17 +151,20 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
   fun mapUniqueDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
     val newTagMap: BiMap<String, Int> = HashBiMap.create()
-    for ((key, value) in digraphs.asMap()) {
-      if (value.size == 1 && !newTagMap.containsValue(value.first())) {
-        var tag = key.toLowerCase()
-        if (findModel.stringToFind.isEmpty())
-          tag = tag.toLowerCase().replace(Regex("."), " ") + tag
-        else
-          tag = (findModel.stringToFind).replace(Regex("."), " ") + tag
+    fun mapTagToIndex(tag: String, index: Int) {
+      newTagMap[tag] = index
+      tagLocations.add(index)
+    }
 
-        val tagIndex = value.first() - findModel.stringToFind.length
+    fun hasNearbyTag(index: Int): Boolean {
+      return ((index - 2)..(index + 2)).any { tagLocations.contains(it) }
+    }
+
+    for ((tag, indices) in digraphs.asMap()) {
+      if (indices.size == 1 && !newTagMap.containsValue(indices.first())) {
+        val tagIndex = indices.first() - findModel.stringToFind.length
         if (!hasNearbyTag(tagIndex))
-          mapTagToIndex(newTagMap, tag, tagIndex)
+          mapTagToIndex(tag.toLowerCase(), tagIndex)
       }
     }
 
@@ -138,7 +172,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       if (unusedDigraphs.isEmpty())
         break
       if (!hasNearbyTag(index)) {
-        mapTagToIndex(newTagMap, unusedDigraphs.first(), index)
+        mapTagToIndex(unusedDigraphs.first(), index)
         unusedDigraphs.remove(unusedDigraphs.first())
       }
     }
@@ -146,63 +180,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return newTagMap
   }
 
-  private fun mapTagToIndex(tags: BiMap<String, Int>, tag: String, index: Int) {
-    tags[tag] = index
-    tagLocations.add(index)
-  }
-
-  private fun hasNearbyTag(index: Int): Boolean {
-    return ((index - 2)..(index + 2)).any { tagLocations.contains(it) }
-  }
-
-  private fun getVisibleRange(): Pair<Int, Int> {
-    val firstVisibleLine = getVisualLineAtTopOfScreen(editor)
-    val firstLine = visualLineToLogicalLine(editor, firstVisibleLine)
-    val startOffset = getLineStartOffset(editor, firstLine)
-
-    val height = getScreenHeight(editor)
-    val lastLine = visualLineToLogicalLine(editor, firstVisibleLine + height)
-    var endOffset = getLineEndOffset(editor, lastLine, true)
-    endOffset = normalizeOffset(editor, lastLine, endOffset, true)
-
-    return Pair(startOffset, endOffset)
-  }
-
-  fun createFindModel(findManager: FindManager): FindModel {
-    val clone = findManager.findInFileModel.clone()
-    clone.isFindAll = true
-    clone.isFromCursor = true
-    clone.isForward = true
-    clone.isRegularExpressions = false
-    clone.isWholeWordsOnly = false
-    clone.isCaseSensitive = false
-    clone.setSearchHighlighters(true)
-    clone.isPreserveCase = false
-
-    return clone
-  }
-
-  fun addResultsReadyListener(changeListener: ChangeListener) {
-    eventDispatcher.addListener(changeListener)
-  }
-
-  private fun jumpToOffset(keyEvent: KeyEvent, offset: Int?) {
-    if (offset == null)
-      return
-
-    if (keyEvent.isShiftDown && !keyEvent.isMetaDown) {
-      aceJumper.setSelectionFromCaretToOffset(offset)
-      aceJumper.moveCaret(offset)
-    } else {
-      aceJumper.moveCaret(offset)
-    }
-
-    if (targetModeEnabled) {
-      aceJumper.selectWordAtCaret()
-    }
-
-    tagMap = HashBiMap.create()
-  }
 
   fun findText(text: Regexp, keyEvent: KeyEvent? = null) {
     findModel.isRegularExpressions = true

@@ -30,7 +30,7 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     keyMap = configureKeyMap()
     popupContainer = configurePopup()
 
-    aceFinder.addResultsReadyListener(ChangeListener {
+    aceFinder.eventDispatcher.addListener(ChangeListener {
       aceCanvas.jumpInfos = plotJumpLocations(aceFinder.tagMap)
       if (aceCanvas.jumpInfos.isEmpty() || aceCanvas.jumpInfos.size == 1) {
         popupContainer?.cancel()
