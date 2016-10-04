@@ -84,12 +84,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     fun isReadyToJump(text: String): Boolean {
       return (text.isNotEmpty() && !findModel.isRegularExpressions &&
         tagMap.containsKey(text.last().toString()) &&
-        !tagMap.containsKey(text) &&
-        document.charsSequence[tagMap[text.last().toString()]!!] != text.last())
-      || (text.isNotEmpty() && !findModel.isRegularExpressions &&
-        tagMap.containsKey(text.last().toString()) &&
-        tagMap.containsKey(text) &&
-        document.charsSequence[tagMap[text.last().toString()]!!] == text.last())
+        !tagMap.containsKey(text))
     }
 
     return {
@@ -152,7 +147,11 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   fun mapUniqueDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
     val newTagMap: BiMap<String, Int> = HashBiMap.create()
     fun mapTagToIndex(tag: String, index: Int) {
-      newTagMap[tag] = index
+      val oldTag = tagMap.inverse()[index]
+      if (oldTag != null)
+        newTagMap[oldTag] = index
+      else
+        newTagMap[tag] = index
       tagLocations.add(index)
     }
 
