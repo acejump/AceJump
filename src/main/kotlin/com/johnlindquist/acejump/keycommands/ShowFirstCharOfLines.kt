@@ -6,7 +6,7 @@ import com.johnlindquist.acejump.ui.SearchBox
 import java.awt.event.KeyEvent
 
 class ShowFirstCharOfLines(override val aceFinder: AceFinder) : AceKeyCommand() {
-  override fun execute(keyEvent: KeyEvent, text: String) {
+  override fun execute(key: Char, text: String) {
     aceFinder.findText(Regexp.CODE_INDENTS)
   }
 }

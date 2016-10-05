@@ -48,16 +48,13 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     findModel.isPreserveCase = false
   }
 
-  fun findText(text: String, keyEvent: KeyEvent?) {
+  fun findText(text: String, key: Char) {
     findModel.stringToFind = text
-    if (keyEvent != null && keyEvent.keyChar.isLetter()) {
-      findModel.stringToFind += keyEvent.keyChar
-    }
     unusedDigraphs = ('a'..'z').mapTo(linkedSetOf(), { "$it" })
     tagLocations = HashSet(maxTags)
 
     val application = ApplicationManager.getApplication()
-    application.runReadAction(jump(keyEvent))
+    application.runReadAction(jump(key))
 
     application.invokeLater({
       if (text.isNotEmpty())
@@ -72,9 +69,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   }
 
   val aceJumper = AceJumper(editor, document)
-  private fun jump(keyEvent: KeyEvent?): () -> Unit {
-    fun jumpTo(keyEvent: KeyEvent, jumpInfo: JumpInfo) {
-      if (keyEvent.isShiftDown && !keyEvent.isMetaDown) {
+  private fun jump(key: Char): () -> Unit {
+    fun jumpTo(jumpInfo: JumpInfo) {
+      if (key.isUpperCase()) {
         aceJumper.setSelectionFromCaretToOffset(jumpInfo.offset)
       }
       aceJumper.moveCaret(jumpInfo.offset)
@@ -89,7 +86,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return {
       jumpLocations = determineJumpLocations()
       if (jumpLocations.size == 1) {
-        jumpTo(keyEvent!!, jumpLocations.first())
+        jumpTo(jumpLocations.first())
       }
     }
   }
@@ -186,9 +183,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return newTagMap
   }
 
-  fun findText(text: Regexp, keyEvent: KeyEvent? = null) {
+  fun findText(text: Regexp) {
     findModel.isRegularExpressions = true
-    findText(text.pattern, keyEvent)
+    findText(text.pattern, 0.toChar())
     findModel.isRegularExpressions = false
   }
 

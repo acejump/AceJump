@@ -7,18 +7,13 @@ import java.awt.*
 class JumpInfo(private val tag: String, val search: String, val index: Int, val editor: EditorImpl) {
   val window = editor.document.charsSequence
   val source: String = window.substring(index, index + tag.length)
-  val tagOffset = editor.offsetToVisualPosition(index)
-  val tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
-  val searchOffset = editor.offsetToVisualPosition(index - search.length)
   var offset = index - search.length + tag.length
+  val tagOffset = editor.offsetToVisualPosition(offset)
+  val tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
 
   fun renderTag(): String {
     return tag.mapIndexed { i, c -> if (source.isEmpty() || source[i] == c) ' ' else c }
       .joinToString("")
-  }
-
-  fun getStartOfSearch(): Point {
-    return getPointFromVisualPosition(editor, editor.offsetToVisualPosition(index)).originalPoint
   }
 
   fun drawRect(g2d: Graphics2D, fbm: AceCanvas.FontBasedMeasurements, colors: Pair<Color, Color>) {

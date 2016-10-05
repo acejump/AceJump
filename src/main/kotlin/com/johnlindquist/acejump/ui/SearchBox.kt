@@ -11,32 +11,69 @@ import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.search.AceFinder
 import com.johnlindquist.acejump.search.guessBestLocation
 import java.awt.*
-import java.awt.event.FocusEvent
-import java.awt.event.FocusListener
-import java.awt.event.KeyEvent
+import java.awt.event.*
 import java.awt.event.KeyEvent.*
-import javax.swing.JRootPane
-import javax.swing.JTextField
-import javax.swing.SwingUtilities
+import javax.swing.*
 import javax.swing.event.ChangeListener
 
-class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField() {
+class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
   var aceCanvas = AceCanvas(editor)
   var keyMap: Map<Int, AceKeyCommand> = hashMapOf()
   var popupContainer: AbstractPopup? = null
-  var defaultKeyCommand = DefaultKeyCommand(aceFinder)
+  var defaultKeyCommand = DefaultKeyCommand(finder)
 
   init {
     keyMap = configureKeyMap()
     popupContainer = configurePopup()
 
-    aceFinder.eventDispatcher.addListener(ChangeListener {
-      aceCanvas.jumpInfos = aceFinder.plotJumpLocations()
+    finder.eventDispatcher.addListener(ChangeListener {
+      aceCanvas.jumpInfos = finder.plotJumpLocations()
       if (aceCanvas.jumpInfos.isEmpty() || aceCanvas.jumpInfos.size == 1) {
         popupContainer?.cancel()
         exit()
       }
       aceCanvas.repaint()
+    })
+
+    val search = "dispatch"
+    (' '..'~').forEach { inputMap.put(KeyStroke.getKeyStroke(it), search) }
+    actionMap.put(search, object : AbstractAction() {
+      override fun actionPerformed(e: ActionEvent) {
+        text += e.actionCommand
+        defaultKeyCommand.execute(e.actionCommand[0], text)
+      }
+    })
+
+    val backspace = "backspace"
+    inputMap.put(KeyStroke.getKeyStroke(VK_BACK_SPACE, 0), backspace)
+    actionMap.put(search, object : AbstractAction() {
+      override fun actionPerformed(e: ActionEvent) {
+        if (text.isNotEmpty())
+          text = text.substring(0, text.length - 1)
+      }
+    })
+
+    val targetMode = "targetMode"
+    inputMap.put(KeyStroke.getKeyStroke(VK_SEMICOLON, 0), targetMode)
+    actionMap.put(search, object : AbstractAction() {
+      override fun actionPerformed(e: ActionEvent) {
+        if (e.actionCommand == ";" && (e.modifiers == CTRL_MASK || e.modifiers == META_MASK)) {
+          if (finder.toggleTargetMode())
+            background = Color.RED
+          else
+            background = Color.WHITE
+        }
+
+        defaultKeyCommand.execute(e.actionCommand[0], text)
+      }
+    })
+
+    val specialKeys = "specialKeys"
+    (VK_HOME..VK_RIGHT).forEach { inputMap.put(KeyStroke.getKeyStroke(it, 0), specialKeys) }
+    actionMap.put(specialKeys, object : AbstractAction() {
+      override fun actionPerformed(e: ActionEvent) {
+        keyMap[e.modifiers]?.execute()
+      }
     })
   }
 
@@ -72,14 +109,14 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
   }
 
   private fun configureKeyMap(): Map<Int, AceKeyCommand> {
-    val showBeginningOfLines = ShowBeginningOfLines(aceFinder)
-    val showEndOfLines = ShowEndOfLines(aceFinder)
+    val showBeginningOfLines = ShowBeginningOfLines(finder)
+    val showEndOfLines = ShowEndOfLines(finder)
     return mapOf(VK_HOME to showBeginningOfLines,
       VK_LEFT to showBeginningOfLines,
       VK_RIGHT to showEndOfLines,
       VK_END to showEndOfLines,
-      VK_UP to ShowFirstCharOfLines(aceFinder),
-      VK_SPACE to ShowWhiteSpace(aceFinder))
+      VK_UP to ShowFirstCharOfLines(finder),
+      VK_SPACE to ShowWhiteSpace(finder))
   }
 
   override fun requestFocus() {
@@ -88,33 +125,6 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
   }
 
   override fun paintBorder(p0: Graphics?) {
-  }
-
-  //todo: I need to really rethink this entire approach
-  override fun processKeyEvent(keyEvent: KeyEvent) {
-    if (keyEvent.id == KEY_PRESSED || keyEvent.keyChar == ';') {
-      if (keyEvent.keyChar == ';' && (keyEvent.isMetaDown || keyEvent .isControlDown)) {
-        if (aceFinder.toggleTargetMode())
-          background = Color.RED
-        else
-          background = Color.WHITE
-      }
-
-      if (keyEvent.keyCode == VK_BACK_SPACE) {
-        if (text.isNotEmpty())
-          text = text.substring(0, text.length - 1)
-
-        return
-      }
-
-      defaultKeyCommand.execute(keyEvent, text)
-      if (keyMap.contains(keyEvent.keyCode)) {
-        keyEvent.consume()
-        keyMap[keyEvent.keyCode]?.execute(keyEvent)
-        return
-      }
-    }
-    super.processKeyEvent(keyEvent)
   }
 
   fun addAceCanvas() {
@@ -130,6 +140,6 @@ class SearchBox(val aceFinder: AceFinder, val editor: EditorImpl) : JTextField()
     val contentComponent = editor.contentComponent
     contentComponent.remove(aceCanvas)
     contentComponent.repaint()
-    aceFinder.tagMap.clear()
+    finder.tagMap.clear()
   }
 }

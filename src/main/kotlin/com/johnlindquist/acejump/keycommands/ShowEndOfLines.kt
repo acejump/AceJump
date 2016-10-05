@@ -6,7 +6,7 @@ import com.johnlindquist.acejump.ui.SearchBox
 import java.awt.event.KeyEvent
 
 class ShowEndOfLines(override val aceFinder: AceFinder) : AceKeyCommand() {
-  override fun execute(keyEvent: KeyEvent, text: String) {
-    aceFinder.findText(Regexp.END_OF_LINE, keyEvent)
+  override fun execute(key: Char, text: String) {
+    aceFinder.findText(Regexp.END_OF_LINE)
   }
 }

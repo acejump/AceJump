@@ -6,5 +6,5 @@ import java.awt.event.KeyEvent
 
 abstract class AceKeyCommand {
   abstract val aceFinder: AceFinder
-  abstract fun execute(keyEvent: KeyEvent, text: String = "")
+  abstract fun execute(key: Char = 0.toChar(), text: String = "")
 }
