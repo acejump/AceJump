@@ -48,6 +48,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   }
 
   fun findText(text: String, key: Char) {
+    if (key == 0.toChar())
+      reset()
+
     findModel.stringToFind = text
     unusedDigraphs = ('a'..'z').mapTo(linkedSetOf(), { "$it" })
     tagLocations = HashSet(maxTags)
@@ -70,23 +73,38 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   val aceJumper = AceJumper(editor, document)
   private fun jump(key: Char): () -> Unit {
     fun jumpTo(jumpInfo: JumpInfo) {
-      if (key.isUpperCase()) {
+      if (key.isUpperCase())
         aceJumper.setSelectionFromCaretToOffset(jumpInfo.offset)
-      }
+
       aceJumper.moveCaret(jumpInfo.offset)
 
-      if (targetModeEnabled) {
+      if (targetModeEnabled)
         aceJumper.selectWordAtCaret()
-      }
 
       reset()
     }
 
     return {
-      jumpLocations = determineJumpLocations()
-      if (jumpLocations.size == 1) {
-        jumpTo(jumpLocations.first())
+      //todo: refactor this mess
+      val text = findModel.stringToFind
+      if (text.isNotEmpty()) {
+        if (tagMap.containsKey(text))
+          listOf(JumpInfo(text, text, tagMap[text]!!, editor))
+        if (1 < text.length) {
+          val last1: String = text.substring(text.length - 1)
+          if (tagMap.containsKey(last1))
+            listOf(JumpInfo(last1, text, tagMap[last1]!!, editor))
+          if (2 < text.length) {
+            val last2: String = text.substring(text.length - 2)
+            if (tagMap.containsKey(last2))
+              listOf(JumpInfo(last2, text, tagMap[last2]!!, editor))
+          }
+        }
       }
+
+      jumpLocations = determineJumpLocations()
+      if (jumpLocations.size == 1)
+        jumpTo(jumpLocations.first())
     }
   }
 
@@ -105,23 +123,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       return indicesToCheck
     }
 
-    //todo: refactor this mess
-    val text = findModel.stringToFind
-    if (text.isNotEmpty()) {
-      if (tagMap.containsKey(text))
-        return listOf(JumpInfo(text, text, tagMap[text]!!, editor))
-      if (1 < text.length) {
-        val last1: String = text.substring(text.length - 1)
-        if (tagMap.containsKey(last1))
-          return listOf(JumpInfo(last1, text, tagMap[last1]!!, editor))
-        if (2 < text.length) {
-          val last2: String = text.substring(text.length - 2)
-          if (tagMap.containsKey(last2))
-            return listOf(JumpInfo(last2, text, tagMap[last2]!!, editor))
-        }
-      }
-    }
-
     val (startIndex, endIndex) = getVisibleRange(editor)
     val fullText = document.charsSequence.toString().toLowerCase()
     val window = fullText.substring(startIndex, endIndex)
@@ -131,16 +132,18 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return plotJumpLocations()
   }
 
-
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
       val (c1, c2) = Pair(text[site], text[site + 1])
-      stringToIndex.put("$c1", site)
-      unusedDigraphs.remove("$c1")
-      if (c1.isLetterOrDigit() && c2.isLetterOrDigit()) {
-        stringToIndex.put("$c1$c2", site)
-        unusedDigraphs.remove("$c1$c2")
+      if (c1.isLetterOrDigit()) {
+        if (stringToIndex.put("$c1", site)) {
+          unusedDigraphs.remove("$c1")
+          if (c2.isLetterOrDigit()) {
+            if (stringToIndex.put("$c1$c2", site))
+              unusedDigraphs.remove("$c1$c2")
+          }
+        }
       }
     }
 

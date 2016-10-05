@@ -16,9 +16,10 @@ class JumpInfo(private val tag: String, val search: String, val index: Int, val 
   val tagOffset = editor.offsetToVisualPosition(offset)
   val tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
 
-  fun renderTag() = tag.mapIndexed { i, c ->
-    if (source.isEmpty() || source[i] == c) ' ' else c
-  }.joinToString("")
+  fun renderTag() =
+    tag.mapIndexed { i, c ->
+      if (source.isEmpty() || source[i] == c) ' ' else c
+    }.joinToString("")
 
   fun drawRect(g2d: Graphics2D, fbm: AceCanvas.FontBasedMeasurements, colors: Pair<Color, Color>) {
     val text = renderTag()

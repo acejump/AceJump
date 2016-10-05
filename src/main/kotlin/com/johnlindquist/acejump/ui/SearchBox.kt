@@ -15,15 +15,10 @@ import java.awt.Dimension
 import java.awt.Font
 import java.awt.Font.BOLD
 import java.awt.Graphics
-import java.awt.event.ActionEvent
-import java.awt.event.FocusEvent
-import java.awt.event.FocusListener
+import java.awt.event.*
 import java.awt.event.KeyEvent.*
-import javax.swing.AbstractAction
-import javax.swing.JRootPane
-import javax.swing.JTextField
+import javax.swing.*
 import javax.swing.KeyStroke.getKeyStroke
-import javax.swing.SwingUtilities
 import javax.swing.event.ChangeListener
 
 class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
@@ -31,11 +26,10 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
   var keyMap: Map<Int, AceKeyCommand> = hashMapOf()
   var popupContainer: AbstractPopup? = null
   var defaultKeyCommand = DefaultKeyCommand(finder)
-  private val modifiers = setOf(CTRL_MASK, META_MASK)
 
   init {
-    keyMap = configureKeyMap()
-    popupContainer = configurePopup()
+    configureKeyMap()
+    configurePopup()
 
     finder.eventDispatcher.addListener(ChangeListener {
       aceCanvas.jumpInfos = finder.plotJumpLocations()
@@ -50,8 +44,10 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
     (' '..'~').forEach { inputMap.put(getKeyStroke(it), search) }
     actionMap.put(search, object : AbstractAction() {
       override fun actionPerformed(e: ActionEvent) {
-        text += e.actionCommand
-        defaultKeyCommand.execute(e.actionCommand[0], text)
+        if (e.modifiers == 0) {
+          text += e.actionCommand
+          defaultKeyCommand.execute(e.actionCommand[0], text)
+        }
       }
     })
 
@@ -61,34 +57,42 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
       override fun actionPerformed(e: ActionEvent) {
         if (text.isNotEmpty()) {
           text = text.substring(0, text.length - 1)
-          defaultKeyCommand.execute(e.actionCommand[0], text)
+          defaultKeyCommand.execute(0.toChar(), text)
         }
       }
     })
 
     val targetMode = "targetMode"
-    inputMap.put(getKeyStroke(VK_SEMICOLON, 0), targetMode)
+    inputMap.put(getKeyStroke(VK_SEMICOLON, CTRL_MASK), targetMode)
+    inputMap.put(getKeyStroke(VK_SEMICOLON, META_MASK), targetMode)
     actionMap.put(targetMode, object : AbstractAction() {
       override fun actionPerformed(e: ActionEvent) {
-        if (e.actionCommand == ";" && e.modifiers in modifiers) {
-          if (finder.toggleTargetMode())
-            background = RED
-          else
-            background = WHITE
-        }
+        if (finder.toggleTargetMode())
+          background = RED
+        else
+          background = WHITE
 
-        defaultKeyCommand.execute(e.actionCommand[0], text)
+        defaultKeyCommand.execute()
       }
     })
 
     val specials = "specialKeys"
     (VK_HOME..VK_RIGHT).forEach { inputMap.put(getKeyStroke(it, 0), specials) }
     actionMap.put(specials, object : AbstractAction() {
-      override fun actionPerformed(e: ActionEvent) = keyMap[e.modifiers]!!.execute()
+      override fun actionPerformed(e: ActionEvent) =
+        keyMap[e.actionCommand[0].toInt()]!!.execute()
     })
   }
 
-  private fun configurePopup(): AbstractPopup? {
+  override fun processKeyEvent(p0: KeyEvent) {
+    if (p0.keyCode == VK_BACK_SPACE && p0.id == KEY_RELEASED) {
+      defaultKeyCommand.execute(0.toChar(), text)
+    }
+
+    super.processKeyEvent(p0)
+  }
+
+  private fun configurePopup() {
     val scheme = EditorColorsManager.getInstance().globalScheme
     val font = Font(scheme.editorFontName, BOLD, scheme.editorFontSize)
     val popupBuilder: ComponentPopupBuilder? =
@@ -111,13 +115,13 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
       override fun focusGained(p0: FocusEvent) = addAceCanvas()
       override fun focusLost(p0: FocusEvent) = exit()
     })
-    return popup
+    popupContainer = popup
   }
 
-  private fun configureKeyMap(): Map<Int, AceKeyCommand> {
+  private fun configureKeyMap() {
     val showBeginningOfLines = ShowBeginningOfLines(finder)
     val showEndOfLines = ShowEndOfLines(finder)
-    return mapOf(VK_HOME to showBeginningOfLines,
+    keyMap = mapOf(VK_HOME to showBeginningOfLines,
       VK_LEFT to showBeginningOfLines,
       VK_RIGHT to showEndOfLines,
       VK_END to showEndOfLines,
