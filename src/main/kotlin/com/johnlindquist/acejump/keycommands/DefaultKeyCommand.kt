@@ -1,7 +1,6 @@
 package com.johnlindquist.acejump.keycommands
 
 import com.johnlindquist.acejump.search.AceFinder
-import java.awt.event.KeyEvent
 import javax.swing.event.ChangeEvent
 
 class DefaultKeyCommand(override val aceFinder: AceFinder) : AceKeyCommand() {

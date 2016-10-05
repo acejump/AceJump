@@ -7,8 +7,6 @@ enum class Regexp(val pattern: String) {
   WHITE_SPACE("\\s+\\S(?<!^\\s*\\S)");
 
   companion object {
-    fun contains(regex: String): Boolean {
-      return Regexp.values().any { it.name == regex }
-    }
+    fun contains(regex: String) = values().any { it.name == regex }
   }
 }

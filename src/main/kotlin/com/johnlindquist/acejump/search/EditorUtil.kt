@@ -21,6 +21,8 @@ package com.johnlindquist.acejump.search
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.VisualPosition
+import java.lang.Math.max
+import java.lang.Math.min
 
 /**
  * This is a set of helper methods for working with editors. All line and column values are zero based.
@@ -73,7 +75,9 @@ fun getFileSize(editor: Editor, includeEndNewLine: Boolean = false): Int {
  */
 fun getScreenHeight(editor: Editor): Int {
   val lh = editor.lineHeight
-  val height = editor.scrollingModel.visibleArea.y + editor.scrollingModel.visibleArea.height - getVisualLineAtTopOfScreen(editor) * lh
+  val height = editor.scrollingModel.visibleArea.y +
+    editor.scrollingModel.visibleArea.height -
+    getVisualLineAtTopOfScreen(editor) * lh
   return height / lh
 }
 
@@ -86,10 +90,8 @@ fun getScreenHeight(editor: Editor): Int {
 
  * @return The logical line number
  */
-fun visualLineToLogicalLine(editor: Editor, line: Int): Int {
-  val logicalLine = editor.visualToLogicalPosition(VisualPosition(line, 0)).line
-  return normalizeLine(editor, logicalLine)
-}
+fun visualLineToLogicalLine(editor: Editor, line: Int) =
+  normalizeLine(editor, editor.visualToLogicalPosition(VisualPosition(line, 0)).line)
 
 /**
  * Returns the offset of the start of the requested line.
@@ -141,9 +143,7 @@ fun getLineEndOffset(editor: Editor, line: Int, allowEnd: Boolean): Int {
 
  * @return The normalized logical line number
  */
-fun normalizeLine(editor: Editor, line: Int): Int {
-  return Math.max(0, Math.min(line, getLineCount(editor) - 1))
-}
+fun normalizeLine(editor: Editor, line: Int) = max(0, min(line, getLineCount(editor) - 1))
 
 /**
  * Ensures that the supplied offset for the given logical line is within the range for the line. If allowEnd
@@ -159,15 +159,12 @@ fun normalizeLine(editor: Editor, line: Int): Int {
 
  * @return The normalized column number
  */
-fun normalizeOffset(editor: Editor,
-                    line: Int,
-                    offset: Int,
-                    allowEnd: Boolean): Int {
+fun normalizeOffset(editor: Editor, line: Int, offset: Int, allowEnd: Boolean): Int {
   if (getFileSize(editor, allowEnd) == 0) {
     return 0
   }
 
   val min = getLineStartOffset(editor, line)
   val max = getLineEndOffset(editor, line, allowEnd)
-  return Math.max(Math.min(offset, max), min)
+  return max(min(offset, max), min)
 }

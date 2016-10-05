@@ -1,6 +1,5 @@
 package com.johnlindquist.acejump.ui
 
-import com.google.common.collect.BiMap
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.ui.popup.ComponentPopupBuilder
@@ -10,10 +9,21 @@ import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.search.AceFinder
 import com.johnlindquist.acejump.search.guessBestLocation
-import java.awt.*
-import java.awt.event.*
+import java.awt.Color.RED
+import java.awt.Color.WHITE
+import java.awt.Dimension
+import java.awt.Font
+import java.awt.Font.BOLD
+import java.awt.Graphics
+import java.awt.event.ActionEvent
+import java.awt.event.FocusEvent
+import java.awt.event.FocusListener
 import java.awt.event.KeyEvent.*
-import javax.swing.*
+import javax.swing.AbstractAction
+import javax.swing.JRootPane
+import javax.swing.JTextField
+import javax.swing.KeyStroke.getKeyStroke
+import javax.swing.SwingUtilities
 import javax.swing.event.ChangeListener
 
 class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
@@ -21,6 +31,7 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
   var keyMap: Map<Int, AceKeyCommand> = hashMapOf()
   var popupContainer: AbstractPopup? = null
   var defaultKeyCommand = DefaultKeyCommand(finder)
+  private val modifiers = setOf(CTRL_MASK, META_MASK)
 
   init {
     keyMap = configureKeyMap()
@@ -36,7 +47,7 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
     })
 
     val search = "dispatch"
-    (' '..'~').forEach { inputMap.put(KeyStroke.getKeyStroke(it), search) }
+    (' '..'~').forEach { inputMap.put(getKeyStroke(it), search) }
     actionMap.put(search, object : AbstractAction() {
       override fun actionPerformed(e: ActionEvent) {
         text += e.actionCommand
@@ -45,41 +56,41 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
     })
 
     val backspace = "backspace"
-    inputMap.put(KeyStroke.getKeyStroke(VK_BACK_SPACE, 0), backspace)
-    actionMap.put(search, object : AbstractAction() {
+    inputMap.put(getKeyStroke(VK_BACK_SPACE, 0), backspace)
+    actionMap.put(backspace, object : AbstractAction() {
       override fun actionPerformed(e: ActionEvent) {
-        if (text.isNotEmpty())
+        if (text.isNotEmpty()) {
           text = text.substring(0, text.length - 1)
+          defaultKeyCommand.execute(e.actionCommand[0], text)
+        }
       }
     })
 
     val targetMode = "targetMode"
-    inputMap.put(KeyStroke.getKeyStroke(VK_SEMICOLON, 0), targetMode)
-    actionMap.put(search, object : AbstractAction() {
+    inputMap.put(getKeyStroke(VK_SEMICOLON, 0), targetMode)
+    actionMap.put(targetMode, object : AbstractAction() {
       override fun actionPerformed(e: ActionEvent) {
-        if (e.actionCommand == ";" && (e.modifiers == CTRL_MASK || e.modifiers == META_MASK)) {
+        if (e.actionCommand == ";" && e.modifiers in modifiers) {
           if (finder.toggleTargetMode())
-            background = Color.RED
+            background = RED
           else
-            background = Color.WHITE
+            background = WHITE
         }
 
         defaultKeyCommand.execute(e.actionCommand[0], text)
       }
     })
 
-    val specialKeys = "specialKeys"
-    (VK_HOME..VK_RIGHT).forEach { inputMap.put(KeyStroke.getKeyStroke(it, 0), specialKeys) }
-    actionMap.put(specialKeys, object : AbstractAction() {
-      override fun actionPerformed(e: ActionEvent) {
-        keyMap[e.modifiers]?.execute()
-      }
+    val specials = "specialKeys"
+    (VK_HOME..VK_RIGHT).forEach { inputMap.put(getKeyStroke(it, 0), specials) }
+    actionMap.put(specials, object : AbstractAction() {
+      override fun actionPerformed(e: ActionEvent) = keyMap[e.modifiers]!!.execute()
     })
   }
 
   private fun configurePopup(): AbstractPopup? {
     val scheme = EditorColorsManager.getInstance().globalScheme
-    val font = Font(scheme.editorFontName, Font.BOLD, scheme.editorFontSize)
+    val font = Font(scheme.editorFontName, BOLD, scheme.editorFontSize)
     val popupBuilder: ComponentPopupBuilder? =
       JBPopupFactory.getInstance()?.createComponentPopupBuilder(this, this)
     popupBuilder?.setCancelKeyEnabled(true)
@@ -97,13 +108,8 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
     size = dimension
     isFocusable = true
     addFocusListener(object : FocusListener {
-      override fun focusGained(p0: FocusEvent) {
-        addAceCanvas()
-      }
-
-      override fun focusLost(p0: FocusEvent) {
-        exit()
-      }
+      override fun focusGained(p0: FocusEvent) = addAceCanvas()
+      override fun focusLost(p0: FocusEvent) = exit()
     })
     return popup
   }
@@ -124,8 +130,7 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
     super.requestFocus()
   }
 
-  override fun paintBorder(p0: Graphics?) {
-  }
+  override fun paintBorder(p0: Graphics?) = Unit
 
   fun addAceCanvas() {
     editor.contentComponent.add(aceCanvas)

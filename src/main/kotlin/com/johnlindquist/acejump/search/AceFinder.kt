@@ -12,7 +12,6 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.util.EventDispatcher
 import com.johnlindquist.acejump.keycommands.AceJumper
 import com.johnlindquist.acejump.ui.JumpInfo
-import java.awt.event.KeyEvent
 import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener

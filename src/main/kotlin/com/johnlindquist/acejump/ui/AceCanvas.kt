@@ -2,8 +2,10 @@ package com.johnlindquist.acejump.ui
 
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.EditorImpl
-import com.johnlindquist.acejump.ui.JumpInfo
-import java.awt.*
+import java.awt.Font
+import java.awt.Font.BOLD
+import java.awt.Graphics
+import java.awt.Graphics2D
 import javax.swing.JComponent
 
 class AceCanvas(val editor: EditorImpl) : JComponent() {
@@ -12,7 +14,7 @@ class AceCanvas(val editor: EditorImpl) : JComponent() {
   val colors = Pair(scheme.defaultBackground, scheme.defaultForeground)
 
   init {
-    font = Font(scheme.editorFontName, Font.BOLD, scheme.editorFontSize)
+    font = Font(scheme.editorFontName, BOLD, scheme.editorFontSize)
   }
 
   inner class FontBasedMeasurements() {

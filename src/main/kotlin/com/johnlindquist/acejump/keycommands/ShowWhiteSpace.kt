@@ -1,12 +1,8 @@
 package com.johnlindquist.acejump.keycommands
 
 import com.johnlindquist.acejump.search.AceFinder
-import com.johnlindquist.acejump.search.Regexp
-import com.johnlindquist.acejump.ui.SearchBox
-import java.awt.event.KeyEvent
+import com.johnlindquist.acejump.search.Regexp.WHITE_SPACE
 
 class ShowWhiteSpace(override val aceFinder: AceFinder) : AceKeyCommand() {
-  override fun execute(key: Char, text: String) {
-    aceFinder.findText(Regexp.WHITE_SPACE)
-  }
+  override fun execute(key: Char, text: String) = aceFinder.findText(WHITE_SPACE)
 }
