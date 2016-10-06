@@ -121,13 +121,13 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
   }
 
   private fun configureKeyMap() {
-    val showBeginningOfLines = ShowBeginningOfLines(finder)
+    val showBeginningOfLines = ShowStartOfLines(finder)
     val showEndOfLines = ShowEndOfLines(finder)
     keyMap = mapOf(VK_HOME to showBeginningOfLines,
       VK_LEFT to showBeginningOfLines,
       VK_RIGHT to showEndOfLines,
       VK_END to showEndOfLines,
-      VK_UP to ShowFirstCharOfLines(finder),
+      VK_UP to ShowFirstLetters(finder),
       VK_SPACE to ShowWhiteSpace(finder))
   }
 

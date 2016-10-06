@@ -24,7 +24,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   var tagMap: BiMap<String, Int> = HashBiMap.create()
   val maxTags = 26
   var unusedDigraphs: LinkedHashSet<String> = linkedSetOf()
-  var tagLocations: HashSet<Int> = HashSet(maxTags)
   var qwertyAdjacentKeys =
     mapOf('1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
       '5' to "56tr4", '6' to "67yt5", '7' to "78uy6", '8' to "89iu7",
@@ -53,7 +52,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
     findModel.stringToFind = text
     unusedDigraphs = ('a'..'z').mapTo(linkedSetOf(), { "$it" })
-    tagLocations = HashSet(maxTags)
 
     val application = ApplicationManager.getApplication()
     application.runReadAction(jump(key))
@@ -142,14 +140,17 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
-      val (c1, c2) = Pair(text[site], text[site + 1])
-      if (c1.isLetterOrDigit()) {
-        if (stringToIndex.put("$c1", site)) {
-          unusedDigraphs.remove("$c1")
-          if (c2.isLetterOrDigit()) {
-            if (stringToIndex.put("$c1$c2", site))
-              unusedDigraphs.remove("$c1$c2")
-          }
+      var (p1, p2) = Pair(site, site - 1)
+      val (c1, c2) = Pair(text[p1], text[p2])
+      if(c1.isLetterOrDigit()) {
+        stringToIndex.put("$c1", p1 - findModel.stringToFind.length)
+        unusedDigraphs.remove("$c1")
+        if (c2.isLetterOrDigit()) {
+          stringToIndex.put("$c1$c2", p1 - findModel.stringToFind.length)
+          unusedDigraphs.remove("$c1$c2")
+        }
+        while (text[p1++].isLetterOrDigit()) {
+          unusedDigraphs.remove(text[p1] + "")
         }
       }
     }
@@ -158,19 +159,23 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   }
 
   fun mapUniqueDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
-    val newTagMap: BiMap<String, Int> = HashBiMap.create()
+    var newTagMap: BiMap<String, Int> = HashBiMap.create()
     fun mapTagToIndex(tag: String, index: Int) {
       val oldTag = tagMap.inverse()[index]
       if (oldTag != null)
         newTagMap[oldTag] = index
-      else
+      else if (!newTagMap.containsKey(tag) && !newTagMap.containsValue(index))
         newTagMap[tag] = index
-      tagLocations.add(index)
     }
 
     fun hasNearbyTag(index: Int): Boolean {
-      return ((index - 2)..(index + 2)).any { tagLocations.contains(it) }
+      return ((index - 2)..(index + 2)).any {
+        newTagMap.containsValue(it)
+      }
     }
+
+    if(digraphs.isEmpty)
+      newTagMap = tagMap
 
     for ((tag, indices) in digraphs.asMap()) {
       if (indices.size == 1 && !newTagMap.containsValue(indices.first())) {
@@ -207,5 +212,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   fun reset() {
     tagMap = HashBiMap.create()
     unusedDigraphs = linkedSetOf()
+    jumpLocations = emptyList()
   }
 }

@@ -12,19 +12,26 @@ import java.awt.RenderingHints
 class JumpInfo(private val tag: String, val search: String, val index: Int, val editor: EditorImpl) {
   val window = editor.document.charsSequence
   val source: String = window.substring(index, index + tag.length)
-  var offset =
-    if (tag.isNotEmpty() && search.isNotEmpty() &&
-      tag.last() == search.last())
-      index - search.length + tag.length
-    else
-      index - search.length
-  val tagOffset = editor.offsetToVisualPosition(offset)
-  val tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
+  var result: String = window.substring(index, index + search.length)
+  var offset = index
+  var tagOffset = editor.offsetToVisualPosition(offset + search.length)
+  var tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
 
-  fun renderTag() =
-    tag.mapIndexed { i, c ->
+  fun renderTag(): String {
+    var trueOffset = 0
+    var i = 0
+    while(i++ < search.length) {
+      if(i < search.length && window[index + i] == search[i])
+        trueOffset++
+      else
+        break
+    }
+    tagOffset = editor.offsetToVisualPosition(offset + trueOffset)
+    tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
+    return tag.mapIndexed { i, c ->
       if (source.isEmpty() || source[i] == c) ' ' else c
     }.joinToString("")
+  }
 
   fun drawRect(g2d: Graphics2D, fbm: AceCanvas.FontBasedMeasurements, colors: Pair<Color, Color>) {
     val text = renderTag()
@@ -33,7 +40,6 @@ class JumpInfo(private val tag: String, val search: String, val index: Int, val 
     val foregroundColor = yellow//if (text[0] == ' ') Color.YELLOW else colors.second
 
     original.translate(0, -fbm.hOffset.toInt())
-
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
     //a slight border for "pop" against the background
