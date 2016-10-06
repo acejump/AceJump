@@ -140,18 +140,14 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
-      var (p1, p2) = Pair(site, site - 1)
+      var (p1, p2) = Pair(site, site + 1)
       val (c1, c2) = Pair(text[p1], text[p2])
-      if(c1.isLetterOrDigit()) {
-        stringToIndex.put("$c1", p1 - findModel.stringToFind.length)
-        unusedDigraphs.remove("$c1")
-        if (c2.isLetterOrDigit()) {
-          stringToIndex.put("$c1$c2", p1 - findModel.stringToFind.length)
-          unusedDigraphs.remove("$c1$c2")
-        }
-        while (text[p1++].isLetterOrDigit()) {
-          unusedDigraphs.remove(text[p1] + "")
-        }
+      stringToIndex.put("$c1", p1 - findModel.stringToFind.length)
+      unusedDigraphs.remove("$c1")
+      stringToIndex.put("$c1$c2", p1 - findModel.stringToFind.length)
+      unusedDigraphs.remove("$c1$c2")
+      while (text[p1++].isLetterOrDigit()) {
+        unusedDigraphs.remove(text[p1] + "")
       }
     }
 
@@ -174,7 +170,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       }
     }
 
-    if(digraphs.isEmpty)
+    if (digraphs.isEmpty)
       newTagMap = tagMap
 
     for ((tag, indices) in digraphs.asMap()) {
