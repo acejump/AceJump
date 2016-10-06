@@ -87,24 +87,31 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return {
       //todo: refactor this mess
       val text = findModel.stringToFind
+      var jumped = false;
       if (text.isNotEmpty()) {
-        if (tagMap.containsKey(text))
-          listOf(JumpInfo(text, text, tagMap[text]!!, editor))
-        if (1 < text.length) {
+        if (tagMap.containsKey(text)) {
+          jumpTo(JumpInfo(text, text, tagMap[text]!!, editor))
+          jumped = true
+        } else if (1 < text.length) {
           val last1: String = text.substring(text.length - 1)
-          if (tagMap.containsKey(last1))
-            listOf(JumpInfo(last1, text, tagMap[last1]!!, editor))
+          if (tagMap.containsKey(last1)) {
+            jumpTo(JumpInfo(last1, text, tagMap[last1]!!, editor))
+            jumped = true
+          }
           if (2 < text.length) {
             val last2: String = text.substring(text.length - 2)
-            if (tagMap.containsKey(last2))
-              listOf(JumpInfo(last2, text, tagMap[last2]!!, editor))
+            if (tagMap.containsKey(last2)) {
+              jumpTo(JumpInfo(last2, text, tagMap[last2]!!, editor))
+              jumped = true
+            }
           }
         }
       }
-
-      jumpLocations = determineJumpLocations()
-      if (jumpLocations.size == 1)
-        jumpTo(jumpLocations.first())
+      if (!jumped) {
+        jumpLocations = determineJumpLocations()
+        if (jumpLocations.size == 1)
+          jumpTo(jumpLocations.first())
+      }
     }
   }
 

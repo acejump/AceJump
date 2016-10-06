@@ -12,7 +12,12 @@ import java.awt.RenderingHints
 class JumpInfo(private val tag: String, val search: String, val index: Int, val editor: EditorImpl) {
   val window = editor.document.charsSequence
   val source: String = window.substring(index, index + tag.length)
-  var offset = index - search.length + tag.length
+  var offset =
+    if (tag.isNotEmpty() && search.isNotEmpty() &&
+      tag.last() == search.last())
+      index - search.length + tag.length
+    else
+      index - search.length
   val tagOffset = editor.offsetToVisualPosition(offset)
   val tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
 

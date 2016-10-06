@@ -82,6 +82,8 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
       override fun actionPerformed(e: ActionEvent) =
         keyMap[e.actionCommand[0].toInt()]!!.execute()
     })
+
+    defaultKeyCommand.execute()
   }
 
   override fun processKeyEvent(p0: KeyEvent) {
