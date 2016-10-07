@@ -11,17 +11,18 @@ import java.awt.RenderingHints
 
 class JumpInfo(private val tag: String, val search: String, val index: Int, val editor: EditorImpl) {
   val window = editor.document.charsSequence
-  val source: String = window.substring(index, index + tag.length)
+  val source: String = window.substring(index, index + tag.length).toLowerCase()
   var result: String = window.substring(index, index + search.length)
   var offset = index
+  var originOffset = editor.offsetToVisualPosition(offset)
   var tagOffset = editor.offsetToVisualPosition(offset + search.length)
-  var tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
+  var tagPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
 
   fun renderTag(): String {
     var trueOffset = 0
     var i = 0
-    while(i++ < search.length) {
-      if(i < search.length && window[index + i] == search[i])
+    while (i++ < search.length) {
+      if (i < search.length && window[index + i].toLowerCase() == search[i].toLowerCase())
         trueOffset++
       else
         break
@@ -29,7 +30,7 @@ class JumpInfo(private val tag: String, val search: String, val index: Int, val 
     tagOffset = editor.offsetToVisualPosition(offset + trueOffset)
     tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
     return tag.mapIndexed { i, c ->
-      if (source.isEmpty() || source[i] == c) ' ' else c
+      if (source.isEmpty() || source[i] == c.toLowerCase()) ' ' else c
     }.joinToString("")
   }
 

@@ -1,9 +1,6 @@
 package com.johnlindquist.acejump.search
 
-import com.google.common.collect.BiMap
-import com.google.common.collect.HashBiMap
-import com.google.common.collect.LinkedListMultimap
-import com.google.common.collect.Multimap
+import com.google.common.collect.*
 import com.intellij.find.FindManager
 import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager
@@ -23,17 +20,21 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   var jumpLocations: Collection<JumpInfo> = emptyList()
   var tagMap: BiMap<String, Int> = HashBiMap.create()
   val maxTags = 26
-  var unusedDigraphs: LinkedHashSet<String> = linkedSetOf()
-  var qwertyAdjacentKeys =
-    mapOf('1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
-      '5' to "56tr4", '6' to "67yt5", '7' to "78uy6", '8' to "89iu7",
-      '9' to "90oi8", '0' to "0po9", 'q' to "q12wa", 'w' to "w3esaq2",
-      'e' to "e4rdsw3", 'r' to "r5tfde4", 't' to "t6ygfr5", 'y' to "y7uhgt6",
-      'u' to "u8ijhy7", 'i' to "i9okju8", 'o' to "o0plki9", 'p' to "plo0",
-      'a' to "aqwsz", 's' to "sedxzaw", 'd' to "drfcxse", 'f' to "ftgvcdr",
-      'g' to "gyhbvft", 'h' to "hujnbgy", 'j' to "jikmnhu", 'k' to "kolmji",
-      'l' to "lkop", 'z' to "zasx", 'x' to "xzsdc", 'c' to "cxdfv",
-      'v' to "vcfgb", 'b' to "bvghn", 'n' to "nbhjm", 'm' to "mnjk")
+  var unseenUnigrams: LinkedHashSet<String> = linkedSetOf()
+  var unseenBigrams: LinkedHashSet<String> = linkedSetOf()
+  var adjacent =
+    mapOf(
+      'j' to "jikmnhu", 'f' to "ftgvcdr", 'k' to "kolmji", 'd' to "drfcxse",
+      'l' to "lkop", 's' to "sedxzaw", 'a' to "aqwsz",
+      'h' to "hujnbgy", 'g' to "gyhbvft", 'y' to "y7uhgt6", 't' to "t6ygfr5",
+      'u' to "u8ijhy7", 'r' to "r5tfde4", 'n' to "nbhjm", 'v' to "vcfgb",
+      'm' to "mnjk", 'c' to "cxdfv", 'b' to "bvghn",
+      'i' to "i9okju8", 'e' to "e4rdsw3", 'x' to "xzsdc", 'z' to "zasx",
+      'o' to "o0plki9", 'w' to "w3esaq2", 'p' to "plo0", 'q' to "q12wa"
+      //'1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
+      //'5' to "56tr4", '6' to "67yt5", '7' to "78uy6", '8' to "89iu7",
+      //'9' to "90oi8", '0' to "0po9"
+    )
 
   init {
     findModel.isFindAll = true
@@ -51,11 +52,15 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       reset()
 
     findModel.stringToFind = text
-    unusedDigraphs = ('a'..'z').mapTo(linkedSetOf(), { "$it" })
+    unseenUnigrams = ('a'..'z').mapTo(linkedSetOf(), { "$it" })
+    adjacent.flatMapTo(unseenBigrams, { e ->
+      e.value.map { c ->
+        "${e.key}$c"
+      }
+    })
 
     val application = ApplicationManager.getApplication()
     application.runReadAction(jump(key))
-
     application.invokeLater({
       if (text.isNotEmpty())
         eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
@@ -84,7 +89,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
     return {
       //todo: refactor this mess
-      val text = findModel.stringToFind
+      val text = findModel.stringToFind.toLowerCase()
       var jumped = false;
       if (text.isNotEmpty()) {
         if (tagMap.containsKey(text)) {
@@ -140,54 +145,96 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
-      var (p1, p2) = Pair(site, site + 1)
+      val (p1, p2) = Pair(site, site + 1)
       val (c1, c2) = Pair(text[p1], text[p2])
-      stringToIndex.put("$c1", p1 - findModel.stringToFind.length)
-      unusedDigraphs.remove("$c1")
-      stringToIndex.put("$c1$c2", p1 - findModel.stringToFind.length)
-      unusedDigraphs.remove("$c1$c2")
-      while (text[p1++].isLetterOrDigit()) {
-        unusedDigraphs.remove(text[p1] + "")
-      }
+      val origin = p1 - findModel.stringToFind.length
+      stringToIndex.put("$c1", origin)
+      stringToIndex.put("$c1$c2", origin)
+      unseenUnigrams.removeAll(listOf("$c1", "$c2"))
+      unseenBigrams.remove("$c1$c2")
     }
 
     return stringToIndex
   }
 
   fun mapUniqueDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
-    var newTagMap: BiMap<String, Int> = HashBiMap.create()
-    fun mapTagToIndex(tag: String, index: Int) {
-      val oldTag = tagMap.inverse()[index]
-      if (oldTag != null)
-        newTagMap[oldTag] = index
-      else if (!newTagMap.containsKey(tag) && !newTagMap.containsValue(index))
-        newTagMap[tag] = index
-    }
+    val newTagMap: BiMap<String, Int> = HashBiMap.create()
+    val unusedNgrams = unseenUnigrams
 
-    fun hasNearbyTag(index: Int): Boolean {
-      return ((index - 2)..(index + 2)).any {
-        newTagMap.containsValue(it)
+    fun tryToAssignTagToIndex(index: Int, tag: String = unusedNgrams.first()) {
+      //todo: decide on a word-by-word basis
+      fun hasNearbyTag(index: Int): Boolean {
+        var gap = (digraphs.size().toDouble() / unusedNgrams.size / 2).toInt()
+        gap = if (gap < 2) 2 else gap
+        val spread = (index - gap)..(index + gap)
+        return spread.any { newTagMap.containsValue(it) }
       }
-    }
 
-    if (digraphs.isEmpty)
-      newTagMap = tagMap
-
-    for ((tag, indices) in digraphs.asMap()) {
-      if (indices.size == 1 && !newTagMap.containsValue(indices.first())) {
-        val tagIndex = indices.first()
-        if (!hasNearbyTag(tagIndex))
-          mapTagToIndex(tag.toLowerCase(), tagIndex)
-      }
-    }
-
-    for (index in digraphs.values()) {
-      if (unusedDigraphs.isEmpty())
-        break
       if (!hasNearbyTag(index)) {
-        mapTagToIndex(unusedDigraphs.first(), index)
-        unusedDigraphs.remove(unusedDigraphs.first())
+        if (unusedNgrams.isEmpty())
+          return
+        var choosenTag = tag
+        val oldTag = tagMap.inverse()[index]
+        if (oldTag != null) {
+          choosenTag = oldTag
+          if(unusedNgrams.contains(choosenTag[0].toString()))
+            choosenTag = choosenTag[0].toString()
+        }
+
+        newTagMap[choosenTag] = index
+        if (choosenTag.length == 1) {
+          unusedNgrams.removeAll(unusedNgrams.filter { it[0] == choosenTag[0] })
+        } else {
+          unusedNgrams.remove(choosenTag)
+        }
       }
+    }
+
+    if (digraphs.isEmpty) {
+      return tagMap
+    }
+
+    tagMap.entries.forEach {
+      val search = findModel.stringToFind
+      if (search.endsWith(it.key)) {
+        newTagMap.put(it.key, it.value)
+        return newTagMap
+      }
+
+      if (it.key.endsWith(search)) {
+        newTagMap.put(it.key, it.value)
+        unusedNgrams.remove(it.key[0].toString())
+      }
+    }
+
+    newTagMap.keys.flatMap { it.toCharArray().toList() }.forEach {
+      unusedNgrams.remove(it.toString()) }
+
+    //Unique tags first
+    val (g1, g2) = digraphs.asMap().entries.partition { it.value.size == 1 }
+    g1.filter { it.key.all(Char::isLetterOrDigit) }
+      .forEach { tryToAssignTagToIndex(it.value.first(), it.key) }
+
+    var tagsNeeded = g2.size - unseenUnigrams.size
+    for (bigram in unseenBigrams) {
+      if (0 <= tagsNeeded--) {
+        unusedNgrams.remove(bigram[0].toString())
+        unusedNgrams.add(bigram)
+      } else {
+        break
+      }
+    }
+
+    newTagMap.keys.forEach { unusedNgrams.remove(it) }
+
+    val g = g2.filter { it.key.first().isLetterOrDigit() ||
+        findModel.stringToFind.isNotEmpty()
+    }.flatMap { it.value }
+    for (index in g) {
+      if (unusedNgrams.isNotEmpty())
+        tryToAssignTagToIndex(index)
+      else
+        break
     }
 
     return newTagMap
@@ -207,7 +254,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
   fun reset() {
     tagMap = HashBiMap.create()
-    unusedDigraphs = linkedSetOf()
+    unseenUnigrams = linkedSetOf()
     jumpLocations = emptyList()
   }
 }

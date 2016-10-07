@@ -47,6 +47,9 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
         if (e.modifiers == 0) {
           text += e.actionCommand
           defaultKeyCommand.execute(e.actionCommand[0], text)
+        } else if (e.modifiers == SHIFT_MASK) {
+          text += e.actionCommand
+          defaultKeyCommand.execute(e.actionCommand[0].toUpperCase(), text)
         }
       }
     })
@@ -72,7 +75,7 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
         else
           background = WHITE
 
-        defaultKeyCommand.execute()
+        defaultKeyCommand.execute(0.toChar(), text)
       }
     })
 
@@ -88,7 +91,8 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
 
   override fun processKeyEvent(p0: KeyEvent) {
     if (p0.keyCode == VK_BACK_SPACE && p0.id == KEY_RELEASED) {
-      defaultKeyCommand.execute(0.toChar(), text)
+      text = ""
+      defaultKeyCommand.execute(0.toChar())
     }
 
     super.processKeyEvent(p0)
