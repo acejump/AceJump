@@ -160,16 +160,21 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   fun mapUniqueDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
     val newTagMap: BiMap<String, Int> = HashBiMap.create()
     val unusedNgrams = unseenUnigrams
+    //todo: decide on a word-by-word basis
+    fun hasNearbyTag(index: Int): Boolean {
+      var gap = (digraphs.size().toDouble() / unusedNgrams.size / 2).toInt()
+      gap = if (gap < 2) 2 else gap
+      val spread = (index - gap)..(index + gap)
+      return spread.any { newTagMap.containsValue(it) }
+    }
+
+    fun hasNearbyTag2(index: Int): Boolean {
+      val gap = 5
+      val spread = (index - gap)..(index + gap)
+      return spread.any { digraphs.containsValue(it) }
+    }
 
     fun tryToAssignTagToIndex(index: Int, tag: String = unusedNgrams.first()) {
-      //todo: decide on a word-by-word basis
-      fun hasNearbyTag(index: Int): Boolean {
-        var gap = (digraphs.size().toDouble() / unusedNgrams.size / 2).toInt()
-        gap = if (gap < 2) 2 else gap
-        val spread = (index - gap)..(index + gap)
-        return spread.any { newTagMap.containsValue(it) }
-      }
-
       if (!hasNearbyTag(index)) {
         if (unusedNgrams.isEmpty())
           return
@@ -177,7 +182,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
         val oldTag = tagMap.inverse()[index]
         if (oldTag != null) {
           choosenTag = oldTag
-          if(unusedNgrams.contains(choosenTag[0].toString()))
+          if (unusedNgrams.contains(choosenTag[0].toString()))
             choosenTag = choosenTag[0].toString()
         }
 
@@ -196,19 +201,22 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
     tagMap.entries.forEach {
       val search = findModel.stringToFind
-      if (search.endsWith(it.key)) {
+      if (search == it.key) {
         newTagMap.put(it.key, it.value)
-        return newTagMap
-      }
-
-      if (it.key.endsWith(search)) {
+      } else if (search.last() == it.key.first()) {
         newTagMap.put(it.key, it.value)
         unusedNgrams.remove(it.key[0].toString())
+      }
+
+      if (hasNearbyTag2(it.value)) {
+        unusedNgrams.removeAll(it.key.map(Char::toString))
+        println(unusedNgrams)
       }
     }
 
     newTagMap.keys.flatMap { it.toCharArray().toList() }.forEach {
-      unusedNgrams.remove(it.toString()) }
+      unusedNgrams.remove(it.toString())
+    }
 
     //Unique tags first
     val (g1, g2) = digraphs.asMap().entries.partition { it.value.size == 1 }
@@ -227,7 +235,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
     newTagMap.keys.forEach { unusedNgrams.remove(it) }
 
-    val g = g2.filter { it.key.first().isLetterOrDigit() ||
+    val g = g2.filter {
+      it.key.first().isLetterOrDigit() ||
         findModel.stringToFind.isNotEmpty()
     }.flatMap { it.value }
     for (index in g) {
