@@ -9,7 +9,7 @@ import java.awt.Color.yellow
 import java.awt.Graphics2D
 import java.awt.RenderingHints
 
-class JumpInfo(private val tag: String, val search: String, val index: Int, val editor: EditorImpl) {
+class JumpInfo(private val tag: String, var search: String, val index: Int, val editor: EditorImpl) {
   val window = editor.document.charsSequence
   val source: String = window.substring(index, index + tag.length).toLowerCase()
   var result: String = window.substring(index, index + search.length)
@@ -29,9 +29,10 @@ class JumpInfo(private val tag: String, val search: String, val index: Int, val 
     }
     tagOffset = editor.offsetToVisualPosition(offset + trueOffset)
     tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
-    return tag.mapIndexed { i, c ->
-      if (source.isEmpty() || source[i] == c.toLowerCase()) ' ' else c
-    }.joinToString("")
+    return tag
+//      .mapIndexed { i, c ->
+//      if (source.isEmpty() || source[i] == c.toLowerCase()) ' ' else c
+//    }.joinToString("")
   }
 
   fun drawRect(g2d: Graphics2D, fbm: AceCanvas.FontBasedMeasurements, colors: Pair<Color, Color>) {

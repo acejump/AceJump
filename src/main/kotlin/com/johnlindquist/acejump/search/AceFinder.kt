@@ -22,19 +22,18 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   val maxTags = 26
   var unseenUnigrams: LinkedHashSet<String> = linkedSetOf()
   var unseenBigrams: LinkedHashSet<String> = linkedSetOf()
-  var adjacent =
-    mapOf(
-      'j' to "jikmnhu", 'f' to "ftgvcdr", 'k' to "kolmji", 'd' to "drfcxse",
-      'l' to "lkop", 's' to "sedxzaw", 'a' to "aqwsz",
-      'h' to "hujnbgy", 'g' to "gyhbvft", 'y' to "y7uhgt6", 't' to "t6ygfr5",
-      'u' to "u8ijhy7", 'r' to "r5tfde4", 'n' to "nbhjm", 'v' to "vcfgb",
-      'm' to "mnjk", 'c' to "cxdfv", 'b' to "bvghn",
-      'i' to "i9okju8", 'e' to "e4rdsw3", 'x' to "xzsdc", 'z' to "zasx",
-      'o' to "o0plki9", 'w' to "w3esaq2", 'p' to "plo0", 'q' to "q12wa"
-      //'1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
-      //'5' to "56tr4", '6' to "67yt5", '7' to "78uy6", '8' to "89iu7",
-      //'9' to "90oi8", '0' to "0po9"
-    )
+  var adjacent = mapOf(
+    'j' to "jikmnhu", 'f' to "ftgvcdr", 'k' to "kolmji", 'd' to "drfcxse",
+    'l' to "lkop", 's' to "sedxzaw", 'a' to "aqwsz",
+    'h' to "hujnbgy", 'g' to "gyhbvft", 'y' to "y7uhgt6", 't' to "t6ygfr5",
+    'u' to "u8ijhy7", 'r' to "r5tfde4", 'n' to "nbhjm", 'v' to "vcfgb",
+    'm' to "mnjk", 'c' to "cxdfv", 'b' to "bvghn",
+    'i' to "i9okju8", 'e' to "e4rdsw3", 'x' to "xzsdc", 'z' to "zasx",
+    'o' to "o0plki9", 'w' to "w3esaq2", 'p' to "plo0", 'q' to "q12wa"
+    //'1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
+    //'5' to "56tr4", '6' to "67yt5", '7' to "78uy6", '8' to "89iu7",
+    //'9' to "90oi8", '0' to "0po9"
+  )
 
   init {
     findModel.isFindAll = true
@@ -58,6 +57,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
         "${e.key}$c"
       }
     })
+//    unseenBigrams.addAll(('a'..'z').flatMapTo(linkedSetOf(), { a ->
+//      ('a'..'z').map { b -> "$a$b" }
+//    }))
 
     val application = ApplicationManager.getApplication()
     application.runReadAction(jump(key))
@@ -90,8 +92,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return {
       //todo: refactor this mess
       val text = findModel.stringToFind.toLowerCase()
-      var jumped = false;
-      if (text.isNotEmpty()) {
+      var jumped = false
+      if (text.isNotEmpty() && getSitesInView().isEmpty()) {
         if (tagMap.containsKey(text)) {
           jumpTo(JumpInfo(text, text, tagMap[text]!!, editor))
           jumped = true
@@ -100,8 +102,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
           if (tagMap.containsKey(last1)) {
             jumpTo(JumpInfo(last1, text, tagMap[last1]!!, editor))
             jumped = true
-          }
-          if (2 < text.length) {
+          } else if (2 < text.length) {
             val last2: String = text.substring(text.length - 2)
             if (tagMap.containsKey(last2)) {
               jumpTo(JumpInfo(last2, text, tagMap[last2]!!, editor))
@@ -118,7 +119,17 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     }
   }
 
+  var sitesToCheck: List<Int> = listOf()
+
   private fun determineJumpLocations(): Collection<JumpInfo> {
+    val fullText = document.charsSequence.toString().toLowerCase()
+    sitesToCheck = getSitesInView()
+    val existingDigraphs = makeMap(fullText, sitesToCheck)
+    tagMap = mapUniqueDigraphs(existingDigraphs)
+    return plotJumpLocations()
+  }
+
+  private fun getSitesInView(): List<Int> {
     fun getSitesToCheck(window: String): Iterable<Int> {
       if (findModel.stringToFind.isEmpty())
         return 0..(window.length - 2)
@@ -133,13 +144,10 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       return indicesToCheck
     }
 
-    val (startIndex, endIndex) = getVisibleRange(editor)
     val fullText = document.charsSequence.toString().toLowerCase()
+    val (startIndex, endIndex) = getVisibleRange(editor)
     val window = fullText.substring(startIndex, endIndex)
-    val sitesToCheck = getSitesToCheck(window).map { it + startIndex }
-    val existingDigraphs = makeMap(fullText, sitesToCheck)
-    tagMap = mapUniqueDigraphs(existingDigraphs)
-    return plotJumpLocations()
+    return getSitesToCheck(window).map { it + startIndex }
   }
 
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
@@ -152,6 +160,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       stringToIndex.put("$c1$c2", origin)
       unseenUnigrams.removeAll(listOf("$c1", "$c2"))
       unseenBigrams.remove("$c1$c2")
+      unseenBigrams.removeAll { it.startsWith(c1) }
     }
 
     return stringToIndex
@@ -174,10 +183,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       return spread.any { digraphs.containsValue(it) }
     }
 
-    fun tryToAssignTagToIndex(index: Int, tag: String = unusedNgrams.first()) {
+    fun tryToAssignTagToIndex(index: Int, tag: String) {
       if (!hasNearbyTag(index)) {
-        if (unusedNgrams.isEmpty())
-          return
         var choosenTag = tag
         val oldTag = tagMap.inverse()[index]
         if (oldTag != null) {
@@ -186,11 +193,13 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
             choosenTag = choosenTag[0].toString()
         }
 
-        newTagMap[choosenTag] = index
-        if (choosenTag.length == 1) {
-          unusedNgrams.removeAll(unusedNgrams.filter { it[0] == choosenTag[0] })
-        } else {
-          unusedNgrams.remove(choosenTag)
+        if (!newTagMap.containsValue(index)) {
+          newTagMap[choosenTag] = index
+          if (choosenTag.length == 1) {
+            unusedNgrams.removeAll(unusedNgrams.filter { it[0] == choosenTag[0] })
+          } else {
+            unusedNgrams.remove(choosenTag)
+          }
         }
       }
     }
@@ -210,7 +219,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
       if (hasNearbyTag2(it.value)) {
         unusedNgrams.removeAll(it.key.map(Char::toString))
-        println(unusedNgrams)
       }
     }
 
@@ -219,11 +227,18 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     }
 
     //Unique tags first
-    val (g1, g2) = digraphs.asMap().entries.partition { it.value.size == 1 }
+    val (g1, gt) = digraphs.asMap().entries.partition { it.value.size == 1 }
     g1.filter { it.key.all(Char::isLetterOrDigit) }
       .forEach { tryToAssignTagToIndex(it.value.first(), it.key) }
+    val (g2, gm) = gt.partition { it.key.all(Char::isLetterOrDigit) && it.value.size == 2 }
+    g2.forEach {
+      if (1 < unusedNgrams.size) {
+        tryToAssignTagToIndex(it.value.first(), unusedNgrams.first())
+        tryToAssignTagToIndex(it.value.last(), unusedNgrams.first())
+      }
+    }
 
-    var tagsNeeded = g2.size - unseenUnigrams.size
+    var tagsNeeded = gm.size - unseenUnigrams.size
     for (bigram in unseenBigrams) {
       if (0 <= tagsNeeded--) {
         unusedNgrams.remove(bigram[0].toString())
@@ -235,13 +250,13 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
     newTagMap.keys.forEach { unusedNgrams.remove(it) }
 
-    val g = g2.filter {
+    val g = gm.filter {
       it.key.first().isLetterOrDigit() ||
         findModel.stringToFind.isNotEmpty()
     }.flatMap { it.value }
     for (index in g) {
       if (unusedNgrams.isNotEmpty())
-        tryToAssignTagToIndex(index)
+        tryToAssignTagToIndex(index, unusedNgrams.first())
       else
         break
     }
