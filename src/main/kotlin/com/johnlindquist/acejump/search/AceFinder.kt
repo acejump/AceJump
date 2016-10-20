@@ -12,6 +12,7 @@ import com.johnlindquist.acejump.ui.JumpInfo
 import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
+import kotlin.comparisons.compareBy
 
 class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   val document = editor.document as DocumentImpl
@@ -19,7 +20,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   val findModel: FindModel = findManager.findInFileModel.clone()
   var jumpLocations: Collection<JumpInfo> = emptyList()
   var tagMap: BiMap<String, Int> = HashBiMap.create()
-  val maxTags = 26
   var unseen1grams: LinkedHashSet<String> = linkedSetOf()
   var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   var adjacent = mapOf(
@@ -62,9 +62,10 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   }
 
   private fun populateNgrams() {
-    unseen1grams.addAll(('a'..'z').mapTo(linkedSetOf(), { "$it" }))
+    val a_z = 'a'..'z'
+    unseen1grams.addAll(a_z.mapTo(linkedSetOf(), { "$it" }))
     unseen1grams.addAll(('0'..'9').mapTo(linkedSetOf(), { "$it" }))
-    adjacent.flatMapTo(unseen2grams, { e -> e.value.map { c -> "$c${e.key}" } })
+    a_z.flatMapTo(unseen2grams, { e -> a_z.map { c -> "${e}$c" } })
   }
 
   var targetModeEnabled = false
@@ -88,30 +89,20 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     }
 
     return {
-      //todo: refactor this mess
-      val text = findModel.stringToFind.toLowerCase()
-      var jumped = false
-      if (text.isNotEmpty() && getSitesInView(document.charsSequence.toString().toLowerCase()).size <= 1) {
+      jumpLocations = determineJumpLocations()
+      if (jumpLocations.size <= 1) {
+        val text = findModel.stringToFind.toLowerCase()
         if (tagMap.containsKey(text)) {
           jumpTo(JumpInfo(text, text, tagMap[text]!!, editor))
-          jumped = true
         } else if (2 <= text.length) {
           val last1: String = text.substring(text.length - 1)
           val last2: String = text.substring(text.length - 2)
           if (tagMap.containsKey(last2)) {
             jumpTo(JumpInfo(last2, text, tagMap[last2]!!, editor))
-            jumped = true
           } else if (tagMap.containsKey(last1)) {
             jumpTo(JumpInfo(last1, text, tagMap[last1]!!, editor))
-            jumped = true
           }
         }
-      }
-
-      if (!jumped) {
-        jumpLocations = determineJumpLocations()
-        if (jumpLocations.size == 1)
-          jumpTo(jumpLocations.first())
       }
     }
   }
@@ -126,6 +117,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       tagMap = filterTags(tagMap, findModel.stringToFind)
     else
       tagMap = compact(mapUniqueDigraphs(existingDigraphs))
+
     return plotJumpLocations()
   }
 
@@ -168,14 +160,18 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
-      val (p1, p2) = Pair(site, site + 1)
-      val (c1, c2) = Pair(text[p1], text[p2])
+      var (p1, p2) = Pair(site, site + 1)
+      var (c1, c2) = Pair(text[p1], text[p2])
       val origin = p1 - findModel.stringToFind.length
       stringToIndex.put("$c1", origin)
       stringToIndex.put("$c1$c2", origin)
       unseen1grams.remove("$c1")
-      unseen2grams.remove("$c1$c2")
       unseen2grams.removeAll { it.startsWith(c1) }
+
+      while (c1.isLetterOrDigit() && c2.isLetterOrDigit()) {
+        unseen2grams.remove("$c1$c2")
+        p1++; p2++; c1 = text[p1]; c2 = text[p2]
+      }
     }
 
     return stringToIndex
@@ -214,26 +210,21 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     // Add pre-existing tags where search string and tag are intermingled
     for (entry in tagMap) {
       val search = findModel.stringToFind
-      if (search == entry.key) {
-        newTagMap[entry.key] = entry.value
-      } else if (search.last() == entry.key.first()) {
+      if (search == entry.key || search.last() == entry.key.first()) {
         newTagMap[entry.key] = entry.value
         unusedNgrams.remove(entry.key[0].toString())
       }
     }
 
-    //Assign unique tags first
-    val (g1, gt) = digraphs.asMap().entries.partition {
-      it.value.size == 1 && it.key.all(Char::isLetterOrDigit)
-    }
-    g1.forEach { tryToAssignTagToIndex(it.value.first(), it.key) }
-
-    val remaining = gt.sortedByDescending { it.value.size }
+    val remaining = digraphs.asMap().entries.sortedBy { it.value.size }
+    val bigrams = unseen2grams.sortedWith(compareBy({
+      !(adjacent.containsKey(it[0]) && adjacent[it[0]]!!.contains(it[1]))
+    }, { it.last() })).iterator()
     var tagsNeeded = remaining.sumBy { it.value.size } - unseen1grams.size
-    val bigramIterator = unseen2grams.sortedBy(String::last).iterator()
-    while (bigramIterator.hasNext() && 0 <= tagsNeeded--) {
-      val biGram = bigramIterator.next()
-      unusedNgrams.remove(biGram[0].toString())
+    while (bigrams.hasNext() && 0 <= tagsNeeded--) {
+      val biGram = bigrams.next()
+      if (unusedNgrams.any { it[0].toString() == biGram[0].toString() })
+        unusedNgrams.remove(biGram[0].toString())
       unusedNgrams.add(biGram)
     }
 
