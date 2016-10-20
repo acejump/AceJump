@@ -1,6 +1,5 @@
 package com.johnlindquist.acejump.ui
 
-import com.intellij.ide.util.EditorHelper
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.johnlindquist.acejump.search.*
 import java.awt.AlphaComposite
@@ -45,21 +44,14 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
 
     g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35.toFloat())
 
-    g2d.color = green
-    if (search.isNotEmpty()) {
-      g2d.fillRect(origin.x - 1,
-        original.y - fbm.rectHOffset.toInt() - 1,
-        search.length * fbm.fontWidth, fbm.lineHeight.toInt() + 1)
-    }
-
     var y = original.y
     var x = original.x
+    val lineOffset = getLengthFromStartToOffset(editor, offset + search.length)
+    val startOfNextLine = getLeadingCharacterOffset(editor, line + 1)
+    val startOfPrevLine = getLeadingCharacterOffset(editor, line - 1)
+    val pLineOffset = getLengthFromStartToOffset(editor, startOfPrevLine)
+    val nLineOffset = getLengthFromStartToOffset(editor, startOfNextLine)
     if (search.isNotEmpty()) {
-      val lineOffset = getLengthFromStartToOffset(editor, offset + search.length)
-      val startOfNextLine = getLeadingCharacterOffset(editor, line + 1)
-      val startOfPrevLine = getLeadingCharacterOffset(editor, line - 1)
-      val pLineOffset = getLengthFromStartToOffset(editor, startOfPrevLine)
-      val nLineOffset = getLengthFromStartToOffset(editor, startOfNextLine)
       if (getNextLineLength(editor, offset) < lineOffset || nLineOffset > lineOffset) {
         y += fbm.lineHeight.toInt()
         x -= fbm.fontWidth
@@ -71,10 +63,28 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
       }
     }
 
-    g2d.color = yellow
     x += fbm.fontWidth
+    val x_adjusted = x
+    g2d.color = green
+    var tagWidth = fbm.rectWidth + text.length * fbm.fontWidth
+    var searchWidth = search.length * fbm.fontWidth
+    if (search.isNotEmpty()) {
+      if (search.last() == tag.first() && search.last() !=
+          editor.document.charsSequence[offset + search.length - 1]) {
+        g2d.fillRect(x - fbm.rectMarginWidth, y - fbm.rectHOffset.toInt(),
+          fbm.rectWidth + fbm.fontWidth, fbm.lineHeight.toInt())
+        x += fbm.fontWidth
+        tagWidth -= fbm.fontWidth
+        searchWidth -= fbm.fontWidth
+      }
+      g2d.fillRect(origin.x - 1,
+        original.y - fbm.rectHOffset.toInt() - 1,
+        searchWidth, fbm.lineHeight.toInt() + 1)
+    }
+
+    g2d.color = yellow
     g2d.fillRect(x - fbm.rectMarginWidth, y - fbm.rectHOffset.toInt(),
-      fbm.rectWidth + text.length * fbm.fontWidth, fbm.lineHeight.toInt())
+      tagWidth, fbm.lineHeight.toInt())
 
     //just a touch of alpha
     g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
@@ -83,6 +93,6 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
     //the foreground text
     g2d.font = fbm.font
     g2d.color = BLACK
-    g2d.drawString(text.toUpperCase(), x, y + fbm.fontHeight)
+    g2d.drawString(text.toUpperCase(), x_adjusted, y + fbm.fontHeight)
   }
 }
