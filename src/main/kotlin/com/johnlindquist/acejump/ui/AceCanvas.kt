@@ -27,7 +27,7 @@ class AceCanvas(val editor: EditorImpl) : JComponent() {
     val doubleRectMarginWidth = rectMarginWidth * 2
     val fontSpacing = fontHeight * lineSpacing
     val rectHOffset = fontSpacing - fontHeight
-    val rectWidth = fontWidth + doubleRectMarginWidth
+    val rectWidth = doubleRectMarginWidth
     val hOffset = fontHeight - fontSpacing
   }
 

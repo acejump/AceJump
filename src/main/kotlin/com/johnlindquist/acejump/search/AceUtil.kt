@@ -28,6 +28,19 @@ fun getVisibleRange(editor: Editor): Pair<Int, Int> {
   return Pair(startOffset, endOffset)
 }
 
+fun getPreviousLineLength(editor: Editor, offset: Int): Int {
+  val pos = editor.offsetToVisualPosition(offset)
+  if (pos.line - 1 > editor.offsetToVisualPosition(getVisibleRange(editor).first).line)
+    return getVisualLineLength(editor, pos.line - 1)
+  return getVisualLineLength(editor, pos.line)
+}
+
+fun getNextLineLength(editor: Editor, offset: Int): Int {
+  val pos = editor.offsetToVisualPosition(offset)
+  if (pos.line + 1 < editor.offsetToVisualPosition(getVisibleRange(editor).second).line)
+    return getVisualLineLength(editor, pos.line + 1)
+  return getVisualLineLength(editor, pos.line)
+}
 
 /*
  * IdeaVim - A Vim emulator plugin for IntelliJ Idea
@@ -193,3 +206,69 @@ fun normalizeOffset(editor: Editor, line: Int, offset: Int, allowEnd: Boolean): 
   val max = getLineEndOffset(editor, line, allowEnd)
   return max(min(offset, max), min)
 }
+
+/**
+ * Gets the number of characters on the specified visual line. This will be different than the number of visual
+ * characters if there are "real" tabs in the line.
+
+ * @param editor The editor
+ * *
+ * @param line   The visual line within the file
+ * *
+ * @return The number of characters in the specified line
+ */
+fun getVisualLineLength(editor: Editor, line: Int): Int {
+  return getLineLength(editor, visualLineToLogicalLine(editor, line))
+}
+
+/**
+ * Gets the number of characters on the specified logical line. This will be different than the number of visual
+ * characters if there are "real" tabs in the line.
+
+ * @param editor The editor
+ * *
+ * @param line   The logical line within the file
+ * *
+ * @return The number of characters in the specified line
+ */
+
+fun getLineLength(editor: Editor, line: Int): Int {
+  if (getLineCount(editor) === 0) {
+    return 0
+  } else {
+    return Math.max(0, editor.offsetToLogicalPosition(editor.document.getLineEndOffset(line)).column)
+  }
+}
+
+
+fun getLengthFromStartToOffset(editor: Editor, offset: Int): Int {
+  if (getLineCount(editor) === 0) {
+    return 0
+  } else {
+    return Math.max(0, editor.offsetToLogicalPosition(offset).column)
+  }
+}
+
+fun getLeadingCharacterOffset(editor: Editor, line: Int): Int {
+  return getLeadingCharacterOffset(editor, line, 0)
+}
+
+fun getLeadingCharacterOffset(editor: Editor, line: Int, col: Int): Int {
+  val start = getLineStartOffset(editor, line) + col
+  val end = getLineEndOffset(editor, line, true)
+  val chars = editor.document.charsSequence
+  var pos = end
+  for (offset in start..end - 1) {
+    if (offset >= chars.length) {
+      break
+    }
+
+    if (!Character.isWhitespace(chars[offset])) {
+      pos = offset
+      break
+    }
+  }
+
+  return pos
+}
+

@@ -1,7 +1,8 @@
 package com.johnlindquist.acejump.ui
 
+import com.intellij.ide.util.EditorHelper
 import com.intellij.openapi.editor.impl.EditorImpl
-import com.johnlindquist.acejump.search.getPointFromVisualPosition
+import com.johnlindquist.acejump.search.*
 import java.awt.AlphaComposite
 import java.awt.Color
 import java.awt.Color.*
@@ -13,8 +14,10 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
   val source: String = window.substring(index, index + tag.length).toLowerCase()
   var result: String = window.substring(index, index + search.length)
   var offset = index
+  val line = editor.offsetToVisualPosition(offset).line
   var originOffset = editor.offsetToVisualPosition(offset)
-  var tagOffset = editor.offsetToVisualPosition(offset + search.length)
+  var trueOffset = offset + search.length
+  var tagOffset = editor.offsetToVisualPosition(trueOffset)
   var tagPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
   var srcPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
 
@@ -36,44 +39,40 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
     val text = renderTag()
     val origin = srcPoint
     val original = tagPoint
-    val backgroundColor = yellow//if (text[0] == ' ') Color.YELLOW else colors.first
-    val foregroundColor = yellow//if (text[0] == ' ') Color.YELLOW else colors.second
 
     original.translate(0, -fbm.hOffset.toInt())
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
+    g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.35.toFloat())
+
     g2d.color = green
     if (search.isNotEmpty()) {
-      g2d.drawRect(origin.x - fbm.rectMarginWidth - 1,
-        origin.y - fbm.rectHOffset.toInt() - 1,
+      g2d.fillRect(origin.x - 1,
+        original.y - fbm.rectHOffset.toInt() - 1,
         search.length * fbm.fontWidth, fbm.lineHeight.toInt() + 1)
     }
 
-    //a slight border for "pop" against the background
-    g2d.color = backgroundColor
-
-    if (text.length == 2) {
-      g2d.drawRect(original.x - fbm.rectMarginWidth - 1,
-        original.y - fbm.rectHOffset.toInt() - 1,
-        fbm.rectWidth + fbm.fontWidth, fbm.lineHeight.toInt() + 1)
-    } else {
-      g2d.drawRect(original.x - fbm.rectMarginWidth - 1,
-        original.y - fbm.rectHOffset.toInt() - 1,
-        fbm.rectWidth, fbm.lineHeight.toInt() + 1)
+    var y = original.y
+    var x = original.x
+    if (search.isNotEmpty()) {
+      val lineOffset = getLengthFromStartToOffset(editor, offset + search.length)
+      val startOfNextLine = getLeadingCharacterOffset(editor, line + 1)
+      val startOfPrevLine = getLeadingCharacterOffset(editor, line - 1)
+      val pLineOffset = getLengthFromStartToOffset(editor, startOfPrevLine)
+      val nLineOffset = getLengthFromStartToOffset(editor, startOfNextLine)
+      if (getNextLineLength(editor, offset) < lineOffset || nLineOffset > lineOffset) {
+        y += fbm.lineHeight.toInt()
+        x -= fbm.fontWidth
+      } else if (getPreviousLineLength(editor, offset) < lineOffset || pLineOffset > lineOffset) {
+        y -= fbm.lineHeight.toInt()
+        x -= fbm.fontWidth
+      }
     }
 
-    //the background rectangle
-    g2d.color = foregroundColor
-
-    if (text.length == 2) {
-      g2d.fillRect(original.x - fbm.rectMarginWidth,
-        original.y - fbm.rectHOffset.toInt(),
-        fbm.rectWidth + fbm.fontWidth, fbm.lineHeight.toInt())
-    } else {
-      g2d.fillRect(original.x - fbm.rectMarginWidth,
-        original.y - fbm.rectHOffset.toInt(),
-        fbm.rectWidth, fbm.lineHeight.toInt())
-    }
+    g2d.color = yellow
+    x += fbm.fontWidth
+    g2d.fillRect(x - fbm.rectMarginWidth, y - fbm.rectHOffset.toInt(),
+      fbm.rectWidth + text.length * fbm.fontWidth, fbm.lineHeight.toInt())
 
     //just a touch of alpha
     g2d.composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
@@ -82,6 +81,6 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
     //the foreground text
     g2d.font = fbm.font
     g2d.color = BLACK
-    g2d.drawString(text.toUpperCase(), original.x, original.y + fbm.fontHeight)
+    g2d.drawString(text.toUpperCase(), x, y + fbm.fontHeight)
   }
 }
