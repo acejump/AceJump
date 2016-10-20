@@ -229,8 +229,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     g1.forEach { tryToAssignTagToIndex(it.value.first(), it.key) }
 
     val remaining = gt.sortedByDescending { it.value.size }
-    var tagsNeeded = remaining.size - unseen1grams.size
-    val bigramIterator = unseen2grams.sortedBy { it.last() }.iterator()
+    var tagsNeeded = remaining.sumBy { it.value.size } - unseen1grams.size
+    val bigramIterator = unseen2grams.sortedBy(String::last).iterator()
     while (bigramIterator.hasNext() && 0 <= tagsNeeded--) {
       val biGram = bigramIterator.next()
       unusedNgrams.remove(biGram[0].toString())
@@ -241,7 +241,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       it.key.first().isLetterOrDigit() || findModel.stringToFind.isNotEmpty()
     }.flatMap { it.value }.listIterator()
 
-    while (unusedNgrams.isNotEmpty() && remainingSites.hasNext())
+    while (remainingSites.hasNext() && unusedNgrams.isNotEmpty())
       tryToAssignTagToIndex(remainingSites.next(), unusedNgrams.first())
 
     return newTagMap
