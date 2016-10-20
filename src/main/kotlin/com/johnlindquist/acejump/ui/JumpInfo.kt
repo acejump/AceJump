@@ -66,6 +66,8 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
       } else if (getPreviousLineLength(editor, offset) < lineOffset || pLineOffset > lineOffset) {
         y -= fbm.lineHeight.toInt()
         x -= fbm.fontWidth
+      } else if (!editor.document.charsSequence[offset - 1].isLetterOrDigit()) {
+        x = origin.x - fbm.fontWidth * (text.length + 1)
       }
     }
 
