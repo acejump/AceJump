@@ -15,6 +15,7 @@ import javax.swing.event.ChangeListener
 import kotlin.comparisons.compareBy
 
 class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
+  var queryString: String = ""
   val document = editor.document as DocumentImpl
   val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = findManager.findInFileModel.clone()
@@ -46,12 +47,12 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     findModel.setSearchHighlighters(true)
   }
 
-  fun findText(text: String, key: Char) {
+  fun find(text: String, key: Char) {
     if (key == 0.toChar())
       reset()
 
+    queryString = text
     findModel.stringToFind = text
-    populateNgrams()
 
     val application = ApplicationManager.getApplication()
     application.runReadAction(jump(key))
@@ -59,13 +60,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       if (text.isNotEmpty())
         eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
     })
-  }
-
-  private fun populateNgrams() {
-    val a_z = 'a'..'z'
-    unseen1grams.addAll(a_z.mapTo(linkedSetOf(), { "$it" }))
-    unseen1grams.addAll(('0'..'9').mapTo(linkedSetOf(), { "$it" }))
-    a_z.flatMapTo(unseen2grams, { e -> a_z.map { c -> "${e}$c" } })
   }
 
   var targetModeEnabled = false
@@ -91,7 +85,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return {
       jumpLocations = determineJumpLocations()
       if (jumpLocations.size <= 1) {
-        val text = findModel.stringToFind.toLowerCase()
+        val text = queryString.toLowerCase()
         if (tagMap.containsKey(text)) {
           jumpTo(JumpInfo(text, text, tagMap[text]!!, editor))
         } else if (2 <= text.length) {
@@ -107,18 +101,24 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     }
   }
 
-  var sitesToCheck: List<Int> = listOf()
-
   private fun determineJumpLocations(): Collection<JumpInfo> {
+    populateNgrams()
     val fullText = document.charsSequence.toString().toLowerCase()
-    sitesToCheck = getSitesInView(fullText)
+    val sitesToCheck = getSitesInView(fullText)
     val existingDigraphs = makeMap(fullText, sitesToCheck)
     if (existingDigraphs.isEmpty)
-      tagMap = filterTags(tagMap, findModel.stringToFind)
+      tagMap = filterTags(tagMap, queryString)
     else
       tagMap = compact(mapUniqueDigraphs(existingDigraphs))
 
     return plotJumpLocations()
+  }
+
+  fun populateNgrams() {
+    val a_z = 'a'..'z'
+    unseen1grams.addAll(a_z.mapTo(linkedSetOf(), { "$it" }))
+    unseen1grams.addAll(('0'..'9').mapTo(linkedSetOf(), { "$it" }))
+    a_z.flatMapTo(unseen2grams, { e -> a_z.map { c -> "${e}$c" } })
   }
 
   private fun filterTags(tags: BiMap<String, Int>, prefix: String) =
@@ -131,15 +131,15 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       val firstCharacter = e.key[0].toString()
       if (tagMap.keys.count { it[0] == e.key[0] } == 1 &&
         unseen1grams.contains(firstCharacter) &&
-        !findModel.stringToFind.endsWith(firstCharacter) &&
-        !findModel.stringToFind.endsWith(e.key))
+        !queryString.endsWith(firstCharacter) &&
+        !queryString.endsWith(e.key))
         firstCharacter
       else e.key
     })
 
   private fun getSitesInView(fullText: String): List<Int> {
     fun getSitesToCheck(window: String): Iterable<Int> {
-      if (findModel.stringToFind.isEmpty())
+      if (queryString.isEmpty())
         return 0..(window.length - 2)
 
       val indicesToCheck = arrayListOf<Int>()
@@ -162,7 +162,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     for (site in sites) {
       var (p1, p2) = Pair(site, site + 1)
       var (c1, c2) = Pair(text[p1], text[p2])
-      val origin = p1 - findModel.stringToFind.length
+      val origin = p1 - queryString.length
       stringToIndex.put("$c1", origin)
       stringToIndex.put("$c1$c2", origin)
       unseen1grams.remove("$c1")
@@ -209,8 +209,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
     // Add pre-existing tags where search string and tag are intermingled
     for (entry in tagMap) {
-      val search = findModel.stringToFind
-      if (search == entry.key || search.last() == entry.key.first()) {
+      if (queryString == entry.key || queryString.last() == entry.key.first()) {
         newTagMap[entry.key] = entry.value
         unusedNgrams.remove(entry.key[0].toString())
       }
@@ -229,7 +228,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     }
 
     val remainingSites = remaining.filter {
-      it.key.first().isLetterOrDigit() || findModel.stringToFind.isNotEmpty()
+      it.key.first().isLetterOrDigit() || queryString.isNotEmpty()
     }.flatMap { it.value }.listIterator()
 
     while (remainingSites.hasNext() && unusedNgrams.isNotEmpty())
@@ -238,15 +237,15 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return newTagMap
   }
 
-  fun findText(text: Regexp) {
+  fun findPattern(text: Pattern) {
     findModel.isRegularExpressions = true
-    findText(text.pattern, 0.toChar())
+    find(text.pattern, 0.toChar())
     findModel.isRegularExpressions = false
   }
 
   fun plotJumpLocations(): List<JumpInfo> {
     return tagMap.values.map {
-      JumpInfo(tagMap.inverse()[it]!!, findModel.stringToFind, it, editor)
+      JumpInfo(tagMap.inverse()[it]!!, queryString, it, editor)
     }
   }
 

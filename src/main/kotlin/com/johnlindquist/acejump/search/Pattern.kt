@@ -1,6 +1,6 @@
 package com.johnlindquist.acejump.search
 
-enum class Regexp(val pattern: String) {
+enum class Pattern(val pattern: String) {
   END_OF_LINE("\\n"),
   BEGINNING_OF_LINE("^.|\\n(?<!.\\n)"),
   CODE_INDENTS("^\\s*\\S"),

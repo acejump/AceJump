@@ -4,8 +4,7 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.johnlindquist.acejump.search.getPointFromVisualPosition
 import java.awt.AlphaComposite
 import java.awt.Color
-import java.awt.Color.BLACK
-import java.awt.Color.yellow
+import java.awt.Color.*
 import java.awt.Graphics2D
 import java.awt.RenderingHints
 
@@ -17,6 +16,7 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
   var originOffset = editor.offsetToVisualPosition(offset)
   var tagOffset = editor.offsetToVisualPosition(offset + search.length)
   var tagPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
+  var srcPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
 
   fun renderTag(): String {
     var trueOffset = 0
@@ -30,13 +30,11 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
     tagOffset = editor.offsetToVisualPosition(offset + trueOffset)
     tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
     return tag
-//      .mapIndexed { i, c ->
-//      if (source.isEmpty() || source[i] == c.toLowerCase()) ' ' else c
-//    }.joinToString("")
   }
 
   fun drawRect(g2d: Graphics2D, fbm: AceCanvas.FontBasedMeasurements, colors: Pair<Color, Color>) {
     val text = renderTag()
+    val origin = srcPoint
     val original = tagPoint
     val backgroundColor = yellow//if (text[0] == ' ') Color.YELLOW else colors.first
     val foregroundColor = yellow//if (text[0] == ' ') Color.YELLOW else colors.second
@@ -44,17 +42,24 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
     original.translate(0, -fbm.hOffset.toInt())
     g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
+    g2d.color = green
+    if (search.isNotEmpty()) {
+      g2d.drawRect(origin.x - fbm.rectMarginWidth - 1,
+        origin.y - fbm.rectHOffset.toInt() - 1,
+        search.length * fbm.fontWidth, fbm.lineHeight.toInt() + 1)
+    }
+
     //a slight border for "pop" against the background
     g2d.color = backgroundColor
 
     if (text.length == 2) {
       g2d.drawRect(original.x - fbm.rectMarginWidth - 1,
         original.y - fbm.rectHOffset.toInt() - 1,
-        fbm.rectWidth + fbm.fontWidth + 5, fbm.lineHeight.toInt() + 1)
+        fbm.rectWidth + fbm.fontWidth, fbm.lineHeight.toInt() + 1)
     } else {
       g2d.drawRect(original.x - fbm.rectMarginWidth - 1,
         original.y - fbm.rectHOffset.toInt() - 1,
-        fbm.rectWidth + 1, fbm.lineHeight.toInt() + 1)
+        fbm.rectWidth, fbm.lineHeight.toInt() + 1)
     }
 
     //the background rectangle
@@ -63,7 +68,7 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
     if (text.length == 2) {
       g2d.fillRect(original.x - fbm.rectMarginWidth,
         original.y - fbm.rectHOffset.toInt(),
-        fbm.rectWidth + fbm.fontWidth + 5, fbm.lineHeight.toInt())
+        fbm.rectWidth + fbm.fontWidth, fbm.lineHeight.toInt())
     } else {
       g2d.fillRect(original.x - fbm.rectMarginWidth,
         original.y - fbm.rectHOffset.toInt(),

@@ -9,7 +9,7 @@ class DefaultKeyCommand(override val aceFinder: AceFinder) : AceKeyCommand() {
     if (key == '\b') return
 
     //Find or jump
-    aceFinder.findText(text, key)
+    aceFinder.find(text, key)
     aceFinder.eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
   }
 }
