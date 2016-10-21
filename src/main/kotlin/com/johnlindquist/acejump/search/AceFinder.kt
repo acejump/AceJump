@@ -109,7 +109,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     if (existingDigraphs.isEmpty)
       tagMap = filterTags(tagMap, queryString)
     else
-      tagMap = compact(mapUniqueDigraphs(existingDigraphs))
+      tagMap = compact(mapDigraphs(existingDigraphs))
 
     return plotJumpLocations()
   }
@@ -166,7 +166,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       stringToIndex.put("$c1", origin)
       stringToIndex.put("$c1$c2", origin)
       unseen1grams.remove("$c1")
-      unseen2grams.removeAll { it.startsWith(c1) }
 
       while (c1.isLetterOrDigit() && c2.isLetterOrDigit()) {
         unseen2grams.remove("$c1$c2")
@@ -177,7 +176,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return stringToIndex
   }
 
-  fun mapUniqueDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
+  fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
     val newTagMap: BiMap<String, Int> = HashBiMap.create()
     val unusedNgrams = LinkedHashSet<String>(unseen1grams)
     fun hasNearbyTag(index: Int): Boolean {
@@ -200,9 +199,10 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       val choosenTag = tagMap.inverse().getOrElse(index, { tag })
       newTagMap[choosenTag] = index
       if (choosenTag.length == 1) {
-        unusedNgrams.removeAll { it[0] == choosenTag[0] }
+        unusedNgrams.removeAll { it.last() == choosenTag[0] }
       } else {
         unusedNgrams.remove(choosenTag[0].toString())
+        unusedNgrams.remove(choosenTag[1].toString())
         unusedNgrams.remove(choosenTag)
       }
     }
@@ -215,15 +215,14 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       }
     }
 
-    val remaining = digraphs.asMap().entries.sortedBy { it.value.size }
-    val bigrams = unseen2grams.sortedWith(compareBy({
-      !(adjacent.containsKey(it[0]) && adjacent[it[0]]!!.contains(it[1]))
-    }, { it.last() })).iterator()
-    var tagsNeeded = remaining.sumBy { it.value.size } - unseen1grams.size
-    while (bigrams.hasNext() && 0 <= tagsNeeded--) {
-      val biGram = bigrams.next()
-      if (unusedNgrams.any { it[0].toString() == biGram[0].toString() })
-        unusedNgrams.remove(biGram[0].toString())
+    val remaining = digraphs.asMap().entries.sortedBy { it.value.size }.take(99)
+    val tags = unseen2grams.sortedWith(compareBy(
+      { digraphs["${it[0]}"].orEmpty().size },
+      String::last)).iterator()
+    var tagsNeeded = remaining.size - unseen1grams.size
+    while (tags.hasNext() && 0 <= tagsNeeded--) {
+      val biGram = tags.next()
+      if (unusedNgrams.remove(biGram[0].toString())) tagsNeeded++
       unusedNgrams.add(biGram)
     }
 
