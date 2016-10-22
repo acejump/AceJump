@@ -69,8 +69,8 @@ class JumpInfo(private val tag: String, var search: String, val index: Int, val 
     var tagWidth = fbm.rectWidth + text.length * fbm.fontWidth
     var searchWidth = search.length * fbm.fontWidth
     if (search.isNotEmpty()) {
-      if (search.last() == tag.first() && search.last() !=
-          editor.document.charsSequence[offset + search.length - 1]) {
+      if (search.last() == tag.first() && search.last().toLowerCase() !=
+          editor.document.charsSequence[offset + search.length - 1].toLowerCase()) {
         g2d.fillRect(x - fbm.rectMarginWidth, y - fbm.rectHOffset.toInt(),
           fbm.rectWidth + fbm.fontWidth, fbm.lineHeight.toInt())
         x += fbm.fontWidth

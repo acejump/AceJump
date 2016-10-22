@@ -106,10 +106,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     val fullText = document.charsSequence.toString().toLowerCase()
     val sitesToCheck = getSitesInView(fullText)
     val existingDigraphs = makeMap(fullText, sitesToCheck)
-    if (existingDigraphs.isEmpty)
-      tagMap = filterTags(tagMap, queryString)
-    else
-      tagMap = compact(mapDigraphs(existingDigraphs))
+    tagMap = compact(mapDigraphs(existingDigraphs))
 
     return plotJumpLocations()
   }
@@ -185,9 +182,10 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       while (0 <= left && chars[left].isLetterOrDigit()) {
         left--
       }
-      while (chars.length < right && chars[right].isLetterOrDigit()) {
+
+      do {
         right++
-      }
+      } while (chars.length <= right && chars[right].isLetterOrDigit())
 
       return (left..right).any { newTagMap.containsValue(it) }
     }
@@ -207,6 +205,23 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       }
     }
 
+    if (queryString.isNotEmpty())
+      if (2 <= queryString.length) {
+        val last2: String = queryString.substring(queryString.length - 2)
+        val last2Index = tagMap[last2]
+        if (last2Index != null) {
+          newTagMap[last2] = last2Index
+          return newTagMap
+        }
+      } else {
+        val last1: String = queryString.substring(queryString.length - 1)
+        val last1Index = tagMap[last1]
+        if (last1Index != null) {
+          newTagMap[last1] = last1Index
+          return newTagMap
+        }
+      }
+
     // Add pre-existing tags where search string and tag are intermingled
     for (entry in tagMap) {
       if (queryString == entry.key || queryString.last() == entry.key.first()) {
@@ -218,6 +233,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     val remaining = digraphs.asMap().entries.sortedBy { it.value.size }.take(99)
     val tags = unseen2grams.sortedWith(compareBy(
       { digraphs["${it[0]}"].orEmpty().size },
+      { !adjacent[it[0]]!!.contains(it[1]) },
       String::last)).iterator()
     var tagsNeeded = remaining.size - unseen1grams.size
     while (tags.hasNext() && 0 <= tagsNeeded--) {

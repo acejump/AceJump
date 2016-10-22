@@ -9,7 +9,7 @@ import java.awt.Graphics2D
 import javax.swing.JComponent
 
 class AceCanvas(val editor: EditorImpl) : JComponent() {
-  var jumpInfos: List<JumpInfo> = arrayListOf()
+  var jumpInfos: Collection<JumpInfo> = arrayListOf()
   val scheme = EditorColorsManager.getInstance().globalScheme
   val colors = Pair(scheme.defaultBackground, scheme.defaultForeground)
 
