@@ -31,7 +31,7 @@ intellij {
 }
 
 group 'com.johnlindquist'
-version '2.0.14'
+version '3.0.0'
 
 repositories {
     mavenCentral()

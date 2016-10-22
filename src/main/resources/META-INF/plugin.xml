@@ -13,6 +13,8 @@
   <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>3.0.0</dt>
+            <dd>Major release: Re-written from the ground up. Lots of new features.
             <dt>2.0.13</dt>
             <dd>Fix a regression affecting target mode and line-based navigation</dd>
             <dt>2.0.12</dt>
@@ -60,7 +62,7 @@
 
   <depends>com.intellij.modules.platform</depends>
 
-  <version>2.0.14</version>
+  <version>3.0.0</version>
   <category>Navigation</category>
   <vendor url="https://github.com/johnlindquist/AceJump">AceJump</vendor>
 
@@ -74,7 +76,8 @@
             description="Search and navigate to result">
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
-      <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
+      <keyboard-shortcut keymap="Mac OS X 10.5+"
+                         first-keystroke="ctrl SEMICOLON"/>
     </action>
   </actions>
 </idea-plugin>
