@@ -114,14 +114,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   fun populateNgrams() {
     val a_z = 'a'..'z'
     unseen1grams.addAll(a_z.mapTo(linkedSetOf(), { "$it" }))
-    unseen1grams.addAll(('0'..'9').mapTo(linkedSetOf(), { "$it" }))
     a_z.flatMapTo(unseen2grams, { e -> a_z.map { c -> "${e}$c" } })
   }
-
-  private fun filterTags(tags: BiMap<String, Int>, prefix: String) =
-    tags.filterTo(HashBiMap.create(tags.size), { e ->
-      prefix.endsWith(e.key) || prefix.endsWith(e.key[0])
-    })
 
   fun compact(tagMap: BiMap<String, Int>) =
     tagMap.mapKeysTo(HashBiMap.create(tagMap.size), { e ->
@@ -180,14 +174,16 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       val chars = document.charsSequence
       var (left, right) = Pair(index, index)
       while (0 <= left && chars[left].isLetterOrDigit()) {
+        if (newTagMap.containsValue(left)) return true
         left--
       }
 
       do {
+        if (newTagMap.containsValue(right)) return true
         right++
-      } while (chars.length <= right && chars[right].isLetterOrDigit())
+      } while (right <= chars.length && chars[right].isLetterOrDigit())
 
-      return (left..right).any { newTagMap.containsValue(it) }
+      return false
     }
 
     fun tryToAssignTagToIndex(index: Int, tag: String) {
@@ -230,7 +226,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       }
     }
 
-    val remaining = digraphs.asMap().entries.sortedBy { it.value.size }.take(99)
+    val remaining = digraphs.asMap().entries.sortedBy { it.value.size }
     val tags = unseen2grams.sortedWith(compareBy(
       { digraphs["${it[0]}"].orEmpty().size },
       { !adjacent[it[0]]!!.contains(it[1]) },
