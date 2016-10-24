@@ -33,7 +33,8 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
 
     finder.eventDispatcher.addListener(ChangeListener {
       aceCanvas.jumpInfos = finder.jumpLocations
-      if (aceCanvas.jumpInfos.isEmpty()) {
+      if (finder.hasJumped) {
+        finder.hasJumped = false
         popupContainer?.cancel()
         exit()
       }

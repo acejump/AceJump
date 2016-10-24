@@ -20,6 +20,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = findManager.findInFileModel.clone()
   var jumpLocations: Collection<JumpInfo> = emptyList()
+  var hasJumped = false
   var tagMap: BiMap<String, Int> = HashBiMap.create()
   var unseen1grams: LinkedHashSet<String> = linkedSetOf()
   var unseen2grams: LinkedHashSet<String> = linkedSetOf()
@@ -75,6 +76,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
         aceJumper.setSelectionFromCaretToOffset(jumpInfo.offset)
 
       aceJumper.moveCaret(jumpInfo.offset)
+      hasJumped = true
 
       if (targetModeEnabled)
         aceJumper.selectWordAtCaret()
@@ -151,14 +153,15 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
-      var (p1, p2) = Pair(site, site + 1)
-      var (c1, c2) = Pair(text[p1], text[p2])
+      var (p0, p1, p2) = Triple(site - 1, site, site + 1)
+      var (c0, c1, c2) = Triple(text[p0], text[p1], text[p2])
       val origin = p1 - queryString.length
       stringToIndex.put("$c1", origin)
       stringToIndex.put("$c1$c2", origin)
       unseen1grams.remove("$c1")
 
       while (c1.isLetterOrDigit() && c2.isLetterOrDigit()) {
+        unseen2grams.remove("$c0$c1")
         unseen2grams.remove("$c1$c2")
         p1++; p2++; c1 = text[p1]; c2 = text[p2]
       }
@@ -167,28 +170,53 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return stringToIndex
   }
 
+  fun getWordBounds(index: Int): Pair<Int, Int> {
+    val chars = document.charsSequence
+    var (left, right) = Pair(index, index)
+    while (1 <= left && chars[left - 1].isLetterOrDigit())
+      left--
+
+    while (right + 1 <= chars.length && chars[right + 1].isLetterOrDigit())
+      right++
+
+    return Pair(left, right)
+  }
+
   fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
     val newTagMap: BiMap<String, Int> = HashBiMap.create()
+    if (queryString.isEmpty())
+      return newTagMap
+
+    val chars = document.charsSequence
     val unusedNgrams = LinkedHashSet<String>(unseen1grams)
     fun hasNearbyTag(index: Int): Boolean {
-      val chars = document.charsSequence
-      var (left, right) = Pair(index, index)
-      while (0 <= left && chars[left].isLetterOrDigit()) {
-        if (newTagMap.containsValue(left)) return true
-        left--
-      }
-
-      do {
-        if (newTagMap.containsValue(right)) return true
-        right++
-      } while (right <= chars.length && chars[right].isLetterOrDigit())
-
-      return false
+      val (left, right) = getWordBounds(index)
+      return (left..right).any { newTagMap.containsValue(it) }
     }
 
-    fun tryToAssignTagToIndex(index: Int, tag: String) {
+    fun tryToAssignTagToIndex(index: Int) {
       if (hasNearbyTag(index) || newTagMap.containsValue(index))
         return
+
+      var tag = unusedNgrams.first()
+      val iterator = unusedNgrams.iterator()
+
+      while (iterator.hasNext()) {
+        tag = iterator.next()
+        val (left, right) = getWordBounds(index)
+        if ((left..right).all {
+          !digraphs.containsKey("${chars[it]}${tag[0]}")
+            && !newTagMap.contains("${chars[it]}${tag[0]}")
+        })
+          break
+      }
+
+      if (!iterator.hasNext() && queryString.isNotEmpty()) {
+        val (left, right) = getWordBounds(index)
+        println("No tags could be assigned to word: " +
+          (left..right).map { "${chars[it]}" }.joinToString(""))
+        return
+      }
 
       val choosenTag = tagMap.inverse().getOrElse(index, { tag })
       newTagMap[choosenTag] = index
@@ -201,7 +229,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       }
     }
 
-    if (queryString.isNotEmpty())
+    if (queryString.isNotEmpty()) {
       if (2 <= queryString.length) {
         val last2: String = queryString.substring(queryString.length - 2)
         val last2Index = tagMap[last2]
@@ -217,6 +245,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
           return newTagMap
         }
       }
+    }
 
     // Add pre-existing tags where search string and tag are intermingled
     for (entry in tagMap) {
@@ -231,10 +260,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       { digraphs["${it[0]}"].orEmpty().size },
       { !adjacent[it[0]]!!.contains(it[1]) },
       String::last)).iterator()
-    var tagsNeeded = remaining.size - unseen1grams.size
-    while (tags.hasNext() && 0 <= tagsNeeded--) {
+    while (tags.hasNext()) {
       val biGram = tags.next()
-      if (unusedNgrams.remove(biGram[0].toString())) tagsNeeded++
+      unusedNgrams.remove(biGram[0].toString())
       unusedNgrams.add(biGram)
     }
 
@@ -243,7 +271,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     }.flatMap { it.value }.listIterator()
 
     while (remainingSites.hasNext() && unusedNgrams.isNotEmpty())
-      tryToAssignTagToIndex(remainingSites.next(), unusedNgrams.first())
+      tryToAssignTagToIndex(remainingSites.next())
 
     return newTagMap
   }
