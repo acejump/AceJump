@@ -32,12 +32,13 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
     configurePopup()
 
     finder.eventDispatcher.addListener(ChangeListener {
-      aceCanvas.jumpInfos = finder.jumpLocations
+      aceCanvas.jumpLocations = finder.jumpLocations
       if (finder.hasJumped) {
         finder.hasJumped = false
         popupContainer?.cancel()
         exit()
       }
+
       aceCanvas.repaint()
     })
 
@@ -102,10 +103,10 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
   private fun configurePopup() {
     val scheme = EditorColorsManager.getInstance().globalScheme
     val font = Font(scheme.editorFontName, BOLD, scheme.editorFontSize)
-    val popupBuilder: ComponentPopupBuilder? =
+    val pb: ComponentPopupBuilder? =
       JBPopupFactory.getInstance()?.createComponentPopupBuilder(this, this)
-    popupBuilder?.setCancelKeyEnabled(true)
-    val popup = popupBuilder?.createPopup() as AbstractPopup?
+    pb?.setCancelKeyEnabled(true)
+    val popup = pb?.createPopup() as AbstractPopup?
     popup?.show(guessBestLocation(editor))
     popup?.setRequestFocus(true)
 

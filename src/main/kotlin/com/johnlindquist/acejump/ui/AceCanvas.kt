@@ -9,7 +9,7 @@ import java.awt.Graphics2D
 import javax.swing.JComponent
 
 class AceCanvas(val editor: EditorImpl) : JComponent() {
-  var jumpInfos: Collection<JumpInfo> = arrayListOf()
+  var jumpLocations: Collection<JumpInfo> = arrayListOf()
   val scheme = EditorColorsManager.getInstance().globalScheme
   val colors = Pair(scheme.defaultBackground, scheme.defaultForeground)
 
@@ -32,13 +32,13 @@ class AceCanvas(val editor: EditorImpl) : JComponent() {
   }
 
   override fun paint(graphics: Graphics) {
-    if (jumpInfos.isEmpty())
+    if (jumpLocations.isEmpty())
       return
 
     super.paint(graphics)
 
     val g2d = graphics as Graphics2D
     val fbm = FontBasedMeasurements()
-    jumpInfos.orEmpty().forEach { it.drawRect(g2d, fbm, colors) }
+    jumpLocations.orEmpty().forEach { it.drawRect(g2d, fbm) }
   }
 }

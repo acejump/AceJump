@@ -15,15 +15,16 @@ import javax.swing.event.ChangeListener
 import kotlin.comparisons.compareBy
 
 class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
-  var queryString = ""
   val document = editor.document as DocumentImpl
   val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = findManager.findInFileModel.clone()
-  var jumpLocations: Collection<JumpInfo> = emptyList()
+
+  var query = ""
   var hasJumped = false
   var tagMap: BiMap<String, Int> = HashBiMap.create()
   var unseen1grams: LinkedHashSet<String> = linkedSetOf()
   var unseen2grams: LinkedHashSet<String> = linkedSetOf()
+  var jumpLocations: Collection<JumpInfo> = emptyList()
   var adjacent = mapOf(
     'j' to "jikmnhu", 'f' to "ftgvcdr", 'k' to "kolmji", 'd' to "drfcxse",
     'l' to "lkop", 's' to "sedxzaw", 'a' to "aqwsz",
@@ -46,10 +47,11 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   }
 
   fun find(text: String, key: Char) {
+    // "0" is Backspace
     if (key == 0.toChar())
       reset()
 
-    queryString = text.toLowerCase()
+    query = text.toLowerCase()
     findModel.stringToFind = text
 
     val application = ApplicationManager.getApplication()
@@ -70,9 +72,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   private fun jump(key: Char): () -> Unit {
     fun jumpTo(jumpInfo: JumpInfo) {
       if (key.isUpperCase())
-        aceJumper.setSelectionFromCaretToOffset(jumpInfo.offset)
+        aceJumper.setSelectionFromCaretToOffset(jumpInfo.index)
       else
-        aceJumper.moveCaret(jumpInfo.offset)
+        aceJumper.moveCaret(jumpInfo.index)
       hasJumped = true
 
       if (targetModeEnabled)
@@ -84,16 +86,15 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return {
       jumpLocations = determineJumpLocations()
       if (jumpLocations.size <= 1) {
-        val text = queryString.toLowerCase()
-        if (tagMap.containsKey(text)) {
-          jumpTo(JumpInfo(text, text, tagMap[text]!!, editor))
-        } else if (2 <= text.length) {
-          val last1: String = text.substring(text.length - 1)
-          val last2: String = text.substring(text.length - 2)
+        if (tagMap.containsKey(query)) {
+          jumpTo(JumpInfo(query, query, tagMap[query]!!, editor))
+        } else if (2 <= query.length) {
+          val last1: String = query.substring(query.length - 1)
+          val last2: String = query.substring(query.length - 2)
           if (tagMap.containsKey(last2)) {
-            jumpTo(JumpInfo(last2, text, tagMap[last2]!!, editor))
+            jumpTo(JumpInfo(last2, query, tagMap[last2]!!, editor))
           } else if (tagMap.containsKey(last1)) {
-            jumpTo(JumpInfo(last1, text, tagMap[last1]!!, editor))
+            jumpTo(JumpInfo(last1, query, tagMap[last1]!!, editor))
           }
         }
       }
@@ -131,8 +132,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       val firstCharacter = e.key[0].toString()
       if (tagMap.keys.count { it[0] == e.key[0] } == 1 &&
         unseen1grams.contains(firstCharacter) &&
-        !queryString.endsWith(firstCharacter) &&
-        !queryString.endsWith(e.key))
+        !query.endsWith(firstCharacter) &&
+        !query.endsWith(e.key))
         firstCharacter
       else e.key
     })
@@ -145,7 +146,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
   private fun getSitesInView(fullText: String): List<Int> {
     fun getSitesToCheck(window: String): Iterable<Int> {
-      if (queryString.isEmpty())
+      if (query.isEmpty())
         return 0..(window.length - 2)
 
       val indicesToCheck = arrayListOf<Int>()
@@ -178,7 +179,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       if (0 <= p0)
         c0 = text[p0]
 
-      val origin = p1 - queryString.length
+      val origin = p1 - query.length
       stringToIndex.put("$c1", origin)
       stringToIndex.put("$c1$c2", origin)
       unseen1grams.remove("$c1")
@@ -227,7 +228,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
   private fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
     val newTagMap: BiMap<String, Int> = HashBiMap.create()
-    if (queryString.isEmpty())
+    if (query.isEmpty())
       return newTagMap
 
     val chars = document.charsSequence
@@ -265,7 +266,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
           break
       }
 
-      if (!iterator.hasNext() && queryString.isNotEmpty()) {
+      if (!iterator.hasNext() && query.isNotEmpty()) {
         val (left, right) = getWordBounds(index)
         println("No tags could be assigned to word: " +
           (left..right).map { "${chars[it]}" }.joinToString(""))
@@ -288,16 +289,16 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       }
     }
 
-    if (queryString.isNotEmpty()) {
-      if (2 <= queryString.length) {
-        val last2: String = queryString.substring(queryString.length - 2)
+    if (query.isNotEmpty()) {
+      if (2 <= query.length) {
+        val last2: String = query.substring(query.length - 2)
         val last2Index = tagMap[last2]
         if (last2Index != null) {
           newTagMap[last2] = last2Index
           return newTagMap
         }
       } else {
-        val last1: String = queryString.substring(queryString.length - 1)
+        val last1: String = query.substring(query.length - 1)
         val last1Index = tagMap[last1]
         if (last1Index != null) {
           newTagMap[last1] = last1Index
@@ -308,7 +309,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
     // Add pre-existing tags where search string and tag are intermingled
     for (entry in tagMap) {
-      if (queryString == entry.key || queryString.last() == entry.key.first()) {
+      if (query == entry.key || query.last() == entry.key.first()) {
         newTagMap[entry.key] = entry.value
         unusedNgrams.remove(entry.key[0].toString())
       }
@@ -326,7 +327,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     }
 
     val remainingSites = remaining.filter {
-      it.key.first().isLetterOrDigit() || queryString.isNotEmpty()
+      it.key.first().isLetterOrDigit() || query.isNotEmpty()
     }.flatMap { it.value }.listIterator()
 
     while (remainingSites.hasNext() && unusedNgrams.isNotEmpty())
@@ -343,7 +344,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
   fun plotJumpLocations(): List<JumpInfo> {
     return tagMap.values.map {
-      JumpInfo(tagMap.inverse()[it]!!, queryString, it, editor)
+      JumpInfo(tagMap.inverse()[it]!!, query, it, editor)
     }
   }
 
