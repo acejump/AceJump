@@ -7,7 +7,10 @@ import com.intellij.openapi.util.TextRange
 import java.util.*
 
 open class AceJumper(var editor: EditorImpl, var document: DocumentImpl) {
-  fun moveCaret(offset: Int) = editor.caretModel.moveToOffset(offset)
+  fun moveCaret(offset: Int) {
+    editor.selectionModel.removeSelection()
+    editor.caretModel.moveToOffset(offset)
+  }
 
   fun selectWordAtCaret() {
     val text = document.charsSequence
@@ -20,11 +23,13 @@ open class AceJumper(var editor: EditorImpl, var document: DocumentImpl) {
     val startWordOffset = Math.max(0, ranges[0].startOffset)
     val endWordOffset = Math.min(ranges[0].endOffset, document.textLength)
 
+    editor.selectionModel.removeSelection()
     editor.selectionModel.setSelection(startWordOffset, endWordOffset)
   }
 
   fun setSelectionFromCaretToOffset(toOffset: Int) {
     editor.selectionModel.removeSelection()
     editor.selectionModel.setSelection(editor.caretModel.offset, toOffset)
+    editor.caretModel.moveToOffset(toOffset)
   }
 }

@@ -15,7 +15,7 @@ import javax.swing.event.ChangeListener
 import kotlin.comparisons.compareBy
 
 class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
-  var queryString: String = ""
+  var queryString = ""
   val document = editor.document as DocumentImpl
   val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = findManager.findInFileModel.clone()
@@ -49,7 +49,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     if (key == 0.toChar())
       reset()
 
-    queryString = text
+    queryString = text.toLowerCase()
     findModel.stringToFind = text
 
     val application = ApplicationManager.getApplication()
@@ -71,8 +71,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     fun jumpTo(jumpInfo: JumpInfo) {
       if (key.isUpperCase())
         aceJumper.setSelectionFromCaretToOffset(jumpInfo.offset)
-
-      aceJumper.moveCaret(jumpInfo.offset)
+      else
+        aceJumper.moveCaret(jumpInfo.offset)
       hasJumped = true
 
       if (targetModeEnabled)
@@ -126,7 +126,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
    * 3. The query does not end with the tag, in whole or part.
    */
 
-  fun compact(tagMap: BiMap<String, Int>) =
+  private fun compact(tagMap: BiMap<String, Int>) =
     tagMap.mapKeysTo(HashBiMap.create(tagMap.size), { e ->
       val firstCharacter = e.key[0].toString()
       if (tagMap.keys.count { it[0] == e.key[0] } == 1 &&
@@ -136,6 +136,12 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
         firstCharacter
       else e.key
     })
+
+  /**
+   * Returns a list of idices where the given query string ends, within the
+   * current editor screen. These are full indices, ie. are not offset to the
+   * first line of the editor window.
+   */
 
   private fun getSitesInView(fullText: String): List<Int> {
     fun getSitesToCheck(window: String): Iterable<Int> {
@@ -187,7 +193,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return stringToIndex
   }
 
-
   /**
    * Identifies the bounds of a word, defined as a contiguous group of letters
    * and digits, by expanding the provided index until a non-matching character
@@ -220,7 +225,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
    * B. Should prefer keys that are physically closer to the last key pressed.
    */
 
-  fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
+  private fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
     val newTagMap: BiMap<String, Int> = HashBiMap.create()
     if (queryString.isEmpty())
       return newTagMap
@@ -271,7 +276,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       newTagMap[choosenTag] = index
       if (choosenTag.length == 1) {
         //Prevents "...a[b]...z[b]..."
-        unusedNgrams.removeAll { it.last() == choosenTag[0] }
+        //Prevents "...a[b]...z[bc]..."
+        unusedNgrams.removeAll { choosenTag[0] == it.last() }
       } else {
         //Prevents "...a[bc]...z[b]..."
         unusedNgrams.remove(choosenTag[0].toString())
