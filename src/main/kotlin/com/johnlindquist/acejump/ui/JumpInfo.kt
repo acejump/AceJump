@@ -10,8 +10,6 @@ import java.awt.RenderingHints
 
 class JumpInfo(private val tag: String, var search: String, val index: Int, val editor: EditorImpl) {
   val window = editor.document.charsSequence
-  val source: String = window.substring(index, index + tag.length).toLowerCase()
-  var result: String = window.substring(index, index + search.length)
   var offset = index
   val line = editor.offsetToVisualPosition(offset).line
   var originOffset = editor.offsetToVisualPosition(offset)

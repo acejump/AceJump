@@ -32,9 +32,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     'm' to "mnjk", 'c' to "cxdfv", 'b' to "bvghn",
     'i' to "i9okju8", 'e' to "e4rdsw3", 'x' to "xzsdc", 'z' to "zasx",
     'o' to "o0plki9", 'w' to "w3esaq2", 'p' to "plo0", 'q' to "q12wa"
-    //'1' to "12q", '2' to "23wq1", '3' to "34ew2", '4' to "45re3",
-    //'5' to "56tr4", '6' to "67yt5", '7' to "78uy6", '8' to "89iu7",
-    //'9' to "90oi8", '0' to "0po9"
   )
 
   init {
@@ -119,6 +116,16 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     a_z.flatMapTo(unseen2grams, { e -> a_z.map { c -> "${e}$c" } })
   }
 
+  /**
+   * Shortens assigned tags. Effectively, this will only shorten two-character
+   * strings to one-character strings. This should happen if and only if the
+   * shortened tag:
+   *
+   * 1. Is unique among the set of all existing tags.
+   * 2. The shortened tag does not equal the next character.
+   * 3. The query does not end with the tag, in whole or part.
+   */
+
   fun compact(tagMap: BiMap<String, Int>) =
     tagMap.mapKeysTo(HashBiMap.create(tagMap.size), { e ->
       val firstCharacter = e.key[0].toString()
@@ -150,11 +157,21 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return getSitesToCheck(window).map { it + startIndex }
   }
 
+  /**
+   * Builds a map of all existing bigrams, starting from the index of the
+   * last character in the search results. Simultaneously builds a map of all
+   * available tags, by removing any used bigrams after each search result, and
+   * prior to end of a word (ie. a contiguous group of letters/digits).
+   */
+
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
       var (p0, p1, p2) = Triple(site - 1, site, site + 1)
-      var (c0, c1, c2) = Triple(text[p0], text[p1], text[p2])
+      var (c0, c1, c2) = Triple(' ', text[p1], text[p2])
+      if (0 <= p0)
+        c0 = text[p0]
+
       val origin = p1 - queryString.length
       stringToIndex.put("$c1", origin)
       stringToIndex.put("$c1$c2", origin)
@@ -170,6 +187,13 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return stringToIndex
   }
 
+
+  /**
+   * Identifies the bounds of a word, defined as a contiguous group of letters
+   * and digits, by expanding the provided index until a non-matching character
+   * is seen on either side.
+   */
+
   fun getWordBounds(index: Int): Pair<Int, Int> {
     val chars = document.charsSequence
     var (left, right) = Pair(index, index)
@@ -182,6 +206,20 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     return Pair(left, right)
   }
 
+  /**
+   * Maps tags to search results. Tags *must* have the following properties:
+   *
+   * 1. A tag must not equal *any* bigrams on the screen.
+   * 2. A tag's 1st letter must not match any letters of the covered word.
+   * 3. Tag must not match any combination of any plaintext and tag. "e(a[B)X]"
+   * 4. Once assigned, a tag must never change until it has been selected. *A.
+   *
+   * Tags *should* have the following properties:
+   *
+   * A. Should be as short as possible. A tag may be shortened later.
+   * B. Should prefer keys that are physically closer to the last key pressed.
+   */
+
   fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
     val newTagMap: BiMap<String, Int> = HashBiMap.create()
     if (queryString.isEmpty())
@@ -193,6 +231,13 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       val (left, right) = getWordBounds(index)
       return (left..right).any { newTagMap.containsValue(it) }
     }
+
+    /**
+     * Iterates through the remaining available tags, until we find one that
+     * matches our criteria, i.e. does not collide with an existing tag or
+     * plaintext string. To have the desired behavior, this has a surprising
+     * number of edge cases and irregularities that must explicitly prevented.
+     */
 
     fun tryToAssignTagToIndex(index: Int) {
       if (hasNearbyTag(index) || newTagMap.containsValue(index))
@@ -207,10 +252,10 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
         if ((left..right).all {
           //Prevents "...a[IJ]...ij..."
           !digraphs.containsKey("${chars[it]}${tag[0]}") &&
-          //Prevents "...a[IJ]...i[JX]..."
-          !newTagMap.contains("${chars[it]}${tag[0]}") &&
-          //Prevents "...i[JX]...i[IJ]..."
-          !(chars[it] == tag[0] && !newTagMap.containsKey("${tag.last()}"))
+            //Prevents "...a[IJ]...i[JX]..."
+            !newTagMap.contains("${chars[it]}${tag[0]}") &&
+            //Prevents "...i[JX]...i[IJ]..."
+            !(chars[it] == tag[0] && !newTagMap.containsKey("${tag.last()}"))
         })
           break
       }
@@ -225,10 +270,14 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       val choosenTag = tagMap.inverse().getOrElse(index, { tag })
       newTagMap[choosenTag] = index
       if (choosenTag.length == 1) {
+        //Prevents "...a[b]...z[b]..."
         unusedNgrams.removeAll { it.last() == choosenTag[0] }
       } else {
+        //Prevents "...a[bc]...z[b]..."
         unusedNgrams.remove(choosenTag[0].toString())
+        //Prevents "...a[bc]...ab[c]..."
         unusedNgrams.remove(choosenTag[1].toString())
+        //Prevents "...a[bc]...z[bc]..."
         unusedNgrams.remove(choosenTag)
       }
     }
