@@ -205,8 +205,12 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
         tag = iterator.next()
         val (left, right) = getWordBounds(index)
         if ((left..right).all {
-          !digraphs.containsKey("${chars[it]}${tag[0]}")
-            && !newTagMap.contains("${chars[it]}${tag[0]}")
+          //Prevents "...a[IJ]...ij..."
+          !digraphs.containsKey("${chars[it]}${tag[0]}") &&
+          //Prevents "...a[IJ]...i[JX]..."
+          !newTagMap.contains("${chars[it]}${tag[0]}") &&
+          //Prevents "...i[JX]...i[IJ]..."
+          !(chars[it] == tag[0] && !newTagMap.containsKey("${tag.last()}"))
         })
           break
       }
