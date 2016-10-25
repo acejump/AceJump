@@ -22,12 +22,9 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
 
   fun renderTag(): String {
     var i = 0
-    while (i + 1 < query.length) {
+    while (i + 1 < query.length &&
+      query[i + 1].toLowerCase() == document[index + i + 1].toLowerCase()) {
       i++
-      val searchChar = query[i].toLowerCase()
-      val sourceChar = document[index + i].toLowerCase()
-      if (sourceChar != searchChar)
-        break
     }
 
     tagOffset = editor.offsetToVisualPosition(index + i)
