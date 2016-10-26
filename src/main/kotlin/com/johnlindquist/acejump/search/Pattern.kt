@@ -7,6 +7,7 @@ enum class Pattern(val pattern: String) {
   WHITE_SPACE("\\s+\\S(?<!^\\s*\\S)");
 
   companion object {
+    val commonLetters = "etaoinshrdlcumwfgypbvkjxqz"
     var adjacent = mapOf(
       'j' to "jikmnhu", 'f' to "ftgvcdr", 'k' to "kolmji", 'd' to "drfcxse",
       'l' to "lkop", 's' to "sedxzaw", 'a' to "aqwsz",

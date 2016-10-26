@@ -171,7 +171,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       var (c0, c1, c2) = Triple(' ', text[p1], ' ')
       if (0 <= p0)
         c0 = text[p0]
-      if(p2 < text.length) {
+      if (p2 < text.length) {
         c2 = text[p2]
       }
 
@@ -246,21 +246,25 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
         return
 
       val (left, right) = getWordBounds(index)
+      val word = (left..right).map { "${chars[it]}" }.joinToString("")
+      val part = (index..right).map { "${chars[it]}" }.joinToString("")
 
-      val tag = unusedNgrams.filter { tag ->
-        ((left..right).all {
+      val (matching, nonMatching) = unusedNgrams.partition { tag ->
+        part.all {
           //Prevents "...a[IJ]...ij..."
-          !digraphs.containsKey("${chars[it]}${tag[0]}") &&
+          !digraphs.containsKey("$it${tag[0]}") &&
             //Prevents "...a[IJ]...i[JX]..."
-            !newTagMap.contains("${chars[it]}${tag[0]}") &&
+            !newTagMap.contains("$it${tag[0]}") &&
             //Prevents "...i[JX]...i[IJ]..."
-            !(chars[it] == tag[0] && !newTagMap.containsKey("${tag.last()}"))
-        })
-      }.sortedBy { nearby[query.last()]!!.indexOf(it.first()) }.firstOrNull()
+            !(it == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
+        }
+      }
+
+      val tag = matching.firstOrNull()
 
       if (tag == null) {
-        println("No tags could be assigned to word: " +
-          (left..right).map { "${chars[it]}" }.joinToString(""))
+        println("\"$word\" rejected: " + nonMatching.joinToString(","))
+        println("No remaining tags could be assigned to word: \"$word\"")
         return
       }
 
@@ -306,7 +310,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       }
     }
 
-    val remaining = digraphs.asMap().entries.sortedBy { it.value.size }
+    val remaining = digraphs.asMap().entries.sortedBy { -it.value.size }
     val tags = unseen2grams.sortedWith(compareBy(
       { digraphs["${it[0]}"].orEmpty().size },
       { !adjacent[it[0]]!!.contains(it[1]) },
