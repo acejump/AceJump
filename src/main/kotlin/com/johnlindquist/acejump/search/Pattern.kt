@@ -7,7 +7,6 @@ enum class Pattern(val pattern: String) {
   WHITE_SPACE("\\s+\\S(?<!^\\s*\\S)");
 
   companion object {
-    val commonLetters = "etaoinshrdlcumwfgypbvkjxqz"
     var adjacent = mapOf(
       'j' to "jikmnhu", 'f' to "ftgvcdr", 'k' to "kolmji", 'd' to "drfcxse",
       'l' to "lkop", 's' to "sedxzaw", 'a' to "aqwsz",
@@ -16,6 +15,7 @@ enum class Pattern(val pattern: String) {
       'm' to "mnjk", 'c' to "cxdfv", 'b' to "bvghn",
       'i' to "i9okju8", 'e' to "e4rdsw3", 'x' to "xzsdc", 'z' to "zasx",
       'o' to "o0plki9", 'w' to "w3esaq2", 'p' to "plo0", 'q' to "q12wa")
+      .mapValues { it.value.toHashSet() }
 
     var nearby = mapOf(
       'j' to "jikmnhuolbgypvftcdrxsezawq", 'f' to "ftgvcdryhbxseujnzawqikmolp",
@@ -30,7 +30,7 @@ enum class Pattern(val pattern: String) {
       'i' to "iokjuplmnhybgtvfrcdexswzaq", 'e' to "erdswtfcxzaqygvuhbijnokmpl",
       'x' to "xzsdcawerfvqtgbyhnujmikolp", 'z' to "zasxqwedcrfvtgbyhnujmikolp",
       'o' to "oplkimjunhybgtvfrcdexswzaq", 'w' to "wesaqrdxztfcygvuhbijnokmpl",
-      'p' to "plokimjunhybgtvfrcdexswzaq", 'q' to "qwaeszrdxtfcygvuhbijnokmpl"
-    )
+      'p' to "plokimjunhybgtvfrcdexswzaq", 'q' to "qwaeszrdxtfcygvuhbijnokmpl")
+      .mapValues { it.value.toHashSet() }
   }
 }

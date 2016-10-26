@@ -310,12 +310,16 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       }
     }
 
-    val remaining = digraphs.asMap().entries.sortedBy { -it.value.size }
+    val remaining = digraphs.asMap().entries.sortedBy { it.value.size }
     val tags = unseen2grams.sortedWith(compareBy(
+      // Last frequent first-character comes first
       { digraphs["${it[0]}"].orEmpty().size },
+      // Adjacent keys come before non-adjacent keys
       { !adjacent[it[0]]!!.contains(it[1]) },
+      // Rotate to ensure no "clumps" (ie. AA, AB, AC..)
       String::last,
-      { nearby[it[0]]!!.indexOf(it[1]) }
+      // Minimze the distance between tag characters
+      { nearby[it[0]]!!.indexOf(it.last()) }
     )).iterator()
     while (tags.hasNext()) {
       val biGram = tags.next()
