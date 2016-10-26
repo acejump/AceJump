@@ -168,9 +168,12 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
       var (p0, p1, p2) = Triple(site - 1, site, site + 1)
-      var (c0, c1, c2) = Triple(' ', text[p1], text[p2])
+      var (c0, c1, c2) = Triple(' ', text[p1], ' ')
       if (0 <= p0)
         c0 = text[p0]
+      if(p2 < text.length) {
+        c2 = text[p2]
+      }
 
       val origin = p1 - query.length
       stringToIndex.put("$c1", origin)
@@ -244,7 +247,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
       val (left, right) = getWordBounds(index)
 
-      val tag = unusedNgrams.filterNot { tag ->
+      val tag = unusedNgrams.filter { tag ->
         ((left..right).all {
           //Prevents "...a[IJ]...ij..."
           !digraphs.containsKey("${chars[it]}${tag[0]}") &&
