@@ -315,7 +315,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       // Last frequent first-character comes first
       { digraphs["${it[0]}"].orEmpty().size },
       // Adjacent keys come before non-adjacent keys
-      { !adjacent[it[0]]!!.contains(it[1]) },
+      { !adjacent[it[0]]!!.contains(it.last()) },
       // Rotate to ensure no "clumps" (ie. AA, AB, AC..)
       String::last,
       // Minimze the distance between tag characters
