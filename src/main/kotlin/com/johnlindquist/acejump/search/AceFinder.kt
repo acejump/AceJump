@@ -8,6 +8,8 @@ import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.util.EventDispatcher
 import com.johnlindquist.acejump.keycommands.AceJumper
+import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
+import com.johnlindquist.acejump.search.Pattern.Companion.nearby
 import com.johnlindquist.acejump.ui.JumpInfo
 import java.util.*
 import javax.swing.event.ChangeEvent
@@ -25,15 +27,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   var unseen1grams: LinkedHashSet<String> = linkedSetOf()
   var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   var jumpLocations: Collection<JumpInfo> = emptyList()
-  var adjacent = mapOf(
-    'j' to "jikmnhu", 'f' to "ftgvcdr", 'k' to "kolmji", 'd' to "drfcxse",
-    'l' to "lkop", 's' to "sedxzaw", 'a' to "aqwsz",
-    'h' to "hujnbgy", 'g' to "gyhbvft", 'y' to "y7uhgt6", 't' to "t6ygfr5",
-    'u' to "u8ijhy7", 'r' to "r5tfde4", 'n' to "nbhjm", 'v' to "vcfgb",
-    'm' to "mnjk", 'c' to "cxdfv", 'b' to "bvghn",
-    'i' to "i9okju8", 'e' to "e4rdsw3", 'x' to "xzsdc", 'z' to "zasx",
-    'o' to "o0plki9", 'w' to "w3esaq2", 'p' to "plo0", 'q' to "q12wa"
-  )
 
   init {
     findModel.isFindAll = true
@@ -249,13 +242,10 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       if (hasNearbyTag(index) || newTagMap.containsValue(index))
         return
 
-      var tag = unusedNgrams.first()
-      val iterator = unusedNgrams.iterator()
+      val (left, right) = getWordBounds(index)
 
-      while (iterator.hasNext()) {
-        tag = iterator.next()
-        val (left, right) = getWordBounds(index)
-        if ((left..right).all {
+      val tag = unusedNgrams.filterNot { tag ->
+        ((left..right).all {
           //Prevents "...a[IJ]...ij..."
           !digraphs.containsKey("${chars[it]}${tag[0]}") &&
             //Prevents "...a[IJ]...i[JX]..."
@@ -263,17 +253,15 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
             //Prevents "...i[JX]...i[IJ]..."
             !(chars[it] == tag[0] && !newTagMap.containsKey("${tag.last()}"))
         })
-          break
-      }
+      }.sortedBy { nearby[query.last()]!!.indexOf(it.first()) }.firstOrNull()
 
-      if (!iterator.hasNext() && query.isNotEmpty()) {
-        val (left, right) = getWordBounds(index)
+      if (tag == null) {
         println("No tags could be assigned to word: " +
           (left..right).map { "${chars[it]}" }.joinToString(""))
         return
       }
 
-      val choosenTag = tagMap.inverse().getOrElse(index, { tag })
+      val choosenTag = tagMap.inverse().getOrElse(index, { tag })!!
       newTagMap[choosenTag] = index
       if (choosenTag.length == 1) {
         //Prevents "...a[b]...z[b]..."
@@ -319,7 +307,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     val tags = unseen2grams.sortedWith(compareBy(
       { digraphs["${it[0]}"].orEmpty().size },
       { !adjacent[it[0]]!!.contains(it[1]) },
-      String::last)).iterator()
+      String::last,
+      { nearby[it[0]]!!.indexOf(it[1]) }
+    )).iterator()
     while (tags.hasNext()) {
       val biGram = tags.next()
       unusedNgrams.remove(biGram[0].toString())
