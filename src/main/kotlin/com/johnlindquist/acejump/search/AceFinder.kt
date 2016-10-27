@@ -246,8 +246,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
         return
 
       val (left, right) = getWordBounds(index)
-      val word = (left..right).map { "${chars[it]}" }.joinToString("")
-      val part = (index..right).map { "${chars[it]}" }.joinToString("")
+      val word = chars.subSequence(left, right)
+      val part = chars.subSequence(index, right)
 
       val (matching, nonMatching) = unusedNgrams.partition { tag ->
         part.all {
@@ -313,7 +313,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     val remaining = digraphs.asMap().entries.sortedBy { it.value.size }
     val tags = unseen2grams.sortedWith(compareBy(
       // Last frequent first-character comes first
-      { digraphs["${it[0]}"].orEmpty().size },
+      { digraphs[{it[0]}.toString()].orEmpty().size },
       // Adjacent keys come before non-adjacent keys
       { !adjacent[it[0]]!!.contains(it.last()) },
       // Rotate to ensure no "clumps" (ie. AA, AB, AC..)

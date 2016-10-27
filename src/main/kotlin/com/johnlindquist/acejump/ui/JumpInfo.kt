@@ -53,7 +53,9 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
     val previousLineLength = getPreviousLineLength(editor, index)
 
     if (query.isNotEmpty()) {
-      if (nextLineLength < lineOffset || nLineOffset > lineOffset) {
+      if(editor.document.charsSequence[index - 1].isWhitespace()) {
+        x = origin.x - fbm.fontWidth * (text.length + 1)
+      } else if (nextLineLength < lineOffset || nLineOffset > lineOffset) {
         y += fbm.lineHeight.toInt()
         x -= fbm.fontWidth
       } else if (previousLineLength < lineOffset || pLineOffset > lineOffset) {
