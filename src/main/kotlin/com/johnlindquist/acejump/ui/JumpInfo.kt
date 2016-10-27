@@ -2,12 +2,9 @@ package com.johnlindquist.acejump.ui
 
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.johnlindquist.acejump.search.*
-import java.awt.AlphaComposite
+import java.awt.*
 import java.awt.AlphaComposite.*
-import java.awt.Color
 import java.awt.Color.*
-import java.awt.Graphics2D
-import java.awt.RenderingHints
 import java.awt.RenderingHints.*
 
 class JumpInfo(private val tag: String, var query: String, val index: Int,
@@ -19,6 +16,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
   var tagOffset = editor.offsetToVisualPosition(trueOffset)
   var tagPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
   var srcPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
+  var text = renderTag()
 
   fun renderTag(): String {
     var i = 0
@@ -32,18 +30,27 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
     return tag
   }
 
-  fun drawRect(g2d: Graphics2D, fbm: AceCanvas.FontBasedMeasurements) {
-    val text = renderTag()
-    val origin = srcPoint
-    val original = tagPoint
-
-    original.translate(0, -fbm.hOffset.toInt())
+  fun paintMe(g2d: Graphics2D, fbm: AceCanvas.FontBasedMeasurements) {
+    tagPoint.translate(0, -fbm.hOffset.toInt())
     g2d.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
-
     g2d.composite = getInstance(SRC_OVER, 0.35.toFloat())
 
-    var y = original.y
-    var x = original.x
+    val (tagY, tagX) = alignTag(fbm)
+    if (query.isNotEmpty())
+      highlight(fbm, g2d, tagX, tagY)
+
+    //just a touch of alpha
+    g2d.composite = getInstance(SRC_OVER, 0.85.toFloat())
+
+    //the foreground text
+    g2d.font = fbm.font
+    g2d.color = BLACK
+    g2d.drawString(text.toUpperCase(), tagX, tagY + fbm.fontHeight)
+  }
+
+  private fun alignTag(fbm: AceCanvas.FontBasedMeasurements): Pair<Int, Int> {
+    var tagY = tagPoint.y
+    var tagX = tagPoint.x
     val lineOffset = getLengthFromStartToOffset(editor, index + query.length)
     val startOfNextLine = getLeadingCharacterOffset(editor, line + 1)
     val startOfPrevLine = getLeadingCharacterOffset(editor, line - 1)
@@ -53,49 +60,39 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
     val previousLineLength = getPreviousLineLength(editor, index)
 
     if (query.isNotEmpty()) {
-      if(editor.document.charsSequence[index - 1].isWhitespace()) {
-        x = origin.x - fbm.fontWidth * (text.length + 1)
+      if (editor.document.charsSequence[index - 1].isWhitespace()) {
+        tagX = srcPoint.x - fbm.fontWidth * (text.length + 1)
       } else if (nextLineLength < lineOffset || nLineOffset > lineOffset) {
-        y += fbm.lineHeight.toInt()
-        x -= fbm.fontWidth
+        tagY += fbm.lineHeight
+        tagX -= fbm.fontWidth
       } else if (previousLineLength < lineOffset || pLineOffset > lineOffset) {
-        y -= fbm.lineHeight.toInt()
-        x -= fbm.fontWidth
+        tagY -= fbm.lineHeight
+        tagX -= fbm.fontWidth
       } else if (!editor.document.charsSequence[index - 1].isLetterOrDigit()) {
-        x = origin.x - fbm.fontWidth * (text.length + 1)
+        tagX = srcPoint.x - fbm.fontWidth * (text.length + 1)
       }
     }
+    tagY -= fbm.rectHOffset.toInt()
+    tagX += fbm.fontWidth
+    return Pair(tagY, tagX)
+  }
 
-    x += fbm.fontWidth
-    val x_adjusted = x
-    g2d.color = green
-    var tagWidth = fbm.rectWidth + text.length * fbm.fontWidth
+  private fun highlight(fbm: AceCanvas.FontBasedMeasurements,
+                        g2d: Graphics2D, x: Int, y: Int) {
+    var tagWidth = text.length * fbm.fontWidth
     var searchWidth = query.length * fbm.fontWidth
-    if (query.isNotEmpty()) {
-      if (query.last() == tag.first() && query.last().toLowerCase() !=
-        document[index + query.length - 1].toLowerCase()) {
-        g2d.fillRect(x - fbm.rectMarginWidth, y - fbm.rectHOffset.toInt(),
-          fbm.rectWidth + fbm.fontWidth, fbm.lineHeight.toInt())
-        x += fbm.fontWidth
-        tagWidth -= fbm.fontWidth
-        searchWidth -= fbm.fontWidth
-      }
-      g2d.fillRect(origin.x - 1,
-        original.y - fbm.rectHOffset.toInt() - 1,
-        searchWidth, fbm.lineHeight.toInt() + 1)
+    var tagX = x
+    val lastQueryChar = query.last()
+    val correspondingChar = document[index + query.length - 1].toLowerCase()
+    g2d.color = green
+    if (lastQueryChar == tag.first() && lastQueryChar != correspondingChar) {
+      g2d.fillRect(tagX, y, fbm.fontWidth, fbm.lineHeight.toInt())
+      tagX += fbm.fontWidth
+      tagWidth -= fbm.fontWidth
+      searchWidth -= fbm.fontWidth
     }
-
+    g2d.fillRect(srcPoint.x - 1, tagPoint.y, searchWidth, fbm.lineHeight + 1)
     g2d.color = yellow
-    g2d.fillRect(x - fbm.rectMarginWidth, y - fbm.rectHOffset.toInt(),
-      tagWidth, fbm.lineHeight.toInt())
-
-    //just a touch of alpha
-    g2d.composite = getInstance(SRC_OVER,
-      if (text[0] == ' ') 0.25.toFloat() else 0.85.toFloat())
-
-    //the foreground text
-    g2d.font = fbm.font
-    g2d.color = BLACK
-    g2d.drawString(text.toUpperCase(), x_adjusted, y + fbm.fontHeight)
+    g2d.fillRect(tagX, y, tagWidth, fbm.lineHeight)
   }
 }

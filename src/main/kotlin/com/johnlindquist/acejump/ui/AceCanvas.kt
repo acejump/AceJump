@@ -39,6 +39,6 @@ class AceCanvas(val editor: EditorImpl) : JComponent() {
 
     val g2d = graphics as Graphics2D
     val fbm = FontBasedMeasurements()
-    jumpLocations.orEmpty().forEach { it.drawRect(g2d, fbm) }
+    jumpLocations.orEmpty().forEach { it.paintMe(g2d, fbm) }
   }
 }
