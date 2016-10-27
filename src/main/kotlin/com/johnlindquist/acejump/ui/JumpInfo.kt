@@ -53,6 +53,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
     var tagX = tagPoint.x
     val lineOffset = getLengthFromStartToOffset(editor, index + query.length)
     val startOfNextLine = getLeadingCharacterOffset(editor, line + 1)
+    val startOfThisLine = getLeadingCharacterOffset(editor, line)
     val startOfPrevLine = getLeadingCharacterOffset(editor, line - 1)
     val pLineOffset = getLengthFromStartToOffset(editor, startOfPrevLine)
     val nLineOffset = getLengthFromStartToOffset(editor, startOfNextLine)
@@ -60,8 +61,10 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
     val previousLineLength = getPreviousLineLength(editor, index)
 
     if (query.isNotEmpty()) {
-      val previousChar = document[Math.max(0, index - 1)]
-      if (previousChar.isWhitespace()) {
+      val previousCharIndex = Math.max(0, index - 1)
+      val previousChar = document[previousCharIndex]
+      val previousCharIsOnSameLine = startOfThisLine < previousCharIndex
+      if (previousCharIsOnSameLine && previousChar.isWhitespace()) {
         tagX = srcPoint.x - fbm.fontWidth * (text.length + 1)
       } else if (nextLineLength < lineOffset || nLineOffset > lineOffset) {
         tagY += fbm.lineHeight
@@ -69,7 +72,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
       } else if (previousLineLength < lineOffset || pLineOffset > lineOffset) {
         tagY -= fbm.lineHeight
         tagX -= fbm.fontWidth
-      } else if (!previousChar.isLetterOrDigit()) {
+      } else if (previousCharIsOnSameLine && previousChar.isLetterOrDigit()) {
         tagX = srcPoint.x - fbm.fontWidth * (text.length + 1)
       }
     }
