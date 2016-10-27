@@ -60,7 +60,8 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
     val previousLineLength = getPreviousLineLength(editor, index)
 
     if (query.isNotEmpty()) {
-      if (editor.document.charsSequence[index - 1].isWhitespace()) {
+      val previousChar = document[Math.max(0, index - 1)]
+      if (previousChar.isWhitespace()) {
         tagX = srcPoint.x - fbm.fontWidth * (text.length + 1)
       } else if (nextLineLength < lineOffset || nLineOffset > lineOffset) {
         tagY += fbm.lineHeight
@@ -68,7 +69,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
       } else if (previousLineLength < lineOffset || pLineOffset > lineOffset) {
         tagY -= fbm.lineHeight
         tagX -= fbm.fontWidth
-      } else if (!editor.document.charsSequence[index - 1].isLetterOrDigit()) {
+      } else if (!previousChar.isLetterOrDigit()) {
         tagX = srcPoint.x - fbm.fontWidth * (text.length + 1)
       }
     }
