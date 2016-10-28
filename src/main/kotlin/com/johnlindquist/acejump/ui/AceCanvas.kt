@@ -2,19 +2,24 @@ package com.johnlindquist.acejump.ui
 
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.EditorImpl
+import com.johnlindquist.acejump.search.getVisibleRange
 import java.awt.Font
 import java.awt.Font.BOLD
 import java.awt.Graphics
 import java.awt.Graphics2D
+import java.awt.Point
 import javax.swing.JComponent
 
 class AceCanvas(val editor: EditorImpl) : JComponent() {
   var jumpLocations: Collection<JumpInfo> = arrayListOf()
   val scheme = EditorColorsManager.getInstance().globalScheme
   val colors = Pair(scheme.defaultBackground, scheme.defaultForeground)
+  val fbm: FontBasedMeasurements
+  var existingTags = hashSetOf<Pair<Int, Int>>()
 
   init {
     font = Font(scheme.editorFontName, BOLD, scheme.editorFontSize)
+    fbm = FontBasedMeasurements()
   }
 
   inner class FontBasedMeasurements() {
@@ -38,7 +43,17 @@ class AceCanvas(val editor: EditorImpl) : JComponent() {
     super.paint(graphics)
 
     val g2d = graphics as Graphics2D
-    val fbm = FontBasedMeasurements()
-    jumpLocations.orEmpty().forEach { it.paintMe(g2d, fbm) }
+    existingTags = hashSetOf<Pair<Int, Int>>()
+    jumpLocations.orEmpty().forEach { it.paintMe(g2d, this@AceCanvas) }
+  }
+
+  fun registerTag(point: Pair<Int, Int>, tag: String) {
+    (-1..(tag.length + 1)).forEach {
+      existingTags.add(Pair(point.first + it * fbm.fontWidth, point.second))
+    }
+  }
+
+  fun isFree(point: Pair<Int, Int>): Boolean {
+    return !existingTags.contains(point)
   }
 }
