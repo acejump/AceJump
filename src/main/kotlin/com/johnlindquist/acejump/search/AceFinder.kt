@@ -4,7 +4,6 @@ import com.google.common.collect.*
 import com.intellij.find.FindManager
 import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.impl.DocumentImpl
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.util.EventDispatcher
 import com.johnlindquist.acejump.keycommands.AceJumper
@@ -17,7 +16,7 @@ import javax.swing.event.ChangeListener
 import kotlin.comparisons.compareBy
 
 class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
-  val document = editor.document as DocumentImpl
+  val document = editor.document.charsSequence
   val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = findManager.findInFileModel.clone()
 
@@ -87,7 +86,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
           if (tagMap.containsKey(last2)) {
             jumpTo(JumpInfo(last2, query, tagMap[last2]!!, editor))
           } else if (tagMap.containsKey(last1)) {
-            jumpTo(JumpInfo(last1, query, tagMap[last1]!!, editor))
+            val index = tagMap[last1]!!
+            if (document[index + query.length - 1].toLowerCase() != last1[0])
+              jumpTo(JumpInfo(last1, query, index, editor))
           }
         }
       }
@@ -96,7 +97,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
   private fun determineJumpLocations(): Collection<JumpInfo> {
     populateNgrams()
-    val fullText = document.charsSequence.toString().toLowerCase()
+    val fullText = document.toString().toLowerCase()
     val sitesToCheck = getSitesInView(fullText)
     val existingDigraphs = makeMap(fullText, sitesToCheck)
     tagMap = compact(mapDigraphs(existingDigraphs))
@@ -179,9 +180,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       stringToIndex.put("$c1", origin)
       stringToIndex.put("$c0$c1", origin)
       stringToIndex.put("$c1$c2", origin)
-      unseen1grams.remove("$c1")
 
-      while (c1.isLetterOrDigit() && c2.isLetterOrDigit()) {
+      while (c1.isLetterOrDigit()) {
         unseen2grams.remove("$c0$c1")
         unseen2grams.remove("$c1$c2")
         p1++; p2++; c1 = text[p1]; c2 = text[p2]
@@ -198,15 +198,14 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
    */
 
   fun getWordBounds(index: Int): Pair<Int, Int> {
-    val chars = document.charsSequence
-    var (left, right) = Pair(index, index)
-    while (1 <= left && chars[left - 1].isLetterOrDigit())
-      left--
+    var (front, back) = Pair(index, index)
+    while (1 <= front && document[front - 1].isLetterOrDigit())
+      front--
 
-    while (right + 1 <= chars.length && chars[right + 1].isLetterOrDigit())
-      right++
+    while (back + 1 <= document.length && document[back + 1].isLetterOrDigit())
+      back++
 
-    return Pair(left, right)
+    return Pair(front, back)
   }
 
   /**
@@ -228,7 +227,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     if (query.isEmpty())
       return newTagMap
 
-    val chars = document.charsSequence
     val unusedNgrams = LinkedHashSet<String>(unseen1grams)
     fun hasNearbyTag(index: Int): Boolean {
       val (left, right) = getWordBounds(index)
@@ -247,8 +245,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
         return
 
       val (left, right) = getWordBounds(index)
-      val word = chars.subSequence(left, right)
-      val part = chars.subSequence(index, right)
+      val word = document.subSequence(left, right)
+      val part = document.subSequence(index, right)
 
       val (matching, nonMatching) = unusedNgrams.partition { tag ->
         part.all { letter ->
@@ -257,7 +255,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
             //Prevents "...a[IJ]...i[JX]..." ij
             !newTagMap.contains("$letter${tag[0]}") &&
             //Prevents "...r[BK]iv...r[VB]in..."  rivb
-            !newTagMap.keys.any { it[0] == letter && it.last() == tag[0]} &&
+            !newTagMap.keys.any { it[0] == letter && it.last() == tag[0] } &&
             //Prevents "...i[JX]...i[IJ]..." ij
             !(letter == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
         }
