@@ -81,12 +81,15 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
       }
     })
 
-    val specials = "specialKeys"
-    (VK_HOME..VK_RIGHT).forEach { inputMap.put(getKeyStroke(it, 0), specials) }
-    actionMap.put(specials, object : AbstractAction() {
-      override fun actionPerformed(e: ActionEvent) =
-        keyMap[e.actionCommand[0].toInt()]!!.execute()
-    })
+    (VK_HOME..VK_RIGHT).forEach {
+      val keyName: String = KeyEvent.getKeyText(it)
+      inputMap.put(getKeyStroke(it, 0), keyName)
+      actionMap.put(keyName, object : AbstractAction() {
+        override fun actionPerformed(e: ActionEvent) =
+          keyMap[it]!!.execute()
+      })
+    }
+
 
     defaultKeyCommand.execute()
   }
@@ -129,12 +132,12 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
   private fun configureKeyMap() {
     val showBeginningOfLines = ShowStartOfLines(finder)
     val showEndOfLines = ShowEndOfLines(finder)
-    keyMap = mapOf(VK_HOME to showBeginningOfLines,
-      VK_LEFT to showBeginningOfLines,
-      VK_RIGHT to showEndOfLines,
-      VK_END to showEndOfLines,
-      VK_UP to ShowFirstLetters(finder),
-      VK_SPACE to ShowWhiteSpace(finder))
+    keyMap = mapOf(VK_HOME  to showBeginningOfLines,
+                   VK_LEFT  to showBeginningOfLines,
+                   VK_RIGHT to showEndOfLines,
+                   VK_END   to showEndOfLines,
+                   VK_UP    to ShowFirstLetters(finder),
+                   VK_SPACE to ShowWhiteSpace(finder))
   }
 
   override fun requestFocus() {
