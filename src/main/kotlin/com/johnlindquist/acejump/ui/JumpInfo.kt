@@ -13,8 +13,9 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
   val document = editor.document.charsSequence
   val line = editor.offsetToVisualPosition(index).line
   var originOffset = editor.offsetToVisualPosition(index)
-  var trueOffset = index + query.length
-  var tagOffset = editor.offsetToVisualPosition(trueOffset)
+  var queryLength = query.length
+  var trueOffset = query.length - 1
+  var tagOffset = editor.offsetToVisualPosition(index + trueOffset)
   var tagPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
   var srcPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
   var text = renderTag()
@@ -29,7 +30,9 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
       i++
     }
 
-    tagOffset = editor.offsetToVisualPosition(index + i)
+    trueOffset = i
+    queryLength = i + 1
+    tagOffset = editor.offsetToVisualPosition(index + trueOffset)
     tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
     return tag
   }
@@ -54,7 +57,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
   private fun alignTag(ac: AceCanvas): Pair<Int, Int> {
     val y = tagPoint.y - ac.fbm.rectHOffset.toInt()
     val x = tagPoint.x + ac.fbm.fontWidth
-    val lineOffset = getLengthFromStartToOffset(editor, index + query.length)
+    val lineOffset = getLengthFromStartToOffset(editor, index + queryLength)
     val startOfNextLine = getLeadingCharacterOffset(editor, line + 1)
     val startOfThisLine = getLineStartOffset(editor, line)
     val startOfPrevLine = getLeadingCharacterOffset(editor, line - 1)
@@ -103,7 +106,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
       return
 
     var tagWidth = text.length * ac.fbm.fontWidth
-    var searchWidth = query.length * ac.fbm.fontWidth
+    var searchWidth = (trueOffset + 1) * ac.fbm.fontWidth
     var tagX = x
     val lastQueryChar = query.last()
     val correspondingChar = document[index + query.length - 1].toLowerCase()
@@ -115,7 +118,6 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
         g2d.fillRect(tagX, y, ac.fbm.fontWidth, ac.fbm.lineHeight.toInt())
         tagX += ac.fbm.fontWidth
         tagWidth -= ac.fbm.fontWidth
-        searchWidth -= ac.fbm.fontWidth
       }
       g2d.fillRect(srcPoint.x - 1, tagPoint.y, searchWidth, ac.fbm.lineHeight)
     }
