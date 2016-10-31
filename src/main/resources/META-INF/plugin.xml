@@ -14,7 +14,7 @@
         <html>
         <dl>
             <dt>3.0.0</dt>
-            <dd>Major release: Re-written from the ground up. Lots of new features.
+            <dd>Major release: Re-written from the ground up. Lots of new features: https://github.com/johnlindquist/AceJump#history
             <dt>2.0.13</dt>
             <dd>Fix a regression affecting target mode and line-based navigation</dd>
             <dt>2.0.12</dt>

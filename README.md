@@ -28,6 +28,18 @@ You can change the default keyboard shortcut, by visiting **File \| Settings \| 
 In order to build AceJump from the source, clone this repository and run `./gradlew buildPlugin`.
 
 ## History
+
+>#### 3.0.0 Major rewrite of AceJump. Introducing:
+>
+>* Realtime search: Just type the word where you want to jump and AceJump will 
+do the rest.
+>* Smart tag placement: Tags now occupy nearby whitespace if available, rather 
+than block text.
+>* Keyboard-aware tagging: Tries to minimize finger travel distance on QWERTY 
+keyboards.
+>* Colorful highlighting: AceJump will now highlight the editor text, 
+as you type.
+
 - 2.0.13  Fix a regression affecting target mode and line-based navigation: https://github.com/johnlindquist/AceJump/commit/cc3a23a3bd6754d11100f15f3dddc4d8529926df#diff-a483c757116bde46e566a8b01520a807L51</dd>
 - 2.0.12 Fix ClassCastException when input letter not present: https://github.com/johnlindquist/AceJump/issues/73
 - 2.0.11 One hundred percent all natural Kotlin.
