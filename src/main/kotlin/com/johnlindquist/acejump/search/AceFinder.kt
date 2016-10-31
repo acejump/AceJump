@@ -182,6 +182,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       stringToIndex.put("$c1$c2", origin)
 
       while (c1.isLetterOrDigit()) {
+        unseen1grams.remove("$c1")
         unseen2grams.remove("$c0$c1")
         unseen2grams.remove("$c1$c2")
         p1++; p2++; c1 = text[p1]; c2 = text[p2]
