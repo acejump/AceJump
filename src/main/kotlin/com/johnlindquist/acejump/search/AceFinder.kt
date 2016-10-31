@@ -177,6 +177,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
       val origin = p1 - query.length
       stringToIndex.put("$c1", origin)
+      stringToIndex.put("$c0$c1", origin)
       stringToIndex.put("$c1$c2", origin)
       unseen1grams.remove("$c1")
 
@@ -250,13 +251,15 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       val part = chars.subSequence(index, right)
 
       val (matching, nonMatching) = unusedNgrams.partition { tag ->
-        part.all {
-          //Prevents "...a[IJ]...ij..."
-          !digraphs.containsKey("$it${tag[0]}") &&
-            //Prevents "...a[IJ]...i[JX]..."
-            !newTagMap.contains("$it${tag[0]}") &&
-            //Prevents "...i[JX]...i[IJ]..."
-            !(it == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
+        part.all { letter ->
+          //Prevents "...a[IJ]...ij..." ij
+          !digraphs.containsKey("$letter${tag[0]}") &&
+            //Prevents "...a[IJ]...i[JX]..." ij
+            !newTagMap.contains("$letter${tag[0]}") &&
+            //Prevents "...r[BK]iv...r[VB]in..."  rivb
+            !newTagMap.keys.any { it[0] == letter && it.last() == tag[0]} &&
+            //Prevents "...i[JX]...i[IJ]..." ij
+            !(letter == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
         }
       }
 
@@ -313,7 +316,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     val remaining = digraphs.asMap().entries.sortedBy { it.value.size }
     val tags = unseen2grams.sortedWith(compareBy(
       // Last frequent first-character comes first
-      { digraphs[{it[0]}.toString()].orEmpty().size },
+      { digraphs[{ it[0] }.toString()].orEmpty().size },
       // Adjacent keys come before non-adjacent keys
       { !adjacent[it[0]]!!.contains(it.last()) },
       // Rotate to ensure no "clumps" (ie. AA, AB, AC..)
