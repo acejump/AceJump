@@ -16,7 +16,7 @@ import javax.swing.event.ChangeListener
 import kotlin.comparisons.compareBy
 
 class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
-  val document = editor.document.charsSequence
+  val document = editor.document.charsSequence.toString().toLowerCase()
   val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = findManager.findInFileModel.clone()
 
@@ -97,9 +97,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
   private fun determineJumpLocations(): Collection<JumpInfo> {
     populateNgrams()
-    val fullText = document.toString().toLowerCase()
-    val sitesToCheck = getSitesInView(fullText)
-    val existingDigraphs = makeMap(fullText, sitesToCheck)
+    val sitesToCheck = getSitesInView(document)
+    val existingDigraphs = makeMap(document, sitesToCheck)
     tagMap = compact(mapDigraphs(existingDigraphs))
 
     return plotJumpLocations()
@@ -203,7 +202,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     while (1 <= front && document[front - 1].isLetterOrDigit())
       front--
 
-    while (back + 1 <= document.length && document[back + 1].isLetterOrDigit())
+    while (back <= document.length && document[back].isLetterOrDigit())
       back++
 
     return Pair(front, back)
