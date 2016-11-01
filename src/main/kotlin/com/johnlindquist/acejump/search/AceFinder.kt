@@ -189,7 +189,10 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
         unseen1grams.remove("$c1")
         unseen2grams.remove("$c0$c1")
         unseen2grams.remove("$c1$c2")
-        p1++; p2++; c1 = text[p1]; c2 = text[p2]
+        p0++; p1++; p2++
+        c0 = text[p0]
+        c1 = if (p1 < text.length) text[p1] else ' '
+        c2 = if (p2 < text.length) text[p2] else ' '
       }
     }
 
@@ -207,7 +210,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     while (1 <= front && document[front - 1].isLetterOrDigit())
       front--
 
-    while (back <= document.length && document[back].isLetterOrDigit())
+    while (back < document.length && document[back].isLetterOrDigit())
       back++
 
     return Pair(front, back)

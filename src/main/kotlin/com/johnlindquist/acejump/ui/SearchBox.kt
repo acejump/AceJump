@@ -77,8 +77,6 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
           background = RED
         else
           background = WHITE
-
-        defaultKeyCommand.execute(0.toChar(), text)
       }
     })
 
