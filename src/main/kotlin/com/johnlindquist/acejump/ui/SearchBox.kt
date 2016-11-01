@@ -8,6 +8,7 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.search.AceFinder
+import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.guessBestLocation
 import java.awt.Color.RED
 import java.awt.Color.WHITE
@@ -85,13 +86,12 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
       val keyName: String = KeyEvent.getKeyText(it)
       inputMap.put(getKeyStroke(it, 0), keyName)
       actionMap.put(keyName, object : AbstractAction() {
-        override fun actionPerformed(e: ActionEvent) =
+        override fun actionPerformed(e: ActionEvent) {
+          text = Pattern.CR.toString()
           keyMap[it]!!.execute()
+        }
       })
     }
-
-
-    defaultKeyCommand.execute()
   }
 
   override fun processKeyEvent(p0: KeyEvent) {
@@ -132,12 +132,12 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
   private fun configureKeyMap() {
     val showBeginningOfLines = ShowStartOfLines(finder)
     val showEndOfLines = ShowEndOfLines(finder)
-    keyMap = mapOf(VK_HOME  to showBeginningOfLines,
-                   VK_LEFT  to showBeginningOfLines,
-                   VK_RIGHT to showEndOfLines,
-                   VK_END   to showEndOfLines,
-                   VK_UP    to ShowFirstLetters(finder),
-                   VK_SPACE to ShowWhiteSpace(finder))
+    keyMap = mapOf(VK_HOME to showBeginningOfLines,
+      VK_LEFT to showBeginningOfLines,
+      VK_RIGHT to showEndOfLines,
+      VK_END to showEndOfLines,
+      VK_UP to ShowFirstLetters(finder),
+      VK_SPACE to ShowWhiteSpace(finder))
   }
 
   override fun requestFocus() {

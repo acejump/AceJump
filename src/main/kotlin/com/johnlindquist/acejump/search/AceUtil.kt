@@ -28,6 +28,13 @@ fun getVisibleRange(editor: Editor): Pair<Int, Int> {
   return Pair(startOffset, endOffset)
 }
 
+fun getThisLineLength(editor: Editor, offset: Int): Int {
+  val pos = editor.offsetToVisualPosition(offset)
+  if (pos.line - 1 > editor.offsetToVisualPosition(getVisibleRange(editor).first).line)
+    return getVisualLineLength(editor, pos.line)
+  return getVisualLineLength(editor, pos.line)
+}
+
 fun getPreviousLineLength(editor: Editor, offset: Int): Int {
   val pos = editor.offsetToVisualPosition(offset)
   if (pos.line - 1 > editor.offsetToVisualPosition(getVisibleRange(editor).first).line)

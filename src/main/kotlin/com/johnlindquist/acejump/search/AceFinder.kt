@@ -40,14 +40,16 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
   fun find(text: String, key: Char) {
     // "0" is Backspace
-    if (key == 0.toChar())
+    if (key == 0.toChar()) {
       reset()
+      return
+    }
 
-    query = text.toLowerCase()
+    query = if (Pattern.contains(text)) key.toString() else text.toLowerCase()
     findModel.stringToFind = text
 
     val application = ApplicationManager.getApplication()
-    application.runReadAction(jump(key))
+    application.runReadAction({ jump(key) })
     application.invokeLater({
       if (text.isNotEmpty())
         eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
@@ -61,7 +63,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   }
 
   val aceJumper = AceJumper(editor, document)
-  private fun jump(key: Char): () -> Unit {
+  private fun jump(key: Char) {
     fun jumpTo(jumpInfo: JumpInfo) {
       if (key.isUpperCase())
         aceJumper.setSelectionFromCaretToOffset(jumpInfo.index)
@@ -75,31 +77,36 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       reset()
     }
 
-    return {
-      jumpLocations = determineJumpLocations()
-      if (jumpLocations.size <= 1) {
-        if (tagMap.containsKey(query)) {
-          jumpTo(JumpInfo(query, query, tagMap[query]!!, editor))
-        } else if (2 <= query.length) {
-          val last1: String = query.substring(query.length - 1)
-          val last2: String = query.substring(query.length - 2)
-          if (tagMap.containsKey(last2)) {
-            jumpTo(JumpInfo(last2, query, tagMap[last2]!!, editor))
-          } else if (tagMap.containsKey(last1)) {
-            val index = tagMap[last1]!!
-            if (document[index + query.length - 1].toLowerCase() != last1[0])
-              jumpTo(JumpInfo(last1, query, index, editor))
-          }
+    jumpLocations = determineJumpLocations()
+    if (jumpLocations.size <= 1) {
+      if (tagMap.containsKey(query)) {
+        jumpTo(JumpInfo(query, query, tagMap[query]!!, editor))
+      } else if (2 <= query.length) {
+        val last1: String = query.substring(query.length - 1)
+        val last2: String = query.substring(query.length - 2)
+        if (tagMap.containsKey(last2)) {
+          jumpTo(JumpInfo(last2, query, tagMap[last2]!!, editor))
+        } else if (tagMap.containsKey(last1)) {
+          val index = tagMap[last1]!!
+          if (document[index + query.length - 1].toLowerCase() != last1[0])
+            jumpTo(JumpInfo(last1, query, index, editor))
         }
       }
     }
   }
 
+  private var sitesToCheck = listOf<Int>()
+  private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
+
   private fun determineJumpLocations(): Collection<JumpInfo> {
     populateNgrams()
-    val sitesToCheck = getSitesInView(document)
-    val existingDigraphs = makeMap(document, sitesToCheck)
-    tagMap = compact(mapDigraphs(existingDigraphs))
+
+    //Todo: cache these calls after the first invocation
+    if (!findModel.isRegularExpressions || sitesToCheck.isEmpty()) {
+      sitesToCheck = getSitesInView(document)
+      digraphs = makeMap(document, sitesToCheck)
+    }
+    tagMap = compact(mapDigraphs(digraphs))
 
     return plotJumpLocations()
   }
@@ -132,7 +139,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     })
 
   /**
-   * Returns a list of idices where the given query string ends, within the
+   * Returns a list of indices where the given query string ends, within the
    * current editor screen. These are full indices, ie. are not offset to the
    * first line of the editor window.
    */
@@ -168,12 +175,10 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
       var (p0, p1, p2) = Triple(site - 1, site, site + 1)
-      var (c0, c1, c2) = Triple(' ', text[p1], ' ')
-      if (0 <= p0)
-        c0 = text[p0]
-      if (p2 < text.length) {
-        c2 = text[p2]
-      }
+      var (c0, c1, c2) = Triple(' ', ' ', ' ')
+      if (0 <= p0) c0 = text[p0]
+      if (p1 < text.length) c2 = text[p1]
+      if (p2 < text.length) c2 = text[p2]
 
       val origin = p1 - query.length
       stringToIndex.put("$c1", origin)
@@ -317,7 +322,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       { digraphs[{ it[0] }.toString()].orEmpty().size },
       // Adjacent keys come before non-adjacent keys
       { !adjacent[it[0]]!!.contains(it.last()) },
-      // Rotate to ensure no "clumps" (ie. AA, AB, AC..)
+      // Rotate to ensure no "clumps" (ie. AA, AB, AC => AA BA CA)
       String::last,
       // Minimze the distance between tag characters
       { nearby[it[0]]!!.indexOf(it.last()) }
@@ -332,16 +337,17 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       it.key.first().isLetterOrDigit() || query.isNotEmpty()
     }.flatMap { it.value }.listIterator()
 
-    while (remainingSites.hasNext() && unusedNgrams.isNotEmpty())
-      tryToAssignTagToIndex(remainingSites.next())
+    if (!findModel.isRegularExpressions || newTagMap.isEmpty())
+      while (remainingSites.hasNext() && unusedNgrams.isNotEmpty())
+        tryToAssignTagToIndex(remainingSites.next())
 
     return newTagMap
   }
 
   fun findPattern(text: Pattern) {
+    reset()
     findModel.isRegularExpressions = true
-    find(text.pattern, 0.toChar())
-    findModel.isRegularExpressions = false
+    find(text.pattern, Pattern.CR)
   }
 
   fun plotJumpLocations(): List<JumpInfo> {
@@ -351,8 +357,14 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   }
 
   fun reset() {
+    findModel.isRegularExpressions = false
+    findModel.stringToFind = ""
+    sitesToCheck = listOf<Int>()
+    digraphs = LinkedListMultimap.create()
     tagMap = HashBiMap.create()
+    query = ""
     unseen1grams = linkedSetOf()
+    unseen2grams = linkedSetOf()
     jumpLocations = emptyList()
   }
 }
