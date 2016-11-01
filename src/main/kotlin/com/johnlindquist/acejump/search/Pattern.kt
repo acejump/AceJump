@@ -8,7 +8,7 @@ enum class Pattern(val pattern: String) {
 
   companion object {
     fun contains(regex: String) = values().any { it.pattern == regex }
-    val CR = '\n'
+    val REGEX_PREFIX = ' '
     var adjacent = mapOf(
       'j' to "jikmnhu", 'f' to "ftgvcdr", 'k' to "kolmji", 'd' to "drfcxse",
       'l' to "lkop", 's' to "sedxzaw", 'a' to "aqwsz",

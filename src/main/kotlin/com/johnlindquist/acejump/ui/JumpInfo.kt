@@ -11,6 +11,7 @@ import java.awt.RenderingHints.*
 class JumpInfo(private val tag: String, var query: String, val index: Int,
                val editor: EditorImpl) {
   val document = editor.document.charsSequence
+  val isRegex = query.first() == Pattern.REGEX_PREFIX
   val line = editor.offsetToVisualPosition(index).line
   var originOffset = editor.offsetToVisualPosition(index)
   var queryLength = query.length
@@ -26,7 +27,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
 
   fun renderTag(): String {
     var i = 0
-    while (i + 1 < query.length &&
+    while (i + 1 < query.length && index + i + 1 < document.length &&
       query[i + 1].toLowerCase() == document[index + i + 1].toLowerCase()) {
       i++
     }
@@ -89,7 +90,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
     val canAlignLeft =
       startOfThisLine < previousCharIndex && ac.isFree(alignLeft)
 
-    if (query.first() == Pattern.CR)
+    if (isRegex)
       return alignRight
     else if (query.isNotEmpty())
       if (canAlignBottom) {
@@ -139,7 +140,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
         startOfThisLine + thisLineLength <= index + tag.length ||
         document[index + 1].isWhitespace()
 
-      if (alignment != ALIGN_RIGHT || hasSpaceToTheRight)
+      if (alignment != ALIGN_RIGHT || hasSpaceToTheRight || isRegex)
         g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
       g2d.fillRect(tagX, y, tagWidth, ac.fbm.lineHeight)

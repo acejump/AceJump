@@ -177,7 +177,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       var (p0, p1, p2) = Triple(site - 1, site, site + 1)
       var (c0, c1, c2) = Triple(' ', ' ', ' ')
       if (0 <= p0) c0 = text[p0]
-      if (p1 < text.length) c2 = text[p1]
+      if (p1 < text.length) c1 = text[p1]
       if (p2 < text.length) c2 = text[p2]
 
       val origin = p1 - query.length
@@ -347,7 +347,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   fun findPattern(text: Pattern) {
     reset()
     findModel.isRegularExpressions = true
-    find(text.pattern, Pattern.CR)
+    find(text.pattern, Pattern.REGEX_PREFIX)
   }
 
   fun plotJumpLocations(): List<JumpInfo> {

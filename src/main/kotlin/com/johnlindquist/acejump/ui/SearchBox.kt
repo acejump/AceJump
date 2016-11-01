@@ -87,7 +87,7 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
       inputMap.put(getKeyStroke(it, 0), keyName)
       actionMap.put(keyName, object : AbstractAction() {
         override fun actionPerformed(e: ActionEvent) {
-          text = Pattern.CR.toString()
+          text = Pattern.REGEX_PREFIX.toString()
           keyMap[it]!!.execute()
         }
       })
