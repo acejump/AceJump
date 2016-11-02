@@ -23,6 +23,12 @@ You can change the default keyboard shortcut, by visiting **File \| Settings \| 
 
 ![Keymap](https://cloud.githubusercontent.com/assets/175716/11760350/911aed4c-a065-11e5-8f17-49bc97ad1dad.png)
 
+If you are using [IdeaVim](https://plugins.jetbrains.com/plugin/164), you may wish to remap a single key to activate AceJump. For example, adding the following line to `˜/.ideavimrc` will activate AceJump whenever the <kbd>F</kbd> key is pressed:
+
+```
+map f :action AceJumpAction<CR>
+```
+
 ## Building
 
 In order to build AceJump from the source, clone this repository and run `./gradlew buildPlugin`.
