@@ -2,9 +2,9 @@
 
 [AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes.
 
-![Jump Points](https://cloud.githubusercontent.com/assets/175716/11760345/6029c136-a065-11e5-83fd-5ba09b6a97f8.png)
+![Jump Points](https://cloud.githubusercontent.com/assets/175716/19928968/28c09254-a0e8-11e6-8545-b38ff005ef74.png)
 
-Hitting the keyboard shortcut for AceJump (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) will activate a tooltip overlay. Press any of the illustrated key combinations in sequence, and the cursor will immediately jump to that location in the editor.
+Hitting the keyboard shortcut for AceJump (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) will activate a tooltip overlay. Type any visible string in the editor, followed by one of illustrated tags, to jump that location. If you press <kbd>Ctrl</kbd>+<kbd>;</kbd> a second time before completing the jump, AceJump will select the whole word instead. If you press <kbd>Shift</kbd> when completing the jump, AceJump will select all text from the current cursor position to the destination. It's that simple.
 
 ## Installing
 
