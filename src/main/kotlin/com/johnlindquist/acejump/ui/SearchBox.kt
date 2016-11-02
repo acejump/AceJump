@@ -53,7 +53,7 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
         } else if (e.modifiers == SHIFT_MASK) {
           text += e.actionCommand
           defaultKeyCommand.execute(e.actionCommand[0].toUpperCase(), text)
-        } else if (e.modifiers == ALT_MASK) {
+        } else if (e.modifiers == ALT_MASK || e.modifiers == META_MASK) {
           text += e.actionCommand
           if (finder.toggleTargetMode())
             background = RED
