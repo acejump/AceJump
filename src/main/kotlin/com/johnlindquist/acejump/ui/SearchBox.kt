@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.ui
 
+import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.ui.popup.ComponentPopupBuilder
@@ -16,10 +17,16 @@ import java.awt.Dimension
 import java.awt.Font
 import java.awt.Font.BOLD
 import java.awt.Graphics
-import java.awt.event.*
+import java.awt.event.ActionEvent
+import java.awt.event.FocusEvent
+import java.awt.event.FocusListener
+import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent.*
-import javax.swing.*
+import javax.swing.AbstractAction
+import javax.swing.JRootPane
+import javax.swing.JTextField
 import javax.swing.KeyStroke.getKeyStroke
+import javax.swing.SwingUtilities
 import javax.swing.event.ChangeListener
 
 class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
@@ -27,6 +34,7 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
   var keyMap: Map<Int, AceKeyCommand> = hashMapOf()
   var popupContainer: AbstractPopup? = null
   var defaultKeyCommand = DefaultKeyCommand(finder)
+  var naturalColor = WHITE
 
   init {
     configureKeyMap()
@@ -53,30 +61,11 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
         } else if (e.modifiers == SHIFT_MASK) {
           text += e.actionCommand
           defaultKeyCommand.execute(e.actionCommand[0].toUpperCase(), text)
-        } else if (e.modifiers == ALT_MASK || e.modifiers == META_MASK) {
-          text += e.actionCommand
-          if (finder.toggleTargetMode())
-            background = RED
-          else
-            background = WHITE
-          defaultKeyCommand.execute(e.actionCommand[0], text)
         }
       }
     })
 
-    val targetMode = "targetMode"
-    inputMap.put(getKeyStroke(VK_SEMICOLON, CTRL_MASK), targetMode)
-    inputMap.put(getKeyStroke(VK_SEMICOLON, META_MASK), targetMode)
-    actionMap.put(targetMode, object : AbstractAction() {
-      override fun actionPerformed(e: ActionEvent) {
-        if (finder.toggleTargetMode())
-          background = RED
-        else
-          background = WHITE
-      }
-    })
-
-    (VK_HOME..VK_RIGHT).forEach {
+    (VK_LEFT..VK_RIGHT).forEach {
       val keyName: String = KeyEvent.getKeyText(it)
       inputMap.put(getKeyStroke(it, 0), keyName)
       actionMap.put(keyName, object : AbstractAction() {
@@ -86,12 +75,37 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
         }
       })
     }
+
+    val aja = "AceJumpAction"
+    val am = ActionManager.getInstance().getKeyboardShortcut(aja)
+    listOf(am?.firstKeyStroke, am?.secondKeyStroke).forEach {
+      inputMap.put(it, aja)
+      actionMap.put(aja, object : AbstractAction() {
+        override fun actionPerformed(e: ActionEvent) {
+          if (finder.toggleTargetMode())
+            background = RED
+          else
+            background = naturalColor
+        }
+      })
+    }
   }
 
+  /*
+   * For some reason, Swing does not like to pass us actions via the inputMap or
+   * actionMap registration technique. Until that works reliably, we need to use
+   * low-level KeyEvents for processing the following keystrokes.
+   */
   override fun processKeyEvent(p0: KeyEvent) {
     if (p0.keyCode == VK_BACK_SPACE && p0.id == KEY_RELEASED) {
       text = ""
       defaultKeyCommand.execute(0.toChar())
+    } else if (p0.keyCode == VK_HOME && p0.id == KEY_RELEASED) {
+      text = Pattern.REGEX_PREFIX.toString()
+      keyMap[VK_HOME]!!.execute()
+    } else if (p0.keyCode == VK_END && p0.id == KEY_RELEASED) {
+      text = Pattern.REGEX_PREFIX.toString()
+      keyMap[VK_END]!!.execute()
     }
 
     super.processKeyEvent(p0)
@@ -121,6 +135,7 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
       override fun focusLost(p0: FocusEvent) = exit()
     })
     popupContainer = popup
+    naturalColor = background
   }
 
   private fun configureKeyMap() {

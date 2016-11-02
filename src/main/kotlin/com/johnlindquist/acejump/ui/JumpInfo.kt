@@ -112,7 +112,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
       return
 
     var tagWidth = text.length * ac.fbm.fontWidth
-    var searchWidth = (trueOffset + 1) * ac.fbm.fontWidth
+    val searchWidth = (trueOffset + 1) * ac.fbm.fontWidth
     var tagX = x
     val lastQueryChar = query.last()
     val indexOfCorrespondingChar = index + query.length - 1
