@@ -53,17 +53,13 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
         } else if (e.modifiers == SHIFT_MASK) {
           text += e.actionCommand
           defaultKeyCommand.execute(e.actionCommand[0].toUpperCase(), text)
-        }
-      }
-    })
-
-    val backspace = "backspace"
-    inputMap.put(getKeyStroke(VK_BACK_SPACE, 0), backspace)
-    actionMap.put(backspace, object : AbstractAction() {
-      override fun actionPerformed(e: ActionEvent) {
-        if (text.isNotEmpty()) {
-          text = text.substring(0, text.length - 1)
-          defaultKeyCommand.execute(0.toChar(), text)
+        } else if (e.modifiers == ALT_MASK) {
+          text += e.actionCommand
+          if (finder.toggleTargetMode())
+            background = RED
+          else
+            background = WHITE
+          defaultKeyCommand.execute(e.actionCommand[0], text)
         }
       }
     })
