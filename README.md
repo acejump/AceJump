@@ -35,6 +35,8 @@ In order to build AceJump from the source, clone this repository and run `./grad
 
 ## History
 
+- 3.0.1 Fixes target-mode issues affecting users with non-default shortcuts and adds support for Home/End.
+
 >#### 3.0.0 Major rewrite of AceJump. Introducing:
 >
 >* Realtime search: Just type the word where you want to jump and AceJump will 
