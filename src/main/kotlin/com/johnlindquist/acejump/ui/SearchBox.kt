@@ -78,17 +78,15 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
 
     val aja = "AceJumpAction"
     val am = ActionManager.getInstance().getKeyboardShortcut(aja)
-    listOf(am?.firstKeyStroke, am?.secondKeyStroke).forEach {
-      inputMap.put(it, aja)
-      actionMap.put(aja, object : AbstractAction() {
-        override fun actionPerformed(e: ActionEvent) {
-          if (finder.toggleTargetMode())
-            background = RED
-          else
-            background = naturalColor
-        }
-      })
-    }
+    inputMap.put(am!!.firstKeyStroke, aja)
+    actionMap.put(aja, object : AbstractAction() {
+      override fun actionPerformed(e: ActionEvent) {
+        if (finder.toggleTargetMode())
+          background = RED
+        else
+          background = naturalColor
+      }
+    })
   }
 
   /*

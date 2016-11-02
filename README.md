@@ -35,6 +35,7 @@ In order to build AceJump from the source, clone this repository and run `./grad
 
 ## History
 
+- 3.0.2 Fixes target mode and default shortcut activation for Mac users.
 - 3.0.1 Fixes target-mode issues affecting users with non-default shortcuts and adds support for Home/End.
 
 >#### 3.0.0 Major rewrite of AceJump. Introducing:

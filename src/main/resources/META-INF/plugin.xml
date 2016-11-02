@@ -13,6 +13,8 @@
   <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>3.0.2</dt>
+            <dd>Fixes target mode and default shortcut activation for Mac users.</dd>
             <dt>3.0.1</dt>
             <dd>Fixes target-mode issues affecting users with non-default shortcuts and adds support for Home/End.</dd>
             <dt>3.0.0</dt>
@@ -76,10 +78,9 @@
             class="com.johnlindquist.acejump.AceJumpAction"
             text="Ace Jump"
             description="Search and navigate to result">
-      <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
-      <keyboard-shortcut keymap="Mac OS X 10.5+"
-                         first-keystroke="ctrl SEMICOLON"/>
+      <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
     </action>
   </actions>
 </idea-plugin>
