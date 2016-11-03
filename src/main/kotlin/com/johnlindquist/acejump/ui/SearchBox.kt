@@ -1,6 +1,7 @@
 package com.johnlindquist.acejump.ui
 
 import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.KeyboardShortcut
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.ui.popup.ComponentPopupBuilder
@@ -77,16 +78,21 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
     }
 
     val aja = "AceJumpAction"
-    val am = ActionManager.getInstance().getKeyboardShortcut(aja)
-    inputMap.put(am!!.firstKeyStroke, aja)
-    actionMap.put(aja, object : AbstractAction() {
-      override fun actionPerformed(e: ActionEvent) {
-        if (finder.toggleTargetMode())
-          background = RED
-        else
-          background = naturalColor
+    val scs = ActionManager.getInstance().getAction(aja).shortcutSet.shortcuts
+    scs.forEach {
+      if(it.isKeyboard) {
+        val kbs = it as KeyboardShortcut
+        inputMap.put(kbs.firstKeyStroke, aja)
+        actionMap.put(aja, object : AbstractAction() {
+          override fun actionPerformed(e: ActionEvent) {
+            if (finder.toggleTargetMode())
+              background = RED
+            else
+              background = naturalColor
+          }
+        })
       }
-    })
+    }
   }
 
   /*
