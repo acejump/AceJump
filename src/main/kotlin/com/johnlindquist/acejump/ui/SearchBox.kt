@@ -78,9 +78,8 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
     }
 
     val aja = "AceJumpAction"
-    val scs = ActionManager.getInstance().getAction(aja).shortcutSet.shortcuts
-    scs.forEach {
-      if(it.isKeyboard) {
+    ActionManager.getInstance().getAction(aja).shortcutSet?.shortcuts?.forEach {
+      if (it.isKeyboard) {
         val kbs = it as KeyboardShortcut
         inputMap.put(kbs.firstKeyStroke, aja)
         actionMap.put(aja, object : AbstractAction() {
