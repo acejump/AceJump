@@ -1,6 +1,9 @@
 package com.johnlindquist.acejump.search
 
-import com.google.common.collect.*
+import com.google.common.collect.BiMap
+import com.google.common.collect.HashBiMap
+import com.google.common.collect.LinkedListMultimap
+import com.google.common.collect.Multimap
 import com.intellij.find.FindManager
 import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager
@@ -207,7 +210,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
   fun getWordBounds(index: Int): Pair<Int, Int> {
     var (front, back) = Pair(index, index)
-    while (1 <= front && document[front - 1].isLetterOrDigit())
+    while (0 < front && document[front - 1].isLetterOrDigit())
       front--
 
     while (back < document.length && document[back].isLetterOrDigit())
@@ -237,7 +240,8 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
     val unusedNgrams = LinkedHashSet<String>(unseen1grams)
     fun hasNearbyTag(index: Int): Boolean {
-      val (left, right) = getWordBounds(index)
+      val left = Math.max(0, index - 2)
+      val right = Math.min(document.length, index + 2)
       return (left..right).any { newTagMap.containsValue(it) }
     }
 
@@ -249,15 +253,14 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
      */
 
     fun tryToAssignTagToIndex(index: Int) {
-      if (hasNearbyTag(index) || newTagMap.containsValue(index))
+      if (newTagMap.containsValue(index) || hasNearbyTag(index))
         return
 
       val (left, right) = getWordBounds(index)
-      val word = document.subSequence(left, right)
-      val part = document.subSequence(index, right)
+      val remainder = document.subSequence(index, right)
 
       val (matching, nonMatching) = unusedNgrams.partition { tag ->
-        part.all { letter ->
+        remainder.all { letter ->
           //Prevents "...a[IJ]...ij..." ij
           !digraphs.containsKey("$letter${tag[0]}") &&
             //Prevents "...a[IJ]...i[JX]..." ij
@@ -272,6 +275,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       val tag = matching.firstOrNull()
 
       if (tag == null) {
+        val word = document.subSequence(left, right)
         println("\"$word\" rejected: " + nonMatching.joinToString(","))
         println("No remaining tags could be assigned to word: \"$word\"")
         return
@@ -319,10 +323,13 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       }
     }
 
-    val remaining = digraphs.asMap().entries.sortedBy { it.value.size }
+    val remaining = digraphs.asMap().entries.filter {
+      it.key.first().isLetterOrDigit() || query.isNotEmpty()
+    }.sortedBy { it.value.size }
+
     val tags = unseen2grams.sortedWith(compareBy(
-      // Last frequent first-character comes first
-      { digraphs[{ it[0] }.toString()].orEmpty().size },
+      // Least frequent first-character comes first
+      { digraphs[it[0].toString()].orEmpty().size },
       // Adjacent keys come before non-adjacent keys
       { !adjacent[it[0]]!!.contains(it.last()) },
       // Rotate to ensure no "clumps" (ie. AA, AB, AC => AA BA CA)
@@ -330,15 +337,16 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       // Minimze the distance between tag characters
       { nearby[it[0]]!!.indexOf(it.last()) }
     )).iterator()
+
     while (tags.hasNext()) {
       val biGram = tags.next()
       unusedNgrams.remove(biGram[0].toString())
       unusedNgrams.add(biGram)
     }
 
-    val remainingSites = remaining.filter {
-      it.key.first().isLetterOrDigit() || query.isNotEmpty()
-    }.flatMap { it.value }.listIterator()
+    val remainingSites = remaining.flatMap { it.value }.sortedBy {
+      document[Math.max(0, it - 1)].isLetterOrDigit()
+    }.listIterator()
 
     if (!findModel.isRegularExpressions || newTagMap.isEmpty())
       while (remainingSites.hasNext() && unusedNgrams.isNotEmpty())

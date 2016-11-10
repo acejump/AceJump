@@ -3,10 +3,12 @@ package com.johnlindquist.acejump.ui
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
-import java.awt.*
-import java.awt.AlphaComposite.*
+import java.awt.AlphaComposite.SRC_OVER
+import java.awt.AlphaComposite.getInstance
 import java.awt.Color.*
-import java.awt.RenderingHints.*
+import java.awt.Graphics2D
+import java.awt.RenderingHints.KEY_ANTIALIASING
+import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 
 class JumpInfo(private val tag: String, var query: String, val index: Int,
                val editor: EditorImpl) {
@@ -67,7 +69,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
   val previousLineLength = getPreviousLineLength(editor, index)
   val topLine = getVisualLineAtTopOfScreen(editor)
   val bottomLine = topLine + getScreenHeight(editor)
-  val previousCharIndex = Math.max(0, index - 1)
+  val prevCharIndex = Math.max(0, index - 1)
 
   private fun alignTag(ac: AceCanvas): Pair<Int, Int> {
     val y = tagPoint.y - ac.fbm.rectHOffset.toInt()
@@ -77,31 +79,28 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
     val alignLeft = Pair(srcPoint.x - ac.fbm.fontWidth * (text.length), y)
     val alignRight = Pair(x, y)
 
-    val canAlignTop =
-      ac.isFree(alignTop) &&
-        (topLine..bottomLine).contains(line - 1) &&
-        (previousLineLength < lineOffset || previousLineOffset > lineOffset)
+    val canAlignTop = ac.isFree(alignTop) &&
+      (topLine..bottomLine).contains(line - 1) &&
+      (previousLineLength < lineOffset || previousLineOffset > lineOffset)
 
-    val canAlignBottom =
-      ac.isFree(alignBottom) &&
-        (topLine..bottomLine).contains(line + 1) &&
-        (nextLineLength < lineOffset || nextLineOffset > lineOffset)
+    val canAlignBottom = ac.isFree(alignBottom) &&
+      (topLine..bottomLine).contains(line + 1) &&
+      (nextLineLength < lineOffset || nextLineOffset > lineOffset)
 
-    val canAlignLeft =
-      startOfThisLine < previousCharIndex && ac.isFree(alignLeft)
+    val canAlignLeft = startOfThisLine < prevCharIndex && ac.isFree(alignLeft)
 
     if (isRegex)
       return alignRight
     else if (query.isNotEmpty())
-      if (canAlignBottom) {
+      if (canAlignLeft) {
+        alignment = ALIGN_LEFT
+        return alignLeft
+      } else if (canAlignBottom) {
         alignment = ALIGN_BOTTOM
         return alignBottom
       } else if (canAlignTop) {
         alignment = ALIGN_TOP
         return alignTop
-      } else if (canAlignLeft) {
-        alignment = ALIGN_LEFT
-        return alignLeft
       }
 
     return alignRight
@@ -127,7 +126,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
     fun highlightAlreadyTyped() {
       g2d.color = green
       if (lastQueryChar == tag.first() && lastQueryChar != correspondingChar) {
-        g2d.fillRect(tagX, y, ac.fbm.fontWidth, ac.fbm.lineHeight.toInt())
+        g2d.fillRect(tagX, y, ac.fbm.fontWidth, ac.fbm.lineHeight)
         tagX += ac.fbm.fontWidth
         tagWidth -= ac.fbm.fontWidth
       }
