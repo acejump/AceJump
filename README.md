@@ -1,10 +1,26 @@
 # AceJump
 
-[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes.
+[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Pressing the keyboard shortcut for AceJump (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) will activate a tooltip overlay. You can type any visible string in the editor, followed by one of illustrated tags, to jump that location: 
 
-![Jump Points](https://cloud.githubusercontent.com/assets/175716/19928968/28c09254-a0e8-11e6-8545-b38ff005ef74.png)
+![](https://cloud.githubusercontent.com/assets/175716/20177444/124fb534-a74d-11e6-8912-1d220ae27091.png)
 
-Hitting the keyboard shortcut for AceJump (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) will activate a tooltip overlay. Type any visible string in the editor, followed by one of illustrated tags, to jump that location. If you press <kbd>Ctrl</kbd>+<kbd>;</kbd> a second time before completing the jump, AceJump will select the whole word instead. If you press <kbd>Shift</kbd> when completing the jump, AceJump will select all text from the current cursor position to the destination. It's that simple.
+If you press the AceJump shortcut a second time before completing a jump, it will activate *Target Mode*. Once *Target Mode* is activated, jumping to a tag will select the entire word at a jump target.
+
+![](https://cloud.githubusercontent.com/assets/175716/20177362/a9976398-a74c-11e6-955d-df029c7b329b.png)
+
+If you press the AceJump shortcut, followed by <kbd>→</kbd>, AceJump will tag the last characters of every visible line in the editor. You can then jump to the character by completing the tag.
+
+![](https://cloud.githubusercontent.com/assets/175716/20177457/29bc0858-a74d-11e6-8e05-341512a5e40a.png)
+
+Similarly, if you press the AceJump shortcut, followed by <kbd>←</kbd>, AceJump will tag the first characters of every visible line in the editor. You can jump to that character by completing the tag.
+
+![](https://cloud.githubusercontent.com/assets/175716/20177464/3ebf45bc-a74d-11e6-9a4d-f9d7538afe2c.png)
+
+Similarly, if you press the AceJump shortcut, followed by <kbd>↑</kbd>, AceJump will tag the first non-whitespace character of every visible line in the editor. You can jump to that character by completing the tag.
+
+![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
+
+Finally, if you press <kbd>Shift</kbd> when completing the jump, AceJump will select all text from the current cursor position to the destination. It's that simple.
 
 ## Installing
 
