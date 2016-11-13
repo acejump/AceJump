@@ -104,7 +104,6 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   private fun determineJumpLocations(): Collection<JumpInfo> {
     populateNgrams()
 
-    //Todo: cache these calls after the first invocation
     if (!findModel.isRegularExpressions || sitesToCheck.isEmpty()) {
       sitesToCheck = getSitesInView(document)
       digraphs = makeMap(document, sitesToCheck)
@@ -148,23 +147,34 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
    */
 
   private fun getSitesInView(fullText: String): List<Int> {
-    fun getSitesToCheck(window: String): Iterable<Int> {
-      if (query.isEmpty())
-        return 0..(window.length - 2)
+    val (windowStart, windowEnd) = getVisibleRange(editor)
 
-      val indicesToCheck = arrayListOf<Int>()
-      var result = findManager.findString(window, 0, findModel)
-      while (result.isStringFound) {
-        indicesToCheck.add(result.endOffset)
-        result = findManager.findString(window, result.endOffset, findModel)
+    if (query.isEmpty())
+      return (windowStart..(windowEnd - 2)).toList()
+
+    val indicesToCheck = arrayListOf<Int>()
+    val preexistingResults = sitesToCheck.iterator()
+    var startingFrom = sitesToCheck.firstOrNull() ?: windowStart
+    var result = findManager.findString(fullText, startingFrom, findModel)
+
+    while (result.isStringFound && result.startOffset < windowEnd) {
+      indicesToCheck.add(result.startOffset)
+      if (sitesToCheck.isNotEmpty()) {
+        if (!preexistingResults.hasNext()) break
+        else {
+          while (preexistingResults.hasNext()) {
+            startingFrom = preexistingResults.next()
+            if (startingFrom >= result.endOffset) break
+          }
+        }
+      } else {
+        startingFrom = result.endOffset
       }
 
-      return indicesToCheck
+      result = findManager.findString(fullText, startingFrom, findModel)
     }
 
-    val (startIndex, endIndex) = getVisibleRange(editor)
-    val window = fullText.substring(startIndex, endIndex)
-    return getSitesToCheck(window).map { it + startIndex }
+    return indicesToCheck
   }
 
   /**
@@ -177,16 +187,16 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
     for (site in sites) {
-      var (p0, p1, p2) = Triple(site - 1, site, site + 1)
+      val toCheck = site + query.length
+      var (p0, p1, p2) = Triple(toCheck - 1, toCheck, toCheck + 1)
       var (c0, c1, c2) = Triple(' ', ' ', ' ')
       if (0 <= p0) c0 = text[p0]
       if (p1 < text.length) c1 = text[p1]
       if (p2 < text.length) c2 = text[p2]
 
-      val origin = p1 - query.length
-      stringToIndex.put("$c1", origin)
-      stringToIndex.put("$c0$c1", origin)
-      stringToIndex.put("$c1$c2", origin)
+      stringToIndex.put("$c1", site)
+      stringToIndex.put("$c0$c1", site)
+      stringToIndex.put("$c1$c2", site)
 
       while (c1.isLetterOrDigit()) {
         unseen1grams.remove("$c1")
@@ -238,7 +248,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     if (query.isEmpty())
       return newTagMap
 
-    val unusedNgrams = LinkedHashSet<String>(unseen1grams)
+    val tags = LinkedHashSet<String>(unseen1grams)
     fun hasNearbyTag(index: Int): Boolean {
       val left = Math.max(0, index - 2)
       val right = Math.min(document.length, index + 2)
@@ -259,7 +269,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       val (left, right) = getWordBounds(index)
       val remainder = document.subSequence(index, right)
 
-      val (matching, nonMatching) = unusedNgrams.partition { tag ->
+      val (matching, nonMatching) = tags.partition { tag ->
         remainder.all { letter ->
           //Prevents "...a[IJ]...ij..." ij
           !digraphs.containsKey("$letter${tag[0]}") &&
@@ -286,14 +296,14 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
       if (choosenTag.length == 1) {
         //Prevents "...a[b]...z[b]..."
         //Prevents "...a[b]...z[bc]..."
-        unusedNgrams.removeAll { choosenTag[0] == it.last() }
+        tags.removeAll { choosenTag[0] == it.last() }
       } else {
         //Prevents "...a[bc]...z[b]..."
-        unusedNgrams.remove(choosenTag[0].toString())
+        tags.remove(choosenTag[0].toString())
         //Prevents "...a[bc]...ab[c]..."
-        unusedNgrams.remove(choosenTag[1].toString())
+        tags.remove(choosenTag[1].toString())
         //Prevents "...a[bc]...z[bc]..."
-        unusedNgrams.remove(choosenTag)
+        tags.remove(choosenTag)
       }
     }
 
@@ -306,10 +316,10 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
           return newTagMap
         }
       } else {
-        val last1: String = query.substring(query.length - 1)
-        val last1Index = tagMap[last1]
-        if (last1Index != null) {
-          newTagMap[last1] = last1Index
+        val lastChar: String = query.last().toString()
+        val lastCharIndex = tagMap[lastChar]
+        if (lastCharIndex != null) {
+          newTagMap[lastChar] = lastCharIndex
           return newTagMap
         }
       }
@@ -319,37 +329,33 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     for (entry in tagMap) {
       if (query == entry.key || query.last() == entry.key.first()) {
         newTagMap[entry.key] = entry.value
-        unusedNgrams.remove(entry.key[0].toString())
+        tags.remove(entry.key[0].toString())
       }
     }
 
-    val remaining = digraphs.asMap().entries.filter {
-      it.key.first().isLetterOrDigit() || query.isNotEmpty()
-    }.sortedBy { it.value.size }
-
-    val tags = unseen2grams.sortedWith(compareBy(
+    unseen2grams.sortedWith(compareBy(
       // Least frequent first-character comes first
       { digraphs[it[0].toString()].orEmpty().size },
       // Adjacent keys come before non-adjacent keys
       { !adjacent[it[0]]!!.contains(it.last()) },
-      // Rotate to ensure no "clumps" (ie. AA, AB, AC => AA BA CA)
+      // Rotate to remove "clumps" (ie. AA, AB, AC => AA BA CA)
       String::last,
       // Minimze the distance between tag characters
       { nearby[it[0]]!!.indexOf(it.last()) }
-    )).iterator()
-
-    while (tags.hasNext()) {
-      val biGram = tags.next()
-      unusedNgrams.remove(biGram[0].toString())
-      unusedNgrams.add(biGram)
+    )).forEach { tag ->
+      tags.remove(tag[0].toString())
+      tags.add(tag)
     }
 
-    val remainingSites = remaining.flatMap { it.value }.sortedBy {
+    val remainingSites = digraphs.asMap().entries.filter {
+      it.key.first().isLetterOrDigit() || query.isNotEmpty()
+    }.sortedBy { it.value.size }.flatMap { it.value }.sortedBy {
+      // Ensure that the first letter of a word is prioritized for tagging
       document[Math.max(0, it - 1)].isLetterOrDigit()
-    }.listIterator()
+    }.iterator()
 
     if (!findModel.isRegularExpressions || newTagMap.isEmpty())
-      while (remainingSites.hasNext() && unusedNgrams.isNotEmpty())
+      while (remainingSites.hasNext() && tags.isNotEmpty())
         tryToAssignTagToIndex(remainingSites.next())
 
     return newTagMap
