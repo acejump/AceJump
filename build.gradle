@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.0.4'
+    ext.kotlin_version = '1.0.5'
 
     repositories {
         mavenCentral()
@@ -31,7 +31,7 @@ intellij {
 }
 
 group 'com.johnlindquist'
-version '3.0.2'
+version '3.0.3'
 
 repositories {
     mavenCentral()

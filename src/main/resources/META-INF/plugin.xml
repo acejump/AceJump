@@ -13,6 +13,8 @@
   <change-notes><![CDATA[
         <html>
         <dl>
+            <dt>3.0.3</dt>
+            <dd>Updates to tag placement and performance improvements.</dd>
             <dt>3.0.2</dt>
             <dd>Fixes target mode and default shortcut activation for Mac users.</dd>
             <dt>3.0.1</dt>
