@@ -2,8 +2,8 @@ package com.johnlindquist.acejump.search
 
 enum class Pattern(val pattern: String) {
   END_OF_LINE("\\n"),
-  BEGINNING_OF_LINE("^.|\\n(?<!.\\n)"),
-  CODE_INDENTS("(?<=^\\s*)\\S"),
+  BEGINNING_OF_LINE("^.|^\\n"),
+  CODE_INDENTS("(?<=^\\s*)\\S|^\\n"),
   WHITE_SPACE("\\s+\\S(?<!^\\s*\\S)");
 
   companion object {

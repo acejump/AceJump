@@ -89,9 +89,12 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
 
     val canAlignLeft = startOfThisLine < prevCharIndex && ac.isFree(alignLeft)
 
-    if (isRegex)
-      return alignRight
-    else if (query.isNotEmpty())
+    if (isRegex) {
+      if (canAlignLeft && document[prevCharIndex].isWhitespace()) {
+        alignment = ALIGN_LEFT
+        return alignLeft
+      }
+    } else if (query.isNotEmpty()) {
       if (canAlignLeft) {
         alignment = ALIGN_LEFT
         return alignLeft
@@ -102,6 +105,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
         alignment = ALIGN_TOP
         return alignTop
       }
+    }
 
     return alignRight
   }

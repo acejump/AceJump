@@ -263,7 +263,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
      */
 
     fun tryToAssignTagToIndex(index: Int) {
-      if (newTagMap.containsValue(index) || hasNearbyTag(index))
+      if (newTagMap.containsValue(index) ||
+        // Regex searches can be adjacent (some lines have no characters)
+        (!findModel.isRegularExpressions && hasNearbyTag(index)))
         return
 
       val (left, right) = getWordBounds(index)
