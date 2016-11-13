@@ -137,6 +137,8 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
       override fun focusGained(p0: FocusEvent) = addAceCanvas()
       override fun focusLost(p0: FocusEvent) = exit()
     })
+
+    editor.scrollingModel.addVisibleAreaListener { exit() }
     popupContainer = popup
     naturalColor = background
   }
@@ -172,6 +174,7 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
     val contentComponent = editor.contentComponent
     contentComponent.remove(aceCanvas)
     contentComponent.repaint()
-    finder.tagMap.clear()
+    popupContainer?.dispose()
+    finder.reset()
   }
 }

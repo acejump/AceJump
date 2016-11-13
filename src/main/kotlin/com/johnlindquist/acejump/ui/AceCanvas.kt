@@ -2,18 +2,15 @@ package com.johnlindquist.acejump.ui
 
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.EditorImpl
-import com.johnlindquist.acejump.search.getVisibleRange
 import java.awt.Font
 import java.awt.Font.BOLD
 import java.awt.Graphics
 import java.awt.Graphics2D
-import java.awt.Point
 import javax.swing.JComponent
 
 class AceCanvas(val editor: EditorImpl) : JComponent() {
   var jumpLocations: Collection<JumpInfo> = arrayListOf()
   val scheme = EditorColorsManager.getInstance().globalScheme
-  val colors = Pair(scheme.defaultBackground, scheme.defaultForeground)
   val fbm: FontBasedMeasurements
   var existingTags = hashSetOf<Pair<Int, Int>>()
 
@@ -28,11 +25,8 @@ class AceCanvas(val editor: EditorImpl) : JComponent() {
     val fontHeight = font.size
     val lineHeight = editor.lineHeight
     val lineSpacing = scheme.lineSpacing
-    val rectMarginWidth = fontWidth / 2
-    val doubleRectMarginWidth = rectMarginWidth * 2
     val fontSpacing = fontHeight * lineSpacing
     val rectHOffset = fontSpacing - fontHeight
-    val rectWidth = doubleRectMarginWidth
     val hOffset = fontHeight - fontSpacing
   }
 

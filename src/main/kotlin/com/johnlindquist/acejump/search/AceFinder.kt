@@ -377,11 +377,11 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
     findModel.isRegularExpressions = false
     findModel.stringToFind = ""
     sitesToCheck = listOf<Int>()
-    digraphs = LinkedListMultimap.create()
-    tagMap = HashBiMap.create()
+    digraphs.clear()
+    tagMap.clear()
     query = ""
-    unseen1grams = linkedSetOf()
-    unseen2grams = linkedSetOf()
+    unseen1grams.clear()
+    unseen2grams.clear()
     jumpLocations = emptyList()
   }
 }
