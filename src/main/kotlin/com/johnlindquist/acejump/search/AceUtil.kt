@@ -22,6 +22,7 @@ fun getVisibleRange(editor: Editor): Pair<Int, Int> {
   val lastLine = visualLineToLogicalLine(editor, firstVisibleLine + height)
   var endOffset = getLineEndOffset(editor, lastLine, true)
   endOffset = normalizeOffset(editor, lastLine, endOffset, true)
+  endOffset = min(max(0, editor.document.textLength - 1), endOffset + 1)
 
   return Pair(startOffset, endOffset)
 }
@@ -245,7 +246,7 @@ fun getLineLength(editor: Editor, line: Int): Int {
   if (getLineCount(editor) === 0) {
     return 0
   } else {
-    return Math.max(0,
+    return max(0,
       editor.offsetToLogicalPosition(editor.document.getLineEndOffset(line)).column)
   }
 }
@@ -255,7 +256,7 @@ fun getLengthFromStartToOffset(editor: Editor, offset: Int): Int {
   if (getLineCount(editor) === 0) {
     return 0
   } else {
-    return Math.max(0, editor.offsetToLogicalPosition(offset).column)
+    return max(0, editor.offsetToLogicalPosition(offset).column)
   }
 }
 

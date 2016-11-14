@@ -14,7 +14,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
                val editor: EditorImpl) {
   val document = editor.document.charsSequence
   val isRegex = query.first() == Pattern.REGEX_PREFIX
-  val line = editor.offsetToVisualPosition(index).line
+  val line = editor.offsetToVisualLine(index)
   var originOffset = editor.offsetToVisualPosition(index)
   var queryLength = query.length
   var trueOffset = query.length - 1
@@ -91,7 +91,8 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
 
     val previousCharIsWhiteSpace = document[prevCharIndex].isWhitespace()
     val nextCharIsWhiteSpace = document[nextCharIndex].isWhitespace()
-    val canAlignLeft = startOfThisLine < prevCharIndex && ac.isFree(left)
+    val canAlignLeft = startOfThisLine < prevCharIndex - 1 &&
+      prevCharIndex - 1 < endOfThisLine && ac.isFree(left)
     val hasSpaceToTheRight = document.length <= index + tag.length ||
       endOfThisLine <= index + tag.length ||
       document[index + 1].isWhitespace()
