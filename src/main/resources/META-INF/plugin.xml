@@ -78,11 +78,19 @@
     <!-- Add your actions here -->
     <action id="AceJumpAction"
             class="com.johnlindquist.acejump.AceJumpAction"
-            text="Ace Jump"
+            text="Activate AceJump Mode"
             description="Search and navigate to result">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
+    </action>
+    <action id="AceJumpLineAction"
+            class="com.johnlindquist.acejump.AceJumpLineAction"
+            text="Display Line Markers"
+            description="Search and navigate to result">
+      <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl shift SEMICOLON"/>
+      <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl shift SEMICOLON"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift SEMICOLON"/>
     </action>
   </actions>
 </idea-plugin>

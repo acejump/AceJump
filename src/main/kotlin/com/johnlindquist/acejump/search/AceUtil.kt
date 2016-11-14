@@ -7,13 +7,11 @@ import java.lang.Math.max
 import java.lang.Math.min
 
 
-fun guessBestLocation(editor: Editor): RelativePoint {
-  return getPointFromVisualPosition(editor, editor.caretModel.visualPosition)
-}
+fun guessBestLocation(editor: Editor) =
+  getPointFromVisualPosition(editor, editor.caretModel.visualPosition)
 
-fun getPointFromVisualPosition(editor: Editor, logicalPosition: VisualPosition): RelativePoint {
-  return RelativePoint(editor.contentComponent, editor.visualPositionToXY(logicalPosition))
-}
+fun getPointFromVisualPosition(editor: Editor, logicalPosition: VisualPosition) =
+  RelativePoint(editor.contentComponent, editor.visualPositionToXY(logicalPosition))
 
 fun getVisibleRange(editor: Editor): Pair<Int, Int> {
   val firstVisibleLine = getVisualLineAtTopOfScreen(editor)
@@ -136,7 +134,8 @@ fun getScreenHeight(editor: Editor): Int {
  * @return The logical line number
  */
 fun visualLineToLogicalLine(editor: Editor, line: Int) =
-  normalizeLine(editor, editor.visualToLogicalPosition(VisualPosition(line, 0)).line)
+  normalizeLine(editor,
+    editor.visualToLogicalPosition(VisualPosition(line, 0)).line)
 
 /**
  * Returns the offset of the start of the requested line.
@@ -188,7 +187,8 @@ fun getLineEndOffset(editor: Editor, line: Int, allowEnd: Boolean): Int {
 
  * @return The normalized logical line number
  */
-fun normalizeLine(editor: Editor, line: Int) = max(0, min(line, getLineCount(editor) - 1))
+fun normalizeLine(editor: Editor, line: Int) =
+  max(0, min(line, getLineCount(editor) - 1))
 
 /**
  * Ensures that the supplied offset for the given logical line is within the range for the line. If allowEnd
@@ -204,7 +204,10 @@ fun normalizeLine(editor: Editor, line: Int) = max(0, min(line, getLineCount(edi
 
  * @return The normalized column number
  */
-fun normalizeOffset(editor: Editor, line: Int, offset: Int, allowEnd: Boolean): Int {
+fun normalizeOffset(editor: Editor,
+                    line: Int,
+                    offset: Int,
+                    allowEnd: Boolean): Int {
   if (getFileSize(editor, allowEnd) == 0) {
     return 0
   }
@@ -224,9 +227,8 @@ fun normalizeOffset(editor: Editor, line: Int, offset: Int, allowEnd: Boolean): 
  * *
  * @return The number of characters in the specified line
  */
-fun getVisualLineLength(editor: Editor, line: Int): Int {
-  return getLineLength(editor, visualLineToLogicalLine(editor, line))
-}
+fun getVisualLineLength(editor: Editor, line: Int) =
+  getLineLength(editor, visualLineToLogicalLine(editor, line))
 
 /**
  * Gets the number of characters on the specified logical line. This will be different than the number of visual
@@ -243,7 +245,8 @@ fun getLineLength(editor: Editor, line: Int): Int {
   if (getLineCount(editor) === 0) {
     return 0
   } else {
-    return Math.max(0, editor.offsetToLogicalPosition(editor.document.getLineEndOffset(line)).column)
+    return Math.max(0,
+      editor.offsetToLogicalPosition(editor.document.getLineEndOffset(line)).column)
   }
 }
 
@@ -256,9 +259,8 @@ fun getLengthFromStartToOffset(editor: Editor, offset: Int): Int {
   }
 }
 
-fun getLeadingCharacterOffset(editor: Editor, line: Int): Int {
-  return getLeadingCharacterOffset(editor, line, 0)
-}
+fun getLeadingCharacterOffset(editor: Editor, line: Int) =
+  getLeadingCharacterOffset(editor, line, 0)
 
 fun getLeadingCharacterOffset(editor: Editor, line: Int, col: Int): Int {
   val start = getLineStartOffset(editor, line) + col

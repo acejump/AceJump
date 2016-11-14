@@ -61,6 +61,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
   val lineOffset = getLengthFromStartToOffset(editor, index + queryLength)
   val startOfNextLine = getLeadingCharacterOffset(editor, line + 1)
   val startOfThisLine = getLineStartOffset(editor, line)
+  val endOfThisLine = getLineEndOffset(editor, line, false)
   val startOfPrevLine = getLeadingCharacterOffset(editor, line - 1)
   val previousLineOffset = getLengthFromStartToOffset(editor, startOfPrevLine)
   val nextLineOffset = getLengthFromStartToOffset(editor, startOfNextLine)
@@ -70,44 +71,46 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
   val topLine = getVisualLineAtTopOfScreen(editor)
   val bottomLine = topLine + getScreenHeight(editor)
   val prevCharIndex = Math.max(0, index - 1)
+  val nextCharIndex = Math.min(document.length, index + 1)
 
   private fun alignTag(ac: AceCanvas): Pair<Int, Int> {
     val y = tagPoint.y - ac.fbm.rectHOffset.toInt()
     val x = tagPoint.x + ac.fbm.fontWidth
-    val alignTop = Pair(x - ac.fbm.fontWidth, y - ac.fbm.lineHeight)
-    val alignBottom = Pair(x - ac.fbm.fontWidth, y + ac.fbm.lineHeight)
-    val alignLeft = Pair(srcPoint.x - ac.fbm.fontWidth * (text.length), y)
-    val alignRight = Pair(x, y)
+    val top = Pair(x - ac.fbm.fontWidth, y - ac.fbm.lineHeight)
+    val bottom = Pair(x - ac.fbm.fontWidth, y + ac.fbm.lineHeight)
+    val left = Pair(srcPoint.x - ac.fbm.fontWidth * (text.length), y)
+    val right = Pair(x, y)
 
-    val canAlignTop = ac.isFree(alignTop) &&
+    val canAlignTop = ac.isFree(top) &&
       (topLine..bottomLine).contains(line - 1) &&
       (previousLineLength < lineOffset || previousLineOffset > lineOffset)
 
-    val canAlignBottom = ac.isFree(alignBottom) &&
+    val canAlignBottom = ac.isFree(bottom) &&
       (topLine..bottomLine).contains(line + 1) &&
       (nextLineLength < lineOffset || nextLineOffset > lineOffset)
 
-    val canAlignLeft = startOfThisLine < prevCharIndex && ac.isFree(alignLeft)
+    val previousCharIsWhiteSpace = document[prevCharIndex].isWhitespace()
+    val nextCharIsWhiteSpace = document[nextCharIndex].isWhitespace()
+    val canAlignLeft = startOfThisLine < prevCharIndex && ac.isFree(left)
+    val hasSpaceToTheRight = document.length <= index + tag.length ||
+      endOfThisLine <= index + tag.length ||
+      document[index + 1].isWhitespace()
+    val canAlignRight = hasSpaceToTheRight && ac.isFree(right)
 
-    if (isRegex) {
-      if (canAlignLeft && document[prevCharIndex].isWhitespace()) {
-        alignment = ALIGN_LEFT
-        return alignLeft
-      }
-    } else if (query.isNotEmpty()) {
-      if (canAlignLeft) {
-        alignment = ALIGN_LEFT
-        return alignLeft
-      } else if (canAlignBottom) {
-        alignment = ALIGN_BOTTOM
-        return alignBottom
-      } else if (canAlignTop) {
-        alignment = ALIGN_TOP
-        return alignTop
-      }
+    alignment = if (canAlignLeft && previousCharIsWhiteSpace) ALIGN_LEFT
+    else if (canAlignRight) ALIGN_RIGHT
+    else if (canAlignLeft && !previousCharIsWhiteSpace) ALIGN_LEFT
+    else if (nextCharIsWhiteSpace) ALIGN_RIGHT
+    else if (canAlignBottom) ALIGN_BOTTOM
+    else if (canAlignTop) ALIGN_TOP
+    else ALIGN_RIGHT
+
+    return when (alignment) {
+      ALIGN_TOP -> top
+      ALIGN_LEFT -> left
+      ALIGN_RIGHT -> right
+      ALIGN_BOTTOM -> bottom
     }
-
-    return alignRight
   }
 
   private fun highlight(ac: AceCanvas, g2d: Graphics2D, x: Int, y: Int) {
@@ -125,9 +128,9 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
         document[indexOfCorrespondingChar].toLowerCase()
       else
         0.toChar()
-    g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
 
     fun highlightAlreadyTyped() {
+      g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
       g2d.color = green
       if (lastQueryChar == tag.first() && lastQueryChar != correspondingChar) {
         g2d.fillRect(tagX, y, ac.fbm.fontWidth, ac.fbm.lineHeight)

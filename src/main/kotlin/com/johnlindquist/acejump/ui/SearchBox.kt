@@ -10,7 +10,7 @@ import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.search.AceFinder
-import com.johnlindquist.acejump.search.Pattern
+import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
 import com.johnlindquist.acejump.search.guessBestLocation
 import java.awt.Color.RED
 import java.awt.Color.WHITE
@@ -30,7 +30,7 @@ import javax.swing.KeyStroke.getKeyStroke
 import javax.swing.SwingUtilities
 import javax.swing.event.ChangeListener
 
-class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
+class SearchBox(val finder: AceFinder, var editor: EditorImpl) : JTextField() {
   var aceCanvas = AceCanvas(editor)
   var keyMap: Map<Int, AceKeyCommand> = hashMapOf()
   var popupContainer: AbstractPopup? = null
@@ -62,6 +62,8 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
         } else if (e.modifiers == SHIFT_MASK) {
           text += e.actionCommand
           defaultKeyCommand.execute(e.actionCommand[0].toUpperCase(), text)
+        } else {
+          exit()
         }
       }
     })
@@ -70,10 +72,7 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
       val keyName: String = KeyEvent.getKeyText(it)
       inputMap.put(getKeyStroke(it, 0), keyName)
       actionMap.put(keyName, object : AbstractAction() {
-        override fun actionPerformed(e: ActionEvent) {
-          text = Pattern.REGEX_PREFIX.toString()
-          keyMap[it]!!.execute()
-        }
+        override fun actionPerformed(e: ActionEvent) = processRegexCommand(it)
       })
     }
 
@@ -84,10 +83,7 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
         inputMap.put(kbs.firstKeyStroke, aja)
         actionMap.put(aja, object : AbstractAction() {
           override fun actionPerformed(e: ActionEvent) {
-            if (finder.toggleTargetMode())
-              background = RED
-            else
-              background = naturalColor
+            background = if (finder.toggleTargetMode()) RED else naturalColor
           }
         })
       }
@@ -99,19 +95,31 @@ class SearchBox(val finder: AceFinder, val editor: EditorImpl) : JTextField() {
    * actionMap registration technique. Until that works reliably, we need to use
    * low-level KeyEvents for processing the following keystrokes.
    */
-  override fun processKeyEvent(p0: KeyEvent) {
-    if (p0.keyCode == VK_BACK_SPACE && p0.id == KEY_RELEASED) {
-      text = ""
-      defaultKeyCommand.execute(0.toChar())
-    } else if (p0.keyCode == VK_HOME && p0.id == KEY_RELEASED) {
-      text = Pattern.REGEX_PREFIX.toString()
-      keyMap[VK_HOME]!!.execute()
-    } else if (p0.keyCode == VK_END && p0.id == KEY_RELEASED) {
-      text = Pattern.REGEX_PREFIX.toString()
-      keyMap[VK_END]!!.execute()
+  override fun processKeyEvent(keyEvent: KeyEvent) {
+    if (keyEvent.id == KEY_RELEASED) {
+      when (keyEvent.keyCode) {
+        VK_BACK_SPACE -> processBackspaceCommand()
+        VK_HOME -> processRegexCommand(VK_END)
+        VK_END -> processRegexCommand(VK_END)
+      }
     }
 
-    super.processKeyEvent(p0)
+    super.processKeyEvent(keyEvent)
+  }
+
+  fun processRegexCommand(aceKeyCommand: AceKeyCommand) {
+    text = REGEX_PREFIX.toString()
+    aceKeyCommand.execute()
+  }
+
+  fun processRegexCommand(keyCode: Int) {
+    text = REGEX_PREFIX.toString()
+    keyMap[keyCode]!!.execute()
+  }
+
+  fun processBackspaceCommand() {
+    text = ""
+    defaultKeyCommand.execute(0.toChar())
   }
 
   private fun configurePopup() {

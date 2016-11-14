@@ -1,6 +1,6 @@
 package com.johnlindquist.acejump.keycommands
 
-import com.intellij.codeInsight.editorActions.SelectWordUtil
+import com.intellij.codeInsight.editorActions.SelectWordUtil.addWordSelection
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.util.TextRange
 import java.util.*
@@ -13,11 +13,9 @@ open class AceJumper(var editor: EditorImpl, var document: CharSequence) {
 
   fun selectWordAtCaret() {
     val ranges = ArrayList<TextRange>()
-    SelectWordUtil.addWordSelection(false, document, editor.caretModel.offset,
-      ranges)
+    addWordSelection(false, document, editor.caretModel.offset, ranges)
 
-    if (ranges.isEmpty())
-      return
+    if (ranges.isEmpty()) return
 
     val startWordOffset = Math.max(0, ranges[0].startOffset)
     val endWordOffset = Math.min(ranges[0].endOffset, document.length)

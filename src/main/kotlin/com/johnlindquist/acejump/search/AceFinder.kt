@@ -18,7 +18,7 @@ import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 import kotlin.comparisons.compareBy
 
-class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
+class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
   val document = editor.document.charsSequence.toString().toLowerCase()
   val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
   val findModel: FindModel = findManager.findInFileModel.clone()
@@ -250,8 +250,9 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
 
     val tags = LinkedHashSet<String>(unseen1grams)
     fun hasNearbyTag(index: Int): Boolean {
-      val left = Math.max(0, index - 2)
-      val right = Math.min(document.length, index + 2)
+      val (wordStart, wordEnd) = getWordBounds(index)
+      val left = Math.max(wordStart, index - 2)
+      val right = Math.min(wordEnd, index + 2)
       return (left..right).any { newTagMap.containsValue(it) }
     }
 
@@ -263,9 +264,7 @@ class AceFinder(val findManager: FindManager, val editor: EditorImpl) {
      */
 
     fun tryToAssignTagToIndex(index: Int) {
-      if (newTagMap.containsValue(index) ||
-        // Regex searches can be adjacent (some lines have no characters)
-        (!findModel.isRegularExpressions && hasNearbyTag(index)))
+      if (newTagMap.containsValue(index) || hasNearbyTag(index))
         return
 
       val (left, right) = getWordBounds(index)
