@@ -10,68 +10,12 @@
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump.
     ]]>
   </description>
-  <change-notes><![CDATA[
-        <html>
-        <dl>
-            <dt>3.0.3</dt>
-            <dd>Updates to tag placement and performance improvements.</dd>
-            <dt>3.0.2</dt>
-            <dd>Fixes target mode and default shortcut activation for Mac users.</dd>
-            <dt>3.0.1</dt>
-            <dd>Fixes target-mode issues affecting users with non-default shortcuts and adds support for Home/End.</dd>
-            <dt>3.0.0</dt>
-            <dd>Major release: Re-written from the ground up. Lots of new features: https://github.com/johnlindquist/AceJump#history
-            <dt>2.0.13</dt>
-            <dd>Fix a regression affecting target mode and line-based navigation</dd>
-            <dt>2.0.12</dt>
-            <dd>Fix ClassCastException when input letter not present: https://github.com/johnlindquist/AceJump/issues/73</dd>
-            <dt>2.0.11</dt>
-            <dd>One hundred percent all natural Kotlin.</dd>
-            <dt>2.0.10</dt>
-            <dd>Support 2016.2, remove upper version limit, update internal Kotlin version</dd>
-            <dt>2.0.9</dt>
-            <dd>Compile on Java 7 to address: https://github.com/johnlindquist/AceJump/issues/61</dd>
-            <dt>2.0.8</dt>
-            <dd>Compile on Java 6 to address: https://github.com/johnlindquist/AceJump/issues/59</dd>
-            <dt>2.0.7</dt>
-            <dd>Language update for Kotlin 1.0 release.</dd>
-            <dt>2.0.6</dt>
-            <dd>Fixing "lost focus" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/41</dd>
-            <dt>2.0.5</dt>
-            <dd>Fixing "backspace" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/20</dd>
-            <dt>2.0.4</dt>
-            <dd>Fixing "code folding" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/24</dd>
-            <dt>2.0.3</dt>
-            <dd>More work on Ubuntu focus bug</dd>
-            <dt>2.0.2</dt>
-            <dd>Fixed bug when there's only 1 search result</dd>
-            <dt>2.0.1</dt>
-            <dd>Fixing Ubuntu focus bug</dd>
-            <dt>2.0.0</dt>
-            <dd>Major release: Added "target mode", many speed increases, multi-char search implemented</dd>
-            <dt>1.1.0</dt>
-            <dd>Switching to Kotlin for the code base</dd>
-            <dt>1.0.4</dt>
-            <dd>Fixing https://github.com/johnlindquist/AceJump/issues/9 and https://github.com/johnlindquist/AceJump/issues/6</dd>
-            <dt>1.0.3</dt>
-            <dd>Fixed minor visual lag when removing the "jumpers" from the editor</dd>
-            <dt>1.0.2</dt>
-            <dd>Cleaning up minor bugs (npe when editor not in focus, not removing layers)</dd>
-            <dt>1.0.1</dt>
-            <dd>Adding a new jump: "Enter" will take you to the first non-whitespace char in a new line (compare to "Home" which takes you to a new line)</dd>
-            <dt>1.0</dt>
-            <dd>Cleaned up code base for release</dd>
-        </dl>
-        </html>
-        ]]>
-  </change-notes>
+  <change-notes>Adds "line mode" - press [Ctrl+Shift+;] to activate.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 
-  <version>3.0.1</version>
   <category>Navigation</category>
   <vendor url="https://github.com/johnlindquist/AceJump">AceJump</vendor>
-
   <idea-version since-build="143.379"/>
 
   <actions>
