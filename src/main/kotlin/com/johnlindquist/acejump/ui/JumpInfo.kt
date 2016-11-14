@@ -71,7 +71,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
   val topLine = getVisualLineAtTopOfScreen(editor)
   val bottomLine = topLine + getScreenHeight(editor)
   val prevCharIndex = Math.max(0, index - 1)
-  val nextCharIndex = Math.min(document.length, index + 1)
+  val nextCharIndex = Math.min(document.length - 1, index + 1)
 
   private fun alignTag(ac: AceCanvas): Pair<Int, Int> {
     val y = tagPoint.y - ac.fbm.rectHOffset.toInt()
