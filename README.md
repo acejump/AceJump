@@ -51,6 +51,7 @@ In order to build AceJump from the source, clone this repository and run `./grad
 
 ## History
 
+- 3.0.5 Hotfix for target mode.
 - 3.0.4 Adds "line mode" - press [Ctrl+Shift+;] to activate.
 - 3.0.3 Updates to tag placement and performance improvements.
 - 3.0.2 Fixes target mode and default shortcut activation for Mac users.
