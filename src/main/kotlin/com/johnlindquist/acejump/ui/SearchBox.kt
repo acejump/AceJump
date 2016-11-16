@@ -62,8 +62,6 @@ class SearchBox(val finder: AceFinder, var editor: EditorImpl) : JTextField() {
         } else if (e.modifiers == SHIFT_MASK) {
           text += e.actionCommand
           defaultKeyCommand.execute(e.actionCommand[0].toUpperCase(), text)
-        } else {
-          exit()
         }
       }
     })

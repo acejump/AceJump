@@ -10,7 +10,7 @@
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump.
     ]]>
   </description>
-  <change-notes>Adds "line mode" - press [Ctrl+Shift+;] to activate.</change-notes>
+  <change-notes>Hotfix for target mode.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 
