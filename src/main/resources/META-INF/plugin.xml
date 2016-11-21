@@ -7,10 +7,10 @@
     AceJump allows you to quickly navigate the cursor to any position visible in the editor.
     See a demo of <a href="https://www.youtube.com/watch?v=8cgy8ITtsJE">AceJump in action</a>!
 
-    Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump.
-    ]]>
+    Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>Hotfix for target mode.</change-notes>
+  <change-notes>Fixes alignment issues, removes top and bottom alignments
+  until there is a better way to visually differentiate adjacent tags.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 

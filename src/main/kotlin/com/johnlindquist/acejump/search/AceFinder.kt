@@ -371,7 +371,7 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
   fun plotJumpLocations(): List<JumpInfo> {
     return tagMap.values.map {
       JumpInfo(tagMap.inverse()[it]!!, query, it, editor)
-    }
+    }.sortedBy { it.index }
   }
 
   fun reset() {

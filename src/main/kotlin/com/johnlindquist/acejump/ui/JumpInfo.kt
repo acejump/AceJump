@@ -59,12 +59,12 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
   }
 
   val lineOffset = getLengthFromStartToOffset(editor, index + queryLength)
-  val startOfNextLine = getLeadingCharacterOffset(editor, line + 1)
+  val firstCharOfNextLine = getLeadingCharacterOffset(editor, line + 1)
   val startOfThisLine = getLineStartOffset(editor, line)
   val endOfThisLine = getLineEndOffset(editor, line, false)
-  val startOfPrevLine = getLeadingCharacterOffset(editor, line - 1)
-  val previousLineOffset = getLengthFromStartToOffset(editor, startOfPrevLine)
-  val nextLineOffset = getLengthFromStartToOffset(editor, startOfNextLine)
+  val firstCharPrevLine = getLeadingCharacterOffset(editor, line - 1)
+  val previousLineOffset = getLengthFromStartToOffset(editor, firstCharPrevLine)
+  val nextLineOffset = getLengthFromStartToOffset(editor, firstCharOfNextLine)
   val nextLineLength = getNextLineLength(editor, index)
   val thisLineLength = getThisLineLength(editor, index)
   val previousLineLength = getPreviousLineLength(editor, index)
@@ -90,21 +90,17 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
       (nextLineLength < lineOffset || nextLineOffset > lineOffset)
 
     val previousCharIsWhiteSpace = document[prevCharIndex].isWhitespace()
-    val nextCharIsWhiteSpace = document[nextCharIndex].isWhitespace()
-    val canAlignLeft = startOfThisLine < prevCharIndex - 1 &&
-      prevCharIndex - 1 < endOfThisLine && ac.isFree(left)
-    val hasSpaceToTheRight = document.length <= index + tag.length ||
-      endOfThisLine <= index + tag.length ||
+    val nextCharIsWhiteSpace = document.length <= index + 1 ||
       document[index + 1].isWhitespace()
-    val canAlignRight = hasSpaceToTheRight && ac.isFree(right)
+    val canAlignRight = ac.isFree(right)
 
-    alignment = if (canAlignLeft && previousCharIsWhiteSpace) ALIGN_LEFT
+    val canAlignLeft = startOfThisLine < prevCharIndex - 1 && ac.isFree(left)
+    val isFirstCharacterOfLine = index == startOfThisLine
+    val alignment = if (nextCharIsWhiteSpace) ALIGN_RIGHT
+    else if (isFirstCharacterOfLine) ALIGN_RIGHT
+    else if (canAlignLeft) ALIGN_LEFT
     else if (canAlignRight) ALIGN_RIGHT
-    else if (canAlignLeft && !previousCharIsWhiteSpace) ALIGN_LEFT
-    else if (nextCharIsWhiteSpace) ALIGN_RIGHT
-    else if (canAlignBottom) ALIGN_BOTTOM
-    else if (canAlignTop) ALIGN_TOP
-    else ALIGN_RIGHT
+    else ALIGN_LEFT
 
     return when (alignment) {
       ALIGN_TOP -> top
