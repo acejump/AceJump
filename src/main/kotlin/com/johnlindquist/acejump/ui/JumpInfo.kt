@@ -97,7 +97,8 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
     val canAlignLeft = startOfThisLine < prevCharIndex - 1 && ac.isFree(left)
     val isFirstCharacterOfLine = index == startOfThisLine
     alignment = if (nextCharIsWhiteSpace) ALIGN_RIGHT
-    else if (isFirstCharacterOfLine) ALIGN_RIGHT
+    else if (isFirstCharacterOfLine)
+      ALIGN_RIGHT
     else if (canAlignLeft)
       ALIGN_LEFT
     else if (canAlignRight)
@@ -141,7 +142,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
 
     fun highlightRemaining() {
       g2d.color = yellow
-      val hasSpaceToTheRight = document.length <= index + tag.length ||
+      val hasSpaceToTheRight = document.length <= index + 1 ||
         document[index + 1].isWhitespace()
 
       if (alignment != ALIGN_RIGHT || hasSpaceToTheRight || isRegex)

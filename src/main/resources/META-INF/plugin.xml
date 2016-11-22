@@ -9,8 +9,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>Fixes alignment issues, removes top and bottom alignments
-  until there is a better way to visually differentiate adjacent tags.</change-notes>
+  <change-notes></change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 

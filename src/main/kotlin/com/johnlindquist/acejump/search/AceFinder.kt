@@ -158,7 +158,9 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
     var result = findManager.findString(fullText, startingFrom, findModel)
 
     while (result.isStringFound && result.startOffset < windowEnd) {
-      indicesToCheck.add(result.startOffset)
+      if(!editor.foldingModel.isOffsetCollapsed(result.startOffset))
+        indicesToCheck.add(result.startOffset)
+
       if (sitesToCheck.isNotEmpty()) {
         if (!preexistingResults.hasNext()) break
         else {
@@ -239,7 +241,7 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
    *
    * Tags *should* have the following properties:
    *
-   * A. Should be as short as possible. A tag may be shortened later.
+   * A. Should be as short as possible. A tag may be "compacted" later.
    * B. Should prefer keys that are physically closer to the last key pressed.
    */
 

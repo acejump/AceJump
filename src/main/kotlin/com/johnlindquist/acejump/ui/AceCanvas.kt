@@ -42,7 +42,7 @@ class AceCanvas(val editor: EditorImpl) : JComponent() {
   }
 
   fun registerTag(point: Pair<Int, Int>, tag: String) {
-    (-1..(tag.length + 1)).forEach {
+    (-1..(tag.length)).forEach {
       existingTags.add(Pair(point.first + it * fbm.fontWidth, point.second))
     }
   }
