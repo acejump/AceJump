@@ -6,6 +6,7 @@ import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
 import com.intellij.find.FindManager
 import com.intellij.find.FindModel
+import com.intellij.find.FindResult
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.util.EventDispatcher
@@ -153,30 +154,31 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
       return (windowStart..(windowEnd - 2)).toList()
 
     val indicesToCheck = arrayListOf<Int>()
-    val preexistingResults = sitesToCheck.iterator()
+    val oldResults = sitesToCheck.iterator()
     var startingFrom = sitesToCheck.firstOrNull() ?: windowStart
-    var result = findManager.findString(fullText, startingFrom, findModel)
 
-    while (result.isStringFound && result.startOffset < windowEnd) {
-      if(!editor.foldingModel.isOffsetCollapsed(result.startOffset))
+    do {
+      val result = findManager.findString(fullText, startingFrom, findModel)
+
+      if (!editor.foldingModel.isOffsetCollapsed(result.startOffset))
         indicesToCheck.add(result.startOffset)
 
-      if (sitesToCheck.isNotEmpty()) {
-        if (!preexistingResults.hasNext()) break
-        else {
-          while (preexistingResults.hasNext()) {
-            startingFrom = preexistingResults.next()
-            if (startingFrom >= result.endOffset) break
-          }
-        }
-      } else {
-        startingFrom = result.endOffset
-      }
-
-      result = findManager.findString(fullText, startingFrom, findModel)
-    }
+      startingFrom = nextSite(oldResults, result)
+    } while (result.isStringFound && result.startOffset < windowEnd)
 
     return indicesToCheck
+  }
+
+  private fun nextSite(oldResults: Iterator<Int>, result: FindResult): Int {
+    if (sitesToCheck.isNotEmpty()) {
+      while (oldResults.hasNext()) {
+        val startingFrom = oldResults.next()
+        if (startingFrom >= result.endOffset)
+          return startingFrom
+      }
+    }
+
+    return result.endOffset
   }
 
   /**
