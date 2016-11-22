@@ -8,15 +8,11 @@ If you press the AceJump shortcut a second time before completing a jump, it wil
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177362/a9976398-a74c-11e6-955d-df029c7b329b.png)
 
-If you press the AceJump shortcut, followed by <kbd>→</kbd>, AceJump will tag the last characters of every visible line in the editor. You can then jump to the character by completing the tag.
+If you press the AceJump shortcut for line mode (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), AceJump will highlight the beginning, first non-whitespace characters, and end of every visible line in the editor). You can then jump by completing the tag.
 
-![](https://cloud.githubusercontent.com/assets/175716/20177457/29bc0858-a74d-11e6-8e05-341512a5e40a.png)
+![](ttps://cloud.githubusercontent.com/assets/175716/20533565/f7d04d1e-b0ab-11e6-8b89-f7b10a98752d.png)
 
-Similarly, if you press the AceJump shortcut, followed by <kbd>←</kbd>, AceJump will tag the first characters of every visible line in the editor. You can jump to that character by completing the tag.
-
-![](https://cloud.githubusercontent.com/assets/175716/20177464/3ebf45bc-a74d-11e6-9a4d-f9d7538afe2c.png)
-
-Similarly, if you press the AceJump shortcut, followed by <kbd>↑</kbd>, AceJump will tag the first non-whitespace character of every visible line in the editor. You can jump to that character by completing the tag.
+If you press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, <kbd>↑</kbd>, or <kbd>↑</kbd>, AceJump will tag the last, first, or first non-whitespace character, respectively, of every visible line in the editor.
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
 
