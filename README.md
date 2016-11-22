@@ -10,7 +10,7 @@ If you press the AceJump shortcut a second time before completing a jump, it wil
 
 If you press the AceJump shortcut for line mode (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), AceJump will highlight the beginning, first non-whitespace characters, and end of every visible line in the editor). You can then jump by completing the tag.
 
-![](ttps://cloud.githubusercontent.com/assets/175716/20533565/f7d04d1e-b0ab-11e6-8b89-f7b10a98752d.png)
+![](https://cloud.githubusercontent.com/assets/175716/20533565/f7d04d1e-b0ab-11e6-8b89-f7b10a98752d.png)
 
 If you press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, <kbd>↑</kbd>, or <kbd>↑</kbd>, AceJump will tag the last, first, or first non-whitespace character, respectively, of every visible line in the editor.
 
