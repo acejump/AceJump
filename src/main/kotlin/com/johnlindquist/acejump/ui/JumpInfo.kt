@@ -23,9 +23,9 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
   var srcPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
   var text = renderTag()
 
-  private var alignment: Alignment = ALIGN_RIGHT
+  private var alignment: Alignment = RIGHT
 
-  enum class Alignment { ALIGN_TOP, ALIGN_BOTTOM, ALIGN_LEFT, ALIGN_RIGHT }
+  enum class Alignment { TOP, BOTTOM, LEFT, RIGHT, NONE }
 
   fun renderTag(): String {
     var i = 0
@@ -61,17 +61,13 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
   val lineOffset = getLengthFromStartToOffset(editor, index + queryLength)
   val firstCharOfNextLine = getLeadingCharacterOffset(editor, line + 1)
   val startOfThisLine = getLineStartOffset(editor, line)
-  val endOfThisLine = getLineEndOffset(editor, line, false)
   val firstCharPrevLine = getLeadingCharacterOffset(editor, line - 1)
   val previousLineOffset = getLengthFromStartToOffset(editor, firstCharPrevLine)
   val nextLineOffset = getLengthFromStartToOffset(editor, firstCharOfNextLine)
   val nextLineLength = getNextLineLength(editor, index)
-  val thisLineLength = getThisLineLength(editor, index)
   val previousLineLength = getPreviousLineLength(editor, index)
   val topLine = getVisualLineAtTopOfScreen(editor)
   val bottomLine = topLine + getScreenHeight(editor)
-  val prevCharIndex = Math.max(0, index - 1)
-  val nextCharIndex = Math.min(document.length - 1, index + 1)
 
   private fun alignTag(ac: AceCanvas): Pair<Int, Int> {
     val y = tagPoint.y - ac.fbm.rectHOffset.toInt()
@@ -89,32 +85,35 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
       (topLine..bottomLine).contains(line + 1) &&
       (nextLineLength < lineOffset || nextLineOffset > lineOffset)
 
-    val previousCharIsWhiteSpace = document[prevCharIndex].isWhitespace()
     val nextCharIsWhiteSpace = document.length <= index + 1 ||
       document[index + 1].isWhitespace()
+
     val canAlignRight = ac.isFree(right)
 
-    val canAlignLeft = startOfThisLine < prevCharIndex - 1 && ac.isFree(left)
+    val canAlignLeft = editor.offsetToLogicalPosition(index).column != 0 &&
+      ac.isFree(left)
     val isFirstCharacterOfLine = index == startOfThisLine
-    alignment = if (nextCharIsWhiteSpace) ALIGN_RIGHT
+    alignment = if (nextCharIsWhiteSpace) RIGHT
     else if (isFirstCharacterOfLine)
-      ALIGN_RIGHT
+      RIGHT
     else if (canAlignLeft)
-      ALIGN_LEFT
+      LEFT
     else if (canAlignRight)
-      ALIGN_RIGHT
-    else ALIGN_LEFT
+      RIGHT
+    else
+      NONE
 
     return when (alignment) {
-      ALIGN_TOP -> top
-      ALIGN_LEFT -> left
-      ALIGN_RIGHT -> right
-      ALIGN_BOTTOM -> bottom
+      TOP -> top
+      LEFT -> left
+      RIGHT -> right
+      BOTTOM -> bottom
+      NONE -> Pair(0, 0)
     }
   }
 
   private fun highlight(ac: AceCanvas, g2d: Graphics2D, x: Int, y: Int) {
-    if (query.isEmpty())
+    if (query.isEmpty() || alignment == NONE)
       return
 
     var tagWidth = text.length * ac.fbm.fontWidth
@@ -145,7 +144,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
       val hasSpaceToTheRight = document.length <= index + 1 ||
         document[index + 1].isWhitespace()
 
-      if (alignment != ALIGN_RIGHT || hasSpaceToTheRight || isRegex)
+      if (alignment != RIGHT || hasSpaceToTheRight || isRegex)
         g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
       g2d.fillRect(tagX, y, tagWidth, ac.fbm.lineHeight)
