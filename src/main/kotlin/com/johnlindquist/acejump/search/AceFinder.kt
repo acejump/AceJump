@@ -155,12 +155,13 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
 
     val indicesToCheck = arrayListOf<Int>()
     val oldResults = sitesToCheck.iterator()
-    var startingFrom = sitesToCheck.firstOrNull() ?: windowStart
+    var startingFrom = if (oldResults.hasNext()) oldResults.next() else windowStart
 
     do {
       val result = findManager.findString(fullText, startingFrom, findModel)
 
-      if (!editor.foldingModel.isOffsetCollapsed(result.startOffset))
+      if (!editor.foldingModel.isOffsetCollapsed(result.startOffset) &&
+        result.startOffset <= windowEnd)
         indicesToCheck.add(result.startOffset)
 
       startingFrom = nextSite(oldResults, result)
@@ -170,12 +171,10 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
   }
 
   private fun nextSite(oldResults: Iterator<Int>, result: FindResult): Int {
-    if (sitesToCheck.isNotEmpty()) {
-      while (oldResults.hasNext()) {
-        val startingFrom = oldResults.next()
-        if (startingFrom >= result.endOffset)
-          return startingFrom
-      }
+    while (oldResults.hasNext()) {
+      val startingFrom = oldResults.next()
+      if (startingFrom >= result.endOffset)
+        return startingFrom
     }
 
     return result.endOffset
