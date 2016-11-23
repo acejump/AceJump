@@ -20,16 +20,18 @@ import javax.swing.event.ChangeListener
 import kotlin.comparisons.compareBy
 
 class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
-  val document = editor.document.charsSequence.toString().toLowerCase()
-  val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
-  val findModel: FindModel = findManager.findInFileModel.clone()
-
-  var query = ""
   var hasJumped = false
-  var tagMap: BiMap<String, Int> = HashBiMap.create()
-  var unseen1grams: LinkedHashSet<String> = linkedSetOf()
-  var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   var jumpLocations: Collection<JumpInfo> = emptyList()
+  val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
+
+  private var query = ""
+  private var sitesToCheck = listOf<Int>()
+  private var tagMap: BiMap<String, Int> = HashBiMap.create()
+  private var unseen1grams: LinkedHashSet<String> = linkedSetOf()
+  private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
+  private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
+  private val document = editor.document.charsSequence.toString().toLowerCase()
+  private val findModel: FindModel = findManager.findInFileModel.clone()
 
   init {
     findModel.isFindAll = true
@@ -99,9 +101,6 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
     }
   }
 
-  private var sitesToCheck = listOf<Int>()
-  private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
-
   private fun determineJumpLocations(): Collection<JumpInfo> {
     populateNgrams()
 
@@ -153,7 +152,7 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
     if (query.isEmpty())
       return (windowStart..(windowEnd - 2)).toList()
 
-    val indicesToCheck = arrayListOf<Int>()
+    val indicesToCheck = mutableListOf<Int>()
     val oldResults = sitesToCheck.iterator()
     var startingFrom = if (oldResults.hasNext()) oldResults.next() else windowStart
 
@@ -300,7 +299,8 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
       if (choosenTag.length == 1) {
         //Prevents "...a[b]...z[b]..."
         //Prevents "...a[b]...z[bc]..."
-        tags.removeAll { choosenTag[0] == it.last() }
+        //Prevents "...a[b]c...z[cb]..."
+        tags.removeAll { it.contains(choosenTag[0]) }
       } else {
         //Prevents "...a[bc]...z[b]..."
         tags.remove(choosenTag[0].toString())
@@ -312,20 +312,15 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
     }
 
     if (query.isNotEmpty()) {
-      if (2 <= query.length) {
-        val last2: String = query.substring(query.length - 2)
-        val last2Index = tagMap[last2]
-        if (last2Index != null) {
-          newTagMap[last2] = last2Index
-          return newTagMap
-        }
-      } else {
-        val lastChar: String = query.last().toString()
-        val lastCharIndex = tagMap[lastChar]
-        if (lastCharIndex != null) {
-          newTagMap[lastChar] = lastCharIndex
-          return newTagMap
-        }
+      val possibleTag: String =
+        if (2 <= query.length)
+          query.substring(query.length - 2)
+        else
+          query.last().toString()
+
+      if (tagMap.contains(possibleTag)) {
+        newTagMap[possibleTag] = tagMap[possibleTag]
+        return newTagMap
       }
     }
 

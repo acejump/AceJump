@@ -38,7 +38,7 @@ class AceCanvas(val editor: EditorImpl) : JComponent() {
 
     val g2d = graphics as Graphics2D
     existingTags = hashSetOf<Pair<Int, Int>>()
-    jumpLocations.orEmpty().forEach { it.paintMe(g2d, this@AceCanvas) }
+    jumpLocations.forEach { it.paintMe(g2d, this@AceCanvas) }
   }
 
   fun registerTag(point: Pair<Int, Int>, tag: String) {
