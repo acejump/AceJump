@@ -86,16 +86,16 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
     jumpLocations = determineJumpLocations()
     if (jumpLocations.size <= 1) {
       if (tagMap.containsKey(query)) {
-        jumpTo(JumpInfo(query, query, tagMap[query]!!, editor))
+        jumpTo(JumpInfo(query, query, tagMap[query]!!, this))
       } else if (2 <= query.length) {
         val last1: String = query.substring(query.length - 1)
         val last2: String = query.substring(query.length - 2)
         if (tagMap.containsKey(last2)) {
-          jumpTo(JumpInfo(last2, query, tagMap[last2]!!, editor))
+          jumpTo(JumpInfo(last2, query, tagMap[last2]!!, this))
         } else if (tagMap.containsKey(last1)) {
           val index = tagMap[last1]!!
           if (document[index + query.length - 1].toLowerCase() != last1[0])
-            jumpTo(JumpInfo(last1, query, index, editor))
+            jumpTo(JumpInfo(last1, query, index, this))
         }
       }
     }
@@ -178,12 +178,12 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
     return indicesToCheck
   }
 
-    /**
-     * Builds a map of all existing bigrams, starting from the index of the
-     * last character in the search results. Simultaneously builds a map of all
-     * available tags, by removing any used bigrams after each search result, and
-     * prior to end of a word (ie. a contiguous group of letters/digits).
-     */
+  /**
+   * Builds a map of all existing bigrams, starting from the index of the
+   * last character in the search results. Simultaneously builds a map of all
+   * available tags, by removing any used bigrams after each search result, and
+   * prior to end of a word (ie. a contiguous group of letters/digits).
+   */
 
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
@@ -367,7 +367,7 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
 
   fun plotJumpLocations(): List<JumpInfo> {
     return tagMap.values.map {
-      JumpInfo(tagMap.inverse()[it]!!, query, it, editor)
+      JumpInfo(tagMap.inverse()[it]!!, query, it, this)
     }.sortedBy { it.index }
   }
 

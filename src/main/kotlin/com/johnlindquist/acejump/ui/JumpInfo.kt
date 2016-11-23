@@ -1,6 +1,5 @@
 package com.johnlindquist.acejump.ui
 
-import com.intellij.openapi.editor.impl.EditorImpl
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
@@ -11,7 +10,8 @@ import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 
 class JumpInfo(private val tag: String, var query: String, val index: Int,
-               val editor: EditorImpl) {
+               val aceFinder: AceFinder) {
+  val editor = aceFinder.editor
   val document = editor.document.charsSequence
   val isRegex = query.first() == Pattern.REGEX_PREFIX
   val line = editor.offsetToVisualLine(index)
@@ -150,7 +150,24 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
       g2d.fillRect(tagX, y, tagWidth, ac.fbm.lineHeight)
     }
 
+    fun surroundTargetWord() {
+      val (wordStart, wordEnd) = aceFinder.getWordBounds(index)
+      g2d.color = blue
+
+      val startPoint = editor.offsetToVisualPosition(wordStart)
+      val startPointO = getPointFromVisualPosition(editor, startPoint)
+      val xPosition = startPointO.originalPoint.x
+      val width = (wordEnd - wordStart) * ac.fbm.fontWidth
+
+      if(document[index].isLetterOrDigit())
+        g2d.drawRect(xPosition, y, width, ac.fbm.fontHeight + 3)
+    }
+
     highlightAlreadyTyped()
     highlightRemaining()
+
+    if(aceFinder.targetModeEnabled) {
+      surroundTargetWord()
+    }
   }
 }

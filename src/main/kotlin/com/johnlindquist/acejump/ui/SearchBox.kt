@@ -2,11 +2,9 @@ package com.johnlindquist.acejump.ui
 
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.KeyboardShortcut
-import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.ui.popup.ComponentPopupBuilder
 import com.intellij.openapi.ui.popup.JBPopupFactory
-import com.intellij.openapi.util.SystemInfo
 import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
 import com.johnlindquist.acejump.search.AceFinder
@@ -14,9 +12,6 @@ import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
 import com.johnlindquist.acejump.search.guessBestLocation
 import java.awt.Color.RED
 import java.awt.Color.WHITE
-import java.awt.Dimension
-import java.awt.Font
-import java.awt.Font.BOLD
 import java.awt.Graphics
 import java.awt.event.ActionEvent
 import java.awt.event.FocusEvent
@@ -82,6 +77,7 @@ class SearchBox(val finder: AceFinder, var editor: EditorImpl) : JTextField() {
         actionMap.put(aja, object : AbstractAction() {
           override fun actionPerformed(e: ActionEvent) {
             background = if (finder.toggleTargetMode()) RED else naturalColor
+            aceCanvas.repaint()
           }
         })
       }
@@ -121,8 +117,6 @@ class SearchBox(val finder: AceFinder, var editor: EditorImpl) : JTextField() {
   }
 
   private fun configurePopup() {
-    val scheme = EditorColorsManager.getInstance().globalScheme
-    val font = Font(scheme.editorFontName, BOLD, scheme.editorFontSize)
     val pb: ComponentPopupBuilder? =
       JBPopupFactory.getInstance()?.createComponentPopupBuilder(this, this)
     pb?.setCancelKeyEnabled(true)
@@ -130,14 +124,6 @@ class SearchBox(val finder: AceFinder, var editor: EditorImpl) : JTextField() {
     popup?.show(guessBestLocation(editor))
     popup?.setRequestFocus(true)
 
-    val width = getFontMetrics(font).stringWidth("w")
-    val dimension = Dimension(width * 2, (editor.lineHeight))
-    if (SystemInfo.isMac) {
-      dimension.setSize(dimension.width * 2, dimension.height * 2)
-    }
-
-    popup?.size = dimension
-    size = dimension
     isFocusable = true
     addFocusListener(object : FocusListener {
       override fun focusGained(p0: FocusEvent) = addAceCanvas()
@@ -175,6 +161,8 @@ class SearchBox(val finder: AceFinder, var editor: EditorImpl) : JTextField() {
     val loc = SwingUtilities.convertPoint(aceCanvas, aceCanvas.location, root)
     aceCanvas.setLocation(-loc.x, -loc.y)
   }
+
+  override fun paint(g: Graphics?) {}
 
   fun exit() {
     val contentComponent = editor.contentComponent
