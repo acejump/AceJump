@@ -147,44 +147,43 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
    */
 
   private fun getSitesInView(fullText: String): List<Int> {
-    val (windowStart, windowEnd) = getVisibleRange(editor)
+    val (viewTop, viewBottom) = getVisibleRange(editor)
+
+    fun nextSite(oldResults: Iterator<Int>, result: FindResult): Int {
+      while (oldResults.hasNext()) {
+        val startingFrom = oldResults.next()
+        if (startingFrom >= result.endOffset)
+          return startingFrom
+      }
+
+      return result.endOffset
+    }
 
     if (query.isEmpty())
-      return (windowStart..(windowEnd - 2)).toList()
+      return (viewTop..(viewBottom - 2)).toList()
 
     val indicesToCheck = mutableListOf<Int>()
     val oldResults = sitesToCheck.iterator()
-    var startingFrom = if (oldResults.hasNext()) oldResults.next() else windowStart
+    var startingFrom = if (oldResults.hasNext()) oldResults.next() else viewTop
 
-    do {
-      val result = findManager.findString(fullText, startingFrom, findModel)
-
-      if (!editor.foldingModel.isOffsetCollapsed(result.startOffset) &&
-        result.startOffset <= windowEnd)
+    var result = findManager.findString(fullText, startingFrom, findModel)
+    while (result!!.isStringFound && result.startOffset < viewBottom) {
+      if (!editor.foldingModel.isOffsetCollapsed(result.startOffset))
         indicesToCheck.add(result.startOffset)
 
       startingFrom = nextSite(oldResults, result)
-    } while (result.isStringFound && result.startOffset < windowEnd)
+      result = findManager.findString(fullText, startingFrom, findModel)
+    }
 
     return indicesToCheck
   }
 
-  private fun nextSite(oldResults: Iterator<Int>, result: FindResult): Int {
-    while (oldResults.hasNext()) {
-      val startingFrom = oldResults.next()
-      if (startingFrom >= result.endOffset)
-        return startingFrom
-    }
-
-    return result.endOffset
-  }
-
-  /**
-   * Builds a map of all existing bigrams, starting from the index of the
-   * last character in the search results. Simultaneously builds a map of all
-   * available tags, by removing any used bigrams after each search result, and
-   * prior to end of a word (ie. a contiguous group of letters/digits).
-   */
+    /**
+     * Builds a map of all existing bigrams, starting from the index of the
+     * last character in the search results. Simultaneously builds a map of all
+     * available tags, by removing any used bigrams after each search result, and
+     * prior to end of a word (ie. a contiguous group of letters/digits).
+     */
 
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
     val stringToIndex = LinkedListMultimap.create<String, Int>()
