@@ -4,19 +4,19 @@ import com.intellij.find.FindManager
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.actionSystem.CommonDataKeys.PROJECT
-import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
-import com.intellij.openapi.wm.IdeFocusManager
 import com.johnlindquist.acejump.keycommands.ShowLineMarkers
 import com.johnlindquist.acejump.search.AceFinder
-import com.johnlindquist.acejump.ui.SearchBox
+import com.sun.glass.events.KeyEvent.VK_BACKSPACE
+import java.awt.event.KeyEvent
+import java.awt.event.KeyEvent.VK_ESCAPE
+
+private var aceFinder: AceFinder? = null
+private var searchBox: KeyboardHandler? = null
 
 open class AceJumpAction() : DumbAwareAction() {
-  var aceFinder: AceFinder? = null
-  var searchBox: SearchBox? = null
-
   override fun update(e: AnActionEvent?) {
     e?.presentation?.isEnabled = (e?.getData(EDITOR)) != null
   }
@@ -27,17 +27,25 @@ open class AceJumpAction() : DumbAwareAction() {
     val editor = actionEvent.getData(EDITOR) as EditorImpl
     val findManager = FindManager.getInstance(project)!!
     aceFinder = AceFinder(findManager, editor)
-    searchBox = SearchBox(aceFinder!!, editor)
-
-    ApplicationManager.getApplication().invokeLater({
-      IdeFocusManager.getInstance(project).requestFocus(searchBox!!, false)
-    })
+    searchBox = KeyboardHandler(aceFinder!!, editor)
   }
 }
 
 class AceJumpLineAction : AceJumpAction() {
   override fun actionPerformed(actionEvent: AnActionEvent) {
-    super.actionPerformed(actionEvent)
     searchBox!!.processRegexCommand(ShowLineMarkers(aceFinder!!))
+    super.actionPerformed(actionEvent)
+  }
+}
+
+class AceJumpKeyAction : AceJumpAction() {
+  override fun actionPerformed(actionEvent: AnActionEvent) {
+    val inputEvent = actionEvent.inputEvent as? KeyEvent ?: return
+
+    when (inputEvent.keyCode) {
+      VK_ESCAPE -> searchBox!!.exit()
+      VK_BACKSPACE -> searchBox!!.processBackspaceCommand()
+      else -> searchBox!!.processRegexCommand(inputEvent.keyCode)
+    }
   }
 }

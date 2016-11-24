@@ -20,7 +20,7 @@ apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'kotlin'
 
 intellij {
-    version '162.1121.32'
+    version '163.7743.44'
     pluginName 'AceJump'
     updateSinceUntilBuild false
 

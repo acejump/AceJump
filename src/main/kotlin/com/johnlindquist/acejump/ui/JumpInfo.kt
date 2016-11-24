@@ -152,7 +152,7 @@ class JumpInfo(private val tag: String, var query: String, val index: Int,
 
     fun surroundTargetWord() {
       val (wordStart, wordEnd) = aceFinder.getWordBounds(index)
-      g2d.color = blue
+      g2d.color = red
 
       val startPoint = editor.offsetToVisualPosition(wordStart)
       val startPointO = getPointFromVisualPosition(editor, startPoint)

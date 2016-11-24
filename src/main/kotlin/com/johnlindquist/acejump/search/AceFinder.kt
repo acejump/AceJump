@@ -94,7 +94,8 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
           jumpTo(JumpInfo(last2, query, tagMap[last2]!!, this))
         } else if (tagMap.containsKey(last1)) {
           val index = tagMap[last1]!!
-          if (document[index + query.length - 1].toLowerCase() != last1[0])
+          val charIndex = index + query.length - 1
+          if (charIndex > document.length || document[charIndex] != last1[0])
             jumpTo(JumpInfo(last1, query, index, this))
         }
       }
@@ -167,7 +168,7 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
     var startingFrom = if (oldResults.hasNext()) oldResults.next() else viewTop
 
     var result = findManager.findString(fullText, startingFrom, findModel)
-    while (result!!.isStringFound && result.startOffset < viewBottom) {
+    while (result!!.isStringFound && result.startOffset <= viewBottom) {
       if (!editor.foldingModel.isOffsetCollapsed(result.startOffset))
         indicesToCheck.add(result.startOffset)
 
@@ -347,10 +348,13 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
 
     val remainingSites = digraphs.asMap().entries.filter {
       it.key.first().isLetterOrDigit() || query.isNotEmpty()
-    }.sortedBy { it.value.size }.flatMap { it.value }.sortedBy {
+    }.sortedBy { it.value.size }.flatMap { it.value }.sortedWith(compareBy(
       // Ensure that the first letter of a word is prioritized for tagging
-      document[Math.max(0, it - 1)].isLetterOrDigit()
-    }.iterator()
+      { document[Math.max(0, it - 1)].isLetterOrDigit() },
+      // Longer characters should come first
+      { val bounds = getWordBounds(it); -document.substring(bounds.first,
+        bounds.second).toCharArray().distinct().size}
+    )).iterator()
 
     if (!findModel.isRegularExpressions || newTagMap.isEmpty())
       while (remainingSites.hasNext() && tags.isNotEmpty())

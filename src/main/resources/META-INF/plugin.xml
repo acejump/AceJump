@@ -9,7 +9,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes></change-notes>
+  <change-notes>No longer tags "folded" regions and minor alignment adjustments.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 
@@ -35,5 +35,8 @@
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl shift SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift SEMICOLON"/>
     </action>
+    <action id="AceJumpKeyAction"
+            class="com.johnlindquist.acejump.AceJumpKeyAction"
+            text="Motion Keys"/>
   </actions>
 </idea-plugin>
