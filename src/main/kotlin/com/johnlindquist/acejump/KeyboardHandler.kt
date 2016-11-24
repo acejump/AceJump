@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
-import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.ui.popup.AbstractPopup
 import com.johnlindquist.acejump.keycommands.*
@@ -12,7 +11,6 @@ import com.johnlindquist.acejump.search.AceFinder
 import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
 import com.johnlindquist.acejump.ui.AceCanvas
 import com.sun.glass.events.KeyEvent.VK_BACKSPACE
-import java.awt.Color.WHITE
 import java.awt.event.KeyEvent.*
 import javax.swing.JRootPane
 import javax.swing.SwingUtilities
@@ -24,7 +22,6 @@ class KeyboardHandler(val finder: AceFinder, var editor: EditorImpl) {
   var keyMap: Map<Int, AceKeyCommand> = hashMapOf()
   var popupContainer: AbstractPopup? = null
   var defaultKeyCommand = DefaultKeyCommand(finder)
-  var naturalColor = WHITE
   var keyHandler = EditorActionManager.getInstance().typedAction.rawHandler
   val specials = intArrayOf(VK_BACKSPACE, VK_LEFT, VK_RIGHT, VK_UP, VK_ESCAPE)
 
@@ -47,39 +44,6 @@ class KeyboardHandler(val finder: AceFinder, var editor: EditorImpl) {
 
       aceCanvas.repaint()
     })
-//
-//    val search = "dispatch"
-//    (' '..'~').forEach { inputMap.put(getKeyStroke(it), search) }
-//    actionMap.put(search, object : AbstractAction() {
-//      override fun actionPerformed(e: ActionEvent) {
-//        if (e.modifiers == 0) {
-//          text += e.actionCommand
-//          defaultKeyCommand.execute(e.actionCommand[0], text)
-//        } else if (e.modifiers == SHIFT_MASK) {
-//          text += e.actionCommand
-//          defaultKeyCommand.execute(e.actionCommand[0].toUpperCase(), text)
-//        }
-//      }
-//    })
-//
-//
-//    val aja = "AceJumpAction"
-//    ActionManager.getInstance().getAction(aja).shortcutSet?.shortcuts?.forEach {
-//      if (it.isKeyboard) {
-//        val kbs = it as KeyboardShortcut
-//        inputMap.put(kbs.firstKeyStroke, aja)
-//        actionMap.put(aja, object : AbstractAction() {
-//          override fun actionPerformed(e: ActionEvent) {
-//            if (finder.toggleTargetMode())
-//              editor.colorsScheme.setColor(CARET_COLOR, RED)
-//            else
-//              editor.colorsScheme.setColor(CARET_COLOR, naturalColor)
-//
-//            aceCanvas.repaint()
-//          }
-//        })
-//      }
-//    }
   }
 
   fun processRegexCommand(aceKeyCommand: AceKeyCommand) {
@@ -100,7 +64,6 @@ class KeyboardHandler(val finder: AceFinder, var editor: EditorImpl) {
   private fun configureEditor() {
     addAceCanvas()
     editor.scrollingModel.addVisibleAreaListener { exit() }
-    naturalColor = editor.colorsScheme.getColor(CARET_COLOR)
   }
 
   private fun configureKeyMap() {
