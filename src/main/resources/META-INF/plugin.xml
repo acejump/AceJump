@@ -1,5 +1,4 @@
-<idea-plugin url="https://github.com/johnlindquist/AceJump"
-             version="2">
+<idea-plugin url="https://github.com/johnlindquist/AceJump" version="2">
   <name>AceJump</name>
   <id>AceJump</id>
 
@@ -9,7 +8,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>No longer tags "folded" regions and minor alignment adjustments.</change-notes>
+  <change-notes>Removes the old search box, improvements to latency.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 

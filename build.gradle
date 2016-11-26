@@ -1,28 +1,27 @@
 buildscript {
-    ext.kotlin_version = '1.0.5-2'
+  ext.kotlin_version = '1.0.5-2'
 
-    repositories {
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-    }
+  repositories {
+    mavenCentral()
+    maven { url 'http://dl.bintray.com/jetbrains/intellij-plugin-service' }
+  }
+
+  dependencies {
+    classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+  }
 }
 
 plugins {
-    id "org.jetbrains.intellij" version "0.1.10"
+  id "org.jetbrains.intellij" version "0.1.10"
 }
 
 apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'kotlin'
 
 intellij {
-    version '163.7743.44'
-    pluginName 'AceJump'
-    updateSinceUntilBuild false
+  version '163.7743.44'
+  pluginName 'AceJump'
+  updateSinceUntilBuild false
 
 //    publish {
 //        username publishUsername
@@ -31,13 +30,13 @@ intellij {
 }
 
 group 'com.johnlindquist'
-version '3.0.7'
+version '3.0.8'
 
 repositories {
-    mavenCentral()
+  mavenCentral()
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-    compile "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  compile "org.jetbrains.kotlin:kotlin-runtime:$kotlin_version"
 }

@@ -4,34 +4,41 @@ import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
-import com.intellij.find.FindManager
-import com.intellij.find.FindModel
-import com.intellij.find.FindResult
-import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.impl.EditorImpl
-import com.intellij.util.EventDispatcher
-import com.johnlindquist.acejump.keycommands.AceJumper
+import com.johnlindquist.acejump.AceJumpAction.Companion.document
+import com.johnlindquist.acejump.AceJumpAction.Companion.editor
+import com.johnlindquist.acejump.AceJumpAction.Companion.findManager
+import com.johnlindquist.acejump.AceJumpAction.Companion.findModel
 import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
 import com.johnlindquist.acejump.search.Pattern.Companion.nearby
 import com.johnlindquist.acejump.ui.JumpInfo
+import com.intellij.find.FindResult
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.util.EventDispatcher
 import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 import kotlin.comparisons.compareBy
 
-class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
-  var hasJumped = false
+/**
+ * Singleton that searches for text in the editor and tags matching results.
+ */
+
+object Finder {
+  var findEnabled = false
+    private set
+  var targetModeEnabled = false
+    private set
   var jumpLocations: Collection<JumpInfo> = emptyList()
+    private set
   val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
 
-  private var query = ""
+  var query = ""
+    private set
   private var sitesToCheck = listOf<Int>()
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private var unseen1grams: LinkedHashSet<String> = linkedSetOf()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
-  private val document = editor.document.charsSequence.toString().toLowerCase()
-  private val findModel: FindModel = findManager.findInFileModel.clone()
 
   init {
     findModel.isFindAll = true
@@ -45,6 +52,7 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
   }
 
   fun find(text: String, key: Char) {
+    findEnabled = true
     // "0" is Backspace
     if (key == 0.toChar()) {
       reset()
@@ -55,48 +63,39 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
     findModel.stringToFind = text
 
     val application = ApplicationManager.getApplication()
-    application.runReadAction({ jump(key) })
+    application.runReadAction({ jump() })
     application.invokeLater({
       if (text.isNotEmpty())
-        eventDispatcher.multicaster.stateChanged(ChangeEvent("AceFinder"))
+        eventDispatcher.multicaster.stateChanged(ChangeEvent("Finder"))
     })
   }
 
-  var targetModeEnabled = false
   fun toggleTargetMode(): Boolean {
     targetModeEnabled = !targetModeEnabled
     return targetModeEnabled
   }
 
-  val aceJumper = AceJumper(editor, document)
-  private fun jump(key: Char) {
+  private fun jump() {
     fun jumpTo(jumpInfo: JumpInfo) {
-      if (key.isUpperCase())
-        aceJumper.setSelectionFromCaretToOffset(jumpInfo.index)
-      else
-        aceJumper.moveCaret(jumpInfo.index)
-      hasJumped = true
-
-      if (targetModeEnabled)
-        aceJumper.selectWordAtCaret()
-
+      Jumper.jump(jumpInfo)
+      findEnabled = false
       reset()
     }
 
     jumpLocations = determineJumpLocations()
     if (jumpLocations.size <= 1) {
       if (tagMap.containsKey(query)) {
-        jumpTo(JumpInfo(query, query, tagMap[query]!!, this))
+        jumpTo(JumpInfo(query, tagMap[query]!!))
       } else if (2 <= query.length) {
         val last1: String = query.substring(query.length - 1)
         val last2: String = query.substring(query.length - 2)
         if (tagMap.containsKey(last2)) {
-          jumpTo(JumpInfo(last2, query, tagMap[last2]!!, this))
+          jumpTo(JumpInfo(last2, tagMap[last2]!!))
         } else if (tagMap.containsKey(last1)) {
           val index = tagMap[last1]!!
           val charIndex = index + query.length - 1
           if (charIndex > document.length || document[charIndex] != last1[0])
-            jumpTo(JumpInfo(last1, query, index, this))
+            jumpTo(JumpInfo(last1, index))
         }
       }
     }
@@ -246,11 +245,12 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
    */
 
   private fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
-    val newTagMap: BiMap<String, Int> = HashBiMap.create()
     if (query.isEmpty())
-      return newTagMap
+      return HashBiMap.create()
 
-    val tags = LinkedHashSet<String>(unseen1grams)
+    val newTagMap: BiMap<String, Int> = setupTagMap()
+    val tags: HashSet<String> = setupTags(digraphs)
+
     fun hasNearbyTag(index: Int): Boolean {
       val (wordStart, wordEnd) = getWordBounds(index)
       val left = Math.max(wordStart, index - 2)
@@ -324,36 +324,18 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
       }
     }
 
-    // Add pre-existing tags where search string and tag are intermingled
-    for (entry in tagMap) {
-      if (query == entry.key || query.last() == entry.key.first()) {
-        newTagMap[entry.key] = entry.value
-        tags.remove(entry.key[0].toString())
-      }
-    }
-
-    unseen2grams.sortedWith(compareBy(
-      // Least frequent first-character comes first
-      { digraphs[it[0].toString()].orEmpty().size },
-      // Adjacent keys come before non-adjacent keys
-      { !adjacent[it[0]]!!.contains(it.last()) },
-      // Rotate to remove "clumps" (ie. AA, AB, AC => AA BA CA)
-      String::last,
-      // Minimze the distance between tag characters
-      { nearby[it[0]]!!.indexOf(it.last()) }
-    )).forEach { tag ->
-      tags.remove(tag[0].toString())
-      tags.add(tag)
-    }
-
     val remainingSites = digraphs.asMap().entries.filter {
       it.key.first().isLetterOrDigit() || query.isNotEmpty()
     }.sortedBy { it.value.size }.flatMap { it.value }.sortedWith(compareBy(
       // Ensure that the first letter of a word is prioritized for tagging
       { document[Math.max(0, it - 1)].isLetterOrDigit() },
-      // Longer characters should come first
-      { val bounds = getWordBounds(it); -document.substring(bounds.first,
-        bounds.second).toCharArray().distinct().size}
+      // Target words with more unique characters to the immediate right ought
+      // to have first pick for tags, since they are the most "picky" targets
+      {
+        val bounds = getWordBounds(it)
+        val charactersBeforeNextSpace = document.substring(it, bounds.second)
+        -charactersBeforeNextSpace.toCharArray().distinct().size
+      }
     )).iterator()
 
     if (!findModel.isRegularExpressions || newTagMap.isEmpty())
@@ -363,6 +345,30 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
     return newTagMap
   }
 
+  private fun setupTagMap(): BiMap<String, Int> {
+    val newTagMap = HashBiMap.create<String, Int>()
+    // Add pre-existing tags where search string and tag are intermingled
+    for ((key, value) in tagMap) {
+      if (query == key || query.last() == key.first()) {
+        newTagMap[key] = value
+      }
+    }
+
+    return newTagMap
+  }
+
+  private fun setupTags(bigrams: Multimap<String, Int>) =
+    unseen2grams.sortedWith(compareBy(
+      // Least frequent first-character comes first
+      { bigrams[it[0].toString()].orEmpty().size },
+      // Adjacent keys come before non-adjacent keys
+      { !adjacent[it[0]]!!.contains(it.last()) },
+      // Rotate to remove "clumps" (ie. AA, AB, AC => AA BA CA)
+      String::last,
+      // Minimze the distance between tag characters
+      { nearby[it[0]]!!.indexOf(it.last()) }
+    )).toHashSet()
+
   fun findPattern(text: Pattern) {
     reset()
     findModel.isRegularExpressions = true
@@ -371,7 +377,7 @@ class AceFinder(val findManager: FindManager, var editor: EditorImpl) {
 
   fun plotJumpLocations(): List<JumpInfo> {
     return tagMap.values.map {
-      JumpInfo(tagMap.inverse()[it]!!, query, it, this)
+      JumpInfo(tagMap.inverse()[it]!!, it)
     }.sortedBy { it.index }
   }
 

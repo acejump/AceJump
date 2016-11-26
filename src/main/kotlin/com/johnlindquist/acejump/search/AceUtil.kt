@@ -1,17 +1,51 @@
 package com.johnlindquist.acejump.search
 
+import com.intellij.find.FindManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.VisualPosition
+import com.intellij.openapi.editor.colors.EditorColors
+import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.project.Project
+import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
+import com.johnlindquist.acejump.AceJumpAction.Companion.editor
+import com.johnlindquist.acejump.ui.Canvas
 import java.lang.Math.max
 import java.lang.Math.min
 
+object AceFont {
+  var font = Canvas.font!!
+  val fontWidth = Canvas.getFontMetrics(font).stringWidth("w")
+  val fontHeight = font.size
+  val lineHeight: Int
+    get() = editor.lineHeight
+  val lineSpacing = Canvas.scheme.lineSpacing
+  val fontSpacing = fontHeight * lineSpacing
+  val rectHOffset = fontSpacing - fontHeight
+  val hOffset = fontHeight - fontSpacing
+}
 
-fun guessBestLocation(editor: Editor) =
-  getPointFromVisualPosition(editor, editor.caretModel.visualPosition)
+fun getDefaultEditor() = FileEditorManager.getInstance(ProjectManager
+  .getInstance().openProjects[0]).selectedTextEditor!!
 
-fun getPointFromVisualPosition(editor: Editor, logicalPosition: VisualPosition) =
-  RelativePoint(editor.contentComponent, editor.visualPositionToXY(logicalPosition))
+fun cloneProjectFindModel(project: Project) =
+  FindManager.getInstance(project).findInFileModel.clone()
+
+fun getDocumentFromEditor(editor: Editor) =
+  editor.document.charsSequence.toString().toLowerCase()
+
+fun getNaturalCursorColor() =
+  EditorColorsManager.getInstance().globalScheme.getColor(EditorColors.CARET_COLOR)!!
+
+fun getBlockCursorUserSetting() =
+  EditorSettingsExternalizable.getInstance().isBlockCursor
+
+fun getPointFromVisualPosition(editor: Editor,
+                               logicalPosition: VisualPosition) =
+  RelativePoint(editor.contentComponent,
+    editor.visualPositionToXY(logicalPosition))
 
 fun getVisibleRange(editor: Editor): Pair<Int, Int> {
   val firstVisibleLine = getVisualLineAtTopOfScreen(editor)

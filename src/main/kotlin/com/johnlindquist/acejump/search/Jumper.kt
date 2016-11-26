@@ -1,11 +1,26 @@
-package com.johnlindquist.acejump.keycommands
+package com.johnlindquist.acejump.search
 
+import com.johnlindquist.acejump.AceJumpAction.Companion.document
+import com.johnlindquist.acejump.AceJumpAction.Companion.editor
+import com.johnlindquist.acejump.ui.JumpInfo
 import com.intellij.codeInsight.editorActions.SelectWordUtil.addWordSelection
-import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.util.TextRange
 import java.util.*
 
-open class AceJumper(var editor: EditorImpl, var document: CharSequence) {
+object Jumper {
+  var hasJumped = false
+  fun jump(jumpInfo: JumpInfo) {
+    if (jumpInfo.query.last().isUpperCase())
+      setSelectionFromCaretToOffset(jumpInfo.index)
+    else
+      moveCaret(jumpInfo.index)
+
+    if (Finder.targetModeEnabled)
+      selectWordAtCaret()
+
+    hasJumped = true
+  }
+
   fun moveCaret(offset: Int) {
     editor.selectionModel.removeSelection()
     editor.caretModel.moveToOffset(offset)
@@ -13,7 +28,9 @@ open class AceJumper(var editor: EditorImpl, var document: CharSequence) {
 
   fun selectWordAtCaret() {
     val ranges = ArrayList<TextRange>()
-    addWordSelection(false, document, editor.caretModel.offset, ranges)
+    addWordSelection(false, document, editor.caretModel
+      .offset,
+      ranges)
 
     if (ranges.isEmpty()) return
 
