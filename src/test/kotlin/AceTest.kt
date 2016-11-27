@@ -8,6 +8,6 @@ import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
  * @see LightCodeInsightFixtureTestCase
  */
 class  AceTest: EditorActionTestCase() {
-  override fun getActionId() = "AceJumpAction"
+  override fun getActionId() = "AceAction"
 
 }

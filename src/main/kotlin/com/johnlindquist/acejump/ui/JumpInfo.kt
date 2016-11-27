@@ -1,8 +1,8 @@
 package com.johnlindquist.acejump.ui
 
-import com.johnlindquist.acejump.AceJumpAction.Companion.document
-import com.johnlindquist.acejump.AceJumpAction.Companion.editor
 import com.johnlindquist.acejump.search.*
+import com.johnlindquist.acejump.ui.AceUI.document
+import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance

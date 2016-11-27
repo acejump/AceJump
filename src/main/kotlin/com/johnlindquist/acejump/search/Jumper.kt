@@ -1,10 +1,10 @@
 package com.johnlindquist.acejump.search
 
-import com.johnlindquist.acejump.AceJumpAction.Companion.document
-import com.johnlindquist.acejump.AceJumpAction.Companion.editor
-import com.johnlindquist.acejump.ui.JumpInfo
 import com.intellij.codeInsight.editorActions.SelectWordUtil.addWordSelection
 import com.intellij.openapi.util.TextRange
+import com.johnlindquist.acejump.ui.AceUI.document
+import com.johnlindquist.acejump.ui.AceUI.editor
+import com.johnlindquist.acejump.ui.JumpInfo
 import java.util.*
 
 object Jumper {

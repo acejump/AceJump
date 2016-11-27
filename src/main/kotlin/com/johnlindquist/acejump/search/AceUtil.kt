@@ -10,7 +10,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
-import com.johnlindquist.acejump.AceJumpAction.Companion.editor
+import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.Canvas
 import java.lang.Math.max
 import java.lang.Math.min
@@ -41,6 +41,10 @@ fun getNaturalCursorColor() =
 
 fun getBlockCursorUserSetting() =
   EditorSettingsExternalizable.getInstance().isBlockCursor
+
+fun getNaturalCursorBlink() =
+  EditorSettingsExternalizable.getInstance().isBlinkCaret
+
 
 fun getPointFromVisualPosition(editor: Editor,
                                logicalPosition: VisualPosition) =

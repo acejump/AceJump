@@ -4,46 +4,38 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
-import com.johnlindquist.acejump.AceJumpAction.Companion.editor
+import com.intellij.openapi.editor.actionSystem.TypedActionHandler
+import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.johnlindquist.acejump.search.Finder
+import com.johnlindquist.acejump.search.Finder.resultsReady
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Pattern.Companion.keyMap
+import com.johnlindquist.acejump.ui.AceUI.editor
+import com.johnlindquist.acejump.ui.AceUI.restoreEditorSettings
+import com.johnlindquist.acejump.ui.AceUI.setupCanvas
 import com.johnlindquist.acejump.ui.Canvas
 import com.sun.glass.events.KeyEvent.VK_BACKSPACE
 import java.awt.event.KeyEvent.*
-import javax.swing.JRootPane
-import javax.swing.SwingUtilities
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
-class KeyboardHandler {
-  var text = ""
-  var keyHandler = EditorActionManager.getInstance().typedAction.rawHandler
+object KeyboardHandler {
+  var isEnabled = false
+  private var text = ""
+  private val keyHandler: TypedActionHandler
+    get() = EditorActionManager.getInstance().typedAction.rawHandler
   val specials = intArrayOf(VK_BACKSPACE, VK_LEFT, VK_RIGHT, VK_UP, VK_ESCAPE)
 
   init {
-    configureKeyMap()
-    configureEditor()
-
-    Finder.eventDispatcher.addListener(ChangeListener {
-      Canvas.jumpLocations = Finder.jumpLocations
+    resultsReady.addListener(ChangeListener {
       if (Jumper.hasJumped) {
         Jumper.hasJumped = false
-        exit()
+        returnToNormal()
+      } else {
+        Canvas.jumpLocations = Finder.jumpLocations
+        Canvas.repaint()
       }
-
-      Canvas.repaint()
     })
-  }
-
-  fun handleKeystroke(key: Char) {
-    //fixes the delete bug
-    if (key == '\b') return
-
-    text += key
-    //Find or jump
-    Finder.find(text, key)
-    Finder.eventDispatcher.multicaster.stateChanged(ChangeEvent("Finder"))
   }
 
   fun processRegexCommand(keyCode: Int) {
@@ -52,43 +44,53 @@ class KeyboardHandler {
 
   fun processBackspaceCommand() {
     text = ""
-    handleKeystroke(0.toChar())
+    Finder.reset()
   }
 
+  val returnToNormalIfChanged = VisibleAreaListener { returnToNormal() }
   private fun configureEditor() {
-    addAceCanvas()
+    setupCanvas()
+    interceptKeystrokes()
+    editor.scrollingModel.addVisibleAreaListener(returnToNormalIfChanged)
+  }
+
+  private fun interceptKeystrokes() {
     EditorActionManager.getInstance().typedAction.setupRawHandler {
-      editor: Editor, c: Char, dataContext: DataContext ->
-      handleKeystroke(c)
+      editor: Editor, key: Char, dataContext: DataContext ->
+      text += key
+      //Find or jump
+      Finder.find(text, key)
+      resultsReady.multicaster.stateChanged(ChangeEvent("Finder"))
     }
-    editor.scrollingModel.addVisibleAreaListener { exit() }
   }
 
   private fun configureKeyMap() {
     specials.forEach {
-      ActionManager.getInstance().getAction("AceJumpKeyAction")
+      ActionManager.getInstance().getAction("AceKeyAction")
         .registerCustomShortcutSet(it, 0, editor.component)
     }
   }
 
-  fun addAceCanvas() {
-    editor.contentComponent.add(Canvas)
-    val viewport = editor.scrollingModel.visibleArea
-    Canvas.setBounds(0, 0, viewport.width + 1000, viewport.height + 1000)
-    val root: JRootPane = editor.component.rootPane
-    val loc = SwingUtilities.convertPoint(Canvas, Canvas.location, root)
-    Canvas.setLocation(-loc.x, -loc.y)
+
+  fun startListening() {
+    configureKeyMap()
+    configureEditor()
+    isEnabled = true
   }
 
-  fun exit() {
-    editor.contentComponent.remove(Canvas)
-    editor.contentComponent.repaint()
+  fun returnToNormal() {
+    text = ""
+    isEnabled = false
+    editor.scrollingModel.removeVisibleAreaListener(returnToNormalIfChanged)
+
     specials.forEach {
-      ActionManager.getInstance().getAction("AceJumpKeyAction")
+      ActionManager.getInstance().getAction("AceKeyAction")
         .unregisterCustomShortcutSet(editor.component)
     }
 
     EditorActionManager.getInstance().typedAction.setupRawHandler(keyHandler)
     Finder.reset()
+    Canvas.reset()
+    restoreEditorSettings()
   }
 }

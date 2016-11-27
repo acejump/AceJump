@@ -4,16 +4,16 @@ import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
-import com.johnlindquist.acejump.AceJumpAction.Companion.document
-import com.johnlindquist.acejump.AceJumpAction.Companion.editor
-import com.johnlindquist.acejump.AceJumpAction.Companion.findManager
-import com.johnlindquist.acejump.AceJumpAction.Companion.findModel
-import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
-import com.johnlindquist.acejump.search.Pattern.Companion.nearby
-import com.johnlindquist.acejump.ui.JumpInfo
 import com.intellij.find.FindResult
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.util.EventDispatcher
+import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
+import com.johnlindquist.acejump.search.Pattern.Companion.nearby
+import com.johnlindquist.acejump.ui.AceUI.document
+import com.johnlindquist.acejump.ui.AceUI.editor
+import com.johnlindquist.acejump.ui.AceUI.findManager
+import com.johnlindquist.acejump.ui.AceUI.findModel
+import com.johnlindquist.acejump.ui.JumpInfo
 import java.util.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
@@ -24,13 +24,11 @@ import kotlin.comparisons.compareBy
  */
 
 object Finder {
-  var findEnabled = false
-    private set
   var targetModeEnabled = false
     private set
   var jumpLocations: Collection<JumpInfo> = emptyList()
     private set
-  val eventDispatcher = EventDispatcher.create(ChangeListener::class.java)
+  val resultsReady = EventDispatcher.create(ChangeListener::class.java)
 
   var query = ""
     private set
@@ -52,13 +50,6 @@ object Finder {
   }
 
   fun find(text: String, key: Char) {
-    findEnabled = true
-    // "0" is Backspace
-    if (key == 0.toChar()) {
-      reset()
-      return
-    }
-
     query = if (Pattern.contains(text)) key.toString() else text.toLowerCase()
     findModel.stringToFind = text
 
@@ -66,7 +57,7 @@ object Finder {
     application.runReadAction({ jump() })
     application.invokeLater({
       if (text.isNotEmpty())
-        eventDispatcher.multicaster.stateChanged(ChangeEvent("Finder"))
+        resultsReady.multicaster.stateChanged(ChangeEvent("Finder"))
     })
   }
 
@@ -78,7 +69,6 @@ object Finder {
   private fun jump() {
     fun jumpTo(jumpInfo: JumpInfo) {
       Jumper.jump(jumpInfo)
-      findEnabled = false
       reset()
     }
 

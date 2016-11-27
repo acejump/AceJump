@@ -18,24 +18,24 @@
 
   <actions>
     <!-- Add your actions here -->
-    <action id="AceJumpAction"
-            class="com.johnlindquist.acejump.AceJumpAction"
+    <action id="AceAction"
+            class="com.johnlindquist.acejump.AceAction"
             text="Activate AceJump Mode"
             description="Search and navigate to result">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
     </action>
-    <action id="AceJumpLineAction"
-            class="com.johnlindquist.acejump.AceJumpLineAction"
+    <action id="AceLineAction"
+            class="com.johnlindquist.acejump.AceLineAction"
             text="Display Line Markers"
             description="Search and navigate to result">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl shift SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl shift SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift SEMICOLON"/>
     </action>
-    <action id="AceJumpKeyAction"
-            class="com.johnlindquist.acejump.AceJumpKeyAction"
+    <action id="AceKeyAction"
+            class="com.johnlindquist.acejump.AceKeyAction"
             text="Motion Keys"/>
   </actions>
 </idea-plugin>

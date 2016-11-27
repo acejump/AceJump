@@ -1,7 +1,7 @@
 package com.johnlindquist.acejump.ui
 
-import com.johnlindquist.acejump.search.AceFont
 import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.johnlindquist.acejump.search.AceFont
 import java.awt.Font
 import java.awt.Font.BOLD
 import java.awt.Graphics
@@ -11,7 +11,7 @@ import javax.swing.JComponent
 object Canvas : JComponent() {
   var existingTags = hashSetOf<Pair<Int, Int>>()
   var jumpLocations: Collection<JumpInfo> = arrayListOf()
-  val scheme = EditorColorsManager.getInstance().globalScheme
+  var scheme = EditorColorsManager.getInstance().globalScheme
 
   init {
     font = Font(scheme.editorFontName, BOLD, scheme.editorFontSize)
@@ -36,5 +36,11 @@ object Canvas : JComponent() {
 
   fun isFree(point: Pair<Int, Int>): Boolean {
     return !existingTags.contains(point)
+  }
+
+  fun reset() {
+    existingTags = hashSetOf<Pair<Int, Int>>()
+    jumpLocations = arrayListOf()
+    scheme = EditorColorsManager.getInstance().globalScheme
   }
 }
