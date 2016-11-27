@@ -2,6 +2,7 @@ package com.johnlindquist.acejump.search
 
 import com.intellij.codeInsight.editorActions.SelectWordUtil.addWordSelection
 import com.intellij.openapi.util.TextRange
+import com.johnlindquist.acejump.search.Finder.originalQuery
 import com.johnlindquist.acejump.ui.AceUI.document
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.JumpInfo
@@ -10,7 +11,7 @@ import java.util.*
 object Jumper {
   var hasJumped = false
   fun jump(jumpInfo: JumpInfo) {
-    if (jumpInfo.query.last().isUpperCase())
+    if (originalQuery.last().isUpperCase())
       setSelectionFromCaretToOffset(jumpInfo.index)
     else
       moveCaret(jumpInfo.index)

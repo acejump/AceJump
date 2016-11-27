@@ -1,6 +1,7 @@
 package com.johnlindquist.acejump.ui
 
 import com.johnlindquist.acejump.search.*
+import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.ui.AceUI.document
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
@@ -12,7 +13,6 @@ import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 
 class JumpInfo(val tag: String, val index: Int) {
-  val query = Finder.query
   val isRegex = query.first() == Pattern.REGEX_PREFIX
   val line = editor.offsetToVisualPosition(index).line
   var originOffset = editor.offsetToVisualPosition(index)
@@ -151,6 +151,7 @@ class JumpInfo(val tag: String, val index: Int) {
     }
 
     fun surroundTargetWord() {
+      g2d.composite = getInstance(SRC_OVER, 1.toFloat())
       val (wordStart, wordEnd) = Finder.getWordBounds(index)
       g2d.color = red
 

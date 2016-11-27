@@ -30,6 +30,7 @@ object Finder {
     private set
   val resultsReady = EventDispatcher.create(ChangeListener::class.java)
 
+  var originalQuery = ""
   var query = ""
     private set
   private var sitesToCheck = listOf<Int>()
@@ -50,6 +51,7 @@ object Finder {
   }
 
   fun find(text: String, key: Char) {
+    originalQuery = text
     query = if (Pattern.contains(text)) key.toString() else text.toLowerCase()
     findModel.stringToFind = text
 
@@ -378,6 +380,7 @@ object Finder {
     digraphs.clear()
     tagMap.clear()
     query = ""
+    originalQuery = ""
     unseen1grams.clear()
     unseen2grams.clear()
     jumpLocations = emptyList()

@@ -9,9 +9,9 @@ import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Pattern.LINE_MARKERS
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.setupCursor
+import com.johnlindquist.acejump.ui.Canvas
 import com.sun.glass.events.KeyEvent.VK_BACKSPACE
 import java.awt.Color.RED
-import java.awt.Color.BLUE
 import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent.VK_ESCAPE
 
@@ -20,6 +20,7 @@ open class AceAction : DumbAwareAction() {
     action?.presentation?.isEnabled = (action?.getData(EDITOR)) != null
   }
 
+  @Synchronized
   override fun actionPerformed(actionEvent: AnActionEvent) {
     editor = actionEvent.getData(EDITOR) as EditorImpl
     setupCursor()
@@ -28,8 +29,7 @@ open class AceAction : DumbAwareAction() {
     } else {
       if (Finder.toggleTargetMode())
         editor.colorsScheme.setColor(CARET_COLOR, RED)
-      else
-        editor.colorsScheme.setColor(CARET_COLOR, BLUE)
+      Canvas.repaint()
     }
   }
 }
