@@ -20,6 +20,7 @@ import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
 object KeyboardHandler {
+  @Volatile
   var isEnabled = false
   private var text = ""
   private val keyHandler: TypedActionHandler
@@ -38,9 +39,7 @@ object KeyboardHandler {
     })
   }
 
-  fun processRegexCommand(keyCode: Int) {
-    keyMap[keyCode]?.invoke()
-  }
+  fun processRegexCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
   fun processBackspaceCommand() {
     text = ""
@@ -56,7 +55,7 @@ object KeyboardHandler {
 
   private fun interceptKeystrokes() {
     EditorActionManager.getInstance().typedAction.setupRawHandler {
-      editor: Editor, key: Char, dataContext: DataContext ->
+      _: Editor, key: Char, _: DataContext ->
       text += key
       //Find or jump
       Finder.find(text, key)
@@ -64,18 +63,15 @@ object KeyboardHandler {
     }
   }
 
-  private fun configureKeyMap() {
+  private fun configureKeyMap() =
     specials.forEach {
       ActionManager.getInstance().getAction("AceKeyAction")
         .registerCustomShortcutSet(it, 0, editor.component)
     }
-  }
-
 
   fun startListening() {
     configureKeyMap()
     configureEditor()
-    isEnabled = true
   }
 
   fun returnToNormal() {

@@ -6,7 +6,7 @@ enum class Pattern(val pattern: String) {
   END_OF_LINE("\\n"),
   START_OF_LINE("^.|^\\n"),
   CODE_INDENTS("(?<=^\\s*)\\S|^\\n"),
-  LINE_MARKERS(END_OF_LINE.pattern + "|" +
+  LINE_MARK(END_OF_LINE.pattern + "|" +
     START_OF_LINE.pattern + "|" +
     CODE_INDENTS.pattern),
   WHITE_SPACE("\\s+\\S(?<!^\\s*\\S)");

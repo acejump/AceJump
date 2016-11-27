@@ -6,9 +6,12 @@ import com.johnlindquist.acejump.search.Finder.originalQuery
 import com.johnlindquist.acejump.ui.AceUI.document
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.JumpInfo
+import java.lang.Math.max
+import java.lang.Math.min
 import java.util.*
 
 object Jumper {
+  @Volatile
   var hasJumped = false
   fun jump(jumpInfo: JumpInfo) {
     if (originalQuery.last().isUpperCase())
@@ -29,17 +32,15 @@ object Jumper {
 
   fun selectWordAtCaret() {
     val ranges = ArrayList<TextRange>()
-    addWordSelection(false, document, editor.caretModel
-      .offset,
-      ranges)
+    addWordSelection(false, document, editor.caretModel.offset, ranges)
 
     if (ranges.isEmpty()) return
 
-    val startWordOffset = Math.max(0, ranges[0].startOffset)
-    val endWordOffset = Math.min(ranges[0].endOffset, document.length)
+    val startOfWordOffset = max(0, ranges[0].startOffset)
+    val endOfWordOffset = min(ranges[0].endOffset, document.length)
 
     editor.selectionModel.removeSelection()
-    editor.selectionModel.setSelection(startWordOffset, endWordOffset)
+    editor.selectionModel.setSelection(startOfWordOffset, endOfWordOffset)
   }
 
   fun setSelectionFromCaretToOffset(toOffset: Int) {

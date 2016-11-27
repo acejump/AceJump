@@ -1,55 +1,18 @@
 package com.johnlindquist.acejump.search
 
-import com.intellij.find.FindManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.VisualPosition
-import com.intellij.openapi.editor.colors.EditorColors
-import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
 import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.project.Project
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
-import com.johnlindquist.acejump.ui.AceUI.editor
-import com.johnlindquist.acejump.ui.Canvas
 import java.lang.Math.max
 import java.lang.Math.min
-
-object AceFont {
-  var font = Canvas.font!!
-  val fontWidth = Canvas.getFontMetrics(font).stringWidth("w")
-  val fontHeight = font.size
-  val lineHeight: Int
-    get() = editor.lineHeight
-  val lineSpacing = Canvas.scheme.lineSpacing
-  val fontSpacing = fontHeight * lineSpacing
-  val rectHOffset = fontSpacing - fontHeight
-  val hOffset = fontHeight - fontSpacing
-}
 
 fun getDefaultEditor() = FileEditorManager.getInstance(ProjectManager
   .getInstance().openProjects[0]).selectedTextEditor!!
 
-fun cloneProjectFindModel(project: Project) =
-  FindManager.getInstance(project).findInFileModel.clone()
-
-fun getDocumentFromEditor(editor: Editor) =
-  editor.document.charsSequence.toString().toLowerCase()
-
-fun getNaturalCursorColor() =
-  EditorColorsManager.getInstance().globalScheme.getColor(EditorColors.CARET_COLOR)!!
-
-fun getBlockCursorUserSetting() =
-  EditorSettingsExternalizable.getInstance().isBlockCursor
-
-fun getNaturalCursorBlink() =
-  EditorSettingsExternalizable.getInstance().isBlinkCaret
-
-
-fun getPointFromVisualPosition(editor: Editor,
-                               logicalPosition: VisualPosition) =
-  RelativePoint(editor.contentComponent,
-    editor.visualPositionToXY(logicalPosition))
+fun getPointFromVisualPosition(editor: Editor, position: VisualPosition) =
+  RelativePoint(editor.contentComponent, editor.visualPositionToXY(position))
 
 fun getVisibleRange(editor: Editor): Pair<Int, Int> {
   val firstVisibleLine = getVisualLineAtTopOfScreen(editor)
@@ -63,27 +26,6 @@ fun getVisibleRange(editor: Editor): Pair<Int, Int> {
   endOffset = min(max(0, editor.document.textLength - 1), endOffset + 1)
 
   return Pair(startOffset, endOffset)
-}
-
-fun getThisLineLength(editor: Editor, offset: Int): Int {
-  val pos = editor.offsetToVisualPosition(offset)
-  if (pos.line - 1 > editor.offsetToVisualPosition(getVisibleRange(editor).first).line)
-    return getVisualLineLength(editor, pos.line)
-  return getVisualLineLength(editor, pos.line)
-}
-
-fun getPreviousLineLength(editor: Editor, offset: Int): Int {
-  val pos = editor.offsetToVisualPosition(offset)
-  if (pos.line - 1 > editor.offsetToVisualPosition(getVisibleRange(editor).first).line)
-    return getVisualLineLength(editor, pos.line - 1)
-  return getVisualLineLength(editor, pos.line)
-}
-
-fun getNextLineLength(editor: Editor, offset: Int): Int {
-  val pos = editor.offsetToVisualPosition(offset)
-  if (pos.line + 1 < editor.offsetToVisualPosition(getVisibleRange(editor).second).line)
-    return getVisualLineLength(editor, pos.line + 1)
-  return getVisualLineLength(editor, pos.line)
 }
 
 /*
@@ -104,7 +46,6 @@ fun getNextLineLength(editor: Editor, offset: Int): Int {
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
  */
-
 
 /**
  * This is a set of helper methods for working with editors. All line and column values are zero based.
@@ -254,69 +195,5 @@ fun normalizeOffset(editor: Editor,
   val min = getLineStartOffset(editor, line)
   val max = getLineEndOffset(editor, line, allowEnd)
   return max(min(offset, max), min)
-}
-
-/**
- * Gets the number of characters on the specified visual line. This will be different than the number of visual
- * characters if there are "real" tabs in the line.
-
- * @param editor The editor
- * *
- * @param line   The visual line within the file
- * *
- * @return The number of characters in the specified line
- */
-fun getVisualLineLength(editor: Editor, line: Int) =
-  getLineLength(editor, visualLineToLogicalLine(editor, line))
-
-/**
- * Gets the number of characters on the specified logical line. This will be different than the number of visual
- * characters if there are "real" tabs in the line.
-
- * @param editor The editor
- * *
- * @param line   The logical line within the file
- * *
- * @return The number of characters in the specified line
- */
-
-fun getLineLength(editor: Editor, line: Int): Int {
-  if (getLineCount(editor) === 0) {
-    return 0
-  } else {
-    return max(0,
-      editor.offsetToLogicalPosition(editor.document.getLineEndOffset(line)).column)
-  }
-}
-
-
-fun getLengthFromStartToOffset(editor: Editor, offset: Int): Int {
-  if (getLineCount(editor) === 0) {
-    return 0
-  } else {
-    return max(0, editor.offsetToLogicalPosition(offset).column)
-  }
-}
-
-fun getLeadingCharacterOffset(editor: Editor, line: Int) =
-  getLeadingCharacterOffset(editor, line, 0)
-
-fun getLeadingCharacterOffset(editor: Editor, line: Int, col: Int): Int {
-  val start = getLineStartOffset(editor, line) + col
-  val end = getLineEndOffset(editor, line, true)
-  val chars = editor.document.charsSequence
-  var pos = end
-  for (offset in start..end - 1) {
-    if (offset >= chars.length) {
-      break
-    }
-
-    if (!Character.isWhitespace(chars[offset])) {
-      pos = offset
-      break
-    }
-  }
-
-  return pos
 }
 

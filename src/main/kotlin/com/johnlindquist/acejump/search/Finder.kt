@@ -40,14 +40,7 @@ object Finder {
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
 
   init {
-    findModel.isFindAll = true
-    findModel.isFromCursor = true
-    findModel.isForward = true
-    findModel.isRegularExpressions = false
-    findModel.isWholeWordsOnly = false
-    findModel.isCaseSensitive = false
-    findModel.isPreserveCase = false
-    findModel.setSearchHighlighters(true)
+
   }
 
   fun find(text: String, key: Char) {
@@ -79,8 +72,8 @@ object Finder {
       if (tagMap.containsKey(query)) {
         jumpTo(JumpInfo(query, tagMap[query]!!))
       } else if (2 <= query.length) {
-        val last1: String = query.substring(query.length - 1)
-        val last2: String = query.substring(query.length - 2)
+        val last1 = query.substring(query.length - 1)
+        val last2 = query.substring(query.length - 2)
         if (tagMap.containsKey(last2)) {
           jumpTo(JumpInfo(last2, tagMap[last2]!!))
         } else if (tagMap.containsKey(last1)) {
@@ -102,13 +95,14 @@ object Finder {
     }
     tagMap = compact(mapDigraphs(digraphs))
 
-    return plotJumpLocations()
+    return tagMap.values.map { JumpInfo(tagMap.inverse()[it]!!, it) }
+      .sortedBy { it.index }
   }
 
   fun populateNgrams() {
     val a_z = 'a'..'z'
     unseen1grams.addAll(a_z.mapTo(linkedSetOf(), { "$it" }))
-    a_z.flatMapTo(unseen2grams, { e -> a_z.map { c -> "${e}$c" } })
+    a_z.flatMapTo(unseen2grams, { e -> a_z.map { c -> "$e$c" } })
   }
 
   /**
@@ -365,12 +359,6 @@ object Finder {
     reset()
     findModel.isRegularExpressions = true
     find(text.pattern, Pattern.REGEX_PREFIX)
-  }
-
-  fun plotJumpLocations(): List<JumpInfo> {
-    return tagMap.values.map {
-      JumpInfo(tagMap.inverse()[it]!!, it)
-    }.sortedBy { it.index }
   }
 
   fun reset() {

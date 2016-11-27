@@ -1,7 +1,10 @@
 package com.johnlindquist.acejump.ui
 
-import com.johnlindquist.acejump.search.*
+import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Finder.query
+import com.johnlindquist.acejump.search.Pattern
+import com.johnlindquist.acejump.search.getLineStartOffset
+import com.johnlindquist.acejump.search.getPointFromVisualPosition
 import com.johnlindquist.acejump.ui.AceUI.document
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
@@ -23,7 +26,7 @@ class JumpInfo(val tag: String, val index: Int) {
   var srcPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
   var text = renderTag()
 
-  private var alignment: Alignment = RIGHT
+  private var alignment = RIGHT
 
   enum class Alignment { TOP, BOTTOM, LEFT, RIGHT, NONE }
 
@@ -42,7 +45,7 @@ class JumpInfo(val tag: String, val index: Int) {
   }
 
   fun paintMe(g2d: Graphics2D) {
-    tagPoint.translate(0, -AceFont.hOffset.toInt())
+    tagPoint.translate(0, -AceUI.hOffset.toInt())
     g2d.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
     val (tagX, tagY) = alignTag(Canvas)
@@ -53,43 +56,25 @@ class JumpInfo(val tag: String, val index: Int) {
     g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
     //the foreground text
-    g2d.font = AceFont.font
+    g2d.font = AceUI.font
     g2d.color = BLACK
-    g2d.drawString(text.toUpperCase(), tagX, tagY + AceFont.fontHeight)
+    g2d.drawString(text.toUpperCase(), tagX, tagY + AceUI.fontHeight)
   }
 
-  val lineOffset = getLengthFromStartToOffset(editor, index + queryLength)
-  val firstCharOfNextLine = getLeadingCharacterOffset(editor, line + 1)
   val startOfThisLine = getLineStartOffset(editor, line)
-  val firstCharPrevLine = getLeadingCharacterOffset(editor, line - 1)
-  val previousLineOffset = getLengthFromStartToOffset(editor, firstCharPrevLine)
-  val nextLineOffset = getLengthFromStartToOffset(editor, firstCharOfNextLine)
-  val nextLineLength = getNextLineLength(editor, index)
-  val previousLineLength = getPreviousLineLength(editor, index)
-  val topLine = getVisualLineAtTopOfScreen(editor)
-  val bottomLine = topLine + getScreenHeight(editor)
 
   private fun alignTag(ac: Canvas): Pair<Int, Int> {
-    val y = tagPoint.y - AceFont.rectHOffset.toInt()
-    val x = tagPoint.x + AceFont.fontWidth
-    val top = Pair(x - AceFont.fontWidth, y - AceFont.lineHeight)
-    val bottom = Pair(x - AceFont.fontWidth, y + AceFont.lineHeight)
-    val left = Pair(srcPoint.x - AceFont.fontWidth * (text.length), y)
+    val y = tagPoint.y - AceUI.rectHOffset.toInt()
+    val x = tagPoint.x + AceUI.fontWidth
+    val top = Pair(x - AceUI.fontWidth, y - AceUI.lineHeight)
+    val bottom = Pair(x - AceUI.fontWidth, y + AceUI.lineHeight)
+    val left = Pair(srcPoint.x - AceUI.fontWidth * (text.length), y)
     val right = Pair(x, y)
-
-    val canAlignTop = ac.isFree(top) &&
-      (topLine..bottomLine).contains(line - 1) &&
-      (previousLineLength < lineOffset || previousLineOffset > lineOffset)
-
-    val canAlignBottom = ac.isFree(bottom) &&
-      (topLine..bottomLine).contains(line + 1) &&
-      (nextLineLength < lineOffset || nextLineOffset > lineOffset)
 
     val nextCharIsWhiteSpace = document.length <= index + 1 ||
       document[index + 1].isWhitespace()
 
     val canAlignRight = ac.isFree(right)
-
     val canAlignLeft = editor.offsetToLogicalPosition(index).column != 0 &&
       ac.isFree(left)
     val isFirstCharacterOfLine = index == startOfThisLine
@@ -116,8 +101,8 @@ class JumpInfo(val tag: String, val index: Int) {
     if (query.isEmpty() || alignment == NONE)
       return
 
-    var tagWidth = text.length * AceFont.fontWidth
-    val searchWidth = (trueOffset + 1) * AceFont.fontWidth
+    var tagWidth = text.length * AceUI.fontWidth
+    val searchWidth = (trueOffset + 1) * AceUI.fontWidth
     var tagX = x
     val lastQueryChar = query.last()
     val indexOfCorrespondingChar = index + query.length - 1
@@ -132,11 +117,12 @@ class JumpInfo(val tag: String, val index: Int) {
       g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
       g2d.color = green
       if (lastQueryChar == tag.first() && lastQueryChar != correspondingChar) {
-        g2d.fillRect(tagX, y, AceFont.fontWidth, AceFont.lineHeight)
-        tagX += AceFont.fontWidth
-        tagWidth -= AceFont.fontWidth
+        g2d.fillRect(tagX, y, AceUI.fontWidth, AceUI.lineHeight)
+        tagX += AceUI.fontWidth
+        tagWidth -= AceUI.fontWidth
       }
-      g2d.fillRect(srcPoint.x - 1, tagPoint.y, searchWidth, AceFont.lineHeight)
+
+      g2d.fillRect(srcPoint.x - 1, tagPoint.y, searchWidth, AceUI.lineHeight)
     }
 
     fun highlightRemaining() {
@@ -147,7 +133,7 @@ class JumpInfo(val tag: String, val index: Int) {
       if (alignment != RIGHT || hasSpaceToTheRight || isRegex)
         g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
-      g2d.fillRect(tagX, y, tagWidth, AceFont.lineHeight)
+      g2d.fillRect(tagX, y, tagWidth, AceUI.lineHeight)
     }
 
     fun surroundTargetWord() {
@@ -158,17 +144,16 @@ class JumpInfo(val tag: String, val index: Int) {
       val startPoint = editor.offsetToVisualPosition(wordStart)
       val startPointO = getPointFromVisualPosition(editor, startPoint)
       val xPosition = startPointO.originalPoint.x
-      val width = (wordEnd - wordStart) * AceFont.fontWidth
+      val width = (wordEnd - wordStart) * AceUI.fontWidth
 
       if (document[index].isLetterOrDigit())
-        g2d.drawRect(xPosition, y, width, AceFont.fontHeight + 3)
+        g2d.drawRect(xPosition, y, width, AceUI.fontHeight + 3)
     }
 
     highlightAlreadyTyped()
     highlightRemaining()
 
-    if (Finder.targetModeEnabled) {
+    if (Finder.targetModeEnabled)
       surroundTargetWord()
-    }
   }
 }
