@@ -284,10 +284,8 @@ object Finder {
         else
           query.last().toString()
 
-      if (tagMap.contains(possibleTag)) {
-        newTagMap[possibleTag] = tagMap[possibleTag]
-        return newTagMap
-      }
+      if (tagMap.contains(possibleTag))
+        return HashBiMap.create(mapOf(possibleTag to tagMap[possibleTag]))
     }
 
     val remainingSites = sortValidJumpTargets(digraphs).iterator()

@@ -139,7 +139,7 @@ class JumpInfo(val tag: String, val index: Int) {
     fun surroundTargetWord() {
       g2d.composite = getInstance(SRC_OVER, 1.toFloat())
       val (wordStart, wordEnd) = Finder.getWordBounds(index)
-      g2d.color = red
+      g2d.color = blue
 
       val startPoint = editor.offsetToVisualPosition(wordStart)
       val startPointO = getPointFromVisualPosition(editor, startPoint)
