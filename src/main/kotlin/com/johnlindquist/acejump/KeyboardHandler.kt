@@ -1,10 +1,7 @@
 package com.johnlindquist.acejump
 
 import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.DataContext
-import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
-import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Finder.resultsReady
@@ -23,8 +20,7 @@ object KeyboardHandler {
   @Volatile
   var isEnabled = false
   private var text = ""
-  private val keyHandler: TypedActionHandler
-    get() = EditorActionManager.getInstance().typedAction.rawHandler
+  private val handler = EditorActionManager.getInstance().typedAction.rawHandler
   val specials = intArrayOf(VK_BACKSPACE, VK_LEFT, VK_RIGHT, VK_UP, VK_ESCAPE)
 
   init {
@@ -54,8 +50,7 @@ object KeyboardHandler {
   }
 
   private fun interceptKeystrokes() {
-    EditorActionManager.getInstance().typedAction.setupRawHandler {
-      _: Editor, key: Char, _: DataContext ->
+    EditorActionManager.getInstance().typedAction.setupRawHandler { _, key, _ ->
       text += key
       Finder.findOrJump(text, key)
       resultsReady.multicaster.stateChanged(ChangeEvent("Finder"))
@@ -77,13 +72,12 @@ object KeyboardHandler {
     text = ""
     isEnabled = false
     editor.scrollingModel.removeVisibleAreaListener(returnToNormalIfChanged)
-
     specials.forEach {
       ActionManager.getInstance().getAction("AceKeyAction")
         .unregisterCustomShortcutSet(editor.component)
     }
 
-    EditorActionManager.getInstance().typedAction.setupRawHandler(keyHandler)
+    EditorActionManager.getInstance().typedAction.setupRawHandler(handler)
     Finder.reset()
     Canvas.reset()
     restoreEditorSettings()

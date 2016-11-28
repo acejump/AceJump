@@ -343,6 +343,7 @@ object Finder {
   fun reset() {
     findModel.isRegularExpressions = false
     findModel.stringToFind = ""
+    targetModeEnabled = false
     sitesToCheck = listOf<Int>()
     digraphs.clear()
     tagMap.clear()
