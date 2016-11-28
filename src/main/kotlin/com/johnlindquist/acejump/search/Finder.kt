@@ -318,10 +318,6 @@ object Finder {
     tagMap.filterTo(HashBiMap.create<String, Int>(),
       { (key, _) -> query == key || query.last() == key.first() })
 
-  /**
-   * Sorts tag candidates by certain criteria to produce viable tags.
-   */
-
   private fun setupTags(searchResults: Multimap<String, Int>) =
     unseen2grams.sortedWith(compareBy(
       // Least frequent first-character comes first
@@ -332,7 +328,7 @@ object Finder {
       String::last,
       // Minimze the distance between tag characters
       { nearby[it[0]]!!.indexOf(it.last()) }
-    )).toHashSet()
+    )).mapTo(linkedSetOf<String>(), { it })
 
   fun findPattern(text: Pattern) {
     reset()
