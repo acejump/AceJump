@@ -57,8 +57,7 @@ object KeyboardHandler {
     EditorActionManager.getInstance().typedAction.setupRawHandler {
       _: Editor, key: Char, _: DataContext ->
       text += key
-      //Find or jump
-      Finder.find(text, key)
+      Finder.findOrJump(text, key)
       resultsReady.multicaster.stateChanged(ChangeEvent("Finder"))
     }
   }

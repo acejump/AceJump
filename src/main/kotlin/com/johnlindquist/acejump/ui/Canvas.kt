@@ -26,11 +26,10 @@ object Canvas : JComponent() {
     jumpLocations.forEach { it.paintMe(g2d) }
   }
 
-  fun registerTag(point: Pair<Int, Int>, tag: String) {
+  fun registerTag(point: Pair<Int, Int>, tag: String) =
     (-1..(tag.length)).forEach {
       existingTags.add(Pair(point.first + it * AceUI.fontWidth, point.second))
     }
-  }
 
   fun isFree(point: Pair<Int, Int>) = !existingTags.contains(point)
 

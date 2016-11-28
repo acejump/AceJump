@@ -51,6 +51,7 @@ fun getVisibleRange(editor: Editor): Pair<Int, Int> {
  * This is a set of helper methods for working with editors.
  * All line and column values are zero based.
  */
+
 fun getVisualLineAtTopOfScreen(e: Editor) =
   (e.scrollingModel.verticalScrollOffset + e.lineHeight - 1) / e.lineHeight
 
@@ -61,6 +62,7 @@ fun getVisualLineAtTopOfScreen(e: Editor) =
  *
  * @return The file line count
  */
+
 fun getLineCount(editor: Editor) =
   if (editor.document.textLength > 0 &&
     editor.document.charsSequence[editor.document.textLength - 1] == '\n') {

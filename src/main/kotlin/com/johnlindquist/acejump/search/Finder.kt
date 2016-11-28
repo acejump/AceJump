@@ -39,11 +39,7 @@ object Finder {
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
 
-  init {
-
-  }
-
-  fun find(text: String, key: Char) {
+  fun findOrJump(text: String, key: Char) {
     originalQuery = text
     query = if (Pattern.contains(text)) key.toString() else text.toLowerCase()
     findModel.stringToFind = text
@@ -93,6 +89,7 @@ object Finder {
       sitesToCheck = getSitesInView(document)
       digraphs = makeMap(document, sitesToCheck)
     }
+
     tagMap = compact(mapDigraphs(digraphs))
 
     return tagMap.values.map { JumpInfo(tagMap.inverse()[it]!!, it) }
@@ -135,7 +132,7 @@ object Finder {
   private fun getSitesInView(fullText: String): List<Int> {
     val (viewTop, viewBottom) = getVisibleRange(editor)
 
-    fun nextSite(oldResults: Iterator<Int>, result: FindResult): Int {
+    fun getNextSite(oldResults: Iterator<Int>, result: FindResult): Int {
       while (oldResults.hasNext()) {
         val startingFrom = oldResults.next()
         if (startingFrom >= result.endOffset)
@@ -145,23 +142,24 @@ object Finder {
       return result.endOffset
     }
 
-    if (query.isEmpty())
-      return (viewTop..(viewBottom - 2)).toList()
+    fun resultsIndices(): MutableList<Int> {
+      val indicesToCheck = mutableListOf<Int>()
+      val oldResults = sitesToCheck.iterator()
+      var nextSite = if (oldResults.hasNext()) oldResults.next() else viewTop
 
-    val indicesToCheck = mutableListOf<Int>()
-    val oldResults = sitesToCheck.iterator()
-    var startingFrom = if (oldResults.hasNext()) oldResults.next() else viewTop
+      var result = findManager.findString(fullText, nextSite, findModel)
+      while (result!!.isStringFound && result.startOffset <= viewBottom) {
+        if (!editor.foldingModel.isOffsetCollapsed(result.startOffset))
+          indicesToCheck.add(result.startOffset)
 
-    var result = findManager.findString(fullText, startingFrom, findModel)
-    while (result!!.isStringFound && result.startOffset <= viewBottom) {
-      if (!editor.foldingModel.isOffsetCollapsed(result.startOffset))
-        indicesToCheck.add(result.startOffset)
+        nextSite = getNextSite(oldResults, result)
+        result = findManager.findString(fullText, nextSite, findModel)
+      }
 
-      startingFrom = nextSite(oldResults, result)
-      result = findManager.findString(fullText, startingFrom, findModel)
+      return indicesToCheck
     }
 
-    return indicesToCheck
+    return resultsIndices()
   }
 
   /**
@@ -207,12 +205,8 @@ object Finder {
 
   fun getWordBounds(index: Int): Pair<Int, Int> {
     var (front, back) = Pair(index, index)
-    while (0 < front && document[front - 1].isLetterOrDigit())
-      front--
-
-    while (back < document.length && document[back].isLetterOrDigit())
-      back++
-
+    while (0 < front && document[front - 1].isLetterOrDigit()) front--
+    while (back < document.length && document[back].isLetterOrDigit()) back++
     return Pair(front, back)
   }
 
@@ -237,10 +231,9 @@ object Finder {
     val newTagMap: BiMap<String, Int> = setupTagMap()
     val tags: HashSet<String> = setupTags(digraphs)
 
-    fun hasNearbyTag(index: Int): Boolean {
-      val (wordStart, wordEnd) = getWordBounds(index)
-      val left = Math.max(wordStart, index - 2)
-      val right = Math.min(wordEnd, index + 2)
+    fun hasNearbyTag(idx: Int): Boolean {
+      val (start, end) = getWordBounds(idx)
+      val (left, right) = Pair(Math.max(start, idx - 2), Math.min(end, idx + 2))
       return (left..right).any { newTagMap.containsValue(it) }
     }
 
@@ -256,10 +249,8 @@ object Finder {
         return
 
       val (left, right) = getWordBounds(index)
-      val remainder = document.subSequence(index, right)
-
       val (matching, nonMatching) = tags.partition { tag ->
-        remainder.all { letter ->
+        substring(index, right).all { letter ->
           //Prevents "...a[IJ]...ij..." ij
           !digraphs.containsKey("$letter${tag[0]}") &&
             //Prevents "...a[IJ]...i[JX]..." ij
@@ -274,7 +265,7 @@ object Finder {
       val tag = matching.firstOrNull()
 
       if (tag == null) {
-        val word = document.subSequence(left, right)
+        val word = substring(left, right)
         println("\"$word\" rejected: " + nonMatching.joinToString(","))
         println("No remaining tags could be assigned to word: \"$word\"")
         return
@@ -282,19 +273,8 @@ object Finder {
 
       val choosenTag = tagMap.inverse().getOrElse(index, { tag })!!
       newTagMap[choosenTag] = index
-      if (choosenTag.length == 1) {
-        //Prevents "...a[b]...z[b]..."
-        //Prevents "...a[b]...z[bc]..."
-        //Prevents "...a[b]c...z[cb]..."
-        tags.removeAll { it.contains(choosenTag[0]) }
-      } else {
-        //Prevents "...a[bc]...z[b]..."
-        tags.remove(choosenTag[0].toString())
-        //Prevents "...a[bc]...ab[c]..."
-        tags.remove(choosenTag[1].toString())
-        //Prevents "...a[bc]...z[bc]..."
-        tags.remove(choosenTag)
-      }
+      //Prevents "...a[bc]...z[bc]..."
+      tags.remove(choosenTag)
     }
 
     if (query.isNotEmpty()) {
@@ -310,20 +290,7 @@ object Finder {
       }
     }
 
-    val remainingSites = digraphs.asMap().entries.filter {
-      it.key.first().isLetterOrDigit() || query.isNotEmpty()
-    }.sortedBy { it.value.size }.flatMap { it.value }.sortedWith(compareBy(
-      // Ensure that the first letter of a word is prioritized for tagging
-      { document[Math.max(0, it - 1)].isLetterOrDigit() },
-      // Target words with more unique characters to the immediate right ought
-      // to have first pick for tags, since they are the most "picky" targets
-      {
-        val bounds = getWordBounds(it)
-        val charactersBeforeNextSpace = document.substring(it, bounds.second)
-        -charactersBeforeNextSpace.toCharArray().distinct().size
-      }
-    )).iterator()
-
+    val remainingSites = sortValidJumpTargets(digraphs).iterator()
     if (!findModel.isRegularExpressions || newTagMap.isEmpty())
       while (remainingSites.hasNext() && tags.isNotEmpty())
         tryToAssignTagToIndex(remainingSites.next())
@@ -331,22 +298,34 @@ object Finder {
     return newTagMap
   }
 
-  private fun setupTagMap(): BiMap<String, Int> {
-    val newTagMap = HashBiMap.create<String, Int>()
-    // Add pre-existing tags where search string and tag are intermingled
-    for ((key, value) in tagMap) {
-      if (query == key || query.last() == key.first()) {
-        newTagMap[key] = value
-      }
-    }
+  private fun substring(start: Int, end: Int) = document.substring(start, end)
 
-    return newTagMap
-  }
+  private fun sortValidJumpTargets(digraphs: Multimap<String, Int>) =
+    digraphs.asMap().entries.sortedBy { it.value.size }
+      .flatMap { it.value }.sortedWith(compareBy(
+      // Ensure that the first letter of a word is prioritized for tagging
+      { document[Math.max(0, it - 1)].isLetterOrDigit() },
+      // Target words with more unique characters to the immediate right ought
+      // to have first pick for tags, since they are the most "picky" targets
+      { -substring(it, getWordBounds(it).second).toCharArray().distinct().size }
+    ))
 
-  private fun setupTags(bigrams: Multimap<String, Int>) =
+  /**
+   * Adds pre-existing tags where search string and tag are intermingled.
+   */
+
+  private fun setupTagMap() =
+    tagMap.filterTo(HashBiMap.create<String, Int>(),
+      { (key, _) -> query == key || query.last() == key.first() })
+
+  /**
+   * Sorts tag candidates by certain criteria to produce viable tags.
+   */
+
+  private fun setupTags(searchResults: Multimap<String, Int>) =
     unseen2grams.sortedWith(compareBy(
       // Least frequent first-character comes first
-      { bigrams[it[0].toString()].orEmpty().size },
+      { searchResults[it[0].toString()].orEmpty().size },
       // Adjacent keys come before non-adjacent keys
       { !adjacent[it[0]]!!.contains(it.last()) },
       // Rotate to remove "clumps" (ie. AA, AB, AC => AA BA CA)
@@ -358,7 +337,7 @@ object Finder {
   fun findPattern(text: Pattern) {
     reset()
     findModel.isRegularExpressions = true
-    find(text.pattern, Pattern.REGEX_PREFIX)
+    findOrJump(text.pattern, Pattern.REGEX_PREFIX)
   }
 
   fun reset() {
