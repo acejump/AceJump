@@ -77,13 +77,4 @@ object AceUI {
     editor.settings.isBlockCursor = naturalCursor
     editor.colorsScheme.setColor(CARET_COLOR, naturalColor)
   }
-
-  var time = System.nanoTime()
-
-  fun pollTime(label: String) {
-    val curr = System.nanoTime()
-    val diff: Long = curr - time
-    println("${(diff.toDouble())/1000000000.0}s \t ($label)")
-    time = curr
-  }
 }
