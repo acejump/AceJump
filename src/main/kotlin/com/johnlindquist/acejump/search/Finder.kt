@@ -5,8 +5,9 @@ import com.google.common.collect.HashBiMap
 import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
 import com.intellij.find.FindResult
-import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ApplicationManager.getApplication
 import com.intellij.util.EventDispatcher
+import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
 import com.johnlindquist.acejump.search.Pattern.Companion.nearby
 import com.johnlindquist.acejump.ui.AceUI.document
@@ -14,8 +15,9 @@ import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.findManager
 import com.johnlindquist.acejump.ui.AceUI.findModel
 import com.johnlindquist.acejump.ui.JumpInfo
+import java.lang.Math.max
+import java.lang.Math.min
 import java.util.*
-import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 import kotlin.comparisons.compareBy
 
@@ -44,12 +46,9 @@ object Finder {
     query = if (Pattern.contains(text)) key.toString() else text.toLowerCase()
     findModel.stringToFind = text
 
-    val application = ApplicationManager.getApplication()
-    application.runReadAction({ jump() })
-    application.invokeLater({
-      if (text.isNotEmpty())
-        resultsReady.multicaster.stateChanged(ChangeEvent("Finder"))
-    })
+    getApplication().runReadAction({ jump() })
+    if (text.isNotEmpty())
+      getApplication().invokeLater({ KeyboardHandler.updateState() })
   }
 
   fun toggleTargetMode(): Boolean {
@@ -231,9 +230,9 @@ object Finder {
     val newTagMap: BiMap<String, Int> = setupTagMap()
     val tags: HashSet<String> = setupTags(digraphs)
 
-    fun hasNearbyTag(idx: Int): Boolean {
-      val (start, end) = getWordBounds(idx)
-      val (left, right) = Pair(Math.max(start, idx - 2), Math.min(end, idx + 2))
+    fun hasNearbyTag(index: Int): Boolean {
+      val (start, end) = getWordBounds(index)
+      val (left, right) = Pair(max(start, index - 2), min(end, index + 2))
       return (left..right).any { newTagMap.containsValue(it) }
     }
 
@@ -302,7 +301,7 @@ object Finder {
     digraphs.asMap().entries.sortedBy { it.value.size }
       .flatMap { it.value }.sortedWith(compareBy(
       // Ensure that the first letter of a word is prioritized for tagging
-      { document[Math.max(0, it - 1)].isLetterOrDigit() },
+      { document[max(0, it - 1)].isLetterOrDigit() },
       // Target words with more unique characters to the immediate right ought
       // to have first pick for tags, since they are the most "picky" targets
       { -substring(it, getWordBounds(it).second).toCharArray().distinct().size }

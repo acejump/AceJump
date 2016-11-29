@@ -5,9 +5,13 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
+import com.johnlindquist.acejump.search.Finder
+import com.johnlindquist.acejump.search.Pattern
+import com.johnlindquist.acejump.search.Pattern.*
 import com.johnlindquist.acejump.search.getDefaultEditor
 import java.awt.Color
 import java.awt.Color.BLUE
+import java.awt.event.KeyEvent.*
 import javax.swing.SwingUtilities.convertPoint
 
 object AceUI {
@@ -15,7 +19,6 @@ object AceUI {
   private val project
     get() = editor.project!!
   var document = editor.document.charsSequence.toString().toLowerCase()
-
   val findModel = FindManager.getInstance(project).findInFileModel.clone()
   val findManager: FindManager
     get() = FindManager.getInstance(project)
@@ -55,6 +58,16 @@ object AceUI {
     findModel.isPreserveCase = false
     findModel.setSearchHighlighters(true)
   }
+
+  val keyMap = mapOf(
+    VK_HOME   to { find(START_OF_LINE) },
+    VK_LEFT   to { find(START_OF_LINE) },
+    VK_RIGHT  to { find(END_OF_LINE)   },
+    VK_END    to { find(END_OF_LINE)   },
+    VK_UP     to { find(CODE_INDENTS)  },
+    VK_SPACE  to { find(WHITE_SPACE)   })
+
+  fun find(pattern: Pattern) = Finder.findPattern(pattern)
 
   fun setupCursor() {
     editor.settings.isBlockCursor = true

@@ -6,15 +6,14 @@ import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Finder.resultsReady
 import com.johnlindquist.acejump.search.Jumper
-import com.johnlindquist.acejump.search.Pattern.Companion.keyMap
 import com.johnlindquist.acejump.ui.AceUI.editor
+import com.johnlindquist.acejump.ui.AceUI.keyMap
 import com.johnlindquist.acejump.ui.AceUI.restoreEditorSettings
 import com.johnlindquist.acejump.ui.AceUI.setupCanvas
 import com.johnlindquist.acejump.ui.Canvas
 import com.sun.glass.events.KeyEvent.VK_BACKSPACE
 import java.awt.event.KeyEvent.*
 import javax.swing.event.ChangeEvent
-import javax.swing.event.ChangeListener
 
 object KeyboardHandler {
   @Volatile
@@ -22,18 +21,6 @@ object KeyboardHandler {
   private var text = ""
   private val handler = EditorActionManager.getInstance().typedAction.rawHandler
   val specials = intArrayOf(VK_BACKSPACE, VK_LEFT, VK_RIGHT, VK_UP, VK_ESCAPE)
-
-  init {
-    resultsReady.addListener(ChangeListener {
-      if (Jumper.hasJumped) {
-        Jumper.hasJumped = false
-        returnToNormal()
-      } else {
-        Canvas.jumpLocations = Finder.jumpLocations
-        Canvas.repaint()
-      }
-    })
-  }
 
   fun processRegexCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
@@ -66,6 +53,16 @@ object KeyboardHandler {
   fun startListening() {
     configureKeyMap()
     configureEditor()
+  }
+
+  fun updateState() {
+    if (Jumper.hasJumped) {
+      Jumper.hasJumped = false
+      returnToNormal()
+    } else {
+      Canvas.jumpLocations = Finder.jumpLocations
+      Canvas.repaint()
+    }
   }
 
   fun returnToNormal() {

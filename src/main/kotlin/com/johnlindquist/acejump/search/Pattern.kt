@@ -1,7 +1,5 @@
 package com.johnlindquist.acejump.search
 
-import java.awt.event.KeyEvent.*
-
 enum class Pattern(val pattern: String) {
   END_OF_LINE("\\n"),
   START_OF_LINE("^.|^\\n"),
@@ -12,15 +10,6 @@ enum class Pattern(val pattern: String) {
   WHITE_SPACE("\\s+\\S(?<!^\\s*\\S)");
 
   companion object {
-    var keyMap = mapOf(VK_HOME to { findPattern(START_OF_LINE) },
-      VK_LEFT to { findPattern(START_OF_LINE) },
-      VK_RIGHT to { findPattern(END_OF_LINE) },
-      VK_END to { findPattern(END_OF_LINE) },
-      VK_UP to { findPattern(CODE_INDENTS) },
-      VK_SPACE to { findPattern(WHITE_SPACE) })
-
-    fun findPattern(pattern: Pattern) = Finder.findPattern(pattern)
-
     fun contains(regex: String) = values().any { it.pattern == regex }
     val REGEX_PREFIX = ' '
     var adjacent = mapOf(
