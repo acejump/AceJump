@@ -14,8 +14,7 @@ object AceUI {
   var editor: Editor = getDefaultEditor()
   private val project
     get() = editor.project!!
-  val document
-    get() = editor.document.charsSequence.toString().toLowerCase()
+  var document = editor.document.charsSequence.toString().toLowerCase()
 
   val findModel = FindManager.getInstance(project).findInFileModel.clone()
   val findManager: FindManager
@@ -77,5 +76,14 @@ object AceUI {
     editor.settings.isBlinkCaret = naturalBlink
     editor.settings.isBlockCursor = naturalCursor
     editor.colorsScheme.setColor(CARET_COLOR, naturalColor)
+  }
+
+  var time = System.nanoTime()
+
+  fun pollTime(label: String) {
+    val curr = System.nanoTime()
+    val diff: Long = curr - time
+    println("${(diff.toDouble())/1000000000.0}s \t ($label)")
+    time = curr
   }
 }

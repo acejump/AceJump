@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.DumbAwareAction
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Pattern.LINE_MARK
+import com.johnlindquist.acejump.ui.AceUI.document
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.setupCursor
 import com.johnlindquist.acejump.ui.Canvas
@@ -22,9 +23,10 @@ open class AceAction : DumbAwareAction() {
   }
 
   override fun actionPerformed(e: AnActionEvent) {
+    editor = e.getData(EDITOR) as EditorImpl
+    document = editor.document.charsSequence.toString().toLowerCase()
     if (!KeyboardHandler.isEnabled) {
       KeyboardHandler.isEnabled = true
-      editor = e.getData(EDITOR) as EditorImpl
       setupCursor()
       KeyboardHandler.startListening()
     } else {

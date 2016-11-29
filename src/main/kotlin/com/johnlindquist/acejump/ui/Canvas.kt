@@ -20,7 +20,6 @@ object Canvas : JComponent() {
       return
 
     super.paint(graphics)
-
     val g2d = graphics as Graphics2D
     existingTags = hashSetOf<Pair<Int, Int>>()
     jumpLocations.forEach { it.paintMe(g2d) }
