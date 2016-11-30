@@ -4,7 +4,6 @@ import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.johnlindquist.acejump.search.Finder
-import com.johnlindquist.acejump.search.Finder.resultsReady
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.keyMap
@@ -13,7 +12,6 @@ import com.johnlindquist.acejump.ui.AceUI.setupCanvas
 import com.johnlindquist.acejump.ui.Canvas
 import com.sun.glass.events.KeyEvent.VK_BACKSPACE
 import java.awt.event.KeyEvent.*
-import javax.swing.event.ChangeEvent
 
 object KeyboardHandler {
   @Volatile
@@ -40,7 +38,6 @@ object KeyboardHandler {
     EditorActionManager.getInstance().typedAction.setupRawHandler { _, key, _ ->
       text += key
       Finder.findOrJump(text, key)
-      resultsReady.multicaster.stateChanged(ChangeEvent("Finder"))
     }
   }
 

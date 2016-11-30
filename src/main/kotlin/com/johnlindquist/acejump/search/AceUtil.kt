@@ -89,8 +89,9 @@ fun getFileSize(e: Editor, includeEndNewLine: Boolean = false): Int {
 }
 
 /**
- * Gets the number of lines than can be displayed on the screen at one time. This is rounded down to the
- * nearest whole line if there is a partial line visible at the bottom of the screen.
+ * Gets the number of lines than can be displayed on the screen at one time.
+ * This is rounded down to the nearest whole line if there is a partial line
+ * visible at the bottom of the screen.
  *
  * @param e The editor
  *
@@ -139,7 +140,8 @@ fun getLineStartOffset(editor: Editor, line: Int) =
  *
  * @param allowEnd True include newline
  *
- * @return 0 if line is &lt 0, file size of line is bigger than file, else the end offset for the line
+ * @return 0 if line is &lt 0, file size of line is bigger than file, else the
+ * end offset for the line
  */
 
 fun getLineEndOffset(editor: Editor, line: Int, allowEnd: Boolean) =

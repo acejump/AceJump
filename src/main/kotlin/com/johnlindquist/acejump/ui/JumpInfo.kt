@@ -75,8 +75,8 @@ class JumpInfo(val tag: String, val index: Int) {
       document[index + 1].isWhitespace()
 
     val canAlignRight = ac.isFree(right)
-    val canAlignLeft = editor.offsetToLogicalPosition(index).column != 0 &&
-      ac.isFree(left)
+    val canAlignLeft =
+      editor.offsetToLogicalPosition(index).column != 0 && ac.isFree(left)
     val isFirstCharacterOfLine = index == startOfThisLine
     alignment = if (nextCharIsWhiteSpace) RIGHT
     else if (isFirstCharacterOfLine)
@@ -101,22 +101,22 @@ class JumpInfo(val tag: String, val index: Int) {
     if (query.isEmpty() || alignment == NONE)
       return
 
-    var tagWidth = text.length * AceUI.fontWidth
-    val searchWidth = (trueOffset + 1) * AceUI.fontWidth
     var tagX = x
     val lastQueryChar = query.last()
-    val indexOfCorrespondingChar = index + query.length - 1
+    var tagWidth = text.length * AceUI.fontWidth
+    val searchWidth = (trueOffset + 1) * AceUI.fontWidth
+    val indexOfEditorChar = index + query.length - 1
 
-    val correspondingChar =
-      if (indexOfCorrespondingChar < document.length)
-        document[indexOfCorrespondingChar].toLowerCase()
+    val editorChar =
+      if (indexOfEditorChar < document.length)
+        document[indexOfEditorChar].toLowerCase()
       else
         0.toChar()
 
     fun highlightAlreadyTyped() {
       g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
       g2d.color = green
-      if (lastQueryChar == tag.first() && lastQueryChar != correspondingChar) {
+      if (lastQueryChar == tag.first() && lastQueryChar != editorChar) {
         g2d.fillRect(tagX, y, AceUI.fontWidth, AceUI.lineHeight)
         tagX += AceUI.fontWidth
         tagWidth -= AceUI.fontWidth

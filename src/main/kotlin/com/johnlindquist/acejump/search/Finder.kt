@@ -6,7 +6,6 @@ import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
 import com.intellij.find.FindResult
 import com.intellij.openapi.application.ApplicationManager.getApplication
-import com.intellij.util.EventDispatcher
 import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
 import com.johnlindquist.acejump.search.Pattern.Companion.nearby
@@ -18,7 +17,6 @@ import com.johnlindquist.acejump.ui.JumpInfo
 import java.lang.Math.max
 import java.lang.Math.min
 import java.util.*
-import javax.swing.event.ChangeListener
 import kotlin.comparisons.compareBy
 
 /**
@@ -30,7 +28,6 @@ object Finder {
     private set
   var jumpLocations: Collection<JumpInfo> = emptyList()
     private set
-  val resultsReady = EventDispatcher.create(ChangeListener::class.java)
 
   var originalQuery = ""
   var query = ""
