@@ -1,7 +1,6 @@
 package com.johnlindquist.acejump
 
 import com.intellij.openapi.actionSystem.CustomShortcutSet
-import com.intellij.openapi.actionSystem.ShortcutSet
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.event.VisibleAreaListener
@@ -21,17 +20,9 @@ object KeyboardHandler {
   var isEnabled = false
   private var text = ""
   private val handler = EditorActionManager.getInstance().typedAction.rawHandler
-  private val original: ShortcutSet = AceAction.shortcutSet
 
-  fun activate() {
-    if (!KeyboardHandler.isEnabled) {
-      KeyboardHandler.startListening()
-    } else {
-      KeyboardHandler.toggleTargetMode()
-    }
-  }
-
-  fun processComand(keyCode: Int) = keyMap[keyCode]?.invoke()
+  fun activate() = if (!isEnabled) startListening() else toggleTargetMode()
+  fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
   fun processBackspaceCommand() {
     text = ""

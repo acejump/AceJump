@@ -44,8 +44,7 @@ object Finder {
     findModel.stringToFind = text
 
     getApplication().runReadAction({ jump() })
-    if (text.isNotEmpty())
-      getApplication().invokeLater({ KeyboardHandler.updateUIState() })
+    getApplication().invokeLater({ KeyboardHandler.updateUIState() })
   }
 
   fun toggleTargetMode(): Boolean {
@@ -200,10 +199,10 @@ object Finder {
    */
 
   fun getWordBounds(index: Int): Pair<Int, Int> {
-    var (front, back) = Pair(index, index)
-    while (0 < front && document[front - 1].isLetterOrDigit()) front--
-    while (back < document.length && document[back].isLetterOrDigit()) back++
-    return Pair(front, back)
+    var (front, end) = Pair(index, index)
+    while (0 < front && document[front - 1].isJavaIdentifierPart()) front--
+    while (end < document.length && document[end].isJavaIdentifierPart()) end++
+    return Pair(front, end)
   }
 
   /**

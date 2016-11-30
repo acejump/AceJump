@@ -9,7 +9,9 @@ import com.johnlindquist.acejump.search.Pattern.LINE_MARK
 import com.johnlindquist.acejump.ui.AceUI.document
 import com.johnlindquist.acejump.ui.AceUI.editor
 import java.awt.event.KeyEvent
+import java.util.logging.Logger
 
+var logger = Logger.getLogger("AceKeyAction")
 object AceAction : DumbAwareAction() {
   override fun update(action: AnActionEvent) {
     action.presentation.isEnabled = (action.getData(EDITOR)) != null
@@ -30,6 +32,7 @@ object AceLineAction : DumbAwareAction() {
 object AceKeyAction : DumbAwareAction() {
   override fun actionPerformed(e: AnActionEvent) {
     val inputEvent = e.inputEvent as? KeyEvent ?: return
-    KeyboardHandler.processComand(inputEvent.keyCode)
+    logger.info("Seen: " + KeyEvent.getKeyText(inputEvent.keyCode))
+    KeyboardHandler.processCommand(inputEvent.keyCode)
   }
 }
