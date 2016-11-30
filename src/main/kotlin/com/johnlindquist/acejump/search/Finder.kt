@@ -45,7 +45,7 @@ object Finder {
 
     getApplication().runReadAction({ jump() })
     if (text.isNotEmpty())
-      getApplication().invokeLater({ KeyboardHandler.updateState() })
+      getApplication().invokeLater({ KeyboardHandler.updateUIState() })
   }
 
   fun toggleTargetMode(): Boolean {

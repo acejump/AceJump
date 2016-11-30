@@ -1,7 +1,9 @@
 package com.johnlindquist.acejump
 
-import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.CustomShortcutSet
+import com.intellij.openapi.actionSystem.ShortcutSet
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
+import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
@@ -9,26 +11,37 @@ import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.keyMap
 import com.johnlindquist.acejump.ui.AceUI.restoreEditorSettings
 import com.johnlindquist.acejump.ui.AceUI.setupCanvas
+import com.johnlindquist.acejump.ui.AceUI.setupCursor
 import com.johnlindquist.acejump.ui.Canvas
-import com.sun.glass.events.KeyEvent.VK_BACKSPACE
-import java.awt.event.KeyEvent.*
+import java.awt.Color.BLUE
+import java.awt.Color.RED
 
 object KeyboardHandler {
   @Volatile
   var isEnabled = false
   private var text = ""
   private val handler = EditorActionManager.getInstance().typedAction.rawHandler
-  val specials = intArrayOf(VK_BACKSPACE, VK_LEFT, VK_RIGHT, VK_UP, VK_ESCAPE)
+  private val original: ShortcutSet = AceAction.shortcutSet
 
-  fun processRegexCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
+  fun activate() {
+    if (!KeyboardHandler.isEnabled) {
+      KeyboardHandler.startListening()
+    } else {
+      KeyboardHandler.toggleTargetMode()
+    }
+  }
+
+  fun processComand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
   fun processBackspaceCommand() {
     text = ""
     Finder.reset()
+    updateUIState()
   }
 
-  val returnToNormalIfChanged = VisibleAreaListener { returnToNormal() }
+  val returnToNormalIfChanged = VisibleAreaListener { resetUIState() }
   private fun configureEditor() {
+    setupCursor()
     setupCanvas()
     interceptKeystrokes()
     editor.scrollingModel.addVisibleAreaListener(returnToNormalIfChanged)
@@ -41,39 +54,43 @@ object KeyboardHandler {
     }
   }
 
-  private fun configureKeyMap() =
-    specials.forEach {
-      ActionManager.getInstance().getAction("AceKeyAction")
-        .registerCustomShortcutSet(it, 0, editor.component)
-    }
-
-  fun startListening() {
-    configureKeyMap()
-    configureEditor()
+  private fun configureKeyMap() {
+    val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
+    AceKeyAction.registerCustomShortcutSet(css, editor.component)
   }
 
-  fun updateState() {
+  fun startListening() {
+    isEnabled = true
+    configureEditor()
+    configureKeyMap()
+  }
+
+  fun updateUIState() {
     if (Jumper.hasJumped) {
       Jumper.hasJumped = false
-      returnToNormal()
+      resetUIState()
     } else {
       Canvas.jumpLocations = Finder.jumpLocations
       Canvas.repaint()
     }
   }
 
-  fun returnToNormal() {
+  fun resetUIState() {
     text = ""
     isEnabled = false
+    AceKeyAction.unregisterCustomShortcutSet(editor.component)
     editor.scrollingModel.removeVisibleAreaListener(returnToNormalIfChanged)
-    specials.forEach {
-      ActionManager.getInstance().getAction("AceKeyAction")
-        .unregisterCustomShortcutSet(editor.component)
-    }
-
     EditorActionManager.getInstance().typedAction.setupRawHandler(handler)
     Finder.reset()
     Canvas.reset()
     restoreEditorSettings()
+  }
+
+  fun toggleTargetMode() {
+    if (Finder.toggleTargetMode())
+      editor.colorsScheme.setColor(CARET_COLOR, RED)
+    else
+      editor.colorsScheme.setColor(CARET_COLOR, BLUE)
+    Canvas.repaint()
   }
 }

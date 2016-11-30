@@ -34,8 +34,5 @@
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl shift SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift SEMICOLON"/>
     </action>
-    <action id="AceKeyAction"
-            class="com.johnlindquist.acejump.AceKeyAction"
-            text="Motion Keys"/>
   </actions>
 </idea-plugin>

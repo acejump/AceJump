@@ -5,10 +5,12 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
+import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.Pattern.*
 import com.johnlindquist.acejump.search.getDefaultEditor
+import com.sun.glass.events.KeyEvent.VK_BACKSPACE
 import java.awt.Color
 import java.awt.Color.BLUE
 import java.awt.event.KeyEvent.*
@@ -59,13 +61,16 @@ object AceUI {
     findModel.setSearchHighlighters(true)
   }
 
-  val keyMap = mapOf(
-    VK_HOME   to { find(START_OF_LINE) },
-    VK_LEFT   to { find(START_OF_LINE) },
-    VK_RIGHT  to { find(END_OF_LINE)   },
-    VK_END    to { find(END_OF_LINE)   },
-    VK_UP     to { find(CODE_INDENTS)  },
-    VK_SPACE  to { find(WHITE_SPACE)   })
+  val keyMap = mutableMapOf(
+    VK_HOME to { find(START_OF_LINE) },
+    VK_LEFT to { find(START_OF_LINE) },
+    VK_RIGHT to { find(END_OF_LINE) },
+    VK_END to { find(END_OF_LINE) },
+    VK_UP to { find(CODE_INDENTS) },
+    VK_SPACE to { find(WHITE_SPACE) },
+    VK_ESCAPE to { KeyboardHandler.resetUIState() },
+    VK_BACKSPACE to { KeyboardHandler.processBackspaceCommand() }
+  )
 
   fun find(pattern: Pattern) = Finder.findPattern(pattern)
 
