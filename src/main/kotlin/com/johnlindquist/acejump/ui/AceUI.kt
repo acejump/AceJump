@@ -21,7 +21,11 @@ import javax.swing.SwingUtilities.convertPoint
 object AceUI {
   var editor: Editor = getDefaultEditor()
     set(value) {
-      field = value
+      if(value != field) {
+        KeyboardHandler.removeListeners()
+        KeyboardHandler.resetUIState()
+        field = value
+      }
 
       //Todo: figure out how to avoid duplicating init block
       project = editor.project!!

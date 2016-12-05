@@ -4,6 +4,9 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
+import com.intellij.openapi.editor.event.CaretEvent
+import com.intellij.openapi.editor.event.CaretListener
+import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.openapi.project.DumbAwareAction.ACTIONS_KEY
 import com.intellij.util.SmartList
@@ -19,6 +22,8 @@ import com.johnlindquist.acejump.ui.AceUI.setupCursor
 import com.johnlindquist.acejump.ui.Canvas
 import java.awt.Color.BLUE
 import java.awt.Color.RED
+import java.awt.event.FocusEvent
+import java.awt.event.FocusListener
 
 object KeyboardHandler {
   @Volatile
@@ -35,12 +40,49 @@ object KeyboardHandler {
     updateUIState()
   }
 
-  val returnToNormalIfChanged = VisibleAreaListener { resetUIState() }
+  val resetIfScrollbarChanged = object : VisibleAreaListener {
+    override fun visibleAreaChanged(e: VisibleAreaEvent?) {
+      editor.scrollingModel.removeVisibleAreaListener(this)
+      resetUIState()
+    }
+  }
+
+  val resetIfCaretPositionChanged = object : CaretListener {
+    override fun caretAdded(e: CaretEvent?) {
+      caretPositionChanged(e)
+    }
+
+    override fun caretPositionChanged(e: CaretEvent?) {
+      editor.caretModel.removeCaretListener(this)
+      resetUIState()
+    }
+
+    override fun caretRemoved(e: CaretEvent?) {
+      caretPositionChanged(e)
+    }
+
+  }
+  val resetIfEditorFocusChanged = object : FocusListener {
+    override fun focusGained(e: FocusEvent?) {
+    }
+
+    override fun focusLost(e: FocusEvent?) {
+      editor.component.removeFocusListener(this)
+      resetUIState()
+    }
+  }
+
   private fun configureEditor() {
     setupCursor()
     setupCanvas()
     interceptKeystrokes()
-    editor.scrollingModel.addVisibleAreaListener(returnToNormalIfChanged)
+    addListeners()
+  }
+
+  fun addListeners() {
+    editor.scrollingModel.addVisibleAreaListener(resetIfScrollbarChanged)
+    editor.caretModel.addCaretListener(resetIfCaretPositionChanged)
+    editor.component.addFocusListener(resetIfEditorFocusChanged)
   }
 
   private fun interceptKeystrokes() {
@@ -54,7 +96,9 @@ object KeyboardHandler {
 
   private fun configureKeyMap() {
     backup = getClientProperty(editor.component, ACTIONS_KEY)
-    putClientProperty(editor.component, ACTIONS_KEY, SmartList<AnAction>(AceKeyAction))
+    putClientProperty(editor.component,
+      ACTIONS_KEY,
+      SmartList<AnAction>(AceKeyAction))
     val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
     AceKeyAction.registerCustomShortcutSet(css, editor.component)
   }
@@ -80,7 +124,6 @@ object KeyboardHandler {
     isEnabled = false
     putClientProperty(editor.component, ACTIONS_KEY, backup)
     AceKeyAction.unregisterCustomShortcutSet(editor.component)
-    editor.scrollingModel.removeVisibleAreaListener(returnToNormalIfChanged)
     EditorActionManager.getInstance().typedAction.setupRawHandler(handler)
     Finder.reset()
     Canvas.reset()
@@ -93,5 +136,13 @@ object KeyboardHandler {
     else
       editor.colorsScheme.setColor(CARET_COLOR, BLUE)
     Canvas.repaint()
+  }
+
+  fun removeListeners() {
+   if(editor.component.focusListeners.contains(resetIfEditorFocusChanged)) {
+     editor.scrollingModel.removeVisibleAreaListener(resetIfScrollbarChanged)
+     editor.caretModel.removeCaretListener(resetIfCaretPositionChanged)
+     editor.component.removeFocusListener(resetIfEditorFocusChanged)
+   }
   }
 }
