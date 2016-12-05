@@ -6,8 +6,7 @@ enum class Pattern(val pattern: String) {
   CODE_INDENTS("(?<=^\\s*)\\S|^\\n"),
   LINE_MARK(END_OF_LINE.pattern + "|" +
     START_OF_LINE.pattern + "|" +
-    CODE_INDENTS.pattern),
-  WHITE_SPACE("\\s+\\S(?<!^\\s*\\S)");
+    CODE_INDENTS.pattern);
 
   companion object {
     fun contains(regex: String) = values().any { it.pattern == regex }

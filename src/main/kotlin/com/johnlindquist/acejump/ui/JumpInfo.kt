@@ -5,12 +5,15 @@ import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.getLineStartOffset
 import com.johnlindquist.acejump.search.getPointFromVisualPosition
+import com.johnlindquist.acejump.ui.AceUI.acejumpHighlightColor
+import com.johnlindquist.acejump.ui.AceUI.boxColor
 import com.johnlindquist.acejump.ui.AceUI.document
 import com.johnlindquist.acejump.ui.AceUI.editor
+import com.johnlindquist.acejump.ui.AceUI.editorHighlightColor
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
-import java.awt.Color.*
+import java.awt.Color.BLACK
 import java.awt.Graphics2D
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
@@ -115,7 +118,7 @@ class JumpInfo(val tag: String, val index: Int) {
 
     fun highlightAlreadyTyped() {
       g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
-      g2d.color = green
+      g2d.color = acejumpHighlightColor
       if (lastQueryChar == tag.first() && lastQueryChar != editorChar) {
         g2d.fillRect(tagX, y, AceUI.fontWidth, AceUI.lineHeight)
         tagX += AceUI.fontWidth
@@ -126,7 +129,7 @@ class JumpInfo(val tag: String, val index: Int) {
     }
 
     fun highlightRemaining() {
-      g2d.color = yellow
+      g2d.color = editorHighlightColor
       val hasSpaceToTheRight = document.length <= index + 1 ||
         document[index + 1].isWhitespace()
 
@@ -139,7 +142,7 @@ class JumpInfo(val tag: String, val index: Int) {
     fun surroundTargetWord() {
       g2d.composite = getInstance(SRC_OVER, 1.toFloat())
       val (wordStart, wordEnd) = Finder.getWordBounds(index)
-      g2d.color = blue
+      g2d.color = boxColor
 
       val startPoint = editor.offsetToVisualPosition(wordStart)
       val startPointO = getPointFromVisualPosition(editor, startPoint)

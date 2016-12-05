@@ -1,9 +1,14 @@
 package com.johnlindquist.acejump
 
+import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.event.VisibleAreaListener
+import com.intellij.openapi.project.DumbAwareAction.ACTIONS_KEY
+import com.intellij.util.SmartList
+import com.intellij.util.ui.UIUtil.getClientProperty
+import com.intellij.util.ui.UIUtil.putClientProperty
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.ui.AceUI.editor
@@ -45,7 +50,11 @@ object KeyboardHandler {
     }
   }
 
+  private var backup: MutableList<AnAction>? = null
+
   private fun configureKeyMap() {
+    backup = getClientProperty(editor.component, ACTIONS_KEY)
+    putClientProperty(editor.component, ACTIONS_KEY, SmartList<AnAction>(AceKeyAction))
     val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
     AceKeyAction.registerCustomShortcutSet(css, editor.component)
   }
@@ -69,6 +78,7 @@ object KeyboardHandler {
   fun resetUIState() {
     text = ""
     isEnabled = false
+    putClientProperty(editor.component, ACTIONS_KEY, backup)
     AceKeyAction.unregisterCustomShortcutSet(editor.component)
     editor.scrollingModel.removeVisibleAreaListener(returnToNormalIfChanged)
     EditorActionManager.getInstance().typedAction.setupRawHandler(handler)

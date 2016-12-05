@@ -8,7 +8,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>Removes the old search box, improvements to latency.</change-notes>
+  <change-notes>Removes the old search box, lots of small usability improvements.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 
