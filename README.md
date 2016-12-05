@@ -47,6 +47,7 @@ In order to build AceJump from the source, clone this repository and run `./grad
 
 ## History
 
+- 3.1.1 Hotfix for broken target mode.
 - 3.1.0 Removes the search box, lots of small usability improvements.
 - 3.0.7 No longer tags "folded" regions and minor alignment adjustments.
 - 3.0.6 Fixes alignment issues, removes top and bottom alignments until there is a better way to visually differentiate adjacent tags.
