@@ -60,8 +60,8 @@ object KeyboardHandler {
     override fun caretRemoved(e: CaretEvent?) {
       caretPositionChanged(e)
     }
-
   }
+
   val resetIfEditorFocusChanged = object : FocusListener {
     override fun focusGained(e: FocusEvent?) {
     }
@@ -96,9 +96,8 @@ object KeyboardHandler {
 
   private fun configureKeyMap() {
     backup = getClientProperty(editor.component, ACTIONS_KEY)
-    putClientProperty(editor.component,
-      ACTIONS_KEY,
-      SmartList<AnAction>(AceKeyAction))
+    val aceActionList = SmartList<AnAction>(AceKeyAction)
+    putClientProperty(editor.component, ACTIONS_KEY, aceActionList)
     val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
     AceKeyAction.registerCustomShortcutSet(css, editor.component)
   }

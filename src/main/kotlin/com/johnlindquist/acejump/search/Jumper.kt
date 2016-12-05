@@ -16,11 +16,14 @@ object Jumper {
   fun jump(jumpInfo: JumpInfo) {
     if (originalQuery.last().isUpperCase())
       setSelectionFromCaretToOffset(jumpInfo.index)
-    else
+    else if (Finder.targetModeEnabled) {
+      // Moving the caret will trigger a reset, flipping targetModeEnabled, so
+      // we need to move the caret and select the word in one single transaction
       moveCaret(jumpInfo.index)
-
-    if (Finder.targetModeEnabled)
       selectWordAtCaret()
+    } else {
+      moveCaret(jumpInfo.index)
+    }
 
     hasJumped = true
   }
