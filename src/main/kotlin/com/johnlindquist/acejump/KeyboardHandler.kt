@@ -93,7 +93,7 @@ object KeyboardHandler {
 
   private var backup: List<AnAction>? = null
 
-  // This is an grotesque hack.
+  // This is a grotesque hack.
   private val ACTIONS_KEY = AnAction::class.java.declaredFields.first {
     it.name == "ACTIONS_KEY" || it.name == "ourClientProperty"
   }.get(null)
