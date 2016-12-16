@@ -8,7 +8,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>Hotfix for broken target mode</change-notes>
+  <change-notes>Fixes Android Studio regression.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 

@@ -8,10 +8,7 @@ import com.intellij.openapi.editor.event.CaretEvent
 import com.intellij.openapi.editor.event.CaretListener
 import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
-import com.intellij.openapi.project.DumbAwareAction.ACTIONS_KEY
 import com.intellij.util.SmartList
-import com.intellij.util.ui.UIUtil.getClientProperty
-import com.intellij.util.ui.UIUtil.putClientProperty
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.ui.AceUI.editor
@@ -31,7 +28,9 @@ object KeyboardHandler {
   private var text = ""
   private val handler = EditorActionManager.getInstance().typedAction.rawHandler
 
+  //  val ACTIONS_KEY: Key<List<AnAction>> = Key.create<List<AnAction>>("AnAction.shortcutSet")
   fun activate() = if (!isEnabled) startListening() else toggleTargetMode()
+
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
   fun processBackspaceCommand() {
@@ -92,12 +91,17 @@ object KeyboardHandler {
     }
   }
 
-  private var backup: MutableList<AnAction>? = null
+  private var backup: List<AnAction>? = null
+
+  // This is an grotesque hack.
+  private val ACTIONS_KEY = AnAction::class.java.declaredFields.first {
+    it.name == "ACTIONS_KEY" || it.name == "ourClientProperty"
+  }.get(null)
 
   private fun configureKeyMap() {
-    backup = getClientProperty(editor.component, ACTIONS_KEY)
+    backup = editor.component.getClientProperty(ACTIONS_KEY) as List<AnAction>?
     val aceActionList = SmartList<AnAction>(AceKeyAction)
-    putClientProperty(editor.component, ACTIONS_KEY, aceActionList)
+    editor.component.putClientProperty(ACTIONS_KEY, aceActionList)
     val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
     AceKeyAction.registerCustomShortcutSet(css, editor.component)
   }
@@ -121,7 +125,7 @@ object KeyboardHandler {
   fun resetUIState() {
     text = ""
     isEnabled = false
-    putClientProperty(editor.component, ACTIONS_KEY, backup)
+    editor.component.putClientProperty(ACTIONS_KEY, backup)
     AceKeyAction.unregisterCustomShortcutSet(editor.component)
     EditorActionManager.getInstance().typedAction.setupRawHandler(handler)
     Finder.reset()
@@ -138,10 +142,10 @@ object KeyboardHandler {
   }
 
   fun removeListeners() {
-   if(editor.component.focusListeners.contains(resetIfEditorFocusChanged)) {
-     editor.scrollingModel.removeVisibleAreaListener(resetIfScrollbarChanged)
-     editor.caretModel.removeCaretListener(resetIfCaretPositionChanged)
-     editor.component.removeFocusListener(resetIfEditorFocusChanged)
-   }
+    if (editor.component.focusListeners.contains(resetIfEditorFocusChanged)) {
+      editor.scrollingModel.removeVisibleAreaListener(resetIfScrollbarChanged)
+      editor.caretModel.removeCaretListener(resetIfCaretPositionChanged)
+      editor.component.removeFocusListener(resetIfEditorFocusChanged)
+    }
   }
 }

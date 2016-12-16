@@ -47,6 +47,7 @@ In order to build AceJump from the source, clone this repository and run `./grad
 
 ## History
 
+- 3.1.2 Fixes an Android Studio regression.
 - 3.1.1 Hotfix for broken target mode.
 - 3.1.0 Removes the search box, lots of small usability improvements.
 - 3.0.7 No longer tags "folded" regions and minor alignment adjustments.
