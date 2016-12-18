@@ -28,7 +28,6 @@ object KeyboardHandler {
   private var text = ""
   private val handler = EditorActionManager.getInstance().typedAction.rawHandler
 
-  //  val ACTIONS_KEY: Key<List<AnAction>> = Key.create<List<AnAction>>("AnAction.shortcutSet")
   fun activate() = if (!isEnabled) startListening() else toggleTargetMode()
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()

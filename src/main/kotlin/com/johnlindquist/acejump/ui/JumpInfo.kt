@@ -59,7 +59,7 @@ class JumpInfo(val tag: String, val index: Int) {
     g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
     //the foreground text
-    g2d.font = AceUI.font
+    g2d.font = Canvas.font
     g2d.color = BLACK
     g2d.drawString(text.toUpperCase(), tagX, tagY + AceUI.fontHeight)
   }
