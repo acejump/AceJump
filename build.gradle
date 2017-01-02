@@ -1,5 +1,5 @@
 buildscript {
-  ext.kotlin_version = '1.1-M03'
+  ext.kotlin_version = '1.1-M04'
 
   repositories {
     jcenter()
@@ -19,7 +19,7 @@ apply plugin: 'org.jetbrains.intellij'
 apply plugin: 'kotlin'
 
 intellij {
-  version '163.7743.44'
+  version '171.2014.21'
   pluginName 'AceJump'
   updateSinceUntilBuild false
 

@@ -12,7 +12,6 @@ import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.Pattern.*
 import com.johnlindquist.acejump.search.getDefaultEditor
-import com.sun.glass.events.KeyEvent.VK_BACKSPACE
 import java.awt.Color.*
 import java.awt.event.KeyEvent.*
 import javax.swing.SwingUtilities.convertPoint
@@ -85,7 +84,7 @@ object AceUI {
     VK_END to { find(END_OF_LINE) },
     VK_UP to { find(CODE_INDENTS) },
     VK_ESCAPE to { KeyboardHandler.resetUIState() },
-    VK_BACKSPACE to { KeyboardHandler.processBackspaceCommand() }
+    VK_BACK_SPACE to { KeyboardHandler.processBackspaceCommand() }
   )
 
   fun find(pattern: Pattern) = Finder.findPattern(pattern)

@@ -250,7 +250,7 @@ object Finder {
           !digraphs.containsKey("$letter${tag[0]}") &&
             //Prevents "...a[IJ]...i[JX]..." ij
             !newTagMap.contains("$letter${tag[0]}") &&
-            //Prevents "...r[BK]iv...r[VB]in..."  rivb
+            //Prevents "...r[BK]iv...r[VB]in..." rivb
             !newTagMap.keys.any { it[0] == letter && it.last() == tag[0] } &&
             //Prevents "...i[JX]...i[IJ]..." ij
             !(letter == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
