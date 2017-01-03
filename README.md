@@ -35,10 +35,10 @@ You can change the default keyboard shortcut, by visiting **File \| Settings \| 
 
 ![Keymap](https://cloud.githubusercontent.com/assets/175716/11760350/911aed4c-a065-11e5-8f17-49bc97ad1dad.png)
 
-If you are using [IdeaVim](https://plugins.jetbrains.com/plugin/164), you may wish to remap a single key to activate AceJump. For example, adding the following line to `˜/.ideavimrc` will activate AceJump whenever the <kbd>F</kbd> key is pressed:
+If you are using [IdeaVim](https://plugins.jetbrains.com/plugin/164), you may wish to remap a single key to activate AceJump. For example, paste the following line into your terminal to activate AceJump whenever the <kbd>F</kbd> key is pressed:
 
 ```
-map f :action AceAction<CR>
+echo - e "map f :action AceAction<CR>\nmap F :action AceTargetAction<CR>" >> ~/.ideavimrc
 ```
 
 ## Building

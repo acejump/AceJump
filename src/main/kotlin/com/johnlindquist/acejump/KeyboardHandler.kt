@@ -157,8 +157,8 @@ object KeyboardHandler {
     restoreEditorSettings()
   }
 
-  private fun toggleTargetMode() {
-    if (Finder.toggleTargetMode())
+  fun toggleTargetMode(status: Boolean? = null) {
+    if (Finder.toggleTargetMode(status))
       editor.colorsScheme.setColor(CARET_COLOR, RED)
     else
       editor.colorsScheme.setColor(CARET_COLOR, BLUE)

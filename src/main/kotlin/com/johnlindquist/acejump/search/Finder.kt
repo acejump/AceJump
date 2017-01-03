@@ -44,8 +44,12 @@ object Finder {
     maybeJump()
   }
 
-  fun toggleTargetMode(): Boolean {
-    targetModeEnabled = !targetModeEnabled
+  fun toggleTargetMode(status: Boolean? = null): Boolean {
+    if(status != null) {
+      targetModeEnabled = status
+    } else {
+      targetModeEnabled = !targetModeEnabled
+    }
     return targetModeEnabled
   }
 
