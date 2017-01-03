@@ -103,9 +103,11 @@ object KeyboardHandler {
   }
 
   fun addListeners() {
-    editor.scrollingModel.addVisibleAreaListener(resetIfScrollbarChanged)
-    editor.caretModel.addCaretListener(resetIfCaretPositionChanged)
-    editor.component.addFocusListener(resetIfEditorFocusChanged)
+    synchronized(resetIfEditorFocusChanged) {
+      editor.scrollingModel.addVisibleAreaListener(resetIfScrollbarChanged)
+      editor.caretModel.addCaretListener(resetIfCaretPositionChanged)
+      editor.component.addFocusListener(resetIfEditorFocusChanged)
+    }
   }
 
   private fun interceptPrintableKeystrokes() {
@@ -164,11 +166,14 @@ object KeyboardHandler {
     Canvas.repaint()
   }
 
+
   fun removeListeners() {
-    if (editor.component.focusListeners.contains(resetIfEditorFocusChanged)) {
-      editor.scrollingModel.removeVisibleAreaListener(resetIfScrollbarChanged)
-      editor.caretModel.removeCaretListener(resetIfCaretPositionChanged)
-      editor.component.removeFocusListener(resetIfEditorFocusChanged)
+    synchronized(resetIfEditorFocusChanged) {
+      if (editor.component.focusListeners.contains(resetIfEditorFocusChanged)) {
+        editor.component.removeFocusListener(resetIfEditorFocusChanged)
+        editor.scrollingModel.removeVisibleAreaListener(resetIfScrollbarChanged)
+        editor.caretModel.removeCaretListener(resetIfCaretPositionChanged)
+      }
     }
   }
 }
