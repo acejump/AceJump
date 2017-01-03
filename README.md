@@ -47,6 +47,7 @@ In order to build AceJump from the source, clone this repository and run `./grad
 
 ## History
 
+- 3.1.4 Fixes the "Assertion Failed" exception popup
 - 3.1.3 Fixes an error affecting some users during startup.
 - 3.1.2 Fixes an Android Studio regression.
 - 3.1.1 Hotfix for broken target mode.

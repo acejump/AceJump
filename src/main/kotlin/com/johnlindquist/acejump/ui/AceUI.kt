@@ -21,8 +21,7 @@ object AceUI {
   var editor: Editor = getDefaultEditor()
     set(value) {
       if (value != field) {
-        KeyboardHandler.removeListeners()
-        KeyboardHandler.resetUIState()
+        KeyboardHandler.reset()
         field = value
       }
 

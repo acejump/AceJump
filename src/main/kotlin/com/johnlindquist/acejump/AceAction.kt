@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.DumbAwareAction
+import com.intellij.ui.navigation.History
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Pattern.LINE_MARK
 import com.johnlindquist.acejump.ui.AceUI.document

@@ -32,7 +32,7 @@ object KeyboardHandler {
   private var text = ""
   private val handler = EditorActionManager.getInstance().typedAction.rawHandler
 
-  val keyMap = mutableMapOf(
+  private val keyMap = mutableMapOf(
     VK_HOME to { find(START_OF_LINE) },
     VK_LEFT to { find(START_OF_LINE) },
     VK_RIGHT to { find(END_OF_LINE) },
@@ -42,9 +42,9 @@ object KeyboardHandler {
     VK_BACK_SPACE to { processBackspaceCommand() }
   )
 
-  fun findAndUpdateUI(query: String, key: Char) {
-    getApplication().runReadAction({ Finder.findOrJump(query, key) })
-    getApplication().invokeLater({ updateUIState() })
+  private fun findAndUpdateUI(query: String, key: Char) {
+    getApplication().runReadAction { Finder.findOrJump(query, key) }
+    getApplication().invokeLater { updateUIState() }
   }
 
   fun find(pattern: Pattern) {
@@ -57,42 +57,26 @@ object KeyboardHandler {
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
-  fun processBackspaceCommand() {
+  private fun processBackspaceCommand() {
     text = ""
     Finder.reset()
     updateUIState()
   }
 
-  val resetIfScrollbarChanged = object : VisibleAreaListener {
-    override fun visibleAreaChanged(e: VisibleAreaEvent?) {
-      editor.scrollingModel.removeVisibleAreaListener(this)
-      resetUIState()
-    }
+  private val resetIfScrollbarChanged = VisibleAreaListener { reset() }
+
+  private val resetIfCaretPositionChanged = object : CaretListener {
+    override fun caretAdded(e: CaretEvent?) = reset()
+
+    override fun caretPositionChanged(e: CaretEvent?) = reset()
+
+    override fun caretRemoved(e: CaretEvent?) = reset()
   }
 
-  val resetIfCaretPositionChanged = object : CaretListener {
-    override fun caretAdded(e: CaretEvent?) {
-      caretPositionChanged(e)
-    }
+  private val resetIfEditorFocusChanged = object : FocusListener {
+    override fun focusGained(e: FocusEvent?) = reset()
 
-    override fun caretPositionChanged(e: CaretEvent?) {
-      editor.caretModel.removeCaretListener(this)
-      resetUIState()
-    }
-
-    override fun caretRemoved(e: CaretEvent?) {
-      caretPositionChanged(e)
-    }
-  }
-
-  val resetIfEditorFocusChanged = object : FocusListener {
-    override fun focusGained(e: FocusEvent?) {
-    }
-
-    override fun focusLost(e: FocusEvent?) {
-      editor.component.removeFocusListener(this)
-      resetUIState()
-    }
+    override fun focusLost(e: FocusEvent?) = reset()
   }
 
   private fun configureEditor() {
@@ -102,7 +86,7 @@ object KeyboardHandler {
     addListeners()
   }
 
-  fun addListeners() {
+  private fun addListeners() {
     synchronized(resetIfEditorFocusChanged) {
       editor.scrollingModel.addVisibleAreaListener(resetIfScrollbarChanged)
       editor.caretModel.addCaretListener(resetIfCaretPositionChanged)
@@ -131,23 +115,38 @@ object KeyboardHandler {
     AceKeyAction.registerCustomShortcutSet(css, editor.component)
   }
 
-  fun startListening() {
+  private fun startListening() {
     isEnabled = true
     configureEditor()
     installCustomShortcutHandler()
   }
 
-  fun updateUIState() {
+  private fun updateUIState() {
     if (Jumper.hasJumped) {
       Jumper.hasJumped = false
-      resetUIState()
+      reset()
     } else {
       Canvas.jumpLocations = Finder.jumpLocations
       Canvas.repaint()
     }
   }
 
-  fun resetUIState() {
+  fun reset() {
+    removeListeners()
+    resetUIState()
+  }
+
+  private fun removeListeners() {
+    synchronized(resetIfEditorFocusChanged) {
+      if (editor.component.focusListeners.contains(resetIfEditorFocusChanged)) {
+        editor.component.removeFocusListener(resetIfEditorFocusChanged)
+        editor.scrollingModel.removeVisibleAreaListener(resetIfScrollbarChanged)
+        editor.caretModel.removeCaretListener(resetIfCaretPositionChanged)
+      }
+    }
+  }
+
+  private fun resetUIState() {
     text = ""
     isEnabled = false
     editor.component.putClientProperty(ACTIONS_KEY, backup)
@@ -158,22 +157,11 @@ object KeyboardHandler {
     restoreEditorSettings()
   }
 
-  fun toggleTargetMode() {
+  private fun toggleTargetMode() {
     if (Finder.toggleTargetMode())
       editor.colorsScheme.setColor(CARET_COLOR, RED)
     else
       editor.colorsScheme.setColor(CARET_COLOR, BLUE)
     Canvas.repaint()
-  }
-
-
-  fun removeListeners() {
-    synchronized(resetIfEditorFocusChanged) {
-      if (editor.component.focusListeners.contains(resetIfEditorFocusChanged)) {
-        editor.component.removeFocusListener(resetIfEditorFocusChanged)
-        editor.scrollingModel.removeVisibleAreaListener(resetIfScrollbarChanged)
-        editor.caretModel.removeCaretListener(resetIfCaretPositionChanged)
-      }
-    }
   }
 }
