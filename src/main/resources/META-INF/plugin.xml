@@ -36,7 +36,7 @@
     </action>
    <action id="AceTargetAction"
             class="com.johnlindquist.acejump.AceTargetAction"
-            text="Display Line Markers"
+            text="Start in Target Mode"
             description="Search and navigate to result">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl alt SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl alt SEMICOLON"/>

@@ -38,7 +38,15 @@ You can change the default keyboard shortcut, by visiting **File \| Settings \| 
 If you are using [IdeaVim](https://plugins.jetbrains.com/plugin/164), you may wish to remap a single key to activate AceJump. For example, paste the following line into your terminal to activate AceJump whenever the <kbd>F</kbd> key is pressed, and activate *Target Mode* whenever <kbd>Shift</kbd>+<kbd>F</kbd> is pressed. 
 
 ```
-echo - e "map f :action AceAction<CR>\nmap F :action AceTargetAction<CR>" >> ~/.ideavimrc
+echo - e "map f :action AceAction<CR>\nmap F :action AceTargetAction<CR>\nmap g :action AceLineAction<CR>" >> ~/.ideavimrc
+```
+
+The previous command will add the following lines to your `~/.ideavimrc` file (the keys <kbd>f</kbd>, <kbd>F</kbd> and <kbd>g</kbd> are user-configurable):
+
+```
+map f :action AceAction<CR>
+map F :action AceTargetAction<CR>
+map g :action AceLineAction<CR>
 ```
 
 ## Building
