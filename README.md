@@ -1,22 +1,22 @@
 # AceJump
 
-[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Pressing the keyboard shortcut for AceJump (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) will activate a tooltip overlay. You can type any visible string in the editor, followed by one of illustrated tags, to jump that location: 
+[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Pressing the keyboard shortcut for AceJump (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) will activate a tooltip overlay. Type any visible string in the editor, followed by one of illustrated tags, to jump that location: 
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177444/124fb534-a74d-11e6-8912-1d220ae27091.png)
 
-If you press the AceJump shortcut a second time before completing a jump, it will activate *Target Mode*. Once *Target Mode* is activated, jumping to a tag will select the entire word at a jump target. You can enter *Target Mode* directly by pressing the shortcut assigned to `AceTargetMode` (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd> by default).
+Press the AceJump shortcut a second time before completing a jump, to activate *Target Mode*. Once *Target Mode* is activated, jumping to a tag will select the entire word at a jump target. You can also enter *Target Mode* directly by pressing the shortcut assigned to `AceTargetMode` (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd> by default).
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177362/a9976398-a74c-11e6-955d-df029c7b329b.png)
 
-If you press the AceJump shortcut for line mode (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), it will highlight the beginning, first non-whitespace characters, and end of every visible line in the editor). You can then jump by completing the tag.
+Press the AceJump shortcut for line mode (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), to highlight the beginning, first non-whitespace characters, and end of every visible line in the editor). You can then jump by completing the tag.
 
 ![](https://cloud.githubusercontent.com/assets/175716/20533565/f7d04d1e-b0ab-11e6-8b89-f7b10a98752d.png)
 
-If you press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, <kbd>↑</kbd>, or <kbd>↑</kbd>, it will tag the last, first, or first non-whitespace character, respectively, of every visible line in the editor.
+Press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, <kbd>↑</kbd>, or <kbd>↑</kbd>, to tag the last, first, or first non-whitespace characters, of every visible line in the editor.
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
 
-Finally, if you press <kbd>Shift</kbd> when completing the jump, AceJump will select all text from the current cursor position to the destination. It's that simple.
+Press <kbd>Shift</kbd> when completing the jump, to select all text from the current cursor position to the destination.
 
 ## Installing
 
@@ -51,7 +51,11 @@ map g :action AceLineAction<CR>
 
 ## Building
 
-In order to build AceJump from the source, clone this repository and run `./gradlew buildPlugin`.
+To build AceJump from the source, clone this repository and run `./gradlew buildPlugin`.
+
+## Contributing
+
+To start an instance of IntelliJ IDEA with AceJump installed, run ` ./gradlew runIdea`.
 
 ## History
 
