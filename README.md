@@ -4,15 +4,15 @@
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177444/124fb534-a74d-11e6-8912-1d220ae27091.png)
 
-If you press the AceJump shortcut a second time before completing a jump, it will activate *Target Mode*. Once *Target Mode* is activated, jumping to a tag will select the entire word at a jump target.
+If you press the AceJump shortcut a second time before completing a jump, it will activate *Target Mode*. Once *Target Mode* is activated, jumping to a tag will select the entire word at a jump target. You can enter *Target Mode* directly by pressing the shortcut assigned to `AceTargetMode` (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd> by default).
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177362/a9976398-a74c-11e6-955d-df029c7b329b.png)
 
-If you press the AceJump shortcut for line mode (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), AceJump will highlight the beginning, first non-whitespace characters, and end of every visible line in the editor). You can then jump by completing the tag.
+If you press the AceJump shortcut for line mode (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), it will highlight the beginning, first non-whitespace characters, and end of every visible line in the editor). You can then jump by completing the tag.
 
 ![](https://cloud.githubusercontent.com/assets/175716/20533565/f7d04d1e-b0ab-11e6-8b89-f7b10a98752d.png)
 
-If you press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, <kbd>↑</kbd>, or <kbd>↑</kbd>, AceJump will tag the last, first, or first non-whitespace character, respectively, of every visible line in the editor.
+If you press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, <kbd>↑</kbd>, or <kbd>↑</kbd>, it will tag the last, first, or first non-whitespace character, respectively, of every visible line in the editor.
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
 
@@ -35,7 +35,7 @@ You can change the default keyboard shortcut, by visiting **File \| Settings \| 
 
 ![Keymap](https://cloud.githubusercontent.com/assets/175716/11760350/911aed4c-a065-11e5-8f17-49bc97ad1dad.png)
 
-If you are using [IdeaVim](https://plugins.jetbrains.com/plugin/164), you may wish to remap a single key to activate AceJump. For example, paste the following line into your terminal to activate AceJump whenever the <kbd>F</kbd> key is pressed:
+If you are using [IdeaVim](https://plugins.jetbrains.com/plugin/164), you may wish to remap a single key to activate AceJump. For example, paste the following line into your terminal to activate AceJump whenever the <kbd>F</kbd> key is pressed, and activate *Target Mode* whenever <kbd>Shift</kbd>+<kbd>F</kbd> is pressed. 
 
 ```
 echo - e "map f :action AceAction<CR>\nmap F :action AceTargetAction<CR>" >> ~/.ideavimrc
@@ -47,6 +47,7 @@ In order to build AceJump from the source, clone this repository and run `./grad
 
 ## History
 
+- 3.1.5 Allow users to enter target mode directly by pressing Ctrl+Alt+;
 - 3.1.4 Fixes the "Assertion Failed" exception popup
 - 3.1.3 Fixes an error affecting some users during startup.
 - 3.1.2 Fixes an Android Studio regression.
@@ -71,7 +72,7 @@ keyboards.
 >* Colorful highlighting: AceJump will now highlight the editor text, 
 as you type.
 
-- 2.0.13  Fix a regression affecting target mode and line-based navigation: https://github.com/johnlindquist/AceJump/commit/cc3a23a3bd6754d11100f15f3dddc4d8529926df#diff-a483c757116bde46e566a8b01520a807L51</dd>
+- 2.0.13  Fix a regression affecting *Target Mode* and line-based navigation: https://github.com/johnlindquist/AceJump/commit/cc3a23a3bd6754d11100f15f3dddc4d8529926df#diff-a483c757116bde46e566a8b01520a807L51</dd>
 - 2.0.12 Fix ClassCastException when input letter not present: https://github.com/johnlindquist/AceJump/issues/73
 - 2.0.11 One hundred percent all natural Kotlin.
 - 2.0.10 Support 2016.2, remove upper version limit, update internal Kotlin version
