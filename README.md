@@ -35,7 +35,7 @@ You can change the default keyboard shortcut, by visiting **File \| Settings \| 
 
 ![Keymap](https://cloud.githubusercontent.com/assets/175716/11760350/911aed4c-a065-11e5-8f17-49bc97ad1dad.png)
 
-If you are using [IdeaVim](https://plugins.jetbrains.com/plugin/164), paste the following command into your terminal to activate various modes in AceJump with a single keystroke. 
+If you are using [IdeaVim](https://plugins.jetbrains.com/plugin/164), paste the following command into your terminal to activate AceJump with a single keystroke. 
 
 ```
 echo - e "map f :action AceAction<CR>\nmap F :action AceTargetAction<CR>\nmap g :action AceLineAction<CR>" >> ~/.ideavimrc
