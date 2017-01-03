@@ -5,8 +5,6 @@ import com.google.common.collect.HashBiMap
 import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
 import com.intellij.find.FindResult
-import com.intellij.openapi.application.ApplicationManager.getApplication
-import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
 import com.johnlindquist.acejump.search.Pattern.Companion.nearby
 import com.johnlindquist.acejump.ui.AceUI.document
@@ -43,8 +41,7 @@ object Finder {
     query = if (Pattern.contains(text)) key.toString() else text.toLowerCase()
     findModel.stringToFind = text
 
-    getApplication().runReadAction({ jump() })
-    getApplication().invokeLater({ KeyboardHandler.updateUIState() })
+    maybeJump()
   }
 
   fun toggleTargetMode(): Boolean {
@@ -52,7 +49,7 @@ object Finder {
     return targetModeEnabled
   }
 
-  private fun jump() {
+  private fun maybeJump() {
     fun jumpTo(jumpInfo: JumpInfo) {
       Jumper.jump(jumpInfo)
       reset()
@@ -99,8 +96,7 @@ object Finder {
 
   /**
    * Shortens assigned tags. Effectively, this will only shorten two-character
-   * strings to one-character strings. This should happen if and only if the
-   * shortened tag:
+   * tags to one-character tags. This happens if and only if the shortened tag:
    *
    * 1. Is unique among the set of all existing tags.
    * 2. The shortened tag does not equal the next character.
@@ -158,10 +154,10 @@ object Finder {
   }
 
   /**
-   * Builds a map of all existing bigrams, starting from the index of the
-   * last character in the search results. Simultaneously builds a map of all
+   * Builds a map of all existing bigrams, starting from the index of the last
+   * character in the search results. Simultaneously builds a map of all
    * available tags, by removing any used bigrams after each search result, and
-   * prior to end of a word (ie. a contiguous group of letters/digits).
+   * prior to the end of a word (ie. a contiguous group of letters/digits).
    */
 
   fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
@@ -208,7 +204,7 @@ object Finder {
   /**
    * Maps tags to search results. Tags *must* have the following properties:
    *
-   * 1. A tag must not equal *any* bigrams on the screen.
+   * 1. A tag must not match *any* bigrams on the screen.
    * 2. A tag's 1st letter must not match any letters of the covered word.
    * 3. Tag must not match any combination of any plaintext and tag. "e(a[B)X]"
    * 4. Once assigned, a tag must never change until it has been selected. *A.
@@ -322,12 +318,6 @@ object Finder {
       // Minimze the distance between tag characters
       { nearby[it[0]]!!.indexOf(it.last()) }
     )).mapTo(linkedSetOf<String>(), { it })
-
-  fun findPattern(text: Pattern) {
-    reset()
-    findModel.isRegularExpressions = true
-    findOrJump(text.pattern, Pattern.REGEX_PREFIX)
-  }
 
   fun reset() {
     findModel.isRegularExpressions = false

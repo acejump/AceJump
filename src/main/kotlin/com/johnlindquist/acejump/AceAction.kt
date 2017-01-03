@@ -18,7 +18,6 @@ object AceAction : DumbAwareAction() {
   override fun actionPerformed(e: AnActionEvent) {
     editor = e.getData(EDITOR) as EditorImpl
     document = editor.document.charsSequence.toString().toLowerCase()
-
     KeyboardHandler.activate()
   }
 }
@@ -28,7 +27,7 @@ object AceLineAction : DumbAwareAction() {
     editor = e.getData(EDITOR) as EditorImpl
     document = editor.document.charsSequence.toString().toLowerCase()
     KeyboardHandler.activate()
-    Finder.findPattern(LINE_MARK)
+    KeyboardHandler.find(LINE_MARK)
   }
 }
 

@@ -8,12 +8,8 @@ import com.intellij.openapi.editor.colors.EditorColorsManager.getInstance
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
 import com.intellij.openapi.project.Project
 import com.johnlindquist.acejump.KeyboardHandler
-import com.johnlindquist.acejump.search.Finder
-import com.johnlindquist.acejump.search.Pattern
-import com.johnlindquist.acejump.search.Pattern.*
 import com.johnlindquist.acejump.search.getDefaultEditor
 import java.awt.Color.*
-import java.awt.event.KeyEvent.*
 import javax.swing.SwingUtilities.convertPoint
 
 object AceUI {
@@ -76,18 +72,6 @@ object AceUI {
   val boxColor = red
   val editorHighlightColor = yellow
   val acejumpHighlightColor = green
-
-  val keyMap = mutableMapOf(
-    VK_HOME to { find(START_OF_LINE) },
-    VK_LEFT to { find(START_OF_LINE) },
-    VK_RIGHT to { find(END_OF_LINE) },
-    VK_END to { find(END_OF_LINE) },
-    VK_UP to { find(CODE_INDENTS) },
-    VK_ESCAPE to { KeyboardHandler.resetUIState() },
-    VK_BACK_SPACE to { KeyboardHandler.processBackspaceCommand() }
-  )
-
-  fun find(pattern: Pattern) = Finder.findPattern(pattern)
 
   fun setupCursor() {
     naturalBlock = editor.settings.isBlockCursor
