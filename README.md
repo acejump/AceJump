@@ -4,7 +4,7 @@
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177444/124fb534-a74d-11e6-8912-1d220ae27091.png)
 
-Press the AceJump shortcut a second time before completing a jump, to activate *Target Mode*. Once *Target Mode* is activated, jumping to a tag will select the entire word at a jump target. You can also enter *Target Mode* directly by pressing the shortcut assigned to `AceTargetMode` (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd> by default).
+Press the AceJump shortcut a second time before completing a jump to activate *Target Mode*. Once *Target Mode* is activated, jumping to a tag will select the entire word at a jump target. You can also enter *Target Mode* directly by pressing the shortcut assigned to `AceTargetMode` (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd> by default).
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177362/a9976398-a74c-11e6-955d-df029c7b329b.png)
 
@@ -16,7 +16,7 @@ Press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, <kbd>↑
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
 
-Press <kbd>Shift</kbd> when completing the jump, to select all text from the current cursor position to the destination.
+Press <kbd>Shift</kbd> when completing the jump to select all text from the current cursor position to the destination.
 
 ## Installing
 
@@ -31,7 +31,7 @@ You can also install AceJump directly from the IDE, via **File \| Settings \| Pl
 
 ## Configuring
 
-You can change the default keyboard shortcut, by visiting **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter⏎</kbd>.
+You can change the default keyboard shortcut by visiting **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter⏎</kbd>.
 
 ![Keymap](https://cloud.githubusercontent.com/assets/175716/11760350/911aed4c-a065-11e5-8f17-49bc97ad1dad.png)
 

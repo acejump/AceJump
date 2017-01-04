@@ -45,7 +45,7 @@ object Finder {
   }
 
   fun toggleTargetMode(status: Boolean? = null): Boolean {
-    if(status != null) {
+    if (status != null) {
       targetModeEnabled = status
     } else {
       targetModeEnabled = !targetModeEnabled
@@ -245,15 +245,17 @@ object Finder {
 
       val (left, right) = getWordBounds(index)
       val (matching, nonMatching) = tags.partition { tag ->
-        substring(index, right).all { letter ->
+        substring(index, right).all { char ->
           //Prevents "...a[IJ]...ij..." ij
-          !digraphs.containsKey("$letter${tag[0]}") &&
+          !digraphs.containsKey("$char${tag[0]}") &&
+            //Prevents "...re[Q]...rdre[QA]sor" req
+            !newTagMap.containsKey("${tag[0]}") &&
             //Prevents "...a[IJ]...i[JX]..." ij
-            !newTagMap.contains("$letter${tag[0]}") &&
+            !newTagMap.contains("$char${tag[0]}") &&
             //Prevents "...r[BK]iv...r[VB]in..." rivb
-            !newTagMap.keys.any { it[0] == letter && it.last() == tag[0] } &&
+            newTagMap.keys.none { it[0] == char && it.last() == tag[0] } &&
             //Prevents "...i[JX]...i[IJ]..." ij
-            !(letter == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
+            !(char == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
         }
       }
 

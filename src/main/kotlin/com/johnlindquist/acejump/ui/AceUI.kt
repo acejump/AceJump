@@ -21,7 +21,9 @@ object AceUI {
   var editor: Editor = getDefaultEditor()
     set(value) {
       if (value != field) {
-        KeyboardHandler.reset()
+        try {
+          KeyboardHandler.reset()
+        } catch (e: UninitializedPropertyAccessException) { }
         field = value
       }
 

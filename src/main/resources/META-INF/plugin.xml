@@ -8,7 +8,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>Allow users to enter target mode directly by pressing Ctrl+Alt+;</change-notes>
+  <change-notes>Fixes a rare tag collision scenario and UninitializedPropertyAccess exception</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 

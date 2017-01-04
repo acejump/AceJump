@@ -22,9 +22,7 @@ object AceAction : DumbAwareAction() {
 }
 
 object AceTargetAction : DumbAwareAction() {
-  override fun update(action: AnActionEvent) {
-    action.presentation.isEnabled = (action.getData(EDITOR)) != null
-  }
+  override fun update(action: AnActionEvent) = AceAction.update(action)
 
   override fun actionPerformed(e: AnActionEvent) {
     AceAction.actionPerformed(e)
@@ -33,10 +31,10 @@ object AceTargetAction : DumbAwareAction() {
 }
 
 object AceLineAction : DumbAwareAction() {
+  override fun update(action: AnActionEvent) = AceAction.update(action)
+
   override fun actionPerformed(e: AnActionEvent) {
-    editor = e.getData(EDITOR) as EditorImpl
-    document = editor.document.charsSequence.toString().toLowerCase()
-    KeyboardHandler.activate()
+    AceAction.actionPerformed(e)
     KeyboardHandler.find(LINE_MARK)
   }
 }
