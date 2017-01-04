@@ -82,14 +82,10 @@ class JumpInfo(val tag: String, val index: Int) {
       editor.offsetToLogicalPosition(index).column != 0 && ac.isFree(left)
     val isFirstCharacterOfLine = index == startOfThisLine
     alignment = if (nextCharIsWhiteSpace) RIGHT
-    else if (isFirstCharacterOfLine)
-      RIGHT
-    else if (canAlignLeft)
-      LEFT
-    else if (canAlignRight)
-      RIGHT
-    else
-      NONE
+    else if (isFirstCharacterOfLine) RIGHT
+    else if (canAlignLeft) LEFT
+    else if (canAlignRight) RIGHT
+    else NONE
 
     return when (alignment) {
       TOP -> top
