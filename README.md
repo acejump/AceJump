@@ -46,7 +46,7 @@ The previous command will add the following lines to your `~/.ideavimrc` file (t
 ```
 map f :action AceAction<CR>
 map F :action AceTargetAction<CR>
-map g :action AceLineAction<CR>
+map v :action AceLineAction<CR>
 ```
 
 ## Building
