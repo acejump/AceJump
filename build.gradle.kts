@@ -21,7 +21,6 @@ apply {
 }
 
 configure<IntelliJPluginExtension> {
-  version = "171.2014.21"
   pluginName = "AceJump"
   updateSinceUntilBuild = false
 }
