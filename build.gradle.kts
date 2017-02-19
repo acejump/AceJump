@@ -1,3 +1,4 @@
+import org.gradle.script.lang.kotlin.*
 import org.jetbrains.intellij.IntelliJPluginExtension
 
 buildscript {
@@ -12,7 +13,7 @@ buildscript {
 }
 
 plugins {
-  id("org.jetbrains.intellij") version "0.2.0"
+  id("org.jetbrains.intellij") version "0.2.5"
 }
 
 apply {

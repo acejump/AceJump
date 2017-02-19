@@ -100,11 +100,11 @@ object Finder {
 
   /**
    * Shortens assigned tags. Effectively, this will only shorten two-character
-   * tags to one-character tags. This happens if and only if the shortened tag:
+   * tags to one-character tags. This will happen if and only if:
    *
-   * 1. Is unique among the set of all existing tags.
-   * 2. The shortened tag does not equal the next character.
-   * 3. The query does not end with the tag, in whole or part.
+   * 1. The shortened tag is unique among the set of existing tags.
+   * 2. The shortened tag does not match the next character of text.
+   * 3. The query does not end with the shortened tag, in whole or part.
    */
 
   private fun compact(tagMap: BiMap<String, Int>) =
@@ -160,7 +160,7 @@ object Finder {
   /**
    * Builds a map of all existing bigrams, starting from the index of the last
    * character in the search results. Simultaneously builds a map of all
-   * available tags, by removing any used bigrams after each search result, and
+   * available tags, by removing used bigrams after each search result, and
    * prior to the end of a word (ie. a contiguous group of letters/digits).
    */
 
@@ -321,7 +321,7 @@ object Finder {
       { !adjacent[it[0]]!!.contains(it.last()) },
       // Rotate to remove "clumps" (ie. AA, AB, AC => AA BA CA)
       String::last,
-      // Minimze the distance between tag characters
+      // Minimize the distance between tag characters
       { nearby[it[0]]!!.indexOf(it.last()) }
     )).mapTo(linkedSetOf<String>(), { it })
 

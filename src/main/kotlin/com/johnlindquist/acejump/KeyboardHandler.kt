@@ -7,7 +7,6 @@ import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.event.CaretEvent
 import com.intellij.openapi.editor.event.CaretListener
-import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.util.SmartList
 import com.johnlindquist.acejump.search.Finder
@@ -30,7 +29,8 @@ object KeyboardHandler {
   @Volatile
   var isEnabled = false
   private var text = ""
-  private val handler = EditorActionManager.getInstance().typedAction.rawHandler
+  private val editorActionManager = EditorActionManager.getInstance()
+  private val handler = editorActionManager.typedAction.rawHandler
 
   private val keyMap = mutableMapOf(
     VK_HOME to { find(START_OF_LINE) },
@@ -63,9 +63,9 @@ object KeyboardHandler {
     updateUIState()
   }
 
-  private val resetIfScrollbarChanged = VisibleAreaListener { reset() }
+  private val resetIfScrollbarChanges = VisibleAreaListener { reset() }
 
-  private val resetIfCaretPositionChanged = object : CaretListener {
+  private val resetIfCaretPositionChanges = object : CaretListener {
     override fun caretAdded(e: CaretEvent?) = reset()
 
     override fun caretPositionChanged(e: CaretEvent?) = reset()
@@ -73,7 +73,7 @@ object KeyboardHandler {
     override fun caretRemoved(e: CaretEvent?) = reset()
   }
 
-  private val resetIfEditorFocusChanged = object : FocusListener {
+  private val resetIfEditorFocusChanges = object : FocusListener {
     override fun focusGained(e: FocusEvent?) = reset()
 
     override fun focusLost(e: FocusEvent?) = reset()
@@ -86,29 +86,21 @@ object KeyboardHandler {
     addListeners()
   }
 
-  private fun addListeners() {
-    synchronized(resetIfEditorFocusChanged) {
-      editor.scrollingModel.addVisibleAreaListener(resetIfScrollbarChanged)
-      editor.caretModel.addCaretListener(resetIfCaretPositionChanged)
-      editor.component.addFocusListener(resetIfEditorFocusChanged)
-    }
-  }
-
   private fun interceptPrintableKeystrokes() {
-    EditorActionManager.getInstance().typedAction.setupRawHandler { _, key, _ ->
+    editorActionManager.typedAction.setupRawHandler { _, key, _ ->
       text += key
       findAndUpdateUI(text, key)
     }
   }
 
-  private var backup: List<AnAction>? = null
+  private var backup: List<*>? = null
   // This is a grotesque hack to support older IntelliJ Platforms.
   private val ACTIONS_KEY = AnAction::class.java.declaredFields.first {
     it.name == "ACTIONS_KEY" || it.name == "ourClientProperty"
   }.get(null)
 
   private fun installCustomShortcutHandler() {
-    backup = editor.component.getClientProperty(ACTIONS_KEY) as List<AnAction>?
+    backup = editor.component.getClientProperty(ACTIONS_KEY) as List<*>?
     val aceActionList = SmartList<AnAction>(AceKeyAction)
     editor.component.putClientProperty(ACTIONS_KEY, aceActionList)
     val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
@@ -136,12 +128,20 @@ object KeyboardHandler {
     resetUIState()
   }
 
+  private fun addListeners() {
+    synchronized(resetIfEditorFocusChanges) {
+      editor.scrollingModel.addVisibleAreaListener(resetIfScrollbarChanges)
+      editor.caretModel.addCaretListener(resetIfCaretPositionChanges)
+      editor.component.addFocusListener(resetIfEditorFocusChanges)
+    }
+  }
+
   private fun removeListeners() {
-    synchronized(resetIfEditorFocusChanged) {
-      if (editor.component.focusListeners.contains(resetIfEditorFocusChanged)) {
-        editor.component.removeFocusListener(resetIfEditorFocusChanged)
-        editor.scrollingModel.removeVisibleAreaListener(resetIfScrollbarChanged)
-        editor.caretModel.removeCaretListener(resetIfCaretPositionChanged)
+    synchronized(resetIfEditorFocusChanges) {
+      if (editor.component.focusListeners.contains(resetIfEditorFocusChanges)) {
+        editor.component.removeFocusListener(resetIfEditorFocusChanges)
+        editor.scrollingModel.removeVisibleAreaListener(resetIfScrollbarChanges)
+        editor.caretModel.removeCaretListener(resetIfCaretPositionChanges)
       }
     }
   }
@@ -151,7 +151,7 @@ object KeyboardHandler {
     isEnabled = false
     editor.component.putClientProperty(ACTIONS_KEY, backup)
     AceKeyAction.unregisterCustomShortcutSet(editor.component)
-    EditorActionManager.getInstance().typedAction.setupRawHandler(handler)
+    editorActionManager.typedAction.setupRawHandler(handler)
     Finder.reset()
     Canvas.reset()
     restoreEditorSettings()
