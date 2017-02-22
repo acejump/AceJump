@@ -137,7 +137,7 @@ object Finder {
       return result.endOffset
     }
 
-    fun resultsIndices(): MutableList<Int> {
+    fun getResultIndices(): MutableList<Int> {
       val indicesToCheck = mutableListOf<Int>()
       val oldResults = sitesToCheck.iterator()
       var nextSite = if (oldResults.hasNext()) oldResults.next() else viewTop
@@ -154,7 +154,7 @@ object Finder {
       return indicesToCheck
     }
 
-    return resultsIndices()
+    return getResultIndices()
   }
 
   /**
