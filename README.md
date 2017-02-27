@@ -109,3 +109,9 @@ as you type.
 - 1.0.2 Cleaning up minor bugs (npe when editor not in focus, not removing layers)
 - 1.0.1 Adding a new jump: "Enter" will take you to the first non-whitespace char in a new line (compare to "Home" which takes you to a new line)
 - 1.0.0 Cleaned up code base for release
+
+## Acknowledgements
+
+- [Vimium](https://vimium.github.io/) - A Chrome plugin with a similar UI.
+- [Vimperator](http://www.vimperator.org/) - A Firefox plugin with a similar UI.
+- [ace-jump-mode](http://www.vimperator.org/) - An emacs plugin with a similar UI.
