@@ -62,6 +62,7 @@ To start an instance of IntelliJ IDEA with AceJump installed, run ` ./gradlew ru
 
 ## History
 
+- 3.1.6 Fixes some errors that occur when the user closes an editor prematurely.
 - 3.1.6 Fixes a rare tag collision scenario and UninitializedPropertyAccess exception
 - 3.1.5 Allow users to enter target mode directly by pressing Ctrl+Alt+;
 - 3.1.4 Fixes the "Assertion Failed" exception popup
