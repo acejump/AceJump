@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.event.CaretEvent
 import com.intellij.openapi.editor.event.CaretListener
+import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.util.SmartList
 import com.johnlindquist.acejump.search.Finder
@@ -24,6 +25,8 @@ import java.awt.Color.RED
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent.*
+import javax.swing.event.AncestorEvent
+import javax.swing.event.AncestorListener
 
 object KeyboardHandler {
   @Volatile
@@ -63,21 +66,27 @@ object KeyboardHandler {
     updateUIState()
   }
 
-  private val resetIfScrollbarChanges = VisibleAreaListener { reset() }
+  private val resetListener = object : CaretListener, VisibleAreaListener,
+    FocusListener, AncestorListener {
+      override fun ancestorAdded(event: AncestorEvent?) = reset()
 
-  private val resetIfCaretPositionChanges = object : CaretListener {
-    override fun caretAdded(e: CaretEvent?) = reset()
+      override fun ancestorMoved(event: AncestorEvent?) = reset()
 
-    override fun caretPositionChanged(e: CaretEvent?) = reset()
+      override fun ancestorRemoved(event: AncestorEvent?) = reset()
 
-    override fun caretRemoved(e: CaretEvent?) = reset()
-  }
+      override fun visibleAreaChanged(e: VisibleAreaEvent?) = reset()
 
-  private val resetIfEditorFocusChanges = object : FocusListener {
-    override fun focusGained(e: FocusEvent?) = reset()
+      override fun focusLost(e: FocusEvent?) = reset()
 
-    override fun focusLost(e: FocusEvent?) = reset()
-  }
+      override fun focusGained(e: FocusEvent?) = reset()
+
+      override fun caretAdded(e: CaretEvent?) = reset()
+
+      override fun caretPositionChanged(e: CaretEvent?) = reset()
+
+      override fun caretRemoved(e: CaretEvent?) = reset()
+    }
+
 
   private fun configureEditor() {
     setupCursor()
@@ -129,19 +138,21 @@ object KeyboardHandler {
   }
 
   private fun addListeners() {
-    synchronized(resetIfEditorFocusChanges) {
-      editor.scrollingModel.addVisibleAreaListener(resetIfScrollbarChanges)
-      editor.caretModel.addCaretListener(resetIfCaretPositionChanges)
-      editor.component.addFocusListener(resetIfEditorFocusChanges)
+    synchronized(resetListener) {
+      editor.component.addFocusListener(resetListener)
+      editor.component.addAncestorListener(resetListener)
+      editor.scrollingModel.addVisibleAreaListener(resetListener)
+      editor.caretModel.addCaretListener(resetListener)
     }
   }
 
   private fun removeListeners() {
-    synchronized(resetIfEditorFocusChanges) {
-      if (editor.component.focusListeners.contains(resetIfEditorFocusChanges)) {
-        editor.component.removeFocusListener(resetIfEditorFocusChanges)
-        editor.scrollingModel.removeVisibleAreaListener(resetIfScrollbarChanges)
-        editor.caretModel.removeCaretListener(resetIfCaretPositionChanges)
+    synchronized(resetListener) {
+      if (isEnabled) {
+        editor.component.removeFocusListener(resetListener)
+        editor.component.removeAncestorListener(resetListener)
+        editor.scrollingModel.removeVisibleAreaListener(resetListener)
+        editor.caretModel.removeCaretListener(resetListener)
       }
     }
   }

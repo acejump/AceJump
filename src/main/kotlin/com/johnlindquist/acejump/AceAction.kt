@@ -2,7 +2,6 @@ package com.johnlindquist.acejump
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
-import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.DumbAwareAction
 import com.johnlindquist.acejump.search.Pattern.LINE_MARK
 import com.johnlindquist.acejump.ui.AceUI.document
@@ -15,7 +14,7 @@ object AceAction : DumbAwareAction() {
   }
 
   override fun actionPerformed(e: AnActionEvent) {
-    editor = e.getData(EDITOR) as EditorImpl
+    editor = e.getData(EDITOR) ?: editor
     document = editor.document.charsSequence.toString().toLowerCase()
     KeyboardHandler.activate()
   }
