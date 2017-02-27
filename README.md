@@ -33,10 +33,6 @@ You can also install AceJump directly from the IDE, via **File \| Settings \| Pl
 
 ## Configuring
 
-You can change the default keyboard shortcut by visiting **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter⏎</kbd>.
-
-![Keymap](https://cloud.githubusercontent.com/assets/175716/11760350/911aed4c-a065-11e5-8f17-49bc97ad1dad.png)
-
 If you are using [IdeaVim](https://plugins.jetbrains.com/plugin/164), copy and paste the following command into your terminal to activate AceJump with a single keystroke (the keys <kbd>f</kbd>, <kbd>F</kbd> and <kbd>g</kbd> are user-configurable):
 
 ```
@@ -51,6 +47,10 @@ map g :action AceLineAction<CR>
 
 ' >> ~/.ideavimrc
 ```
+
+You can change the default keyboard shortcut via **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter⏎</kbd>.
+
+![Keymap](https://cloud.githubusercontent.com/assets/175716/11760350/911aed4c-a065-11e5-8f17-49bc97ad1dad.png)
 
 ## Building
 
