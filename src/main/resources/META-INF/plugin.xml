@@ -1,4 +1,4 @@
-<idea-plugin url="https://github.com/johnlindquist/AceJump" version="2">
+<idea-plugin url="https://github.com/johnlindquist/AceJump">
   <name>AceJump</name>
   <id>AceJump</id>
 
@@ -8,7 +8,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>Fixes a rare tag collision scenario and UninitializedPropertyAccess exception</change-notes>
+  <change-notes>Fixes some errors that occur when the user closes an editor prematurely.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 

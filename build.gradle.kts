@@ -1,3 +1,4 @@
+
 import org.gradle.script.lang.kotlin.*
 import org.jetbrains.intellij.IntelliJPluginExtension
 
@@ -27,4 +28,4 @@ configure<IntelliJPluginExtension> {
 }
 
 group = "com.johnlindquist"
-version = "3.1.6"
+version = "3.1.8"
