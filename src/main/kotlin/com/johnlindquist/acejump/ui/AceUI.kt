@@ -32,14 +32,13 @@ object AceUI {
       findModel = FindManager.getInstance(project).findInFileModel.clone()
       findManager = FindManager.getInstance(project)
 
+      //TODO: add listener to update these when settings change
       scheme = getInstance().globalScheme
       fontWidth = Canvas.getFontMetrics(Canvas.font).stringWidth("w")
       fontHeight = Canvas.font.size
       lineHeight = editor.lineHeight
       lineSpacing = scheme.lineSpacing
-      fontSpacing = fontHeight * lineSpacing
-      rectHOffset = fontSpacing - fontHeight
-      hOffset = fontHeight - fontSpacing
+      rectHOffset = fontHeight - lineHeight + 4
 
       findModel.isFindAll = true
       findModel.isFromCursor = true
@@ -66,9 +65,7 @@ object AceUI {
   var fontHeight = Canvas.font.size
   var lineHeight = editor.lineHeight
   var lineSpacing = scheme.lineSpacing
-  var fontSpacing = fontHeight * lineSpacing
-  var rectHOffset = fontSpacing - fontHeight
-  var hOffset = fontHeight - fontSpacing
+  var rectHOffset = fontHeight - lineHeight + 4
 
   val boxColor = red
   val editorHighlightColor = yellow

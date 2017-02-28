@@ -10,6 +10,8 @@ import com.johnlindquist.acejump.ui.AceUI.boxColor
 import com.johnlindquist.acejump.ui.AceUI.document
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorHighlightColor
+import com.johnlindquist.acejump.ui.AceUI.fontHeight
+import com.johnlindquist.acejump.ui.AceUI.rectHOffset
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
@@ -48,7 +50,6 @@ class JumpInfo(val tag: String, val index: Int) {
   }
 
   fun paintMe(g2d: Graphics2D) {
-    tagPoint.translate(0, -AceUI.hOffset.toInt())
     g2d.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
     val (tagX, tagY) = alignTag(Canvas)
@@ -61,13 +62,13 @@ class JumpInfo(val tag: String, val index: Int) {
     //the foreground text
     g2d.font = Canvas.font
     g2d.color = BLACK
-    g2d.drawString(text.toUpperCase(), tagX, tagY + AceUI.fontHeight)
+    g2d.drawString(text.toUpperCase(), tagX, tagPoint.y - rectHOffset + fontHeight)
   }
 
   val startOfThisLine = getLineStartOffset(editor, line)
 
   private fun alignTag(ac: Canvas): Pair<Int, Int> {
-    val y = tagPoint.y - AceUI.rectHOffset.toInt()
+    val y = tagPoint.y - AceUI.rectHOffset
     val x = tagPoint.x + AceUI.fontWidth
     val top = Pair(x - AceUI.fontWidth, y - AceUI.lineHeight)
     val bottom = Pair(x - AceUI.fontWidth, y + AceUI.lineHeight)
@@ -116,12 +117,12 @@ class JumpInfo(val tag: String, val index: Int) {
       g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
       g2d.color = acejumpHighlightColor
       if (lastQueryChar == tag.first() && lastQueryChar != editorChar) {
-        g2d.fillRect(tagX, y, AceUI.fontWidth, AceUI.lineHeight)
+        g2d.fillRect(tagX, tagPoint.y - rectHOffset, AceUI.fontWidth, AceUI.fontHeight + 3)
         tagX += AceUI.fontWidth
         tagWidth -= AceUI.fontWidth
       }
 
-      g2d.fillRect(srcPoint.x - 1, tagPoint.y, searchWidth, AceUI.lineHeight)
+      g2d.fillRect(srcPoint.x - 1, tagPoint.y - rectHOffset, searchWidth, AceUI.fontHeight + 3)
     }
 
     fun highlightRemaining() {
@@ -132,7 +133,7 @@ class JumpInfo(val tag: String, val index: Int) {
       if (alignment != RIGHT || hasSpaceToTheRight || isRegex)
         g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
-      g2d.fillRect(tagX, y, tagWidth, AceUI.lineHeight)
+      g2d.fillRect(tagX, tagPoint.y - rectHOffset, tagWidth, AceUI.fontHeight + 3)
     }
 
     fun surroundTargetWord() {
@@ -146,7 +147,7 @@ class JumpInfo(val tag: String, val index: Int) {
       val width = (wordEnd - wordStart) * AceUI.fontWidth
 
       if (document[index].isLetterOrDigit())
-        g2d.drawRect(xPosition, y, width, AceUI.fontHeight + 3)
+        g2d.drawRect(xPosition, tagPoint.y - rectHOffset, width, AceUI.fontHeight + 3)
     }
 
     highlightAlreadyTyped()
