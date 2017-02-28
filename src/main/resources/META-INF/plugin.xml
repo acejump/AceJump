@@ -8,7 +8,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>Fixes some errors that occur when the user closes an editor prematurely.</change-notes>
+  <change-notes>Support Back/Forward navigation in the IntelliJ Platform.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 

@@ -1,10 +1,15 @@
 package com.johnlindquist.acejump.search
 
 import com.intellij.codeInsight.editorActions.SelectWordUtil.addWordSelection
+import com.intellij.openapi.command.CommandProcessor
+import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
+import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
+import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.util.TextRange
 import com.johnlindquist.acejump.search.Finder.originalQuery
 import com.johnlindquist.acejump.ui.AceUI.document
 import com.johnlindquist.acejump.ui.AceUI.editor
+import com.johnlindquist.acejump.ui.AceUI.project
 import com.johnlindquist.acejump.ui.JumpInfo
 import java.lang.Math.max
 import java.lang.Math.min
@@ -13,6 +18,7 @@ import java.util.*
 object Jumper {
   @Volatile
   var hasJumped = false
+
   fun jump(jumpInfo: JumpInfo) {
     if (originalQuery.last().isUpperCase())
       setSelectionFromCaretToOffset(jumpInfo.index)
@@ -29,8 +35,27 @@ object Jumper {
   }
 
   fun moveCaret(offset: Int) {
+    markNextJumpAsHistorical()
     editor.selectionModel.removeSelection()
     editor.caretModel.moveToOffset(offset)
+  }
+
+  private val aceJumpHistoryAppender = {
+    val historyImpl =
+      IdeDocumentHistory.getInstance(project) as IdeDocumentHistoryImpl
+    historyImpl.onSelectionChanged()
+    historyImpl.includeCurrentCommandAsNavigation()
+    historyImpl.includeCurrentPlaceAsChangePlace()
+  }
+
+  private fun markNextJumpAsHistorical() {
+    // Add current caret position to navigation history
+    CommandProcessor.getInstance().executeCommand(
+      project,
+      aceJumpHistoryAppender,
+      "AceJumpHistoryAppender",
+      DocCommandGroupId.noneGroupId(editor.document),
+      editor.document)
   }
 
   fun selectWordAtCaret() {
