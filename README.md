@@ -115,4 +115,4 @@ as you type.
 
 - [Vimium](https://vimium.github.io/) - A Chrome plugin with a similar UI.
 - [Vimperator](http://www.vimperator.org/) - A Firefox plugin with a similar UI.
-- [ace-jump-mode](http://www.vimperator.org/) - An emacs plugin with a similar UI.
+- [ace-jump-mode](https://www.emacswiki.org/emacs/AceJump) - An emacs plugin with a similar UI.
