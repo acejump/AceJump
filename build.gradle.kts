@@ -1,4 +1,3 @@
-
 import org.gradle.script.lang.kotlin.*
 import org.jetbrains.intellij.IntelliJPluginExtension
 

@@ -103,6 +103,8 @@ object KeyboardHandler {
   }
 
   private var backup: List<*>? = null
+
+  // Bulenkov: BuildInfo, Graphics2DLog, DrawString/DrawChars, IDEEventQueue.dispatcher
   // This is a grotesque hack to support older IntelliJ Platforms.
   private val ACTIONS_KEY = AnAction::class.java.declaredFields.first {
     it.name == "ACTIONS_KEY" || it.name == "ourClientProperty"
