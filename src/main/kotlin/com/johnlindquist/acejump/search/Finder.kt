@@ -125,7 +125,7 @@ object Finder {
    */
 
   private fun getSitesInView(fullText: String): List<Int> {
-    val (viewTop, viewBottom) = getVisibleRange(editor)
+    val (viewTop, viewBottom) = editor.getVisibleRange()
 
     fun getNextSite(oldResults: Iterator<Int>, result: FindResult): Int {
       while (oldResults.hasNext()) {

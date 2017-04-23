@@ -27,8 +27,8 @@ class JumpInfo(val tag: String, val index: Int) {
   var queryLength = query.length
   var trueOffset = query.length - 1
   var tagOffset = editor.offsetToVisualPosition(index + trueOffset)
-  var tagPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
-  var srcPoint = getPointFromVisualPosition(editor, originOffset).originalPoint
+  var tagPoint = editor.getPointFromVisualPosition(originOffset).originalPoint
+  var srcPoint = editor.getPointFromVisualPosition(originOffset).originalPoint
   var text = renderTag()
 
   private var alignment = RIGHT
@@ -45,7 +45,7 @@ class JumpInfo(val tag: String, val index: Int) {
     trueOffset = i
     queryLength = i + 1
     tagOffset = editor.offsetToVisualPosition(index + trueOffset)
-    tagPoint = getPointFromVisualPosition(editor, tagOffset).originalPoint
+    tagPoint = editor.getPointFromVisualPosition(tagOffset).originalPoint
     return tag
   }
 
@@ -65,7 +65,7 @@ class JumpInfo(val tag: String, val index: Int) {
     g2d.drawString(text.toUpperCase(), tagX, tagPoint.y - rectHOffset + fontHeight)
   }
 
-  val startOfThisLine = getLineStartOffset(editor, line)
+  val startOfThisLine = editor.getLineStartOffset(line)
 
   private fun alignTag(ac: Canvas): Pair<Int, Int> {
     val y = tagPoint.y - AceUI.rectHOffset
@@ -142,7 +142,7 @@ class JumpInfo(val tag: String, val index: Int) {
       g2d.color = boxColor
 
       val startPoint = editor.offsetToVisualPosition(wordStart)
-      val startPointO = getPointFromVisualPosition(editor, startPoint)
+      val startPointO = editor.getPointFromVisualPosition(startPoint)
       val xPosition = startPointO.originalPoint.x
       val width = (wordEnd - wordStart) * AceUI.fontWidth
 

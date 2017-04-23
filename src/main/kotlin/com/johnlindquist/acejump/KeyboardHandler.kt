@@ -5,6 +5,8 @@ import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.application.ApplicationManager.getApplication
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
+import com.intellij.openapi.editor.colors.EditorColorsListener
+import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.event.CaretEvent
 import com.intellij.openapi.editor.event.CaretListener
 import com.intellij.openapi.editor.event.VisibleAreaEvent
@@ -14,6 +16,8 @@ import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.Pattern.*
+import com.johnlindquist.acejump.search.getDefaultEditor
+import com.johnlindquist.acejump.ui.AceUI
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.findModel
 import com.johnlindquist.acejump.ui.AceUI.restoreEditorSettings
@@ -67,28 +71,31 @@ object KeyboardHandler {
   }
 
   private val resetListener = object : CaretListener, VisibleAreaListener,
-    FocusListener, AncestorListener {
-      override fun ancestorAdded(event: AncestorEvent?) = reset()
+    FocusListener, AncestorListener, EditorColorsListener {
+    override fun globalSchemeChange(scheme: EditorColorsScheme?) = redo()
 
-      override fun ancestorMoved(event: AncestorEvent?) = reset()
+    override fun ancestorAdded(event: AncestorEvent?) = reset()
 
-      override fun ancestorRemoved(event: AncestorEvent?) = reset()
+    override fun ancestorMoved(event: AncestorEvent?) = reset()
 
-      override fun visibleAreaChanged(e: VisibleAreaEvent?) = reset()
+    override fun ancestorRemoved(event: AncestorEvent?) = reset()
 
-      override fun focusLost(e: FocusEvent?) = reset()
+    override fun visibleAreaChanged(e: VisibleAreaEvent?) = redo()
 
-      override fun focusGained(e: FocusEvent?) = reset()
+    override fun focusLost(e: FocusEvent?) = reset()
 
-      override fun caretAdded(e: CaretEvent?) = reset()
+    override fun focusGained(e: FocusEvent?) = reset()
 
-      override fun caretPositionChanged(e: CaretEvent?) = reset()
+    override fun caretAdded(e: CaretEvent?) = reset()
 
-      override fun caretRemoved(e: CaretEvent?) = reset()
-    }
+    override fun caretPositionChanged(e: CaretEvent?) = reset()
+
+    override fun caretRemoved(e: CaretEvent?) = reset()
+  }
 
 
   private fun configureEditor() {
+    AceUI.editor = getDefaultEditor()
     setupCursor()
     setupCanvas()
     interceptPrintableKeystrokes()
@@ -120,6 +127,10 @@ object KeyboardHandler {
 
   private fun startListening() {
     isEnabled = true
+    startup()
+  }
+
+  private fun startup() {
     configureEditor()
     installCustomShortcutHandler()
   }
@@ -131,6 +142,16 @@ object KeyboardHandler {
     } else {
       Canvas.jumpLocations = Finder.jumpLocations
       Canvas.repaint()
+    }
+  }
+
+  fun redo() {
+    val tmpText = text
+    reset()
+    startup()
+    text = tmpText
+    if (text.isNotEmpty()) {
+      findAndUpdateUI(text, text.last())
     }
   }
 

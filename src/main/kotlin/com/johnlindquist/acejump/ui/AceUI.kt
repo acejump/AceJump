@@ -34,8 +34,8 @@ object AceUI {
 
       //TODO: add listener to update these when settings change
       scheme = getInstance().globalScheme
-      fontWidth = Canvas.getFontMetrics(Canvas.font).stringWidth("w")
-      fontHeight = Canvas.font.size
+      fontWidth = editor.component.getFontMetrics(editor.component.font).stringWidth("w")
+      fontHeight = editor.component.font.size
       lineHeight = editor.lineHeight
       lineSpacing = scheme.lineSpacing
       rectHOffset = fontHeight - lineHeight + 4
@@ -61,8 +61,8 @@ object AceUI {
   var naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
 
   var scheme = getInstance().globalScheme
-  var fontWidth = Canvas.getFontMetrics(Canvas.font).stringWidth("w")
-  var fontHeight = Canvas.font.size
+  var fontWidth = editor.component.getFontMetrics(editor.component.font).stringWidth("w")
+  var fontHeight = editor.colorsScheme.editorFontSize
   var lineHeight = editor.lineHeight
   var lineSpacing = scheme.lineSpacing
   var rectHOffset = fontHeight - lineHeight + 4
