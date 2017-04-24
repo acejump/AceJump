@@ -160,8 +160,7 @@ fun Editor.getLineEndOffset(line: Int, allowEnd: Boolean) =
  * @return The normalized logical line number
  */
 
-fun Editor.normalizeLine(line: Int) =
-  max(0, min(line, getLineCount() - 1))
+fun Editor.normalizeLine(line: Int) = max(0, min(line, getLineCount() - 1))
 
 /**
  * Ensures that the supplied offset for the given logical line is within the

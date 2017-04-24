@@ -5,67 +5,65 @@ import com.intellij.find.FindModel
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColorsManager.getInstance
+import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
 import com.intellij.openapi.project.Project
 import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.getDefaultEditor
 import java.awt.Color.*
+import java.awt.Font
+import java.awt.Font.BOLD
 import javax.swing.SwingUtilities.convertPoint
 
 object AceUI {
-  lateinit var project: Project
-  lateinit var document: String
-  lateinit var findModel: FindModel
-  lateinit var findManager: FindManager
-
   var editor: Editor = getDefaultEditor()
     set(value) {
-      if (value != field) {
-        try {
-          KeyboardHandler.reset()
-        } catch (e: UninitializedPropertyAccessException) { }
-        field = value
+      if (value == field) {
+        return
       }
 
-      project = editor.project!!
-      document = editor.document.charsSequence.toString().toLowerCase()
-      findModel = FindManager.getInstance(project).findInFileModel.clone()
-      findManager = FindManager.getInstance(project)
-
-      //TODO: add listener to update these when settings change
-      scheme = getInstance().globalScheme
-      fontWidth = editor.component.getFontMetrics(editor.component.font).stringWidth("w")
-      fontHeight = editor.component.font.size
-      lineHeight = editor.lineHeight
-      lineSpacing = scheme.lineSpacing
-      rectHOffset = fontHeight - lineHeight + 4
-
-      findModel.isFindAll = true
-      findModel.isFromCursor = true
-      findModel.isForward = true
-      findModel.isRegularExpressions = false
-      findModel.isWholeWordsOnly = false
-      findModel.isCaseSensitive = false
-      findModel.isPreserveCase = false
-      findModel.setSearchHighlighters(true)
-
-      if (!KeyboardHandler.isEnabled) {
-        naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
-        naturalColor = getInstance().globalScheme.getColor(CARET_COLOR)!!
-        naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
+      try {
+        KeyboardHandler.reset()
+      } catch (e: UninitializedPropertyAccessException) {
+        println(e)
       }
+      field = value
+
+      naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
+      naturalColor = getInstance().globalScheme.getColor(CARET_COLOR)!!
+      naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
     }
 
+  val project: Project
+    get() = editor.project!!
+  var document: String = editor.document.charsSequence.toString().toLowerCase()
+
+  val findModel: FindModel by lazy {
+    val findModel = FindModel()
+    findModel.isFindAll = true
+    findModel.setSearchHighlighters(true)
+    findModel
+  }
+
+  val findManager: FindManager = FindManager.getInstance(project)
   var naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
   var naturalColor = getInstance().globalScheme.getColor(CARET_COLOR)!!
   var naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
 
-  var scheme = getInstance().globalScheme
-  var fontWidth = editor.component.getFontMetrics(editor.component.font).stringWidth("w")
-  var fontHeight = editor.colorsScheme.editorFontSize
-  var lineHeight = editor.lineHeight
-  var lineSpacing = scheme.lineSpacing
-  var rectHOffset = fontHeight - lineHeight + 4
+  val scheme: EditorColorsScheme
+    get() = editor.colorsScheme
+  val font: Font
+    get() = Font(scheme.editorFontName, BOLD, scheme.editorFontSize)
+  val fontWidth
+    get() = editor.component.getFontMetrics(font).stringWidth("w")
+  val fontHeight: Int
+    get() = editor.colorsScheme.editorFontSize
+  val lineHeight: Int
+    get() = editor.lineHeight
+  val lineSpacing: Float
+    get() = scheme.lineSpacing
+  val rectHOffset: Int
+    get() = fontHeight - lineHeight + 4
 
   val boxColor = red
   val editorHighlightColor = yellow
@@ -91,8 +89,17 @@ object AceUI {
   }
 
   fun restoreEditorSettings() {
+    restoreCanvas()
+    restoreCursor()
+  }
+
+  private fun restoreCanvas() {
+    Canvas.reset()
     editor.contentComponent.remove(Canvas)
     editor.contentComponent.repaint()
+  }
+
+  private fun restoreCursor() {
     editor.settings.isBlinkCaret = naturalBlink
     editor.settings.isBlockCursor = naturalBlock
     editor.colorsScheme.setColor(CARET_COLOR, naturalColor)

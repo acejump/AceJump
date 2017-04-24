@@ -34,7 +34,7 @@ object AceLineAction : DumbAwareAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     AceAction.actionPerformed(e)
-    KeyboardHandler.find(LINE_MARK)
+    KeyboardHandler.findPattern(LINE_MARK)
   }
 }
 

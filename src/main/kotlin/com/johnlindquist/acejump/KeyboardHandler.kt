@@ -16,6 +16,7 @@ import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.Pattern.*
+import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
 import com.johnlindquist.acejump.search.getDefaultEditor
 import com.johnlindquist.acejump.ui.AceUI
 import com.johnlindquist.acejump.ui.AceUI.editor
@@ -33,31 +34,31 @@ import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 
 object KeyboardHandler {
-  @Volatile
   var isEnabled = false
   private var text = ""
   private val editorActionManager = EditorActionManager.getInstance()
   private val handler = editorActionManager.typedAction.rawHandler
 
   private val keyMap = mutableMapOf(
-    VK_HOME to { find(START_OF_LINE) },
-    VK_LEFT to { find(START_OF_LINE) },
-    VK_RIGHT to { find(END_OF_LINE) },
-    VK_END to { find(END_OF_LINE) },
-    VK_UP to { find(CODE_INDENTS) },
-    VK_ESCAPE to { resetUIState() },
+    VK_HOME to { findPattern(START_OF_LINE) },
+    VK_LEFT to { findPattern(START_OF_LINE) },
+    VK_RIGHT to { findPattern(END_OF_LINE) },
+    VK_END to { findPattern(END_OF_LINE) },
+    VK_UP to { findPattern(CODE_INDENTS) },
+    VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { processBackspaceCommand() }
   )
 
-  private fun findAndUpdateUI(query: String, key: Char) {
+  private fun findString(query: String, key: Char) {
     getApplication().runReadAction { Finder.findOrJump(query, key) }
     getApplication().invokeLater { updateUIState() }
   }
 
-  fun find(pattern: Pattern) {
+  fun findPattern(pattern: Pattern) {
     Finder.reset()
     findModel.isRegularExpressions = true
-    findAndUpdateUI(pattern.pattern, Pattern.REGEX_PREFIX)
+    // TODO: Fix this really bad hack.
+    findString(pattern.pattern, REGEX_PREFIX)
   }
 
   fun activate() = if (!isEnabled) startListening() else toggleTargetMode()
@@ -72,7 +73,7 @@ object KeyboardHandler {
 
   private val resetListener = object : CaretListener, VisibleAreaListener,
     FocusListener, AncestorListener, EditorColorsListener {
-    override fun globalSchemeChange(scheme: EditorColorsScheme?) = redo()
+    override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoQuery()
 
     override fun ancestorAdded(event: AncestorEvent?) = reset()
 
@@ -80,7 +81,7 @@ object KeyboardHandler {
 
     override fun ancestorRemoved(event: AncestorEvent?) = reset()
 
-    override fun visibleAreaChanged(e: VisibleAreaEvent?) = redo()
+    override fun visibleAreaChanged(e: VisibleAreaEvent?) = redoQuery()
 
     override fun focusLost(e: FocusEvent?) = reset()
 
@@ -93,20 +94,19 @@ object KeyboardHandler {
     override fun caretRemoved(e: CaretEvent?) = reset()
   }
 
-
   private fun configureEditor() {
-    AceUI.editor = getDefaultEditor()
+    fun interceptPrintableKeystrokes() {
+      editorActionManager.typedAction.setupRawHandler { _, key, _ ->
+        text += key
+        findString(text, key)
+      }
+    }
+
+    editor = getDefaultEditor()
     setupCursor()
     setupCanvas()
     interceptPrintableKeystrokes()
     addListeners()
-  }
-
-  private fun interceptPrintableKeystrokes() {
-    editorActionManager.typedAction.setupRawHandler { _, key, _ ->
-      text += key
-      findAndUpdateUI(text, key)
-    }
   }
 
   private var backup: List<*>? = null
@@ -126,13 +126,13 @@ object KeyboardHandler {
   }
 
   private fun startListening() {
+    fun startup() {
+      configureEditor()
+      installCustomShortcutHandler()
+    }
+
     isEnabled = true
     startup()
-  }
-
-  private fun startup() {
-    configureEditor()
-    installCustomShortcutHandler()
   }
 
   private fun updateUIState() {
@@ -145,17 +145,27 @@ object KeyboardHandler {
     }
   }
 
-  fun redo() {
+  fun redoQuery() {
     val tmpText = text
     reset()
-    startup()
+    activate()
     text = tmpText
     if (text.isNotEmpty()) {
-      findAndUpdateUI(text, text.last())
+      findString(text, text.last())
     }
   }
 
   fun reset() {
+    fun resetUIState() {
+      text = ""
+      isEnabled = false
+      editor.component.putClientProperty(ACTIONS_KEY, backup)
+      AceKeyAction.unregisterCustomShortcutSet(editor.component)
+      editorActionManager.typedAction.setupRawHandler(handler)
+      Finder.reset()
+      restoreEditorSettings()
+    }
+
     removeListeners()
     resetUIState()
   }
@@ -178,17 +188,6 @@ object KeyboardHandler {
         editor.caretModel.removeCaretListener(resetListener)
       }
     }
-  }
-
-  private fun resetUIState() {
-    text = ""
-    isEnabled = false
-    editor.component.putClientProperty(ACTIONS_KEY, backup)
-    AceKeyAction.unregisterCustomShortcutSet(editor.component)
-    editorActionManager.typedAction.setupRawHandler(handler)
-    Finder.reset()
-    Canvas.reset()
-    restoreEditorSettings()
   }
 
   fun toggleTargetMode(status: Boolean? = null) {

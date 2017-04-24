@@ -3,6 +3,7 @@ package com.johnlindquist.acejump.ui
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.search.Pattern
+import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
 import com.johnlindquist.acejump.search.getLineStartOffset
 import com.johnlindquist.acejump.search.getPointFromVisualPosition
 import com.johnlindquist.acejump.ui.AceUI.acejumpHighlightColor
@@ -10,7 +11,10 @@ import com.johnlindquist.acejump.ui.AceUI.boxColor
 import com.johnlindquist.acejump.ui.AceUI.document
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorHighlightColor
+import com.johnlindquist.acejump.ui.AceUI.font
 import com.johnlindquist.acejump.ui.AceUI.fontHeight
+import com.johnlindquist.acejump.ui.AceUI.fontWidth
+import com.johnlindquist.acejump.ui.AceUI.lineHeight
 import com.johnlindquist.acejump.ui.AceUI.rectHOffset
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
@@ -21,7 +25,7 @@ import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 
 class JumpInfo(val tag: String, val index: Int) {
-  val isRegex = query.first() == Pattern.REGEX_PREFIX
+  val isRegex = query.first() == REGEX_PREFIX
   val line = editor.offsetToVisualPosition(index).line
   var originOffset = editor.offsetToVisualPosition(index)
   var queryLength = query.length
@@ -60,7 +64,7 @@ class JumpInfo(val tag: String, val index: Int) {
     g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
     //the foreground text
-    g2d.font = Canvas.font
+    g2d.font = font
     g2d.color = BLACK
     g2d.drawString(text.toUpperCase(), tagX, tagPoint.y - rectHOffset + fontHeight)
   }
@@ -68,11 +72,11 @@ class JumpInfo(val tag: String, val index: Int) {
   val startOfThisLine = editor.getLineStartOffset(line)
 
   private fun alignTag(ac: Canvas): Pair<Int, Int> {
-    val y = tagPoint.y - AceUI.rectHOffset
-    val x = tagPoint.x + AceUI.fontWidth
-    val top = Pair(x - AceUI.fontWidth, y - AceUI.lineHeight)
-    val bottom = Pair(x - AceUI.fontWidth, y + AceUI.lineHeight)
-    val left = Pair(srcPoint.x - AceUI.fontWidth * (text.length), y)
+    val y = tagPoint.y - rectHOffset
+    val x = tagPoint.x + fontWidth
+    val top = Pair(x - fontWidth, y - lineHeight)
+    val bottom = Pair(x - fontWidth, y + lineHeight)
+    val left = Pair(srcPoint.x - fontWidth * (text.length), y)
     val right = Pair(x, y)
 
     val nextCharIsWhiteSpace = document.length <= index + 1 ||
@@ -103,8 +107,8 @@ class JumpInfo(val tag: String, val index: Int) {
 
     var tagX = x
     val lastQueryChar = query.last()
-    var tagWidth = text.length * AceUI.fontWidth
-    val searchWidth = (trueOffset + 1) * AceUI.fontWidth
+    var tagWidth = text.length * fontWidth
+    val searchWidth = (trueOffset + 1) * fontWidth
     val indexOfEditorChar = index + query.length - 1
 
     val editorChar =
@@ -113,16 +117,17 @@ class JumpInfo(val tag: String, val index: Int) {
       else
         0.toChar()
 
+    // TODO: Use the built-in find-highlighter
     fun highlightAlreadyTyped() {
       g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
       g2d.color = acejumpHighlightColor
       if (lastQueryChar == tag.first() && lastQueryChar != editorChar) {
-        g2d.fillRect(tagX, tagPoint.y - rectHOffset, AceUI.fontWidth, AceUI.fontHeight + 3)
-        tagX += AceUI.fontWidth
-        tagWidth -= AceUI.fontWidth
+        g2d.fillRect(tagX, tagPoint.y - rectHOffset, fontWidth, fontHeight + 3)
+        tagX += fontWidth
+        tagWidth -= fontWidth
       }
 
-      g2d.fillRect(srcPoint.x - 1, tagPoint.y - rectHOffset, searchWidth, AceUI.fontHeight + 3)
+      g2d.fillRect(srcPoint.x - 1, tagPoint.y - rectHOffset, searchWidth, fontHeight + 3)
     }
 
     fun highlightRemaining() {
@@ -133,7 +138,7 @@ class JumpInfo(val tag: String, val index: Int) {
       if (alignment != RIGHT || hasSpaceToTheRight || isRegex)
         g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
-      g2d.fillRect(tagX, tagPoint.y - rectHOffset, tagWidth, AceUI.fontHeight + 3)
+      g2d.fillRect(tagX, tagPoint.y - rectHOffset, tagWidth, fontHeight + 3)
     }
 
     fun surroundTargetWord() {
@@ -144,10 +149,10 @@ class JumpInfo(val tag: String, val index: Int) {
       val startPoint = editor.offsetToVisualPosition(wordStart)
       val startPointO = editor.getPointFromVisualPosition(startPoint)
       val xPosition = startPointO.originalPoint.x
-      val width = (wordEnd - wordStart) * AceUI.fontWidth
+      val width = (wordEnd - wordStart) * fontWidth
 
       if (document[index].isLetterOrDigit())
-        g2d.drawRect(xPosition, tagPoint.y - rectHOffset, width, AceUI.fontHeight + 3)
+        g2d.drawRect(xPosition, tagPoint.y - rectHOffset, width, fontHeight + 3)
     }
 
     highlightAlreadyTyped()

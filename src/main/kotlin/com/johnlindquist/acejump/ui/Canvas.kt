@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.ui
 
+import com.johnlindquist.acejump.ui.AceUI.fontWidth
 import com.johnlindquist.acejump.ui.AceUI.scheme
 import java.awt.Font
 import java.awt.Font.BOLD
@@ -10,10 +11,6 @@ import javax.swing.JComponent
 object Canvas : JComponent() {
   var existingTags = hashSetOf<Pair<Int, Int>>()
   var jumpLocations: Collection<JumpInfo> = arrayListOf()
-
-  init {
-    font = Font(scheme.editorFontName, BOLD, scheme.editorFontSize)
-  }
 
   override fun paint(graphics: Graphics) {
     if (jumpLocations.isEmpty())
@@ -27,7 +24,7 @@ object Canvas : JComponent() {
 
   fun registerTag(point: Pair<Int, Int>, tag: String) =
     (-1..(tag.length)).forEach {
-      existingTags.add(Pair(point.first + it * AceUI.fontWidth, point.second))
+      existingTags.add(Pair(point.first + it * fontWidth, point.second))
     }
 
   fun isFree(point: Pair<Int, Int>) = !existingTags.contains(point)

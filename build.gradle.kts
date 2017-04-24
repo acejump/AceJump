@@ -4,7 +4,7 @@ import org.jetbrains.intellij.IntelliJPluginExtension
 buildscript {
   repositories {
     gradleScriptKotlin()
-    maven { setUrl("http://dl.bintray.com/kotlin/kotlin-eap-1.1") }
+    maven { setUrl("https://dl.bintray.com/jetbrains/intellij-plugin-service") }
   }
 
   dependencies {
@@ -13,7 +13,7 @@ buildscript {
 }
 
 plugins {
-  id("org.jetbrains.intellij") version "0.2.5"
+  id("org.jetbrains.intellij") version "0.2.7"
 }
 
 apply {
@@ -27,4 +27,4 @@ configure<IntelliJPluginExtension> {
 }
 
 group = "com.johnlindquist"
-version = "3.2.0"
+version = "3.2.1"

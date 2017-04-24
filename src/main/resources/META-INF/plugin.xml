@@ -8,7 +8,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>Support Back/Forward navigation in the IntelliJ Platform.</change-notes>
+  <change-notes>AceJump now tracks and adjusts to font changes in the editor much more rapidly.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 
