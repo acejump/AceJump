@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump
 
+import com.intellij.execution.testframework.sm.SMRunnerUtil
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.application.ApplicationManager.getApplication
@@ -18,18 +19,19 @@ import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.Pattern.*
 import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
 import com.johnlindquist.acejump.search.getDefaultEditor
-import com.johnlindquist.acejump.ui.AceUI
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.findModel
 import com.johnlindquist.acejump.ui.AceUI.restoreEditorSettings
 import com.johnlindquist.acejump.ui.AceUI.setupCanvas
 import com.johnlindquist.acejump.ui.AceUI.setupCursor
 import com.johnlindquist.acejump.ui.Canvas
+import org.jetbrains.concurrency.runAsync
 import java.awt.Color.BLUE
 import java.awt.Color.RED
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent.*
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 
@@ -50,7 +52,7 @@ object KeyboardHandler {
   )
 
   private fun findString(query: String, key: Char) {
-    getApplication().runReadAction { Finder.findOrJump(query, key) }
+    getApplication().invokeAndWait { Finder.findOrJump(query, key) }
     getApplication().invokeLater { updateUIState() }
   }
 
@@ -61,7 +63,11 @@ object KeyboardHandler {
     findString(pattern.pattern, REGEX_PREFIX)
   }
 
-  fun activate() = if (!isEnabled) startListening() else toggleTargetMode()
+  fun activate() {
+    getApplication().invokeAndWait {
+      if (!isEnabled) startListening() else toggleTargetMode()
+    }
+  }
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
@@ -71,8 +77,30 @@ object KeyboardHandler {
     updateUIState()
   }
 
-  private val resetListener = object : CaretListener, VisibleAreaListener,
-    FocusListener, AncestorListener, EditorColorsListener {
+  private val resetListener = object : CaretListener, FocusListener,
+    AncestorListener, EditorColorsListener, VisibleAreaListener {
+    private val stopWatch = object : () -> Unit {
+      var timer = System.currentTimeMillis()
+      var isRunning = false
+
+      override fun invoke() {
+        timer = System.currentTimeMillis()
+        if (isRunning) return
+        synchronized(this) {
+          while (System.currentTimeMillis() - timer <= 1000) {
+            isRunning = true
+          }
+
+          redoQuery()
+          isRunning = false
+        }
+      }
+    }
+
+    override fun visibleAreaChanged(e: VisibleAreaEvent?) {
+      runAsync(stopWatch)
+    }
+
     override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoQuery()
 
     override fun ancestorAdded(event: AncestorEvent?) = reset()
@@ -81,7 +109,7 @@ object KeyboardHandler {
 
     override fun ancestorRemoved(event: AncestorEvent?) = reset()
 
-    override fun visibleAreaChanged(e: VisibleAreaEvent?) = redoQuery()
+//    override fun visibleAreaChanged(e: VisibleAreaEvent?) = redoQuery()
 
     override fun focusLost(e: FocusEvent?) = reset()
 
