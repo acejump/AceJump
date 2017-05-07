@@ -1,6 +1,5 @@
 package com.johnlindquist.acejump
 
-import com.intellij.execution.testframework.sm.SMRunnerUtil
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.application.ApplicationManager.getApplication
@@ -31,7 +30,6 @@ import java.awt.Color.RED
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent.*
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 
