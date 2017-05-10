@@ -85,8 +85,9 @@ object KeyboardHandler {
         timer = System.currentTimeMillis()
         if (isRunning) return
         synchronized(this) {
-          while (System.currentTimeMillis() - timer <= 1000) {
-            isRunning = true
+          isRunning = true
+          while (System.currentTimeMillis() - timer <= 750) {
+            Thread.sleep(Math.abs(750 - (System.currentTimeMillis() - timer)))
           }
 
           redoQuery()
@@ -96,7 +97,21 @@ object KeyboardHandler {
     }
 
     override fun visibleAreaChanged(e: VisibleAreaEvent?) {
+      if (e!!.isHorizontalScroll()) return
       runAsync(stopWatch)
+    }
+
+    fun VisibleAreaEvent.isHorizontalScroll(): Boolean {
+      if (this.oldRectangle == newRectangle)
+        return false
+      else if (oldRectangle.width != newRectangle.width)
+        return false
+      else if (oldRectangle.height != newRectangle.height)
+        return false
+      else if (oldRectangle.y != newRectangle.y)
+        return false
+
+      return true
     }
 
     override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoQuery()

@@ -2,7 +2,6 @@ package com.johnlindquist.acejump.ui
 
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Finder.query
-import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
 import com.johnlindquist.acejump.search.getLineStartOffset
 import com.johnlindquist.acejump.search.getPointFromVisualPosition

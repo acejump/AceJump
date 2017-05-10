@@ -15,7 +15,6 @@ import com.johnlindquist.acejump.ui.JumpInfo
 import java.lang.Math.max
 import java.lang.Math.min
 import java.util.*
-import kotlin.comparisons.compareBy
 
 /**
  * Singleton that searches for text in the editor and tags matching results.

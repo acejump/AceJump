@@ -1,9 +1,6 @@
 package com.johnlindquist.acejump.ui
 
 import com.johnlindquist.acejump.ui.AceUI.fontWidth
-import com.johnlindquist.acejump.ui.AceUI.scheme
-import java.awt.Font
-import java.awt.Font.BOLD
 import java.awt.Graphics
 import java.awt.Graphics2D
 import javax.swing.JComponent
