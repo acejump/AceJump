@@ -10,7 +10,6 @@ import com.johnlindquist.acejump.ui.AceUI.boxColor
 import com.johnlindquist.acejump.ui.AceUI.document
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorHighlightColor
-import com.johnlindquist.acejump.ui.AceUI.font
 import com.johnlindquist.acejump.ui.AceUI.fontHeight
 import com.johnlindquist.acejump.ui.AceUI.fontWidth
 import com.johnlindquist.acejump.ui.AceUI.lineHeight
@@ -52,20 +51,20 @@ class JumpInfo(val tag: String, val index: Int) {
     return tag
   }
 
-  fun paintMe(g2d: Graphics2D) {
-    g2d.setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
+  fun paintMe(graphics2D: Graphics2D) = with(graphics2D) {
+    setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
     val (tagX, tagY) = alignTag(Canvas)
     Canvas.registerTag(Pair(tagX, tagY), tag)
-    highlight(g2d, tagX, tagY)
+    highlight(graphics2D, tagX, tagY)
 
     //just a touch of alpha
-    g2d.composite = getInstance(SRC_OVER, 1.toFloat())
+    composite = getInstance(SRC_OVER, 1.toFloat())
 
     //the foreground text
-    g2d.font = font
-    g2d.color = BLACK
-    g2d.drawString(text.toUpperCase(), tagX, tagPoint.y - rectHOffset + fontHeight)
+    font = AceUI.font
+    color = BLACK
+    drawString(text.toUpperCase(), tagX, tagPoint.y - rectHOffset + fontHeight)
   }
 
   val startOfThisLine = editor.getLineStartOffset(line)

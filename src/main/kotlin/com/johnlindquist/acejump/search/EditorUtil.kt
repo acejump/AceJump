@@ -63,12 +63,12 @@ fun Editor.getVisualLineAtTopOfScreen() =
  * @return The file line count
  */
 
-fun Editor.getLineCount() =
-  if (document.textLength > 0 &&
-    document.charsSequence[document.textLength - 1] == '\n') {
-    document.lineCount - 1
-  } else {
-    document.lineCount
+fun Editor.getLineCount() = with(document) {
+    if (textLength > 0 && charsSequence[textLength - 1] == '\n') {
+      lineCount - 1
+    } else {
+      lineCount
+    }
   }
 
 /**

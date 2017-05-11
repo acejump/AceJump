@@ -78,6 +78,7 @@ object KeyboardHandler {
   private val resetListener = object : CaretListener, FocusListener,
     AncestorListener, EditorColorsListener, VisibleAreaListener {
     private val stopWatch = object : () -> Unit {
+      val DELAY = 750
       var timer = System.currentTimeMillis()
       var isRunning = false
 
@@ -86,8 +87,9 @@ object KeyboardHandler {
         if (isRunning) return
         synchronized(this) {
           isRunning = true
-          while (System.currentTimeMillis() - timer <= 750) {
-            Thread.sleep(Math.abs(750 - (System.currentTimeMillis() - timer)))
+
+          while (System.currentTimeMillis() - timer <= DELAY) {
+            Thread.sleep(Math.abs(DELAY - (System.currentTimeMillis() - timer)))
           }
 
           redoQuery()
@@ -121,8 +123,6 @@ object KeyboardHandler {
     override fun ancestorMoved(event: AncestorEvent?) = reset()
 
     override fun ancestorRemoved(event: AncestorEvent?) = reset()
-
-//    override fun visibleAreaChanged(e: VisibleAreaEvent?) = redoQuery()
 
     override fun focusLost(e: FocusEvent?) = reset()
 
@@ -213,29 +213,34 @@ object KeyboardHandler {
 
   private fun addListeners() {
     synchronized(resetListener) {
-      editor.component.addFocusListener(resetListener)
-      editor.component.addAncestorListener(resetListener)
-      editor.scrollingModel.addVisibleAreaListener(resetListener)
-      editor.caretModel.addCaretListener(resetListener)
+      with(editor) {
+        component.addFocusListener(resetListener)
+        component.addAncestorListener(resetListener)
+        scrollingModel.addVisibleAreaListener(resetListener)
+        caretModel.addCaretListener(resetListener)
+      }
     }
   }
 
   private fun removeListeners() {
     synchronized(resetListener) {
       if (isEnabled) {
-        editor.component.removeFocusListener(resetListener)
-        editor.component.removeAncestorListener(resetListener)
-        editor.scrollingModel.removeVisibleAreaListener(resetListener)
-        editor.caretModel.removeCaretListener(resetListener)
+        with(editor) {
+          component.removeFocusListener(resetListener)
+          component.removeAncestorListener(resetListener)
+          scrollingModel.removeVisibleAreaListener(resetListener)
+          caretModel.removeCaretListener(resetListener)
+        }
       }
     }
   }
 
-  fun toggleTargetMode(status: Boolean? = null) {
-    if (Finder.toggleTargetMode(status))
-      editor.colorsScheme.setColor(CARET_COLOR, RED)
-    else
-      editor.colorsScheme.setColor(CARET_COLOR, BLUE)
-    Canvas.repaint()
-  }
+  fun toggleTargetMode(status: Boolean? = null) =
+    with(editor.colorsScheme) {
+      if (Finder.toggleTargetMode(status))
+        setColor(CARET_COLOR, RED)
+      else
+        setColor(CARET_COLOR, BLUE)
+      Canvas.repaint()
+    }
 }

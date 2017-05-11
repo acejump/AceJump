@@ -14,9 +14,9 @@ object Canvas : JComponent() {
       return
 
     super.paint(graphics)
-    val g2d = graphics as Graphics2D
+    val graphics2D = graphics as Graphics2D
     existingTags = hashSetOf<Pair<Int, Int>>()
-    jumpLocations.forEach { it.paintMe(g2d) }
+    jumpLocations.forEach { it.paintMe(graphics2D) }
   }
 
   fun registerTag(point: Pair<Int, Int>, tag: String) =

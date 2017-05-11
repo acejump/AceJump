@@ -142,7 +142,7 @@ object Finder {
       var nextSite = if (oldResults.hasNext()) oldResults.next() else viewTop
 
       var result = findManager.findString(fullText, nextSite, findModel)
-      while (result!!.isStringFound && result.startOffset <= viewBottom) {
+      while (result.isStringFound && result.startOffset <= viewBottom) {
         if (!editor.foldingModel.isOffsetCollapsed(result.startOffset))
           indicesToCheck.add(result.startOffset)
 

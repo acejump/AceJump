@@ -8,6 +8,8 @@ import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColorsManager.getInstance
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
+import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
+import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.project.Project
 import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.getDefaultEditor
@@ -30,9 +32,14 @@ object AceUI {
       }
       field = value
 
-      naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
+      document = editor.document.charsSequence.toString().toLowerCase()
+
+      with(EditorSettingsExternalizable.getInstance()) {
+        naturalBlock = isBlockCursor
+        naturalBlink = isBlinkCaret
+      }
+
       naturalColor = getInstance().globalScheme.getColor(CARET_COLOR)!!
-      naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
     }
 
   val project: Project
@@ -48,8 +55,8 @@ object AceUI {
 
   val findManager: FindManager = FindManager.getInstance(project)
   var naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
-  var naturalColor = getInstance().globalScheme.getColor(CARET_COLOR)!!
   var naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
+  var naturalColor = getInstance().globalScheme.getColor(CARET_COLOR)!!
 
   val scheme: EditorColorsScheme
     get() = editor.colorsScheme
@@ -102,9 +109,11 @@ object AceUI {
 
   private fun restoreCursor() {
     getApplication().invokeAndWait {
-      editor.settings.isBlinkCaret = naturalBlink
-      editor.settings.isBlockCursor = naturalBlock
-      editor.colorsScheme.setColor(CARET_COLOR, naturalColor)
+      with(editor) {
+        settings.isBlinkCaret = naturalBlink
+        settings.isBlockCursor = naturalBlock
+        colorsScheme.setColor(CARET_COLOR, naturalColor)
+      }
     }
   }
 }

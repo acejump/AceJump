@@ -41,14 +41,14 @@ object Jumper {
   }
 
   private val aceJumpHistoryAppender = {
-    val historyImpl =
-      IdeDocumentHistory.getInstance(project) as IdeDocumentHistoryImpl
-    historyImpl.onSelectionChanged()
-    historyImpl.includeCurrentCommandAsNavigation()
-    historyImpl.includeCurrentPlaceAsChangePlace()
+    with(IdeDocumentHistory.getInstance(project)) {
+      (this as IdeDocumentHistoryImpl).onSelectionChanged()
+      includeCurrentCommandAsNavigation()
+      includeCurrentPlaceAsChangePlace()
+    }
   }
 
-  private fun markNextJumpAsHistorical() {
+  private fun markNextJumpAsHistorical() =
     // Add current caret position to navigation history
     CommandProcessor.getInstance().executeCommand(
       project,
@@ -56,7 +56,6 @@ object Jumper {
       "AceJumpHistoryAppender",
       DocCommandGroupId.noneGroupId(editor.document),
       editor.document)
-  }
 
   fun selectWordAtCaret() {
     val ranges = ArrayList<TextRange>()
@@ -67,13 +66,16 @@ object Jumper {
     val startOfWordOffset = max(0, ranges[0].startOffset)
     val endOfWordOffset = min(ranges[0].endOffset, document.length)
 
-    editor.selectionModel.removeSelection()
-    editor.selectionModel.setSelection(startOfWordOffset, endOfWordOffset)
+    with(editor.selectionModel) {
+      removeSelection()
+      setSelection(startOfWordOffset, endOfWordOffset)
+    }
   }
 
-  fun setSelectionFromCaretToOffset(toOffset: Int) {
-    editor.selectionModel.removeSelection()
-    editor.selectionModel.setSelection(editor.caretModel.offset, toOffset)
-    editor.caretModel.moveToOffset(toOffset)
-  }
+  fun setSelectionFromCaretToOffset(toOffset: Int) =
+    with(editor) {
+      selectionModel.removeSelection()
+      selectionModel.setSelection(caretModel.offset, toOffset)
+      caretModel.moveToOffset(toOffset)
+    }
 }

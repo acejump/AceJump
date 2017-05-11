@@ -15,7 +15,6 @@ object AceAction : DumbAwareAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     editor = e.getData(EDITOR) ?: editor
-    document = editor.document.charsSequence.toString().toLowerCase()
     KeyboardHandler.activate()
   }
 }
