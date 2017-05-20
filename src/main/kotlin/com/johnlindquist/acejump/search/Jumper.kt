@@ -63,8 +63,9 @@ object Jumper {
 
     if (ranges.isEmpty()) return
 
-    val startOfWordOffset = max(0, ranges[0].startOffset)
-    val endOfWordOffset = min(ranges[0].endOffset, document.length)
+    val firstRange = ranges[0]
+    val startOfWordOffset = max(0, firstRange.startOffset)
+    val endOfWordOffset = min(firstRange.endOffset, document.length)
 
     with(editor.selectionModel) {
       removeSelection()

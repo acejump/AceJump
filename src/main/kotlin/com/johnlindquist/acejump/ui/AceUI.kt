@@ -8,11 +8,17 @@ import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColorsManager.getInstance
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
+import com.intellij.openapi.editor.impl.EditorImpl
+import com.intellij.openapi.editor.markup.EffectType
+import com.intellij.openapi.editor.markup.EffectType.*
+import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.project.Project
+import com.intellij.ui.ColorUtil
 import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.getDefaultEditor
+import java.awt.Color
 import java.awt.Color.*
 import java.awt.Font
 import java.awt.Font.BOLD
@@ -46,17 +52,20 @@ object AceUI {
     get() = editor.project!!
   var document: String = editor.document.charsSequence.toString().toLowerCase()
 
-  val findModel: FindModel by lazy {
-    val findModel = FindModel()
-    findModel.isFindAll = true
-    findModel.setSearchHighlighters(true)
-    findModel
+  val findModel by lazy {
+    FindModel().apply {
+      isFindAll = true
+      setSearchHighlighters(true)
+    }
   }
 
   val findManager: FindManager = FindManager.getInstance(project)
   var naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
   var naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
   var naturalColor = getInstance().globalScheme.getColor(CARET_COLOR)!!
+
+  val targetModeStyle = TextAttributes(null, null, RED, BOXED, Font.PLAIN)
+  val highlightStyle = TextAttributes(null, GREEN, GREEN, BOXED, Font.PLAIN)
 
   val scheme: EditorColorsScheme
     get() = editor.colorsScheme
@@ -71,7 +80,7 @@ object AceUI {
   val lineSpacing: Float
     get() = scheme.lineSpacing
   val rectHOffset: Int
-    get() = fontHeight - lineHeight + 4
+    get() = lineHeight - fontHeight
 
   val boxColor = red
   val editorHighlightColor = yellow

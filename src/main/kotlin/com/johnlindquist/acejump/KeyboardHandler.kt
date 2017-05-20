@@ -158,13 +158,13 @@ object KeyboardHandler {
     it.name == "ACTIONS_KEY" || it.name == "ourClientProperty"
   }.get(null)
 
-  private fun installCustomShortcutHandler() {
-    backup = editor.component.getClientProperty(ACTIONS_KEY) as List<*>?
-    val aceActionList = SmartList<AnAction>(AceKeyAction)
-    editor.component.putClientProperty(ACTIONS_KEY, aceActionList)
-    val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
-    AceKeyAction.registerCustomShortcutSet(css, editor.component)
-  }
+  private fun installCustomShortcutHandler() =
+    with(editor.component) {
+      backup = getClientProperty(ACTIONS_KEY) as List<*>?
+      putClientProperty(ACTIONS_KEY, SmartList<AnAction>(AceKeyAction))
+      val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
+      AceKeyAction.registerCustomShortcutSet(css, this)
+    }
 
   private fun startListening() {
     fun startup() {

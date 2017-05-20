@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.ui
 
+import com.intellij.openapi.editor.impl.EditorImpl
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
@@ -25,13 +26,14 @@ import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 class JumpInfo(val tag: String, val index: Int) {
   val isRegex = query.first() == REGEX_PREFIX
   val line = editor.offsetToVisualPosition(index).line
-  var originOffset = editor.offsetToVisualPosition(index)
+  var visualPosition = editor.offsetToVisualPosition(index)
   var queryLength = query.length
   var trueOffset = query.length - 1
   var tagOffset = editor.offsetToVisualPosition(index + trueOffset)
-  var tagPoint = editor.getPointFromVisualPosition(originOffset).originalPoint
-  var srcPoint = editor.getPointFromVisualPosition(originOffset).originalPoint
+  var tagPoint = editor.getPointFromVisualPosition(visualPosition).originalPoint
+  var srcPoint = editor.getPointFromVisualPosition(visualPosition).originalPoint
   var text = renderTag()
+  val startOfThisLine = editor.getLineStartOffset(line)
 
   private var alignment = RIGHT
 
@@ -46,8 +48,6 @@ class JumpInfo(val tag: String, val index: Int) {
 
     trueOffset = i
     queryLength = i + 1
-    tagOffset = editor.offsetToVisualPosition(index + trueOffset)
-    tagPoint = editor.getPointFromVisualPosition(tagOffset).originalPoint
     return tag
   }
 
@@ -67,10 +67,9 @@ class JumpInfo(val tag: String, val index: Int) {
     drawString(text.toUpperCase(), tagX, tagPoint.y - rectHOffset + fontHeight)
   }
 
-  val startOfThisLine = editor.getLineStartOffset(line)
-
   private fun alignTag(ac: Canvas): Pair<Int, Int> {
-    val y = tagPoint.y - rectHOffset
+    val op = (editor as EditorImpl).visualPositionToXY(visualPosition).y
+    val y = tagPoint.y + rectHOffset
     val x = tagPoint.x + fontWidth
     val top = Pair(x - fontWidth, y - lineHeight)
     val bottom = Pair(x - fontWidth, y + lineHeight)
@@ -81,9 +80,9 @@ class JumpInfo(val tag: String, val index: Int) {
       document[index + 1].isWhitespace()
 
     val canAlignRight = ac.isFree(right)
-    val canAlignLeft =
-      editor.offsetToLogicalPosition(index).column != 0 && ac.isFree(left)
     val isFirstCharacterOfLine = index == startOfThisLine
+    val canAlignLeft = !isFirstCharacterOfLine && ac.isFree(left)
+
     alignment = if (nextCharIsWhiteSpace) RIGHT
     else if (isFirstCharacterOfLine) RIGHT
     else if (canAlignLeft) LEFT
@@ -120,12 +119,14 @@ class JumpInfo(val tag: String, val index: Int) {
       g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
       g2d.color = acejumpHighlightColor
       if (lastQueryChar == tag.first() && lastQueryChar != editorChar) {
-        g2d.fillRect(tagX, tagPoint.y - rectHOffset, fontWidth, fontHeight + 3)
+        g2d.fillRect(tagX, y, fontWidth, fontHeight + 3)
         tagX += fontWidth
         tagWidth -= fontWidth
       }
 
-      g2d.fillRect(srcPoint.x - 1, tagPoint.y - rectHOffset, searchWidth, fontHeight + 3)
+//      editor.markupModel.addRangeHighlighter(index, index + trueOffset + 1,
+//        HighlighterLayer.SELECTION, highlightStyle, HighlighterTargetArea.EXACT_RANGE)
+      g2d.fillRect(srcPoint.x - 1, y, searchWidth, fontHeight + 3)
     }
 
     fun highlightRemaining() {
@@ -136,7 +137,7 @@ class JumpInfo(val tag: String, val index: Int) {
       if (alignment != RIGHT || hasSpaceToTheRight || isRegex)
         g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
-      g2d.fillRect(tagX, tagPoint.y - rectHOffset, tagWidth, fontHeight + 3)
+      g2d.fillRect(tagX, y, tagWidth, fontHeight + 3)
     }
 
     fun surroundTargetWord() {

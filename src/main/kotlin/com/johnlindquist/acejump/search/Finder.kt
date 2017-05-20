@@ -173,9 +173,11 @@ object Finder {
       if (p1 < text.length) c1 = text[p1]
       if (p2 < text.length) c2 = text[p2]
 
-      stringToIndex.put("$c1", site)
-      stringToIndex.put("$c0$c1", site)
-      stringToIndex.put("$c1$c2", site)
+      with(stringToIndex) {
+        put("$c1", site)
+        put("$c0$c1", site)
+        put("$c1$c2", site)
+      }
 
       while (c1.isLetterOrDigit()) {
         unseen1grams.remove("$c1")
