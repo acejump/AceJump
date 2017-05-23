@@ -34,28 +34,24 @@ object Jumper {
     hasJumped = true
   }
 
-  fun moveCaret(offset: Int) {
-    markNextJumpAsHistorical()
-    editor.selectionModel.removeSelection()
-    editor.caretModel.moveToOffset(offset)
-  }
+  fun moveCaret(offset: Int) =
+    with(editor) {
+      // Add current caret position to navigation history
+      CommandProcessor.getInstance().executeCommand(project,
+        aceJumpHistoryAppender, "AceJumpHistoryAppender",
+        DocCommandGroupId.noneGroupId(document), document)
+
+      selectionModel.removeSelection()
+      caretModel.moveToOffset(offset)
+    }
 
   private val aceJumpHistoryAppender = {
-    with(IdeDocumentHistory.getInstance(project)) {
-      (this as IdeDocumentHistoryImpl).onSelectionChanged()
+    with(IdeDocumentHistory.getInstance(project) as IdeDocumentHistoryImpl) {
+      onSelectionChanged()
       includeCurrentCommandAsNavigation()
       includeCurrentPlaceAsChangePlace()
     }
   }
-
-  private fun markNextJumpAsHistorical() =
-    // Add current caret position to navigation history
-    CommandProcessor.getInstance().executeCommand(
-      project,
-      aceJumpHistoryAppender,
-      "AceJumpHistoryAppender",
-      DocCommandGroupId.noneGroupId(editor.document),
-      editor.document)
 
   fun selectWordAtCaret() {
     val ranges = ArrayList<TextRange>()

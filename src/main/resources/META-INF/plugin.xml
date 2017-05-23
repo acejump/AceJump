@@ -8,7 +8,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>AceJump now tracks and adjusts to font changes in the editor much more rapidly.</change-notes>
+  <change-notes>Adds scrolling support! Now you can search for a pattern and scroll for updates.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 
