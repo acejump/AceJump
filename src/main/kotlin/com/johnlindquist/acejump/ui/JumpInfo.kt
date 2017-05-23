@@ -13,12 +13,12 @@ import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorHighlightColor
 import com.johnlindquist.acejump.ui.AceUI.fontHeight
 import com.johnlindquist.acejump.ui.AceUI.fontWidth
-import com.johnlindquist.acejump.ui.AceUI.lineHeight
 import com.johnlindquist.acejump.ui.AceUI.rectHOffset
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
 import java.awt.Color.BLACK
+import java.awt.Font
 import java.awt.Graphics2D
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
@@ -27,6 +27,7 @@ class JumpInfo(val tag: String, val index: Int) {
   val isRegex = query.first() == REGEX_PREFIX
   val line = editor.offsetToVisualPosition(index).line
   var visualPosition = editor.offsetToVisualPosition(index)
+    get() = editor.offsetToVisualPosition(index)
   var queryLength = query.length
   var trueOffset = query.length - 1
   var tagOffset = editor.offsetToVisualPosition(index + trueOffset)
@@ -37,7 +38,7 @@ class JumpInfo(val tag: String, val index: Int) {
 
   private var alignment = RIGHT
 
-  enum class Alignment { TOP, BOTTOM, LEFT, RIGHT, NONE }
+  enum class Alignment { /*TOP, BOTTOM,*/ LEFT, RIGHT, NONE }
 
   fun renderTag(): String {
     var i = 0
@@ -64,15 +65,15 @@ class JumpInfo(val tag: String, val index: Int) {
     //the foreground text
     font = AceUI.font
     color = BLACK
-    drawString(text.toUpperCase(), tagX, tagPoint.y - rectHOffset + fontHeight)
+    drawString(text.toUpperCase(), tagX, tagY + fontHeight)
   }
 
   private fun alignTag(ac: Canvas): Pair<Int, Int> {
     val op = (editor as EditorImpl).visualPositionToXY(visualPosition).y
     val y = tagPoint.y + rectHOffset
     val x = tagPoint.x + fontWidth
-    val top = Pair(x - fontWidth, y - lineHeight)
-    val bottom = Pair(x - fontWidth, y + lineHeight)
+//    val top = Pair(x - fontWidth, y - fontHeight)
+//    val bottom = Pair(x - fontWidth, y + fontHeight)
     val left = Pair(srcPoint.x - fontWidth * (text.length), y)
     val right = Pair(x, y)
 
@@ -90,10 +91,10 @@ class JumpInfo(val tag: String, val index: Int) {
     else NONE
 
     return when (alignment) {
-      TOP -> top
+//      TOP -> top
       LEFT -> left
       RIGHT -> right
-      BOTTOM -> bottom
+//      BOTTOM -> bottom
       NONE -> Pair(0, 0)
     }
   }
@@ -151,7 +152,7 @@ class JumpInfo(val tag: String, val index: Int) {
       val width = (wordEnd - wordStart) * fontWidth
 
       if (document[index].isLetterOrDigit())
-        g2d.drawRect(xPosition, tagPoint.y - rectHOffset, width, fontHeight + 3)
+        g2d.drawRect(xPosition, y, width, fontHeight + 3)
     }
 
     highlightAlreadyTyped()

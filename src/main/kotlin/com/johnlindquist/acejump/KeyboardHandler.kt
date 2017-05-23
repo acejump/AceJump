@@ -61,10 +61,8 @@ object KeyboardHandler {
     findString(pattern.pattern, REGEX_PREFIX)
   }
 
-  fun activate() {
-    getApplication().invokeAndWait {
-      if (!isEnabled) startListening() else toggleTargetMode()
-    }
+  fun activate() = getApplication().invokeAndWait {
+    if (!isEnabled) startListening() else toggleTargetMode()
   }
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()

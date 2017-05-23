@@ -27,18 +27,18 @@ import javax.swing.SwingUtilities.convertPoint
 object AceUI {
   var editor: Editor = getDefaultEditor()
     set(value) {
-      if (value == field) {
+      document = editor.document.charsSequence.toString().toLowerCase()
+
+      if (value == field)
         return
-      }
 
       try {
         KeyboardHandler.reset()
-      } catch (e: UninitializedPropertyAccessException) {
+      } catch (e: Exception) {
         println(e)
       }
-      field = value
 
-      document = editor.document.charsSequence.toString().toLowerCase()
+      field = value
 
       with(EditorSettingsExternalizable.getInstance()) {
         naturalBlock = isBlockCursor
@@ -80,7 +80,7 @@ object AceUI {
   val lineSpacing: Float
     get() = scheme.lineSpacing
   val rectHOffset: Int
-    get() = lineHeight - fontHeight
+    get() = lineHeight - (editor as EditorImpl).descent - fontHeight
 
   val boxColor = red
   val editorHighlightColor = yellow
@@ -110,13 +110,14 @@ object AceUI {
     restoreCursor()
   }
 
-  private fun restoreCanvas() {
-    Canvas.reset()
-    editor.contentComponent.remove(Canvas)
-    editor.contentComponent.repaint()
-  }
+  private fun restoreCanvas() =
+    with(editor.component) {
+      Canvas.reset()
+      remove(Canvas)
+      repaint()
+    }
 
-  private fun restoreCursor() {
+  private fun restoreCursor() =
     getApplication().invokeAndWait {
       with(editor) {
         settings.isBlinkCaret = naturalBlink
@@ -124,5 +125,4 @@ object AceUI {
         colorsScheme.setColor(CARET_COLOR, naturalColor)
       }
     }
-  }
 }
