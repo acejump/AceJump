@@ -136,21 +136,26 @@ object Finder {
       return endOffset
     }
 
+    /**
+     * Returns a list of indices where the query matches the index position.
+     */
     fun getResultIndices(): MutableList<Int> {
       val indicesToCheck = mutableListOf<Int>()
       val oldResults = sitesToCheck.iterator()
+      // If sitesToCheck is populated, we can filter it instead of redoing work
       var nextSite = if (oldResults.hasNext()) oldResults.next() else viewTop
 
-      var result = findManager.findString(fullText, nextSite, findModel)
-      while (result.isStringFound && result.startOffset <= viewBottom) {
-        if (!editor.foldingModel.isOffsetCollapsed(result.startOffset))
-          indicesToCheck.add(result.startOffset)
+      while (true) {
+        findManager.findString(fullText, nextSite, findModel).run {
+          if (!isStringFound || startOffset > viewBottom)
+            return indicesToCheck
 
-        nextSite = result.getNextSite(oldResults)
-        result = findManager.findString(fullText, nextSite, findModel)
+          if (!editor.foldingModel.isOffsetCollapsed(startOffset))
+            indicesToCheck.add(startOffset)
+
+          nextSite = getNextSite(oldResults)
+        }
       }
-
-      return indicesToCheck
     }
 
     return getResultIndices()
@@ -292,7 +297,10 @@ object Finder {
     ))
 
   /**
-   * Adds pre-existing tags where search string and tag are intermingled.
+   * Adds pre-existing tags where search string and tag are intermingled. For
+   * example, tags starting with the last character of the query should be
+   * considered. The user could be starting to select a tag, or continuing to
+   * filter plaintext results.
    */
 
   private fun setupTagMap() =
