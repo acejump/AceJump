@@ -58,6 +58,7 @@ object Finder {
       reset()
     }
 
+    // TODO: Clean up this ugliness.
     jumpLocations = determineJumpLocations()
     if (jumpLocations.size <= 1) {
       if (tagMap.containsKey(query)) {
@@ -239,49 +240,49 @@ object Finder {
       val (left, right) = document.wordBounds(index)
       val (matching, nonMatching) = tags.partition { tag ->
         document[index, right].all { char ->
-          //Prevents "...a[IJ]...ij..." ij
+          // Prevents "...a[IJ]...ij..." ij
           !digraphs.containsKey("$char${tag[0]}") &&
-            //Prevents "...re[Q]...rdre[QA]sor" req
+            // Prevents "...re[Q]...rdre[QA]sor" req
             !newTagMap.containsKey("${tag[0]}") &&
-            //Prevents "...a[IJ]...i[JX]..." ij
+            // Prevents "...a[IJ]...i[JX]..." ij
             !newTagMap.contains("$char${tag[0]}") &&
-            //Prevents "...r[BK]iv...r[VB]in..." rivb
+            // Prevents "...r[BK]iv...r[VB]in..." rivb
             newTagMap.keys.none { it[0] == char && it.last() == tag[0] } &&
-            //Prevents "...i[JX]...i[IJ]..." ij
+            // Prevents "...i[JX]...i[IJ]..." ij
             !(char == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
         }
       }
 
       val tag = matching.firstOrNull()
 
-      if (tag == null) {
-        val word = document[left, right]
-        println("\"$word\" rejected: " + nonMatching.joinToString(","))
-        println("No remaining tags could be assigned to word: \"$word\"")
-        return
+      if (tag == null)
+        document[left, right].let {
+          println("\"$it\" rejected: " + nonMatching.joinToString(","))
+          println("No remaining tags could be assigned to word: \"$it\"")
+        }
+      else
+        tagMap.inverse().getOrElse(index, { tag }).let {
+          // Assigns chosen tag to index
+          newTagMap[it] = index
+          // Prevents "...a[bc]...z[bc]..."
+          tags::remove
+        }
+    }
+
+    query.run {
+      if (isNotEmpty()) {
+        val pTag = if (2 <= length) substring(length - 2) else last().toString()
+
+        if (tagMap.contains(pTag))
+          return HashBiMap.create(mapOf(pTag to tagMap[pTag]))
       }
-
-      val choosenTag = tagMap.inverse().getOrElse(index, { tag })!!
-      newTagMap[choosenTag] = index
-      //Prevents "...a[bc]...z[bc]..."
-      tags.remove(choosenTag)
     }
 
-    if (query.isNotEmpty()) {
-      val possibleTag: String =
-        if (2 <= query.length)
-          query.substring(query.length - 2)
-        else
-          query.last().toString()
-
-      if (tagMap.contains(possibleTag))
-        return HashBiMap.create(mapOf(possibleTag to tagMap[possibleTag]))
-    }
-
-    val remainingSites = sortValidJumpTargets(digraphs).iterator()
     if (!findModel.isRegularExpressions || newTagMap.isEmpty())
-      while (remainingSites.hasNext() && tags.isNotEmpty())
-        tryToAssignTagToIndex(remainingSites.next())
+      sortValidJumpTargets(digraphs).forEach {
+        if (tags.isEmpty()) return newTagMap
+        tryToAssignTagToIndex(it)
+      }
 
     return newTagMap
   }

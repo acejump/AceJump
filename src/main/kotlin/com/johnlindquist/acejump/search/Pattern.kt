@@ -1,15 +1,15 @@
 package com.johnlindquist.acejump.search
 
-enum class Pattern(val pattern: String) {
+enum class Pattern(val string: String) {
   END_OF_LINE("\\n"),
   START_OF_LINE("^.|^\\n"),
   CODE_INDENTS("(?<=^\\s*)\\S|^\\n"),
-  LINE_MARK(END_OF_LINE.pattern + "|" +
-    START_OF_LINE.pattern + "|" +
-    CODE_INDENTS.pattern);
+  LINE_MARK(END_OF_LINE.string + "|" +
+    START_OF_LINE.string + "|" +
+    CODE_INDENTS.string);
 
   companion object {
-    fun contains(regex: String) = values().any { it.pattern == regex }
+    fun contains(regex: String) = values().any { it.string == regex }
     val REGEX_PREFIX = ' '
     var adjacent = mapOf(
       'j' to "jikmnhu", 'f' to "ftgvcdr", 'k' to "kolmji", 'd' to "drfcxse",

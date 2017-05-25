@@ -31,7 +31,7 @@ object Canvas : JComponent() {
   }
 
   fun registerTag(point: Pair<Int, Int>, tag: String) =
-    (-1..(tag.length)).forEach {
+    (-1..tag.length).forEach {
       existingTags.add(Pair(point.first + it * fontWidth, point.second))
     }
 

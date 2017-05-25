@@ -47,16 +47,17 @@ object KeyboardHandler {
     VK_BACK_SPACE to { processBackspaceCommand() }
   )
 
-  private fun findString(query: String, key: Char) {
-    getApplication().invokeAndWait { Finder.findOrJump(query, key) }
-    getApplication().invokeLater { updateUIState() }
-  }
+  private fun findString(query: String, key: Char) =
+    getApplication().invokeLater {
+      Finder.findOrJump(query, key);
+      updateUIState()
+    }
 
   fun findPattern(pattern: Pattern) {
     Finder.reset()
     findModel.isRegularExpressions = true
     // TODO: Fix this really bad hack.
-    findString(pattern.pattern, REGEX_PREFIX)
+    findString(pattern.string, REGEX_PREFIX)
   }
 
   fun activate() = getApplication().invokeAndWait {
@@ -223,14 +224,13 @@ object KeyboardHandler {
 
   private fun removeListeners() {
     synchronized(resetListener) {
-      if (isEnabled) {
+      if (isEnabled)
         editor.run {
           component.removeFocusListener(resetListener)
           component.removeAncestorListener(resetListener)
           scrollingModel.removeVisibleAreaListener(resetListener)
           caretModel.removeCaretListener(resetListener)
         }
-      }
     }
   }
 
