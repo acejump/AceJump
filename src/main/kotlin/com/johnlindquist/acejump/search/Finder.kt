@@ -86,17 +86,16 @@ object Finder {
       digraphs = makeMap(document, sitesToCheck)
     }
 
-    tagMap = compact(mapDigraphs(digraphs))
-
-    return tagMap.values.map { JumpInfo(tagMap.inverse()[it]!!, it) }
-      .sortedBy { it.index }
+    return compact(mapDigraphs(digraphs)).apply { tagMap = this }.run {
+      values.map { JumpInfo(inverse()[it]!!, it) }.sortedBy { it.index }
+    }
   }
 
-  fun populateNgrams() {
-    val a_z = 'a'..'z'
-    unseen1grams.addAll(a_z.mapTo(linkedSetOf(), { "$it" }))
-    a_z.flatMapTo(unseen2grams, { e -> a_z.map { c -> "$e$c" } })
-  }
+  fun populateNgrams() =
+    with('a'..'z') {
+      unseen1grams.addAll(mapTo(linkedSetOf(), { "$it" }))
+      flatMapTo(unseen2grams, { e -> map { c -> "$e$c" } })
+    }
 
   /**
    * Shortens assigned tags. Effectively, this will only shorten two-character
