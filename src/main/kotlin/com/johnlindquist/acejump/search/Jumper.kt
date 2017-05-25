@@ -21,7 +21,7 @@ object Jumper {
 
   fun jump(jumpInfo: JumpInfo) {
     if (originalQuery.last().isUpperCase())
-      setSelectionFromCaretToOffset(jumpInfo.index)
+      selectFromCaretToOffset(jumpInfo.index)
     else if (Finder.targetModeEnabled) {
       // Moving the caret will trigger a reset, flipping targetModeEnabled, so
       // we need to move the caret and select the word in one single transaction
@@ -35,7 +35,7 @@ object Jumper {
   }
 
   fun moveCaret(offset: Int) =
-    with(editor) {
+    editor.run {
       // Add current caret position to navigation history
       CommandProcessor.getInstance().executeCommand(project,
         aceJumpHistoryAppender, "AceJumpHistoryAppender",
@@ -63,14 +63,14 @@ object Jumper {
     val startOfWordOffset = max(0, firstRange.startOffset)
     val endOfWordOffset = min(firstRange.endOffset, document.length)
 
-    with(editor.selectionModel) {
+    editor.selectionModel.run {
       removeSelection()
       setSelection(startOfWordOffset, endOfWordOffset)
     }
   }
 
-  fun setSelectionFromCaretToOffset(toOffset: Int) =
-    with(editor) {
+  fun selectFromCaretToOffset(toOffset: Int) =
+    editor.run {
       selectionModel.removeSelection()
       selectionModel.setSelection(caretModel.offset, toOffset)
       caretModel.moveToOffset(toOffset)

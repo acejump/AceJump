@@ -6,6 +6,7 @@ import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
 import com.johnlindquist.acejump.search.getLineStartOffset
 import com.johnlindquist.acejump.search.getPointFromVisualPosition
+import com.johnlindquist.acejump.search.wordBounds
 import com.johnlindquist.acejump.ui.AceUI.acejumpHighlightColor
 import com.johnlindquist.acejump.ui.AceUI.boxColor
 import com.johnlindquist.acejump.ui.AceUI.document
@@ -18,7 +19,6 @@ import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
 import java.awt.Color.BLACK
-import java.awt.Font
 import java.awt.Graphics2D
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
@@ -52,7 +52,7 @@ class JumpInfo(val tag: String, val index: Int) {
     return tag
   }
 
-  fun paintMe(graphics2D: Graphics2D) = with(graphics2D) {
+  fun paintMe(graphics2D: Graphics2D) = graphics2D.run {
     setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
     val (tagX, tagY) = alignTag(Canvas)
@@ -143,7 +143,7 @@ class JumpInfo(val tag: String, val index: Int) {
 
     fun surroundTargetWord() {
       g2d.composite = getInstance(SRC_OVER, 1.toFloat())
-      val (wordStart, wordEnd) = Finder.getWordBounds(index)
+      val (wordStart, wordEnd) = document.wordBounds(index)
       g2d.color = boxColor
 
       val startPoint = editor.offsetToVisualPosition(wordStart)

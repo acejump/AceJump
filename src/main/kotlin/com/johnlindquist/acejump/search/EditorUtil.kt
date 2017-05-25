@@ -8,6 +8,21 @@ import com.intellij.ui.awt.RelativePoint
 import java.lang.Math.max
 import java.lang.Math.min
 
+operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
+
+/**
+ * Identifies the bounds of a word, defined as a contiguous group of letters
+ * and digits, by expanding the provided index until a non-matching character
+ * is seen on either side.
+ */
+
+fun String.wordBounds(index: Int): Pair<Int, Int> {
+  var (front, end) = Pair(index, index)
+  while (0 < front && get(front - 1).isJavaIdentifierPart()) front--
+  while (end < length && get(end).isJavaIdentifierPart()) end++
+  return Pair(front, end)
+}
+
 fun getDefaultEditor() = FileEditorManager.getInstance(ProjectManager
   .getInstance().openProjects[0]).selectedTextEditor!!
 
@@ -63,13 +78,13 @@ fun Editor.getVisualLineAtTopOfScreen() =
  * @return The file line count
  */
 
-fun Editor.getLineCount() = with(document) {
-    if (textLength > 0 && charsSequence[textLength - 1] == '\n') {
-      lineCount - 1
-    } else {
-      lineCount
-    }
+fun Editor.getLineCount() = document.run {
+  if (textLength > 0 && charsSequence[textLength - 1] == '\n') {
+    lineCount - 1
+  } else {
+    lineCount
   }
+}
 
 /**
  * Gets the actual number of characters in the file

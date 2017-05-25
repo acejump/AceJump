@@ -17,11 +17,9 @@ import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.Pattern.*
 import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
-import com.johnlindquist.acejump.search.getDefaultEditor
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.findModel
 import com.johnlindquist.acejump.ui.AceUI.restoreEditorSettings
-import com.johnlindquist.acejump.ui.AceUI.setupCanvas
 import com.johnlindquist.acejump.ui.AceUI.setupCursor
 import com.johnlindquist.acejump.ui.Canvas
 import org.jetbrains.concurrency.runAsync
@@ -102,7 +100,7 @@ object KeyboardHandler {
     }
 
     fun VisibleAreaEvent.isHorizontalScroll(): Boolean {
-      if (this.oldRectangle == newRectangle)
+      if (oldRectangle == newRectangle)
         return false
       else if (oldRectangle.width != newRectangle.width)
         return false
@@ -134,16 +132,14 @@ object KeyboardHandler {
   }
 
   private fun configureEditor() {
-    fun interceptPrintableKeystrokes() {
+    fun interceptPrintableKeystrokes() =
       editorActionManager.typedAction.setupRawHandler { _, key, _ ->
         text += key
         findString(text, key)
       }
-    }
 
-    editor = getDefaultEditor()
     setupCursor()
-    setupCanvas()
+    Canvas.bindToEditor(editor)
     interceptPrintableKeystrokes()
     addListeners()
   }
@@ -157,11 +153,17 @@ object KeyboardHandler {
   }.get(null)
 
   private fun installCustomShortcutHandler() =
-    with(editor.component) {
+    editor.component.run {
       backup = getClientProperty(ACTIONS_KEY) as List<*>?
       putClientProperty(ACTIONS_KEY, SmartList<AnAction>(AceKeyAction))
       val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
       AceKeyAction.registerCustomShortcutSet(css, this)
+    }
+
+  private fun uninstallCustomShortCutHandler() =
+    editor.component.run {
+      putClientProperty(ACTIONS_KEY, backup)
+      AceKeyAction::unregisterCustomShortcutSet
     }
 
   private fun startListening() {
@@ -198,8 +200,7 @@ object KeyboardHandler {
     fun resetUIState() {
       text = ""
       isEnabled = false
-      editor.component.putClientProperty(ACTIONS_KEY, backup)
-      AceKeyAction.unregisterCustomShortcutSet(editor.component)
+      uninstallCustomShortCutHandler()
       editorActionManager.typedAction.setupRawHandler(handler)
       Finder.reset()
       restoreEditorSettings()
@@ -211,7 +212,7 @@ object KeyboardHandler {
 
   private fun addListeners() {
     synchronized(resetListener) {
-      with(editor) {
+      editor.run {
         component.addFocusListener(resetListener)
         component.addAncestorListener(resetListener)
         scrollingModel.addVisibleAreaListener(resetListener)
@@ -223,7 +224,7 @@ object KeyboardHandler {
   private fun removeListeners() {
     synchronized(resetListener) {
       if (isEnabled) {
-        with(editor) {
+        editor.run {
           component.removeFocusListener(resetListener)
           component.removeAncestorListener(resetListener)
           scrollingModel.removeVisibleAreaListener(resetListener)
@@ -234,7 +235,7 @@ object KeyboardHandler {
   }
 
   fun toggleTargetMode(status: Boolean? = null) =
-    with(editor.colorsScheme) {
+    editor.colorsScheme.run {
       if (Finder.toggleTargetMode(status))
         setColor(CARET_COLOR, RED)
       else

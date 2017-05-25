@@ -9,20 +9,14 @@ import com.intellij.openapi.editor.colors.EditorColorsManager.getInstance
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
 import com.intellij.openapi.editor.impl.EditorImpl
-import com.intellij.openapi.editor.markup.EffectType
-import com.intellij.openapi.editor.markup.EffectType.*
+import com.intellij.openapi.editor.markup.EffectType.BOXED
 import com.intellij.openapi.editor.markup.TextAttributes
-import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
-import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.project.Project
-import com.intellij.ui.ColorUtil
 import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.getDefaultEditor
-import java.awt.Color
 import java.awt.Color.*
 import java.awt.Font
 import java.awt.Font.BOLD
-import javax.swing.SwingUtilities.convertPoint
 
 object AceUI {
   var editor: Editor = getDefaultEditor()
@@ -40,7 +34,7 @@ object AceUI {
 
       field = value
 
-      with(EditorSettingsExternalizable.getInstance()) {
+      EditorSettingsExternalizable.getInstance().run {
         naturalBlock = isBlockCursor
         naturalBlink = isBlinkCaret
       }
@@ -86,24 +80,17 @@ object AceUI {
   val editorHighlightColor = yellow
   val acejumpHighlightColor = green
 
-  fun setupCursor() {
-    naturalBlock = editor.settings.isBlockCursor
-    editor.settings.isBlockCursor = true
+  fun setupCursor() =
+    editor.run {
+      naturalBlock = settings.isBlockCursor
+      settings.isBlockCursor = true
 
-    naturalBlink = editor.settings.isBlinkCaret
-    editor.settings.isBlinkCaret = false
+      naturalBlink = settings.isBlinkCaret
+      settings.isBlinkCaret = false
 
-    naturalColor = editor.colorsScheme.getColor(CARET_COLOR)!!
-    editor.colorsScheme.setColor(CARET_COLOR, BLUE)
-  }
-
-  fun setupCanvas() {
-    editor.contentComponent.add(Canvas)
-    val viewport = editor.scrollingModel.visibleArea
-    Canvas.setBounds(0, 0, viewport.width + 1000, viewport.height + 1000)
-    val loc = convertPoint(Canvas, Canvas.location, editor.component.rootPane)
-    Canvas.setLocation(-loc.x, -loc.y)
-  }
+      naturalColor = colorsScheme.getColor(CARET_COLOR)!!
+      colorsScheme.setColor(CARET_COLOR, BLUE)
+    }
 
   fun restoreEditorSettings() {
     restoreCanvas()
@@ -111,7 +98,7 @@ object AceUI {
   }
 
   private fun restoreCanvas() =
-    with(editor.component) {
+    editor.component.run {
       Canvas.reset()
       remove(Canvas)
       repaint()
@@ -119,7 +106,7 @@ object AceUI {
 
   private fun restoreCursor() =
     getApplication().invokeAndWait {
-      with(editor) {
+      editor.run {
         settings.isBlinkCaret = naturalBlink
         settings.isBlockCursor = naturalBlock
         colorsScheme.setColor(CARET_COLOR, naturalColor)

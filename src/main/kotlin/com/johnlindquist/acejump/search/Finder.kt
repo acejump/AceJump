@@ -126,14 +126,14 @@ object Finder {
   private fun getSitesInView(fullText: String): List<Int> {
     val (viewTop, viewBottom) = editor.getVisibleRange()
 
-    fun getNextSite(oldResults: Iterator<Int>, result: FindResult): Int {
+    fun FindResult.getNextSite(oldResults: Iterator<Int>): Int {
       while (oldResults.hasNext()) {
         val startingFrom = oldResults.next()
-        if (startingFrom >= result.endOffset)
+        if (startingFrom >= endOffset)
           return startingFrom
       }
 
-      return result.endOffset
+      return endOffset
     }
 
     fun getResultIndices(): MutableList<Int> {
@@ -146,7 +146,7 @@ object Finder {
         if (!editor.foldingModel.isOffsetCollapsed(result.startOffset))
           indicesToCheck.add(result.startOffset)
 
-        nextSite = getNextSite(oldResults, result)
+        nextSite = result.getNextSite(oldResults)
         result = findManager.findString(fullText, nextSite, findModel)
       }
 
@@ -173,7 +173,7 @@ object Finder {
       if (p1 < text.length) c1 = text[p1]
       if (p2 < text.length) c2 = text[p2]
 
-      with(stringToIndex) {
+      stringToIndex.run {
         put("$c1", site)
         put("$c0$c1", site)
         put("$c1$c2", site)
@@ -191,19 +191,6 @@ object Finder {
     }
 
     return stringToIndex
-  }
-
-  /**
-   * Identifies the bounds of a word, defined as a contiguous group of letters
-   * and digits, by expanding the provided index until a non-matching character
-   * is seen on either side.
-   */
-
-  fun getWordBounds(index: Int): Pair<Int, Int> {
-    var (front, end) = Pair(index, index)
-    while (0 < front && document[front - 1].isJavaIdentifierPart()) front--
-    while (end < document.length && document[end].isJavaIdentifierPart()) end++
-    return Pair(front, end)
   }
 
   /**
@@ -228,7 +215,7 @@ object Finder {
     val tags: HashSet<String> = setupTags(digraphs)
 
     fun hasNearbyTag(index: Int): Boolean {
-      val (start, end) = getWordBounds(index)
+      val (start, end) = document.wordBounds(index)
       val (left, right) = Pair(max(start, index - 2), min(end, index + 2))
       return (left..right).any { newTagMap.containsValue(it) }
     }
@@ -244,9 +231,9 @@ object Finder {
       if (newTagMap.containsValue(index) || hasNearbyTag(index))
         return
 
-      val (left, right) = getWordBounds(index)
+      val (left, right) = document.wordBounds(index)
       val (matching, nonMatching) = tags.partition { tag ->
-        substring(index, right).all { char ->
+        document[index, right].all { char ->
           //Prevents "...a[IJ]...ij..." ij
           !digraphs.containsKey("$char${tag[0]}") &&
             //Prevents "...re[Q]...rdre[QA]sor" req
@@ -263,7 +250,7 @@ object Finder {
       val tag = matching.firstOrNull()
 
       if (tag == null) {
-        val word = substring(left, right)
+        val word = document[left, right]
         println("\"$word\" rejected: " + nonMatching.joinToString(","))
         println("No remaining tags could be assigned to word: \"$word\"")
         return
@@ -294,8 +281,6 @@ object Finder {
     return newTagMap
   }
 
-  private fun substring(start: Int, end: Int) = document.substring(start, end)
-
   private fun sortValidJumpTargets(digraphs: Multimap<String, Int>) =
     digraphs.asMap().entries.sortedBy { it.value.size }
       .flatMap { it.value }.sortedWith(compareBy(
@@ -303,7 +288,7 @@ object Finder {
       { document[max(0, it - 1)].isLetterOrDigit() },
       // Target words with more unique characters to the immediate right ought
       // to have first pick for tags, since they are the most "picky" targets
-      { -substring(it, getWordBounds(it).second).toCharArray().distinct().size }
+      { -document[it, document.wordBounds(it).second].distinct().size }
     ))
 
   /**
