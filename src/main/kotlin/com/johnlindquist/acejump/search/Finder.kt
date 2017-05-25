@@ -261,11 +261,10 @@ object Finder {
           println("No remaining tags could be assigned to word: \"$it\"")
         }
       else
-        tagMap.inverse().getOrElse(index, { tag }).let {
-          // Assigns chosen tag to index
-          newTagMap[it] = index
+        tagMap.inverse().getOrElse(index, { tag }).let { chosenTag ->
+          newTagMap[chosenTag] = index
           // Prevents "...a[bc]...z[bc]..."
-          tags::remove
+          tags.remove(chosenTag)
         }
     }
 
