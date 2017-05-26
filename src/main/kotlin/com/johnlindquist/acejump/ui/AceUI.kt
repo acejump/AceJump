@@ -26,6 +26,7 @@ object AceUI {
       if (value == field)
         return
 
+      // When the editor is updated, we must update some properties
       try {
         KeyboardHandler.reset()
       } catch (e: Exception) {

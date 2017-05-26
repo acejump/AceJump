@@ -136,9 +136,7 @@ object Finder {
       return endOffset
     }
 
-    /**
-     * Returns a list of indices where the query matches the index position.
-     */
+    // Returns a list of indices where the query matches the index position.
     fun getResultIndices(): MutableList<Int> {
       val indicesToCheck = mutableListOf<Int>()
       val oldResults = sitesToCheck.iterator()

@@ -5,8 +5,12 @@ import com.intellij.openapi.editor.VisualPosition
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
+import java.awt.Point
 import java.lang.Math.max
 import java.lang.Math.min
+
+operator fun Point.component1() = x
+operator fun Point.component2() = y
 
 operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 

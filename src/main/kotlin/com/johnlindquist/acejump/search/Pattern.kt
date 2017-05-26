@@ -12,6 +12,7 @@ enum class Pattern(val string: String) {
     fun contains(regex: String) = values().any { it.string == regex }
     val REGEX_PREFIX = ' '
     var adjacent = mapOf(
+      // Values are QWERTY keys which are physically adjacent to the map key
       'j' to "jikmnhu", 'f' to "ftgvcdr", 'k' to "kolmji", 'd' to "drfcxse",
       'l' to "lkop", 's' to "sedxzaw", 'a' to "aqwsz",
       'h' to "hujnbgy", 'g' to "gyhbvft", 'y' to "y7uhgt6", 't' to "t6ygfr5",
@@ -22,6 +23,7 @@ enum class Pattern(val string: String) {
       .mapValues { it.value.toHashSet() }
 
     var nearby = mapOf(
+      // Values are QWERTY keys sorted by physical proximity to the map key
       'j' to "jikmnhuolbgypvftcdrxsezawq", 'f' to "ftgvcdryhbxseujnzawqikmolp",
       'k' to "kolmjipnhubgyvftcdrxsezawq", 'd' to "drfcxsetgvzawyhbqujnikmolp",
       'l' to "lkopmjinhubgyvftcdrxsezawq", 's' to "sedxzawrfcqtgvyhbujnikmolp",

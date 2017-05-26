@@ -1,12 +1,9 @@
 package com.johnlindquist.acejump.ui
 
 import com.intellij.openapi.editor.impl.EditorImpl
-import com.johnlindquist.acejump.search.Finder
+import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
-import com.johnlindquist.acejump.search.getLineStartOffset
-import com.johnlindquist.acejump.search.getPointFromVisualPosition
-import com.johnlindquist.acejump.search.wordBounds
 import com.johnlindquist.acejump.ui.AceUI.acejumpHighlightColor
 import com.johnlindquist.acejump.ui.AceUI.boxColor
 import com.johnlindquist.acejump.ui.AceUI.document
@@ -20,6 +17,7 @@ import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
 import java.awt.Color.BLACK
 import java.awt.Graphics2D
+import java.awt.Point
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 
@@ -55,9 +53,9 @@ class JumpInfo(val tag: String, val index: Int) {
   fun paintMe(graphics2D: Graphics2D) = graphics2D.run {
     setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
-    val (tagX, tagY) = alignTag(Canvas)
-    Canvas.registerTag(Pair(tagX, tagY), tag)
-    highlight(graphics2D, tagX, tagY)
+    val tagPosition = alignTag(Canvas)
+    Canvas.registerTag(tagPosition, tag)
+    highlight(graphics2D, tagPosition)
 
     //just a touch of alpha
     composite = getInstance(SRC_OVER, 1.toFloat())
@@ -65,24 +63,24 @@ class JumpInfo(val tag: String, val index: Int) {
     //the foreground text
     font = AceUI.font
     color = BLACK
-    drawString(text.toUpperCase(), tagX, tagY + fontHeight)
+    drawString(text.toUpperCase(), tagPosition.x, tagPosition.y + fontHeight)
   }
 
-  private fun alignTag(ac: Canvas): Pair<Int, Int> {
+  private fun alignTag(canvas: Canvas): Point {
     val op = (editor as EditorImpl).visualPositionToXY(visualPosition).y
     val y = tagPoint.y + rectHOffset
     val x = tagPoint.x + fontWidth
-//    val top = Pair(x - fontWidth, y - fontHeight)
-//    val bottom = Pair(x - fontWidth, y + fontHeight)
-    val left = Pair(srcPoint.x - fontWidth * (text.length), y)
-    val right = Pair(x, y)
+//    val top = Point(x - fontWidth, y - fontHeight)
+//    val bottom = Point(x - fontWidth, y + fontHeight)
+    val left = Point(srcPoint.x - fontWidth * (text.length), y)
+    val right = Point(x, y)
 
     val nextCharIsWhiteSpace = document.length <= index + 1 ||
       document[index + 1].isWhitespace()
 
-    val canAlignRight = ac.isFree(right)
+    val canAlignRight = canvas.isFree(right)
     val isFirstCharacterOfLine = index == startOfThisLine
-    val canAlignLeft = !isFirstCharacterOfLine && ac.isFree(left)
+    val canAlignLeft = !isFirstCharacterOfLine && canvas.isFree(left)
 
     alignment = if (nextCharIsWhiteSpace) RIGHT
     else if (isFirstCharacterOfLine) RIGHT
@@ -95,15 +93,15 @@ class JumpInfo(val tag: String, val index: Int) {
       LEFT -> left
       RIGHT -> right
 //      BOTTOM -> bottom
-      NONE -> Pair(0, 0)
+      NONE -> Point(0, 0)
     }
   }
 
-  private fun highlight(g2d: Graphics2D, x: Int, y: Int) {
+  private fun highlight(g2d: Graphics2D, point: Point) {
     if (query.isEmpty() || alignment == NONE)
       return
 
-    var tagX = x
+    var tagX = point.x
     val lastQueryChar = query.last()
     var tagWidth = text.length * fontWidth
     val searchWidth = (trueOffset + 1) * fontWidth
@@ -120,14 +118,14 @@ class JumpInfo(val tag: String, val index: Int) {
       g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
       g2d.color = acejumpHighlightColor
       if (lastQueryChar == tag.first() && lastQueryChar != editorChar) {
-        g2d.fillRect(tagX, y, fontWidth, fontHeight + 3)
+        g2d.fillRect(tagX, point.y, fontWidth, fontHeight + 3)
         tagX += fontWidth
         tagWidth -= fontWidth
       }
 
 //      editor.markupModel.addRangeHighlighter(index, index + trueOffset + 1,
 //        HighlighterLayer.SELECTION, highlightStyle, HighlighterTargetArea.EXACT_RANGE)
-      g2d.fillRect(srcPoint.x - 1, y, searchWidth, fontHeight + 3)
+      g2d.fillRect(srcPoint.x - 1, point.y, searchWidth, fontHeight + 3)
     }
 
     fun highlightRemaining() {
@@ -138,7 +136,7 @@ class JumpInfo(val tag: String, val index: Int) {
       if (alignment != RIGHT || hasSpaceToTheRight || isRegex)
         g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
-      g2d.fillRect(tagX, y, tagWidth, fontHeight + 3)
+      g2d.fillRect(tagX, point.y, tagWidth, fontHeight + 3)
     }
 
     fun surroundTargetWord() {
@@ -152,7 +150,7 @@ class JumpInfo(val tag: String, val index: Int) {
       val width = (wordEnd - wordStart) * fontWidth
 
       if (document[index].isLetterOrDigit())
-        g2d.drawRect(xPosition, y, width, fontHeight + 3)
+        g2d.drawRect(xPosition, point.y, width, fontHeight + 3)
     }
 
     highlightAlreadyTyped()

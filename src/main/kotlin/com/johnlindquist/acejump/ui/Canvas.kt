@@ -4,12 +4,13 @@ import com.intellij.openapi.editor.Editor
 import com.johnlindquist.acejump.ui.AceUI.fontWidth
 import java.awt.Graphics
 import java.awt.Graphics2D
+import java.awt.Point
 import javax.swing.JComponent
 import javax.swing.SwingUtilities.convertPoint
 
 object Canvas : JComponent() {
-  var existingTags = hashSetOf<Pair<Int, Int>>()
-  var jumpLocations: Collection<JumpInfo> = arrayListOf()
+  val existingTags = hashSetOf<Point>()
+  var jumpLocations: Collection<JumpInfo> = emptyList<JumpInfo>()
 
   fun bindToEditor(editor: Editor) =
     editor.run {
@@ -21,24 +22,22 @@ object Canvas : JComponent() {
     }
 
   override fun paint(graphics: Graphics) {
-    if (jumpLocations.isEmpty())
-      return
+    if (jumpLocations.isEmpty()) return
 
     super.paint(graphics)
-    val graphics2D = graphics as Graphics2D
-    existingTags = hashSetOf<Pair<Int, Int>>()
-    jumpLocations.forEach { it.paintMe(graphics2D) }
+    existingTags.clear()
+    jumpLocations.forEach { it.paintMe(graphics as Graphics2D) }
   }
 
-  fun registerTag(point: Pair<Int, Int>, tag: String) =
+  fun registerTag(point: Point, tag: String) =
     (-1..tag.length).forEach {
-      existingTags.add(Pair(point.first + it * fontWidth, point.second))
+      existingTags.add(Point(point.x + it * fontWidth, point.y))
     }
 
-  fun isFree(point: Pair<Int, Int>) = !existingTags.contains(point)
+  fun isFree(point: Point) = !existingTags.contains(point)
 
   fun reset() {
-    existingTags = hashSetOf<Pair<Int, Int>>()
-    jumpLocations = arrayListOf()
+    existingTags.clear()
+    jumpLocations = emptyList()
   }
 }
