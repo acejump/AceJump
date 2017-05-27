@@ -23,16 +23,10 @@ import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 
 class JumpInfo(val tag: String, val index: Int) {
   val isRegex = query.first() == REGEX_PREFIX
-  val line = editor.offsetToVisualPosition(index).line
-  var visualPosition = editor.offsetToVisualPosition(index)
-    get() = editor.offsetToVisualPosition(index)
-  var queryLength = query.length
-  var trueOffset = query.length - 1
-  var tagOffset = editor.offsetToVisualPosition(index + trueOffset)
-  var tagPoint = editor.getPointFromVisualPosition(visualPosition).originalPoint
-  var srcPoint = editor.getPointFromVisualPosition(visualPosition).originalPoint
+
+  var tagPoint = editor.getPointFromIndex(index + query.length - 1)
+  var srcPoint = editor.getPointFromIndex(index)
   var text = renderTag()
-  val startOfThisLine = editor.getLineStartOffset(line)
 
   private var alignment = RIGHT
 
@@ -45,8 +39,6 @@ class JumpInfo(val tag: String, val index: Int) {
       i++
     }
 
-    trueOffset = i
-    queryLength = i + 1
     return tag
   }
 
@@ -67,7 +59,6 @@ class JumpInfo(val tag: String, val index: Int) {
   }
 
   private fun alignTag(canvas: Canvas): Point {
-    val op = (editor as EditorImpl).visualPositionToXY(visualPosition).y
     val y = tagPoint.y + rectHOffset
     val x = tagPoint.x + fontWidth
 //    val top = Point(x - fontWidth, y - fontHeight)
@@ -79,7 +70,7 @@ class JumpInfo(val tag: String, val index: Int) {
       document[index + 1].isWhitespace()
 
     val canAlignRight = canvas.isFree(right)
-    val isFirstCharacterOfLine = index == startOfThisLine
+    val isFirstCharacterOfLine = editor.isFirstCharacterOfLine(index)
     val canAlignLeft = !isFirstCharacterOfLine && canvas.isFree(left)
 
     alignment = if (nextCharIsWhiteSpace) RIGHT
@@ -104,7 +95,7 @@ class JumpInfo(val tag: String, val index: Int) {
     var tagX = point.x
     val lastQueryChar = query.last()
     var tagWidth = text.length * fontWidth
-    val searchWidth = (trueOffset + 1) * fontWidth
+    val searchWidth = query.length * fontWidth
     val indexOfEditorChar = index + query.length - 1
 
     val editorChar =
@@ -144,9 +135,7 @@ class JumpInfo(val tag: String, val index: Int) {
       val (wordStart, wordEnd) = document.wordBounds(index)
       g2d.color = boxColor
 
-      val startPoint = editor.offsetToVisualPosition(wordStart)
-      val startPointO = editor.getPointFromVisualPosition(startPoint)
-      val xPosition = startPointO.originalPoint.x
+      val xPosition = editor.getPointFromIndex(wordStart).x
       val width = (wordEnd - wordStart) * fontWidth
 
       if (document[index].isLetterOrDigit())

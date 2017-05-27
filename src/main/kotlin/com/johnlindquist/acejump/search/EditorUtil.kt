@@ -5,6 +5,7 @@ import com.intellij.openapi.editor.VisualPosition
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
+import com.johnlindquist.acejump.ui.AceUI.editor
 import java.awt.Point
 import java.lang.Math.max
 import java.lang.Math.min
@@ -30,8 +31,13 @@ fun String.wordBounds(index: Int): Pair<Int, Int> {
 fun getDefaultEditor() = FileEditorManager.getInstance(ProjectManager
   .getInstance().openProjects[0]).selectedTextEditor!!
 
-fun Editor.getPointFromVisualPosition(position: VisualPosition) =
-  RelativePoint(contentComponent, visualPositionToXY(position))
+fun Editor.getPointFromIndex(index: Int) = run {
+  RelativePoint(contentComponent, visualPositionToXY(offsetToVisualPosition(index))).originalPoint
+}
+
+fun Editor.isFirstCharacterOfLine(index: Int) = run {
+  index == getLineStartOffset(offsetToLogicalPosition(index).line)
+}
 
 fun Editor.getVisibleRange(): Pair<Int, Int> {
   val firstVisibleLine = getVisualLineAtTopOfScreen()
