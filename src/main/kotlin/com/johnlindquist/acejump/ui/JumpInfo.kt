@@ -1,12 +1,14 @@
 package com.johnlindquist.acejump.ui
 
-import com.intellij.openapi.editor.impl.EditorImpl
-import com.johnlindquist.acejump.search.*
+import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
+import com.johnlindquist.acejump.search.getPointFromIndex
+import com.johnlindquist.acejump.search.isFirstCharacterOfLine
+import com.johnlindquist.acejump.search.wordBounds
 import com.johnlindquist.acejump.ui.AceUI.acejumpHighlightColor
 import com.johnlindquist.acejump.ui.AceUI.boxColor
-import com.johnlindquist.acejump.ui.AceUI.document
+import com.johnlindquist.acejump.ui.AceUI.screenText
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorHighlightColor
 import com.johnlindquist.acejump.ui.AceUI.fontHeight
@@ -23,24 +25,12 @@ import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 
 class JumpInfo(val tag: String, val index: Int) {
   val isRegex = query.first() == REGEX_PREFIX
-
   var tagPoint = editor.getPointFromIndex(index + query.length - 1)
   var srcPoint = editor.getPointFromIndex(index)
-  var text = renderTag()
 
   private var alignment = RIGHT
 
   enum class Alignment { /*TOP, BOTTOM,*/ LEFT, RIGHT, NONE }
-
-  fun renderTag(): String {
-    var i = 0
-    while (i + 1 < query.length && index + i + 1 < document.length &&
-      query[i + 1].toLowerCase() == document[index + i + 1].toLowerCase()) {
-      i++
-    }
-
-    return tag
-  }
 
   fun paintMe(graphics2D: Graphics2D) = graphics2D.run {
     setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
@@ -55,7 +45,7 @@ class JumpInfo(val tag: String, val index: Int) {
     //the foreground text
     font = AceUI.font
     color = BLACK
-    drawString(text.toUpperCase(), tagPosition.x, tagPosition.y + fontHeight)
+    drawString(tag.toUpperCase(), tagPosition.x, tagPosition.y + fontHeight)
   }
 
   private fun alignTag(canvas: Canvas): Point {
@@ -63,11 +53,11 @@ class JumpInfo(val tag: String, val index: Int) {
     val x = tagPoint.x + fontWidth
 //    val top = Point(x - fontWidth, y - fontHeight)
 //    val bottom = Point(x - fontWidth, y + fontHeight)
-    val left = Point(srcPoint.x - fontWidth * (text.length), y)
+    val left = Point(srcPoint.x - fontWidth * (tag.length), y)
     val right = Point(x, y)
 
-    val nextCharIsWhiteSpace = document.length <= index + 1 ||
-      document[index + 1].isWhitespace()
+    val nextCharIsWhiteSpace = screenText.length <= index + 1 ||
+      screenText[index + 1].isWhitespace()
 
     val canAlignRight = canvas.isFree(right)
     val isFirstCharacterOfLine = editor.isFirstCharacterOfLine(index)
@@ -94,13 +84,13 @@ class JumpInfo(val tag: String, val index: Int) {
 
     var tagX = point.x
     val lastQueryChar = query.last()
-    var tagWidth = text.length * fontWidth
+    var tagWidth = tag.length * fontWidth
     val searchWidth = query.length * fontWidth
     val indexOfEditorChar = index + query.length - 1
 
     val editorChar =
-      if (indexOfEditorChar < document.length)
-        document[indexOfEditorChar].toLowerCase()
+      if (indexOfEditorChar < screenText.length)
+        screenText[indexOfEditorChar].toLowerCase()
       else
         0.toChar()
 
@@ -121,8 +111,8 @@ class JumpInfo(val tag: String, val index: Int) {
 
     fun highlightRemaining() {
       g2d.color = editorHighlightColor
-      val hasSpaceToTheRight = document.length <= index + 1 ||
-        document[index + 1].isWhitespace()
+      val hasSpaceToTheRight = screenText.length <= index + 1 ||
+        screenText[index + 1].isWhitespace()
 
       if (alignment != RIGHT || hasSpaceToTheRight || isRegex)
         g2d.composite = getInstance(SRC_OVER, 1.toFloat())
@@ -132,13 +122,13 @@ class JumpInfo(val tag: String, val index: Int) {
 
     fun surroundTargetWord() {
       g2d.composite = getInstance(SRC_OVER, 1.toFloat())
-      val (wordStart, wordEnd) = document.wordBounds(index)
+      val (wordStart, wordEnd) = screenText.wordBounds(index)
       g2d.color = boxColor
 
       val xPosition = editor.getPointFromIndex(wordStart).x
       val width = (wordEnd - wordStart) * fontWidth
 
-      if (document[index].isLetterOrDigit())
+      if (screenText[index].isLetterOrDigit())
         g2d.drawRect(xPosition, point.y, width, fontHeight + 3)
     }
 

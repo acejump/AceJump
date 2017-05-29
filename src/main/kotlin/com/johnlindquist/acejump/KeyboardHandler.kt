@@ -3,6 +3,7 @@ package com.johnlindquist.acejump
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.application.ApplicationManager.getApplication
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColorsListener
@@ -139,10 +140,10 @@ object KeyboardHandler {
         findString(text, key)
       }
 
-    setupCursor()
+    editor.setupCursor()
     Canvas.bindToEditor(editor)
     interceptPrintableKeystrokes()
-    addListeners()
+    editor.addListeners()
   }
 
   private var backup: List<*>? = null
@@ -207,30 +208,27 @@ object KeyboardHandler {
       restoreEditorSettings()
     }
 
-    removeListeners()
+    editor.removeListeners()
     resetUIState()
   }
 
-  private fun addListeners() {
+  private fun Editor.addListeners() {
     synchronized(resetListener) {
-      editor.run {
-        component.addFocusListener(resetListener)
-        component.addAncestorListener(resetListener)
-        scrollingModel.addVisibleAreaListener(resetListener)
-        caretModel.addCaretListener(resetListener)
-      }
+      component.addFocusListener(resetListener)
+      component.addAncestorListener(resetListener)
+      scrollingModel.addVisibleAreaListener(resetListener)
+      caretModel.addCaretListener(resetListener)
     }
   }
 
-  private fun removeListeners() {
+  private fun Editor.removeListeners() {
     synchronized(resetListener) {
-      if (isEnabled)
-        editor.run {
-          component.removeFocusListener(resetListener)
-          component.removeAncestorListener(resetListener)
-          scrollingModel.removeVisibleAreaListener(resetListener)
-          caretModel.removeCaretListener(resetListener)
-        }
+      if (isEnabled) {
+        component.removeFocusListener(resetListener)
+        component.removeAncestorListener(resetListener)
+        scrollingModel.removeVisibleAreaListener(resetListener)
+        caretModel.removeCaretListener(resetListener)
+      }
     }
   }
 

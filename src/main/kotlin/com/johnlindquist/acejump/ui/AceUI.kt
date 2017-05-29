@@ -21,7 +21,7 @@ import java.awt.Font.BOLD
 object AceUI {
   var editor: Editor = getDefaultEditor()
     set(value) {
-      document = editor.document.charsSequence.toString().toLowerCase()
+      screenText = editor.document.charsSequence.toString().toLowerCase()
 
       if (value == field)
         return
@@ -45,7 +45,7 @@ object AceUI {
 
   val project: Project
     get() = editor.project!!
-  var document: String = editor.document.charsSequence.toString().toLowerCase()
+  var screenText = editor.document.charsSequence.toString().toLowerCase()
 
   val findModel by lazy {
     FindModel().apply {
@@ -81,17 +81,16 @@ object AceUI {
   val editorHighlightColor = yellow
   val acejumpHighlightColor = green
 
-  fun setupCursor() =
-    editor.run {
-      naturalBlock = settings.isBlockCursor
-      settings.isBlockCursor = true
+  fun Editor.setupCursor() {
+    naturalBlock = settings.isBlockCursor
+    settings.isBlockCursor = true
 
-      naturalBlink = settings.isBlinkCaret
-      settings.isBlinkCaret = false
+    naturalBlink = settings.isBlinkCaret
+    settings.isBlinkCaret = false
 
-      naturalColor = colorsScheme.getColor(CARET_COLOR)!!
-      colorsScheme.setColor(CARET_COLOR, BLUE)
-    }
+    naturalColor = colorsScheme.getColor(CARET_COLOR)!!
+    colorsScheme.setColor(CARET_COLOR, BLUE)
+  }
 
   fun restoreEditorSettings() {
     restoreCanvas()
