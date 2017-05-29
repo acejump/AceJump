@@ -7,7 +7,7 @@ import com.google.common.collect.Multimap
 import com.intellij.find.FindResult
 import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
 import com.johnlindquist.acejump.search.Pattern.Companion.nearby
-import com.johnlindquist.acejump.ui.AceUI.screenText
+import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.findManager
 import com.johnlindquist.acejump.ui.AceUI.findModel
@@ -71,7 +71,7 @@ object Finder {
         } else if (tagMap.containsKey(last1)) {
           val index = tagMap[last1]!!
           val charIndex = index + query.length - 1
-          if (charIndex > screenText.length || screenText[charIndex] != last1[0])
+          if (charIndex > editorText.length || editorText[charIndex] != last1[0])
             jumpTo(JumpInfo(last1, index))
         }
       }
@@ -82,8 +82,8 @@ object Finder {
     populateNgrams()
 
     if (!findModel.isRegularExpressions || sitesToCheck.isEmpty()) {
-      sitesToCheck = getSitesInView(screenText)
-      digraphs = makeMap(screenText, sitesToCheck)
+      sitesToCheck = getSitesInView(editorText)
+      digraphs = makeMap(editorText, sitesToCheck)
     }
 
     return compact(mapDigraphs(digraphs)).apply { tagMap = this }.run {
@@ -218,7 +218,7 @@ object Finder {
     val tags: HashSet<String> = setupTags(digraphs)
 
     fun hasNearbyTag(index: Int): Boolean {
-      val (start, end) = screenText.wordBounds(index)
+      val (start, end) = editorText.wordBounds(index)
       val (left, right) = Pair(max(start, index - 2), min(end, index + 2))
       return (left..right).any { newTagMap.containsValue(it) }
     }
@@ -234,9 +234,9 @@ object Finder {
       if (newTagMap.containsValue(index) || hasNearbyTag(index))
         return
 
-      val (left, right) = screenText.wordBounds(index)
+      val (left, right) = editorText.wordBounds(index)
       val (matching, nonMatching) = tags.partition { tag ->
-        screenText[index, right].all { char ->
+        editorText[index, right].all { char ->
           // Prevents "...a[IJ]...ij..." ij
           !digraphs.containsKey("$char${tag[0]}") &&
             // Prevents "...re[Q]...rdre[QA]sor" req
@@ -253,7 +253,7 @@ object Finder {
       val tag = matching.firstOrNull()
 
       if (tag == null)
-        screenText[left, right].let {
+        editorText[left, right].let {
           println("\"$it\" rejected: " + nonMatching.joinToString(","))
           println("No remaining tags could be assigned to word: \"$it\"")
         }
@@ -287,10 +287,10 @@ object Finder {
     digraphs.asMap().entries.sortedBy { it.value.size }
       .flatMap { it.value }.sortedWith(compareBy(
       // Ensure that the first letter of a word is prioritized for tagging
-      { screenText[max(0, it - 1)].isLetterOrDigit() },
+      { editorText[max(0, it - 1)].isLetterOrDigit() },
       // Target words with more unique characters to the immediate right ought
       // to have first pick for tags, since they are the most "picky" targets
-      { -screenText[it, screenText.wordBounds(it).second].distinct().size }
+      { -editorText[it, editorText.wordBounds(it).second].distinct().size }
     ))
 
   /**

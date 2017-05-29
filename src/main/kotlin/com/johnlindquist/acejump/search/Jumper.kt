@@ -8,7 +8,7 @@ import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.util.TextRange
 import com.johnlindquist.acejump.search.Finder.originalQuery
-import com.johnlindquist.acejump.ui.AceUI.screenText
+import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.project
 import com.johnlindquist.acejump.ui.JumpInfo
@@ -55,13 +55,13 @@ object Jumper {
 
   fun Editor.selectWordAtOffset(offset: Int = caretModel.offset) {
     val ranges = ArrayList<TextRange>()
-    addWordSelection(false, screenText, offset, ranges)
+    addWordSelection(false, editorText, offset, ranges)
 
     if (ranges.isEmpty()) return
 
     val firstRange = ranges[0]
     val startOfWordOffset = max(0, firstRange.startOffset)
-    val endOfWordOffset = min(firstRange.endOffset, screenText.length)
+    val endOfWordOffset = min(firstRange.endOffset, editorText.length)
 
     selectFromToOffset(startOfWordOffset, endOfWordOffset)
   }

@@ -8,7 +8,7 @@ import com.johnlindquist.acejump.search.isFirstCharacterOfLine
 import com.johnlindquist.acejump.search.wordBounds
 import com.johnlindquist.acejump.ui.AceUI.acejumpHighlightColor
 import com.johnlindquist.acejump.ui.AceUI.boxColor
-import com.johnlindquist.acejump.ui.AceUI.screenText
+import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorHighlightColor
 import com.johnlindquist.acejump.ui.AceUI.fontHeight
@@ -56,8 +56,8 @@ class JumpInfo(val tag: String, val index: Int) {
     val left = Point(srcPoint.x - fontWidth * (tag.length), y)
     val right = Point(x, y)
 
-    val nextCharIsWhiteSpace = screenText.length <= index + 1 ||
-      screenText[index + 1].isWhitespace()
+    val nextCharIsWhiteSpace = editorText.length <= index + 1 ||
+      editorText[index + 1].isWhitespace()
 
     val canAlignRight = canvas.isFree(right)
     val isFirstCharacterOfLine = editor.isFirstCharacterOfLine(index)
@@ -89,8 +89,8 @@ class JumpInfo(val tag: String, val index: Int) {
     val indexOfEditorChar = index + query.length - 1
 
     val editorChar =
-      if (indexOfEditorChar < screenText.length)
-        screenText[indexOfEditorChar].toLowerCase()
+      if (indexOfEditorChar < editorText.length)
+        editorText[indexOfEditorChar].toLowerCase()
       else
         0.toChar()
 
@@ -111,8 +111,8 @@ class JumpInfo(val tag: String, val index: Int) {
 
     fun highlightRemaining() {
       g2d.color = editorHighlightColor
-      val hasSpaceToTheRight = screenText.length <= index + 1 ||
-        screenText[index + 1].isWhitespace()
+      val hasSpaceToTheRight = editorText.length <= index + 1 ||
+        editorText[index + 1].isWhitespace()
 
       if (alignment != RIGHT || hasSpaceToTheRight || isRegex)
         g2d.composite = getInstance(SRC_OVER, 1.toFloat())
@@ -122,13 +122,13 @@ class JumpInfo(val tag: String, val index: Int) {
 
     fun surroundTargetWord() {
       g2d.composite = getInstance(SRC_OVER, 1.toFloat())
-      val (wordStart, wordEnd) = screenText.wordBounds(index)
+      val (wordStart, wordEnd) = editorText.wordBounds(index)
       g2d.color = boxColor
 
       val xPosition = editor.getPointFromIndex(wordStart).x
       val width = (wordEnd - wordStart) * fontWidth
 
-      if (screenText[index].isLetterOrDigit())
+      if (editorText[index].isLetterOrDigit())
         g2d.drawRect(xPosition, point.y, width, fontHeight + 3)
     }
 

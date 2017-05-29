@@ -21,7 +21,7 @@ import java.awt.Font.BOLD
 object AceUI {
   var editor: Editor = getDefaultEditor()
     set(value) {
-      screenText = editor.document.charsSequence.toString().toLowerCase()
+      editorText = editor.document.charsSequence.toString().toLowerCase()
 
       if (value == field)
         return
@@ -45,7 +45,7 @@ object AceUI {
 
   val project: Project
     get() = editor.project!!
-  var screenText = editor.document.charsSequence.toString().toLowerCase()
+  var editorText = editor.document.charsSequence.toString().toLowerCase()
 
   val findModel by lazy {
     FindModel().apply {
