@@ -14,6 +14,7 @@ import com.johnlindquist.acejump.ui.AceUI.editorHighlightColor
 import com.johnlindquist.acejump.ui.AceUI.fontHeight
 import com.johnlindquist.acejump.ui.AceUI.fontWidth
 import com.johnlindquist.acejump.ui.AceUI.rectHOffset
+import com.johnlindquist.acejump.ui.AceUI.rectHeight
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
@@ -27,6 +28,22 @@ class JumpInfo(val tag: String, val index: Int) {
   val isRegex = query.first() == REGEX_PREFIX
   var tagPoint = editor.getPointFromIndex(index + query.length - 1)
   var srcPoint = editor.getPointFromIndex(index)
+  var queryLength = query.length
+
+  var trueOffset = query.length - 1
+  var tagOffset = editor.offsetToVisualPosition(index + trueOffset)
+
+  // TODO: Clean up this mess.
+  init {
+    var i = 0
+    while (i + 1 < query.length && index + i + 1 < editorText.length &&
+      query[i + 1].toLowerCase() == editorText[index + i + 1].toLowerCase()) {
+      i++
+    }
+
+    trueOffset = i
+    queryLength = i + 1
+  }
 
   private var alignment = RIGHT
 
@@ -85,7 +102,7 @@ class JumpInfo(val tag: String, val index: Int) {
     var tagX = point.x
     val lastQueryChar = query.last()
     var tagWidth = tag.length * fontWidth
-    val searchWidth = query.length * fontWidth
+    val searchWidth = (trueOffset + 1) * fontWidth
     val indexOfEditorChar = index + query.length - 1
 
     val editorChar =
@@ -99,14 +116,14 @@ class JumpInfo(val tag: String, val index: Int) {
       g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
       g2d.color = acejumpHighlightColor
       if (lastQueryChar == tag.first() && lastQueryChar != editorChar) {
-        g2d.fillRect(tagX, point.y, fontWidth, fontHeight + 3)
+        g2d.fillRect(tagX, point.y, fontWidth, rectHeight)
         tagX += fontWidth
         tagWidth -= fontWidth
       }
 
 //      editor.markupModel.addRangeHighlighter(index, index + trueOffset + 1,
 //        HighlighterLayer.SELECTION, highlightStyle, HighlighterTargetArea.EXACT_RANGE)
-      g2d.fillRect(srcPoint.x - 1, point.y, searchWidth, fontHeight + 3)
+      g2d.fillRect(srcPoint.x - 1, point.y, searchWidth, rectHeight)
     }
 
     fun highlightRemaining() {
@@ -117,7 +134,7 @@ class JumpInfo(val tag: String, val index: Int) {
       if (alignment != RIGHT || hasSpaceToTheRight || isRegex)
         g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
-      g2d.fillRect(tagX, point.y, tagWidth, fontHeight + 3)
+      g2d.fillRect(tagX, point.y, tagWidth, rectHeight)
     }
 
     fun surroundTargetWord() {
@@ -129,7 +146,7 @@ class JumpInfo(val tag: String, val index: Int) {
       val width = (wordEnd - wordStart) * fontWidth
 
       if (editorText[index].isLetterOrDigit())
-        g2d.drawRect(xPosition, point.y, width, fontHeight + 3)
+        g2d.drawRect(xPosition, point.y, width, rectHeight)
     }
 
     highlightAlreadyTyped()

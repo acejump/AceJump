@@ -31,7 +31,7 @@ fun getDefaultEditor() = FileEditorManager.getInstance(ProjectManager
   .getInstance().openProjects[0]).selectedTextEditor!!
 
 fun Editor.getPointFromIndex(index: Int) = RelativePoint(contentComponent,
-  visualPositionToXY(offsetToVisualPosition(index))).originalPoint
+  visualPositionToXY(offsetToVisualPosition(index))).originalPoint!!
 
 fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)
@@ -86,11 +86,7 @@ fun Editor.getVisualLineAtTopOfScreen() =
  */
 
 fun Editor.getLineCount() = document.run {
-  if (textLength > 0 && charsSequence[textLength - 1] == '\n') {
-    lineCount - 1
-  } else {
-    lineCount
-  }
+  lineCount - if (textLength > 0 && text[textLength - 1] == '\n') 1 else 0
 }
 
 /**

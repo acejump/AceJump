@@ -8,7 +8,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>Adds scrolling support! Now you can search for a pattern and scroll for updates.</change-notes>
+  <change-notes>Fixes a critical issue affecting users with multiple windows open.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 

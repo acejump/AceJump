@@ -21,17 +21,13 @@ import java.awt.Font.BOLD
 object AceUI {
   var editor: Editor = getDefaultEditor()
     set(value) {
-      editorText = editor.document.charsSequence.toString().toLowerCase()
+      editorText = value.document.charsSequence.toString().toLowerCase()
 
       if (value == field)
         return
 
       // When the editor is updated, we must update some properties
-      try {
-        KeyboardHandler.reset()
-      } catch (e: Exception) {
-        println(e)
-      }
+      KeyboardHandler.reset()
 
       field = value
 
@@ -54,7 +50,7 @@ object AceUI {
     }
   }
 
-  val findManager: FindManager = FindManager.getInstance(project)
+  val findManager = FindManager.getInstance(project)
   var naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
   var naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
   var naturalColor = getInstance().globalScheme.getColor(CARET_COLOR)!!
@@ -69,11 +65,13 @@ object AceUI {
   val fontWidth
     get() = editor.component.getFontMetrics(font).stringWidth("w")
   val fontHeight: Int
-    get() = editor.colorsScheme.editorFontSize
+    get() = editor.colorsScheme.editorFontSize + 3
   val lineHeight: Int
     get() = editor.lineHeight
   val lineSpacing: Float
     get() = scheme.lineSpacing
+  val rectHeight: Int
+    get() = fontHeight + 3
   val rectHOffset: Int
     get() = lineHeight - (editor as EditorImpl).descent - fontHeight
 

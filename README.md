@@ -62,6 +62,7 @@ To start an instance of IntelliJ IDEA with AceJump installed, run ` ./gradlew ru
 
 ## History
 
+- 3.2.2 Fixes a critical issue affecting users with multiple editor windows open. 
 - 3.2.2 Adds scrolling support and fixes some line spacing issues.
 - 3.2.1 AceJump now synchronizes font style changes in real-time.
 - 3.2.0 Support Back/Forward navigation in the IntelliJ Platform.
