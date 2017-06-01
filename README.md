@@ -16,7 +16,7 @@ Press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, <kbd>↑
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
 
-Press <kbd>Shift</kbd> when completing the jump to select all text from the current cursor position to the destination.
+AceJump tags are *not* case sensitive. Holding down <kbd>Shift</kbd> when typing the last tag character will select all text from the current cursor position to that destination.
 
 If you mistype a character while searching, just press <kbd>Backspace</kbd> to restart from scratch.
 
