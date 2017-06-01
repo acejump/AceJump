@@ -65,7 +65,7 @@ object AceUI {
   val fontWidth
     get() = editor.component.getFontMetrics(font).stringWidth("w")
   val fontHeight: Int
-    get() = editor.colorsScheme.editorFontSize + 3
+    get() = editor.colorsScheme.editorFontSize
   val lineHeight: Int
     get() = editor.lineHeight
   val lineSpacing: Float
