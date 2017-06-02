@@ -14,6 +14,11 @@ operator fun Point.component2() = y
 
 operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 
+fun Editor.getScreenText(): String {
+  val (viewTop, viewBottom) = getVisibleRange()
+  return document.text.toLowerCase().substring(viewTop, viewBottom)
+}
+
 /**
  * Identifies the bounds of a word, defined as a contiguous group of letters
  * and digits, by expanding the provided index until a non-matching character

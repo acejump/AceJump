@@ -14,6 +14,8 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.getDefaultEditor
+import com.johnlindquist.acejump.search.getScreenText
+import com.johnlindquist.acejump.search.getVisibleRange
 import java.awt.Color.*
 import java.awt.Font
 import java.awt.Font.BOLD
@@ -41,7 +43,8 @@ object AceUI {
 
   val project: Project
     get() = editor.project!!
-  var editorText = editor.document.charsSequence.toString().toLowerCase()
+  var editorText = editor.document.getText().toLowerCase()
+  var screenText = editor.getScreenText()
 
   val findModel by lazy {
     FindModel().apply {

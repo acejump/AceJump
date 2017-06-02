@@ -7,10 +7,11 @@ import com.google.common.collect.Multimap
 import com.intellij.find.FindResult
 import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
 import com.johnlindquist.acejump.search.Pattern.Companion.nearby
-import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.AceUI.editor
+import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.AceUI.findManager
 import com.johnlindquist.acejump.ui.AceUI.findModel
+import com.johnlindquist.acejump.ui.AceUI.screenText
 import com.johnlindquist.acejump.ui.JumpInfo
 import java.lang.Math.max
 import java.lang.Math.min
@@ -247,7 +248,10 @@ object Finder {
             newTagMap.keys.none { it[0] == char && it.last() == tag[0] } &&
             // Prevents "...i[JX]...i[IJ]..." ij
             !(char == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
-        }
+        } && (index..right).map {
+          // Never use a tag which can be partly completed by typing plaintext
+          editorText.substring(index, min(it + 1, editorText.length)) + tag[0]
+        }.none { screenText.contains(it) }
       }
 
       val tag = matching.firstOrNull()
