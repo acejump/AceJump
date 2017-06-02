@@ -27,12 +27,10 @@ import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 
 class JumpInfo(val tag: String, val index: Int) {
   val isRegex = query.first() == REGEX_PREFIX
-  var tagPoint = editor.getPointFromIndex(index + query.length - 1)
   var srcPoint = editor.getPointFromIndex(index)
   var queryLength = query.length
 
   var trueOffset = query.length - 1
-  var tagOffset = editor.offsetToVisualPosition(index + trueOffset)
 
   // TODO: Clean up this mess.
   init {
@@ -45,6 +43,8 @@ class JumpInfo(val tag: String, val index: Int) {
     trueOffset = i
     queryLength = i + 1
   }
+
+  var tagPoint = editor.getPointFromIndex(index + trueOffset)
 
   private var alignment = RIGHT
 
@@ -124,7 +124,7 @@ class JumpInfo(val tag: String, val index: Int) {
 
 //      editor.markupModel.addRangeHighlighter(index, index + trueOffset + 1,
 //        HighlighterLayer.SELECTION, highlightStyle, HighlighterTargetArea.EXACT_RANGE)
-      g2d.fillRoundRect(srcPoint.x - 1, point.y, searchWidth, rectHeight, rectHeight - 6, rectHeight - 6)
+      g2d.fillRoundRect(srcPoint.x, point.y, searchWidth, rectHeight, rectHeight - 6, rectHeight - 6)
     }
 
     fun highlightRemaining() {
