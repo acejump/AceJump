@@ -111,7 +111,6 @@ object Finder {
     tagMap.mapKeysTo(HashBiMap.create(tagMap.size), { e ->
       val firstCharacter = e.key[0].toString()
       if (tagMap.keys.count { it[0] == e.key[0] } == 1 &&
-        unseen1grams.contains(firstCharacter) &&
         !query.endsWith(firstCharacter) &&
         !query.endsWith(e.key))
         firstCharacter
@@ -246,7 +245,7 @@ object Finder {
             !newTagMap.contains("$char${tag[0]}") &&
             // Prevents "...r[BK]iv...r[VB]in..." rivb
             newTagMap.keys.none { it[0] == char && it.last() == tag[0] } &&
-            // Prevents "...i[JX]...i[IJ]..." ij
+            // Prevents "...i[JX]...i[IJ]..." ij;
             !(char == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
         } && (index..right).map {
           // Never use a tag which can be partly completed by typing plaintext

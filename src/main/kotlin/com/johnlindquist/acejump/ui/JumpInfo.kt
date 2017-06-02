@@ -19,6 +19,7 @@ import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
 import java.awt.Color.BLACK
+import java.awt.Color.blue
 import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.RenderingHints.KEY_ANTIALIASING
@@ -116,14 +117,14 @@ class JumpInfo(val tag: String, val index: Int) {
       g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
       g2d.color = acejumpHighlightColor
       if (lastQueryChar == tag.first() && lastQueryChar != editorChar) {
-        g2d.fillRect(tagX, point.y, fontWidth, rectHeight)
+        g2d.fillRoundRect(tagX, point.y, fontWidth, rectHeight, rectHeight - 6, rectHeight - 6)
         tagX += fontWidth
         tagWidth -= fontWidth
       }
 
 //      editor.markupModel.addRangeHighlighter(index, index + trueOffset + 1,
 //        HighlighterLayer.SELECTION, highlightStyle, HighlighterTargetArea.EXACT_RANGE)
-      g2d.fillRect(srcPoint.x - 1, point.y, searchWidth, rectHeight)
+      g2d.fillRoundRect(srcPoint.x - 1, point.y, searchWidth, rectHeight, rectHeight - 6, rectHeight - 6)
     }
 
     fun highlightRemaining() {
@@ -134,7 +135,7 @@ class JumpInfo(val tag: String, val index: Int) {
       if (alignment != RIGHT || hasSpaceToTheRight || isRegex)
         g2d.composite = getInstance(SRC_OVER, 1.toFloat())
 
-      g2d.fillRect(tagX, point.y, tagWidth, rectHeight)
+      g2d.fillRoundRect(tagX, point.y, tagWidth, rectHeight, rectHeight - 6, rectHeight - 6)
     }
 
     fun surroundTargetWord() {
@@ -146,7 +147,7 @@ class JumpInfo(val tag: String, val index: Int) {
       val width = (wordEnd - wordStart) * fontWidth
 
       if (editorText[index].isLetterOrDigit())
-        g2d.drawRect(xPosition, point.y, width, rectHeight)
+        g2d.drawRoundRect(xPosition, point.y, width, rectHeight, rectHeight - 6, rectHeight - 6)
     }
 
     highlightAlreadyTyped()
