@@ -143,16 +143,14 @@ object Finder {
       // If sitesToCheck is populated, we can filter it instead of redoing work
       var nextSite = if (oldResults.hasNext()) oldResults.next() else viewTop
 
-      while (true) {
-        findManager.findString(fullText, nextSite, findModel).run {
-          if (!isStringFound || startOffset > viewBottom)
-            return indicesToCheck
+      while (true) findManager.findString(fullText, nextSite, findModel).run {
+        if (!isStringFound || startOffset > viewBottom)
+          return indicesToCheck
 
-          if (!editor.foldingModel.isOffsetCollapsed(startOffset))
-            indicesToCheck.add(startOffset)
+        if (!editor.foldingModel.isOffsetCollapsed(startOffset))
+          indicesToCheck.add(startOffset)
 
-          nextSite = getNextSite(oldResults)
-        }
+        nextSite = getNextSite(oldResults)
       }
     }
 
@@ -166,35 +164,31 @@ object Finder {
    * prior to the end of a word (ie. a contiguous group of letters/digits).
    */
 
-  fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> {
-    val stringToIndex = LinkedListMultimap.create<String, Int>()
-    for (site in sites) {
-      val toCheck = site + query.length
-      var (p0, p1, p2) = Triple(toCheck - 1, toCheck, toCheck + 1)
-      var (c0, c1, c2) = Triple(' ', ' ', ' ')
-      if (0 <= p0) c0 = text[p0]
-      if (p1 < text.length) c1 = text[p1]
-      if (p2 < text.length) c2 = text[p2]
+  fun makeMap(text: CharSequence, sites: Iterable<Int>) =
+    LinkedListMultimap.create<String, Int>().apply {
+      sites.forEach { site ->
+        val toCheck = site + query.length
+        var (p0, p1, p2) = Triple(toCheck - 1, toCheck, toCheck + 1)
+        var (c0, c1, c2) = Triple(' ', ' ', ' ')
+        if (0 <= p0) c0 = text[p0]
+        if (p1 < text.length) c1 = text[p1]
+        if (p2 < text.length) c2 = text[p2]
 
-      stringToIndex.run {
         put("$c1", site)
         put("$c0$c1", site)
         put("$c1$c2", site)
-      }
 
-      while (c1.isLetterOrDigit()) {
-        unseen1grams.remove("$c1")
-        unseen2grams.remove("$c0$c1")
-        unseen2grams.remove("$c1$c2")
-        p0++; p1++; p2++
-        c0 = text[p0]
-        c1 = if (p1 < text.length) text[p1] else ' '
-        c2 = if (p2 < text.length) text[p2] else ' '
+        while (c1.isLetterOrDigit()) {
+          unseen1grams.remove("$c1")
+          unseen2grams.remove("$c0$c1")
+          unseen2grams.remove("$c1$c2")
+          p0++; p1++; p2++
+          c0 = text[p0]
+          c1 = if (p1 < text.length) text[p1] else ' '
+          c2 = if (p2 < text.length) text[p2] else ' '
+        }
       }
     }
-
-    return stringToIndex
-  }
 
   /**
    * Maps tags to search results. Tags *must* have the following properties:
@@ -217,8 +211,8 @@ object Finder {
     val newTagMap: BiMap<String, Int> = setupTagMap()
     val tags: HashSet<String> = setupTags(digraphs)
 
-    fun hasNearbyTag(index: Int): Boolean {
-      val (start, end) = editorText.wordBounds(index)
+    fun String.hasNearbyTag(index: Int): Boolean {
+      val (start, end) = wordBounds(index)
       val (left, right) = Pair(max(start, index - 2), min(end, index + 2))
       return (left..right).any { newTagMap.containsValue(it) }
     }
@@ -231,7 +225,7 @@ object Finder {
      */
 
     fun tryToAssignTagToIndex(index: Int) {
-      if (newTagMap.containsValue(index) || hasNearbyTag(index))
+      if (newTagMap.containsValue(index) || editorText.hasNearbyTag(index))
         return
 
       val (left, right) = editorText.wordBounds(index)

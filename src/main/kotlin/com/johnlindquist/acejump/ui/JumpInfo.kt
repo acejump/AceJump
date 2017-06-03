@@ -29,7 +29,6 @@ class JumpInfo(val tag: String, val index: Int) {
   val isRegex = query.first() == REGEX_PREFIX
   var srcPoint = editor.getPointFromIndex(index)
   var queryLength = query.length
-
   var trueOffset = query.length - 1
 
   // TODO: Clean up this mess.

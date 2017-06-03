@@ -23,8 +23,8 @@ import java.awt.Font.BOLD
 object AceUI {
   var editor: Editor = getDefaultEditor()
     set(value) {
-      editorText = value.document.charsSequence.toString().toLowerCase()
-
+      editorText = value.document.getText().toLowerCase()
+      screenText = value.getScreenText()
       if (value == field)
         return
 
