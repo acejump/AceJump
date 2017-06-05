@@ -4,14 +4,13 @@ import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
-import com.intellij.find.FindResult
+import com.intellij.find.FindManager
+import com.intellij.find.FindModel
 import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
 import com.johnlindquist.acejump.search.Pattern.Companion.nearby
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorText
-import com.johnlindquist.acejump.ui.AceUI.findManager
-import com.johnlindquist.acejump.ui.AceUI.findModel
-import com.johnlindquist.acejump.ui.AceUI.screenText
+import com.johnlindquist.acejump.ui.AceUI.project
 import com.johnlindquist.acejump.ui.JumpInfo
 import java.lang.Math.max
 import java.lang.Math.min
@@ -35,12 +34,19 @@ object Finder {
   private var unseen1grams: LinkedHashSet<String> = linkedSetOf()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
+  val findManager = FindManager.getInstance(project)!!
 
-  fun findOrJump(text: String, key: Char) {
-    originalQuery = text
-    query = if (Pattern.contains(text)) key.toString() else text.toLowerCase()
-    findModel.stringToFind = text
+  var findModel = FindModel().apply {
+    isFindAll = true
+    setSearchHighlighters(true)
+  }
 
+  fun findOrJump(findModel: FindModel) {
+    originalQuery = findModel.stringToFind
+    query = if (findModel.isRegularExpressions) " " else
+      findModel.stringToFind.toLowerCase()
+
+    this.findModel = findModel
     maybeJump()
   }
 
@@ -83,7 +89,7 @@ object Finder {
     populateNgrams()
 
     if (!findModel.isRegularExpressions || sitesToCheck.isEmpty()) {
-      sitesToCheck = getSitesInView(editorText)
+      sitesToCheck = editorText.findInRange(findModel)
       digraphs = makeMap(editorText, sitesToCheck)
     }
 
@@ -118,44 +124,20 @@ object Finder {
     })
 
   /**
-   * Returns a list of indices where the given query string ends, within the
-   * current editor screen. These are full indices, ie. are not offset to the
-   * first line of the editor window.
+   * Returns a list of indices where the query begins, within the given range.
+   * These are full indices, ie. are not offset to the beginning of the range.
    */
 
-  private fun getSitesInView(fullText: String): List<Int> {
-    val (viewTop, viewBottom) = editor.getVisibleRange()
-
-    fun FindResult.getNextSite(oldResults: Iterator<Int>): Int {
-      while (oldResults.hasNext()) {
-        val startingFrom = oldResults.next()
-        if (startingFrom >= endOffset)
-          return startingFrom
-      }
-
-      return endOffset
-    }
-
-    // Returns a list of indices where the query matches the index position.
-    fun getResultIndices(): MutableList<Int> {
-      val indicesToCheck = mutableListOf<Int>()
-      val oldResults = sitesToCheck.iterator()
+  fun String.findInRange(findModel: FindModel,
+                         range: Pair<Int, Int> = editor.getView()): List<Int> =
+    findManager.findString(this, range.first, findModel).run {
+      if (!isStringFound || startOffset > range.second) listOf<Int>()
+      else (if (editor.foldingModel.isOffsetCollapsed(startOffset)) emptyList()
       // If sitesToCheck is populated, we can filter it instead of redoing work
-      var nextSite = if (oldResults.hasNext()) oldResults.next() else viewTop
-
-      while (true) findManager.findString(fullText, nextSite, findModel).run {
-        if (!isStringFound || startOffset > viewBottom)
-          return indicesToCheck
-
-        if (!editor.foldingModel.isOffsetCollapsed(startOffset))
-          indicesToCheck.add(startOffset)
-
-        nextSite = getNextSite(oldResults)
-      }
+      else listOf(startOffset))
+        .plus(findInRange(findModel, range.copy(
+          first = sitesToCheck.firstOrNull { it >= endOffset } ?: endOffset)))
     }
-
-    return getResultIndices()
-  }
 
   /**
    * Builds a map of all existing bigrams, starting from the index of the last
@@ -164,7 +146,7 @@ object Finder {
    * prior to the end of a word (ie. a contiguous group of letters/digits).
    */
 
-  fun makeMap(text: CharSequence, sites: Iterable<Int>) =
+  fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> =
     LinkedListMultimap.create<String, Int>().apply {
       sites.forEach { site ->
         val toCheck = site + query.length
@@ -205,8 +187,7 @@ object Finder {
    */
 
   private fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
-    if (query.isEmpty())
-      return HashBiMap.create()
+    if (query.isEmpty()) return HashBiMap.create()
 
     val newTagMap: BiMap<String, Int> = setupTagMap()
     val tags: HashSet<String> = setupTags(digraphs)
@@ -241,10 +222,12 @@ object Finder {
             newTagMap.keys.none { it[0] == char && it.last() == tag[0] } &&
             // Prevents "...i[JX]...i[IJ]..." ij;
             !(char == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
-        } && (index..right).map {
+        } && ((index + 1)..right).map {
           // Never use a tag which can be partly completed by typing plaintext
-          editorText.substring(index, min(it + 1, editorText.length)) + tag[0]
-        }.none { screenText.contains(it) }
+          editorText.substring(index, min(it, editorText.length)) + tag[0]
+        }.none {
+          editorText.findInRange(FindModel().apply { stringToFind = it }).isNotEmpty()
+        }
       }
 
       val tag = matching.firstOrNull()

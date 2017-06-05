@@ -1,16 +1,16 @@
 package com.johnlindquist.acejump.ui
 
 import com.johnlindquist.acejump.search.Finder
+import com.johnlindquist.acejump.search.Finder.findModel
 import com.johnlindquist.acejump.search.Finder.query
-import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
 import com.johnlindquist.acejump.search.getPointFromIndex
 import com.johnlindquist.acejump.search.isFirstCharacterOfLine
 import com.johnlindquist.acejump.search.wordBounds
 import com.johnlindquist.acejump.ui.AceUI.acejumpHighlightColor
 import com.johnlindquist.acejump.ui.AceUI.boxColor
-import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorHighlightColor
+import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.AceUI.fontHeight
 import com.johnlindquist.acejump.ui.AceUI.fontWidth
 import com.johnlindquist.acejump.ui.AceUI.rectHOffset
@@ -19,14 +19,13 @@ import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
 import java.awt.Color.BLACK
-import java.awt.Color.blue
 import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 
 class JumpInfo(val tag: String, val index: Int) {
-  val isRegex = query.first() == REGEX_PREFIX
+  val isRegex = findModel.isRegularExpressions
   var srcPoint = editor.getPointFromIndex(index)
   var queryLength = query.length
   var trueOffset = query.length - 1

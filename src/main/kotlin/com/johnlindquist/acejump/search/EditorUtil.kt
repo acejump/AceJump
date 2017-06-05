@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.search
 
+import com.intellij.find.FindModel
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.VisualPosition
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -13,11 +14,7 @@ operator fun Point.component1() = x
 operator fun Point.component2() = y
 
 operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
-
-fun Editor.getScreenText(): String {
-  val (viewTop, viewBottom) = getVisibleRange()
-  return document.text.toLowerCase().substring(viewTop, viewBottom)
-}
+operator fun FindModel.invoke(t: FindModel.() -> Unit) = clone().apply(t)
 
 /**
  * Identifies the bounds of a word, defined as a contiguous group of letters
@@ -41,7 +38,7 @@ fun Editor.getPointFromIndex(index: Int) = RelativePoint(contentComponent,
 fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)
 
-fun Editor.getVisibleRange(): Pair<Int, Int> {
+fun Editor.getView(): Pair<Int, Int> {
   val firstVisibleLine = getVisualLineAtTopOfScreen()
   val firstLine = visualLineToLogicalLine(firstVisibleLine)
   val startOffset = getLineStartOffset(firstLine)

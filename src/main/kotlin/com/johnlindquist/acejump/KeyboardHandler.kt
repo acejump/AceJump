@@ -1,8 +1,10 @@
 package com.johnlindquist.acejump
 
+import com.intellij.find.FindModel
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.application.ApplicationManager.getApplication
+import com.intellij.openapi.application.ModalityState.defaultModalityState
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
@@ -17,9 +19,7 @@ import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.Pattern.*
-import com.johnlindquist.acejump.search.Pattern.Companion.REGEX_PREFIX
 import com.johnlindquist.acejump.ui.AceUI.editor
-import com.johnlindquist.acejump.ui.AceUI.findModel
 import com.johnlindquist.acejump.ui.AceUI.restoreEditorSettings
 import com.johnlindquist.acejump.ui.AceUI.setupCursor
 import com.johnlindquist.acejump.ui.Canvas
@@ -48,22 +48,25 @@ object KeyboardHandler {
     VK_BACK_SPACE to { processBackspaceCommand() }
   )
 
-  private fun findString(query: String, key: Char) =
+  private fun findString(string: String) =
     getApplication().invokeLater {
-      Finder.findOrJump(query, key);
+      Finder.findOrJump(FindModel().apply { stringToFind = string });
       updateUIState()
     }
 
-  fun findPattern(pattern: Pattern) {
-    Finder.reset()
-    findModel.isRegularExpressions = true
-    // TODO: Fix this really bad hack.
-    findString(pattern.string, REGEX_PREFIX)
-  }
+  fun findPattern(pattern: Pattern) =
+    getApplication().invokeLater {
+      Finder.reset()
+      Finder.findOrJump(FindModel().apply {
+        stringToFind = pattern.string
+        isRegularExpressions = true
+      })
+      updateUIState()
+    }
 
-  fun activate() = getApplication().invokeAndWait {
+  fun activate() = getApplication().invokeAndWait({
     if (!isEnabled) startListening() else toggleTargetMode()
-  }
+  }, defaultModalityState())
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
@@ -101,18 +104,11 @@ object KeyboardHandler {
       runAsync(stopWatch)
     }
 
-    fun VisibleAreaEvent.isHorizontalScroll(): Boolean {
-      if (oldRectangle == newRectangle)
-        return false
-      else if (oldRectangle.width != newRectangle.width)
-        return false
-      else if (oldRectangle.height != newRectangle.height)
-        return false
-      else if (oldRectangle.y != newRectangle.y)
-        return false
-
-      return true
-    }
+    fun VisibleAreaEvent.isHorizontalScroll() =
+      oldRectangle != newRectangle &&
+        oldRectangle.width == newRectangle.width &&
+        oldRectangle.height == newRectangle.height &&
+        oldRectangle.y == newRectangle.y
 
     override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoQuery()
 
@@ -137,7 +133,7 @@ object KeyboardHandler {
     fun interceptPrintableKeystrokes() =
       editorActionManager.typedAction.setupRawHandler { _, key, _ ->
         text += key
-        findString(text, key)
+        findString(text)
       }
 
     editor.setupCursor()
@@ -193,9 +189,7 @@ object KeyboardHandler {
     reset()
     activate()
     text = tmpText
-    if (text.isNotEmpty()) {
-      findString(text, text.last())
-    }
+    if (text.isNotEmpty()) findString(text)
   }
 
   fun reset() {

@@ -9,8 +9,6 @@ enum class Pattern(val string: String) {
     CODE_INDENTS.string);
 
   companion object {
-    fun contains(regex: String) = values().any { it.string == regex }
-    val REGEX_PREFIX = ' '
     var adjacent = mapOf(
       // Values are QWERTY keys which are physically adjacent to the map key
       'j' to "jikmnhu", 'f' to "ftgvcdr", 'k' to "kolmji", 'd' to "drfcxse",

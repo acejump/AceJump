@@ -1,7 +1,5 @@
 package com.johnlindquist.acejump.ui
 
-import com.intellij.find.FindManager
-import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager.getApplication
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
@@ -14,8 +12,6 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.getDefaultEditor
-import com.johnlindquist.acejump.search.getScreenText
-import com.johnlindquist.acejump.search.getVisibleRange
 import java.awt.Color.*
 import java.awt.Font
 import java.awt.Font.BOLD
@@ -23,8 +19,7 @@ import java.awt.Font.BOLD
 object AceUI {
   var editor: Editor = getDefaultEditor()
     set(value) {
-      editorText = value.document.getText().toLowerCase()
-      screenText = value.getScreenText()
+      editorText = value.document.text.toLowerCase()
       if (value == field)
         return
 
@@ -43,17 +38,8 @@ object AceUI {
 
   val project: Project
     get() = editor.project!!
-  var editorText = editor.document.getText().toLowerCase()
-  var screenText = editor.getScreenText()
+  var editorText = editor.document.text.toLowerCase()
 
-  val findModel by lazy {
-    FindModel().apply {
-      isFindAll = true
-      setSearchHighlighters(true)
-    }
-  }
-
-  val findManager = FindManager.getInstance(project)
   var naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
   var naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
   var naturalColor = getInstance().globalScheme.getColor(CARET_COLOR)!!
