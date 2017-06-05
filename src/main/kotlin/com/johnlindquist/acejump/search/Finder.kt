@@ -66,7 +66,10 @@ object Finder {
     }
 
     // TODO: Clean up this ugliness.
+//    val startTime = System.currentTimeMillis()
     jumpLocations = determineJumpLocations()
+//    val endTime = System.currentTimeMillis()
+//    println("Total execution time for determineJumpLocations(): " + (endTime - startTime) + "ms")
     if (jumpLocations.size <= 1) {
       if (tagMap.containsKey(query)) {
         jumpTo(JumpInfo(query, tagMap[query]!!))
@@ -89,7 +92,10 @@ object Finder {
     populateNgrams()
 
     if (!findModel.isRegularExpressions || sitesToCheck.isEmpty()) {
+//      val startTime = System.currentTimeMillis()
       sitesToCheck = editorText.findInRange(findModel)
+//      val endTime = System.currentTimeMillis()
+//      println("Total execution time for findInRange(): " + (endTime - startTime) + "ms")
       digraphs = makeMap(editorText, sitesToCheck)
     }
 
@@ -128,16 +134,25 @@ object Finder {
    * These are full indices, ie. are not offset to the beginning of the range.
    */
 
-  fun String.findInRange(findModel: FindModel,
-                         range: Pair<Int, Int> = editor.getView()): List<Int> =
-    findManager.findString(this, range.first, findModel).run {
-      if (!isStringFound || startOffset > range.second) listOf<Int>()
-      else (if (editor.foldingModel.isOffsetCollapsed(startOffset)) emptyList()
-      // If sitesToCheck is populated, we can filter it instead of redoing work
-      else listOf(startOffset))
-        .plus(findInRange(findModel, range.copy(
-          first = sitesToCheck.firstOrNull { it >= endOffset } ?: endOffset)))
-    }
+  tailrec fun String.findInRange(findModel: FindModel,
+                                 range: Pair<Int, Int> = editor.getView(),
+                                 acc: List<Int> = emptyList<Int>()): List<Int> {
+    val t = findManager.findString(this, range.first, findModel)
+
+    val outOfBounds = t.startOffset > range.second
+    val isUnavailable = !t.isStringFound
+    if (isUnavailable || outOfBounds) return acc
+
+    val collapseCondition = editor.foldingModel.isOffsetCollapsed(t.startOffset)
+
+    // If sitesToCheck is populated, we can filter it instead of redoing work
+    val nextSite = sitesToCheck.firstOrNull { it >= t.endOffset } ?: t.endOffset
+    val results =
+      if (collapseCondition) acc // Ignore collapsed matches
+      else acc.plus(t.startOffset) // Append positive matches
+
+    return findInRange(findModel, range.copy(first = nextSite), results)
+  }
 
   /**
    * Builds a map of all existing bigrams, starting from the index of the last
@@ -187,6 +202,7 @@ object Finder {
    */
 
   private fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
+//    val startTime = System.currentTimeMillis()
     if (query.isEmpty()) return HashBiMap.create()
 
     val newTagMap: BiMap<String, Int> = setupTagMap()
@@ -259,6 +275,9 @@ object Finder {
         if (tags.isEmpty()) return newTagMap
         tryToAssignTagToIndex(it)
       }
+
+//    val endTime = System.currentTimeMillis()
+//    println("Total execution time for mapDigraphs(): " + (endTime - startTime) + "ms")
 
     return newTagMap
   }
