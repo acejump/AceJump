@@ -34,7 +34,7 @@ object Finder {
   private var unseen1grams: LinkedHashSet<String> = linkedSetOf()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
-  val findManager = FindManager.getInstance(project)!!
+//  val findManager = FindManager.getInstance(project)!!
 
   var findModel = FindModel().apply {
     isFindAll = true
@@ -59,12 +59,17 @@ object Finder {
     return targetModeEnabled
   }
 
-  private fun maybeJump() {
-    fun jumpTo(jumpInfo: JumpInfo) {
-      Jumper.jump(jumpInfo)
-      reset()
-    }
+  fun maybeJumpIfOneTag() {
+    if (tagMap.size == 1)
+      jumpTo(JumpInfo(tagMap.entries.first().key, tagMap.entries.first().value))
+  }
 
+  fun jumpTo(jumpInfo: JumpInfo) {
+    Jumper.jump(jumpInfo)
+    reset()
+  }
+
+  private fun maybeJump() {
     // TODO: Clean up this ugliness.
 //    val startTime = System.currentTimeMillis()
     jumpLocations = determineJumpLocations()
@@ -76,13 +81,15 @@ object Finder {
       } else if (2 <= query.length) {
         val last1 = query.substring(query.length - 1)
         val last2 = query.substring(query.length - 2)
-        if (tagMap.containsKey(last2)) {
-          jumpTo(JumpInfo(last2, tagMap[last2]!!))
-        } else if (tagMap.containsKey(last1)) {
-          val index = tagMap[last1]!!
-          val charIndex = index + query.length - 1
-          if (charIndex > editorText.length || editorText[charIndex] != last1[0])
-            jumpTo(JumpInfo(last1, index))
+        val indexLast1 = tagMap[last1]
+        val indexLast2 = tagMap[last2]
+
+        if (indexLast2 != null) {
+          jumpTo(JumpInfo(last2, indexLast2))
+        } else if (indexLast1 != null) {
+          val charIndex = indexLast1 + query.length - 1
+          if (charIndex >= editorText.length || editorText[charIndex] != last1[0])
+            jumpTo(JumpInfo(last1, indexLast1))
         }
       }
     }
@@ -93,7 +100,7 @@ object Finder {
 
     if (!findModel.isRegularExpressions || sitesToCheck.isEmpty()) {
 //      val startTime = System.currentTimeMillis()
-      sitesToCheck = editorText.findInRange(findModel)
+      sitesToCheck = editorText.findInRange(originalQuery, res = sitesToCheck)
 //      val endTime = System.currentTimeMillis()
 //      println("Total execution time for findInRange(): " + (endTime - startTime) + "ms")
       digraphs = makeMap(editorText, sitesToCheck)
@@ -134,24 +141,25 @@ object Finder {
    * These are full indices, ie. are not offset to the beginning of the range.
    */
 
-  tailrec fun String.findInRange(findModel: FindModel,
+  tailrec fun String.findInRange(key: String,
                                  range: Pair<Int, Int> = editor.getView(),
-                                 acc: List<Int> = emptyList<Int>()): List<Int> {
-    val t = findManager.findString(this, range.first, findModel)
+                                 acc: List<Int> = emptyList<Int>(),
+                                 res: List<Int> = emptyList<Int>()): List<Int> {
+    val t = Regex(key).find(this, range.first) ?: return acc
 
-    val outOfBounds = t.startOffset > range.second
-    val isUnavailable = !t.isStringFound
-    if (isUnavailable || outOfBounds) return acc
+    val outOfBounds = t.range.first > range.second
+    if (outOfBounds) return acc
 
-    val collapseCondition = editor.foldingModel.isOffsetCollapsed(t.startOffset)
+    val collapseCondition = editor.foldingModel.isOffsetCollapsed(t.range.first)
 
     // If sitesToCheck is populated, we can filter it instead of redoing work
-    val nextSite = sitesToCheck.firstOrNull { it >= t.endOffset } ?: t.endOffset
+    val toCheck = res.partition { it >= t.range.endInclusive + 1 }.first
+    val idx1 = toCheck.firstOrNull() ?: t.range.endInclusive + 1
     val results =
       if (collapseCondition) acc // Ignore collapsed matches
-      else acc.plus(t.startOffset) // Append positive matches
+      else acc.plus(t.range.start) // Append positive matches
 
-    return findInRange(findModel, range.copy(first = nextSite), results)
+    return findInRange(key, range.copy(first = idx1), results, toCheck)
   }
 
   /**
@@ -202,7 +210,7 @@ object Finder {
    */
 
   private fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
-//    val startTime = System.currentTimeMillis()
+    val startTime = System.currentTimeMillis()
     if (query.isEmpty()) return HashBiMap.create()
 
     val newTagMap: BiMap<String, Int> = setupTagMap()
@@ -242,7 +250,8 @@ object Finder {
           // Never use a tag which can be partly completed by typing plaintext
           editorText.substring(index, min(it, editorText.length)) + tag[0]
         }.none {
-          editorText.findInRange(FindModel().apply { stringToFind = it }).isNotEmpty()
+          //          editorText.findInRange(it).isNotEmpty()
+          editorText.contains(it)
         }
       }
 
@@ -276,8 +285,8 @@ object Finder {
         tryToAssignTagToIndex(it)
       }
 
-//    val endTime = System.currentTimeMillis()
-//    println("Total execution time for mapDigraphs(): " + (endTime - startTime) + "ms")
+    val endTime = System.currentTimeMillis()
+    println("Total execution time for mapDigraphs(): " + (endTime - startTime) + "ms")
 
     return newTagMap
   }
