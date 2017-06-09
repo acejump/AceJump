@@ -4,13 +4,11 @@ import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
-import com.intellij.find.FindManager
 import com.intellij.find.FindModel
 import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
 import com.johnlindquist.acejump.search.Pattern.Companion.nearby
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorText
-import com.johnlindquist.acejump.ui.AceUI.project
 import com.johnlindquist.acejump.ui.JumpInfo
 import java.lang.Math.max
 import java.lang.Math.min
@@ -31,7 +29,6 @@ object Finder {
     private set
   private var sitesToCheck = listOf<Int>()
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
-  private var unseen1grams: LinkedHashSet<String> = linkedSetOf()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
 //  val findManager = FindManager.getInstance(project)!!
@@ -71,10 +68,7 @@ object Finder {
 
   private fun maybeJump() {
     // TODO: Clean up this ugliness.
-//    val startTime = System.currentTimeMillis()
     jumpLocations = determineJumpLocations()
-//    val endTime = System.currentTimeMillis()
-//    println("Total execution time for determineJumpLocations(): " + (endTime - startTime) + "ms")
     if (jumpLocations.size <= 1) {
       if (tagMap.containsKey(query)) {
         jumpTo(JumpInfo(query, tagMap[query]!!))
@@ -83,7 +77,6 @@ object Finder {
         val last2 = query.substring(query.length - 2)
         val indexLast1 = tagMap[last1]
         val indexLast2 = tagMap[last2]
-
         if (indexLast2 != null) {
           jumpTo(JumpInfo(last2, indexLast2))
         } else if (indexLast1 != null) {
@@ -99,10 +92,7 @@ object Finder {
     populateNgrams()
 
     if (!findModel.isRegularExpressions || sitesToCheck.isEmpty()) {
-//      val startTime = System.currentTimeMillis()
-      sitesToCheck = editorText.findInRange(originalQuery, res = sitesToCheck)
-//      val endTime = System.currentTimeMillis()
-//      println("Total execution time for findInRange(): " + (endTime - startTime) + "ms")
+      sitesToCheck = editorText.findInRange(originalQuery)
       digraphs = makeMap(editorText, sitesToCheck)
     }
 
@@ -113,7 +103,6 @@ object Finder {
 
   fun populateNgrams() =
     with('a'..'z') {
-      unseen1grams.addAll(mapTo(linkedSetOf(), { "$it" }))
       flatMapTo(unseen2grams, { e -> map { c -> "$e$c" } })
     }
 
@@ -143,23 +132,22 @@ object Finder {
 
   tailrec fun String.findInRange(key: String,
                                  range: Pair<Int, Int> = editor.getView(),
-                                 acc: List<Int> = emptyList<Int>(),
-                                 res: List<Int> = emptyList<Int>()): List<Int> {
-    val t = Regex(key).find(this, range.first) ?: return acc
+                                 accumulator: List<Int> = emptyList<Int>(),
+                                 cache: List<Int> = sitesToCheck): List<Int> {
+    val t = Regex(key).find(this, range.first) ?: return accumulator
 
     val outOfBounds = t.range.first > range.second
-    if (outOfBounds) return acc
+    if (outOfBounds) return accumulator
 
     val collapseCondition = editor.foldingModel.isOffsetCollapsed(t.range.first)
+    val results = if (collapseCondition) accumulator // Ignore collapsed matches
+    else accumulator.plus(t.range.start) // Append positive matches
 
     // If sitesToCheck is populated, we can filter it instead of redoing work
-    val toCheck = res.partition { it >= t.range.endInclusive + 1 }.first
-    val idx1 = toCheck.firstOrNull() ?: t.range.endInclusive + 1
-    val results =
-      if (collapseCondition) acc // Ignore collapsed matches
-      else acc.plus(t.range.start) // Append positive matches
-
-    return findInRange(key, range.copy(first = idx1), results, toCheck)
+    val endResultIndex = t.range.endInclusive + 1
+    val rest = cache.dropWhile { it <= endResultIndex }
+    val nextSearchIndex = if (rest.isEmpty()) endResultIndex else rest.first()
+    return findInRange(key, range.copy(first = nextSearchIndex), results, rest)
   }
 
   /**
@@ -184,7 +172,6 @@ object Finder {
         put("$c1$c2", site)
 
         while (c1.isLetterOrDigit()) {
-          unseen1grams.remove("$c1")
           unseen2grams.remove("$c0$c1")
           unseen2grams.remove("$c1$c2")
           p0++; p1++; p2++
@@ -250,8 +237,7 @@ object Finder {
           // Never use a tag which can be partly completed by typing plaintext
           editorText.substring(index, min(it, editorText.length)) + tag[0]
         }.none {
-          //          editorText.findInRange(it).isNotEmpty()
-          editorText.contains(it)
+          editorText.findInRange(it).isNotEmpty()
         }
       }
 
@@ -333,7 +319,6 @@ object Finder {
     tagMap.clear()
     query = ""
     originalQuery = ""
-    unseen1grams.clear()
     unseen2grams.clear()
     jumpLocations = emptyList()
   }
