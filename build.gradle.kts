@@ -14,11 +14,7 @@ buildscript {
 
 plugins {
   id("org.jetbrains.intellij") version "0.2.11"
-}
-
-apply {
-  plugin("org.jetbrains.intellij")
-  plugin("kotlin")
+  id("org.jetbrains.kotlin.jvm") version "1.1.2"
 }
 
 configure<IntelliJPluginExtension> {
@@ -27,4 +23,4 @@ configure<IntelliJPluginExtension> {
 }
 
 group = "com.johnlindquist"
-version = "3.2.4"
+version = "3.2.5"

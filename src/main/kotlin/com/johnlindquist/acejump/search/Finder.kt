@@ -92,7 +92,7 @@ object Finder {
     populateNgrams()
 
     if (!findModel.isRegularExpressions || sitesToCheck.isEmpty()) {
-      sitesToCheck = editorText.findInRange(originalQuery)
+      sitesToCheck = editorText.findInRange(originalQuery).toList()
       digraphs = makeMap(editorText, sitesToCheck)
     }
 
@@ -197,7 +197,6 @@ object Finder {
    */
 
   private fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
-    val startTime = System.currentTimeMillis()
     if (query.isEmpty()) return HashBiMap.create()
 
     val newTagMap: BiMap<String, Int> = setupTagMap()
@@ -236,9 +235,7 @@ object Finder {
         } && ((index + 1)..right).map {
           // Never use a tag which can be partly completed by typing plaintext
           editorText.substring(index, min(it, editorText.length)) + tag[0]
-        }.none {
-          editorText.findInRange(it).isNotEmpty()
-        }
+        }.none { editorText.contains(it) }
       }
 
       val tag = matching.firstOrNull()
@@ -270,9 +267,6 @@ object Finder {
         if (tags.isEmpty()) return newTagMap
         tryToAssignTagToIndex(it)
       }
-
-    val endTime = System.currentTimeMillis()
-    println("Total execution time for mapDigraphs(): " + (endTime - startTime) + "ms")
 
     return newTagMap
   }
