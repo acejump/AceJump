@@ -8,7 +8,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>AceJump 3 now supports older IntelliJ Platform and Kotlin versions.</change-notes>
+  <change-notes>Fixes an error affecting older versions of the IntelliJ Platform.</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 
