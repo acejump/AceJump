@@ -129,18 +129,19 @@ object Finder {
   fun String.findInEditor(key: String,
                           range: IntRange = editor.getView(),
                           cache: Sequence<Int> = sitesToCheck): Sequence<Int> {
-    val results = find(key, range, cache.isEmpty())
-    if (cache.isEmpty() || results.isEmpty())
-      return results.map { it.range.first }
+    val results = clipToRange(range).find(key, cache.isEmpty())
 
-    val result = results.first().range
+    if (cache.isEmpty() || results.isEmpty())
+      return results.map { it.range.first + range.first }
+
+    val startOfResult = results.first().range.first + range.first
+    val endOfResult = results.first().range.endInclusive + 1
 
     val next = Sequence {
-      val resultEndIndex = result.endInclusive + 1
       // If the cache is populated let's reuse it instead of doing extra work
-      val rest = cache.dropWhile { it <= resultEndIndex }
+      val rest = cache.dropWhile { it <= endOfResult }
       val nextSearchIndex =
-        if (rest.isEmpty() || rest.first() > range.endInclusive) resultEndIndex
+        if (rest.isEmpty() || rest.first() > range.endInclusive) endOfResult
         else rest.first()
 
       // To fetch the rest of the sequence, recurse over the remaining range
@@ -148,20 +149,20 @@ object Finder {
     }
 
     // Do not accept any sites which fall between folded regions in the gutter
-    val isVisible = !editor.foldingModel.isOffsetCollapsed(result.first)
+    val isVisible = !editor.foldingModel.isOffsetCollapsed(startOfResult)
 
     // Lazily concatenate further results to avoid fetching more than we need
-    return if (isVisible) sequenceOf(result.start) + next else next
+    return if (isVisible) sequenceOf(startOfResult) + next else next
   }
 
-  fun String.find(key: String, range: IntRange, all: Boolean): Sequence<MatchResult> {
+  fun String.clipToRange(range: IntRange): CharSequence =
+    if (length <= range.endInclusive) this
     // Be very careful to avoid substring copying here for performance reasons
-    val t: CharSequence = if (length <= range.endInclusive) this
-    else CharBuffer.wrap(this).subSequence(0, range.endInclusive)
+    else CharBuffer.wrap(this).subSequence(range.first, range.endInclusive + 1)
 
-    return if (all) Regex(key).findAll(t, range.first)
-    else generateSequence { Regex(key).find(t, range.first) }
-  }
+  fun CharSequence.find(key: String, all: Boolean): Sequence<MatchResult> =
+    if (all) Regex(key).findAll(this)
+    else generateSequence { Regex(key).find(this) }
 
   /**
    * Builds a map of all existing bigrams, starting from the index of the last
