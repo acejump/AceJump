@@ -16,6 +16,8 @@ operator fun Point.component2() = y
 operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 operator fun FindModel.invoke(t: FindModel.() -> Unit) = clone().apply(t)
 
+fun <T> Sequence<T>.isEmpty() = !iterator().hasNext()
+
 /**
  * Identifies the bounds of a word, defined as a contiguous group of letters
  * and digits, by expanding the provided index until a non-matching character
@@ -38,7 +40,7 @@ fun Editor.getPointFromIndex(index: Int) = RelativePoint(contentComponent,
 fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)
 
-fun Editor.getView(): Pair<Int, Int> {
+fun Editor.getView(): IntRange {
   val firstVisibleLine = getVisualLineAtTopOfScreen()
   val firstLine = visualLineToLogicalLine(firstVisibleLine)
   val startOffset = getLineStartOffset(firstLine)
@@ -49,7 +51,13 @@ fun Editor.getView(): Pair<Int, Int> {
   endOffset = normalizeOffset(lastLine, endOffset, true)
   endOffset = min(max(0, document.textLength - 1), endOffset + 1)
 
-  return Pair(startOffset, endOffset)
+  return startOffset..endOffset
+}
+
+fun Editor.selectFromToOffset(fromOffset: Int, toOffset: Int) {
+  selectionModel.removeSelection()
+  selectionModel.setSelection(fromOffset, toOffset)
+  caretModel.moveToOffset(toOffset)
 }
 
 /*

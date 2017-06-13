@@ -46,7 +46,7 @@ object KeyboardHandler {
     VK_UP to { findPattern(CODE_INDENTS) },
     VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { processBackspaceCommand() },
-    VK_ENTER to { Finder.maybeJumpIfOneTag() }
+    VK_ENTER to { Finder.maybeJumpIfJustOneTagRemains() }
   )
 
   private fun findString(string: String) =

@@ -12,7 +12,9 @@ import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.JumpInfo
 import java.lang.Math.max
 import java.lang.Math.min
+import java.nio.CharBuffer
 import java.util.*
+import kotlin.collections.LinkedHashSet
 
 /**
  * Singleton that searches for text in the editor and tags matching results.
@@ -27,11 +29,10 @@ object Finder {
   var originalQuery = ""
   var query = ""
     private set
-  private var sitesToCheck = listOf<Int>()
+  private var sitesToCheck = sequenceOf<Int>()
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
-//  val findManager = FindManager.getInstance(project)!!
 
   var findModel = FindModel().apply {
     isFindAll = true
@@ -39,9 +40,12 @@ object Finder {
   }
 
   fun findOrJump(findModel: FindModel) {
-    originalQuery = findModel.stringToFind
-    query = if (findModel.isRegularExpressions) " " else
-      findModel.stringToFind.toLowerCase()
+    originalQuery =
+      if (findModel.isRegularExpressions) Regex.escape(findModel.stringToFind)
+      else findModel.stringToFind
+    query =
+      if (findModel.isRegularExpressions) " "
+      else findModel.stringToFind.toLowerCase()
 
     this.findModel = findModel
     maybeJump()
@@ -56,55 +60,46 @@ object Finder {
     return targetModeEnabled
   }
 
-  fun maybeJumpIfOneTag() {
-    if (tagMap.size == 1)
-      jumpTo(JumpInfo(tagMap.entries.first().key, tagMap.entries.first().value))
-  }
+  fun maybeJumpIfJustOneTagRemains() =
+    tagMap.entries.firstOrNull()?.run { jumpTo(JumpInfo(key, value)) }
 
-  fun jumpTo(jumpInfo: JumpInfo) {
-    Jumper.jump(jumpInfo)
-    reset()
-  }
+  fun jumpTo(jumpInfo: JumpInfo) = Jumper.jump(jumpInfo)
 
   private fun maybeJump() {
-    // TODO: Clean up this ugliness.
     jumpLocations = determineJumpLocations()
-    if (jumpLocations.size <= 1) {
-      if (tagMap.containsKey(query)) {
-        jumpTo(JumpInfo(query, tagMap[query]!!))
-      } else if (2 <= query.length) {
-        val last1 = query.substring(query.length - 1)
-        val last2 = query.substring(query.length - 2)
-        val indexLast1 = tagMap[last1]
-        val indexLast2 = tagMap[last2]
-        if (indexLast2 != null) {
-          jumpTo(JumpInfo(last2, indexLast2))
-        } else if (indexLast1 != null) {
-          val charIndex = indexLast1 + query.length - 1
-          if (charIndex >= editorText.length || editorText[charIndex] != last1[0])
-            jumpTo(JumpInfo(last1, indexLast1))
-        }
+
+    // TODO: Clean up this ugliness.
+    if (jumpLocations.size > 1) return
+    if (tagMap.containsKey(query))
+      return jumpTo(JumpInfo(query, tagMap[query]!!))
+    if (2 <= query.length) {
+      val last1 = query.substring(query.length - 1)
+      val last2 = query.substring(query.length - 2)
+      val indexLast1 = tagMap[last1]
+      val indexLast2 = tagMap[last2]
+      if (indexLast2 != null) {
+        jumpTo(JumpInfo(last2, indexLast2))
+      } else if (indexLast1 != null) {
+        val charIndex = indexLast1 + query.length - 1
+        if (charIndex >= editorText.length || editorText[charIndex] != last1[0])
+          jumpTo(JumpInfo(last1, indexLast1))
       }
     }
   }
 
   private fun determineJumpLocations(): Collection<JumpInfo> {
-    populateNgrams()
+    fun allBigrams() = with('a'..'z') { flatMap { e -> map { c -> "$e$c" } } }
+    unseen2grams = LinkedHashSet(allBigrams())
 
     if (!findModel.isRegularExpressions || sitesToCheck.isEmpty()) {
-      sitesToCheck = editorText.findInRange(originalQuery).toList()
-      digraphs = makeMap(editorText, sitesToCheck)
+      sitesToCheck = editorText.findInEditor(originalQuery)
+      digraphs = makeMap(editorText, sitesToCheck.toList())
     }
 
     return compact(mapDigraphs(digraphs)).apply { tagMap = this }.run {
       values.map { JumpInfo(inverse()[it]!!, it) }.sortedBy { it.index }
     }
   }
-
-  fun populateNgrams() =
-    with('a'..'z') {
-      flatMapTo(unseen2grams, { e -> map { c -> "$e$c" } })
-    }
 
   /**
    * Shortens assigned tags. Effectively, this will only shorten two-character
@@ -128,26 +123,44 @@ object Finder {
   /**
    * Returns a list of indices where the query begins, within the given range.
    * These are full indices, ie. are not offset to the beginning of the range.
+   * The algorithm is designed to defer evaluation until absolutely necessary.
    */
 
-  tailrec fun String.findInRange(key: String,
-                                 range: Pair<Int, Int> = editor.getView(),
-                                 accumulator: List<Int> = emptyList<Int>(),
-                                 cache: List<Int> = sitesToCheck): List<Int> {
-    val t = Regex(key).find(this, range.first) ?: return accumulator
+  fun String.findInEditor(key: String,
+                          range: IntRange = editor.getView(),
+                          cache: Sequence<Int> = sitesToCheck): Sequence<Int> {
+    val results = find(key, range, cache.isEmpty())
+    if (cache.isEmpty() || results.isEmpty())
+      return results.map { it.range.first }
 
-    val outOfBounds = t.range.first > range.second
-    if (outOfBounds) return accumulator
+    val result = results.first().range
 
-    val collapseCondition = editor.foldingModel.isOffsetCollapsed(t.range.first)
-    val results = if (collapseCondition) accumulator // Ignore collapsed matches
-    else accumulator.plus(t.range.start) // Append positive matches
+    val next = Sequence {
+      val resultEndIndex = result.endInclusive + 1
+      // If the cache is populated let's reuse it instead of doing extra work
+      val rest = cache.dropWhile { it <= resultEndIndex }
+      val nextSearchIndex =
+        if (rest.isEmpty() || rest.first() > range.endInclusive) resultEndIndex
+        else rest.first()
 
-    // If sitesToCheck is populated, we can filter it instead of redoing work
-    val endResultIndex = t.range.endInclusive + 1
-    val rest = cache.dropWhile { it <= endResultIndex }
-    val nextSearchIndex = if (rest.isEmpty()) endResultIndex else rest.first()
-    return findInRange(key, range.copy(first = nextSearchIndex), results, rest)
+      // To fetch the rest of the sequence, recurse over the remaining range
+      findInEditor(key, nextSearchIndex..range.endInclusive, rest).iterator()
+    }
+
+    // Do not accept any sites which fall between folded regions in the gutter
+    val isVisible = !editor.foldingModel.isOffsetCollapsed(result.first)
+
+    // Lazily concatenate further results to avoid fetching more than we need
+    return if (isVisible) sequenceOf(result.start) + next else next
+  }
+
+  fun String.find(key: String, range: IntRange, all: Boolean): Sequence<MatchResult> {
+    // Be very careful to avoid substring copying here for performance reasons
+    val t: CharSequence = if (length <= range.endInclusive) this
+    else CharBuffer.wrap(this).subSequence(0, range.endInclusive)
+
+    return if (all) Regex(key).findAll(t, range.first)
+    else generateSequence { Regex(key).find(t, range.first) }
   }
 
   /**
@@ -235,7 +248,10 @@ object Finder {
         } && ((index + 1)..right).map {
           // Never use a tag which can be partly completed by typing plaintext
           editorText.substring(index, min(it, editorText.length)) + tag[0]
-        }.none { editorText.contains(it) }
+        }.none {
+          //          editorText.substring(editor.getView()).contains(it)
+          !editorText.findInEditor(it).isEmpty()
+        }
       }
 
       val tag = matching.firstOrNull()
@@ -308,7 +324,7 @@ object Finder {
     findModel.isRegularExpressions = false
     findModel.stringToFind = ""
     targetModeEnabled = false
-    sitesToCheck = listOf<Int>()
+    sitesToCheck = emptySequence()
     digraphs.clear()
     tagMap.clear()
     query = ""

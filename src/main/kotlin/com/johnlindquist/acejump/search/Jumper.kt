@@ -65,10 +65,4 @@ object Jumper {
 
     selectFromToOffset(startOfWordOffset, endOfWordOffset)
   }
-
-  fun Editor.selectFromToOffset(fromOffset: Int, toOffset: Int) {
-    selectionModel.removeSelection()
-    selectionModel.setSelection(fromOffset, toOffset)
-    caretModel.moveToOffset(toOffset)
-  }
 }
