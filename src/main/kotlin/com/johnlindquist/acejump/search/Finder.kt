@@ -29,7 +29,7 @@ object Finder {
   var originalQuery = ""
   var query = ""
     private set
-  private var sitesToCheck = sequenceOf<Int>()
+  private var sitesToCheck = intArrayOf()
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
@@ -41,8 +41,8 @@ object Finder {
 
   fun findOrJump(findModel: FindModel) {
     originalQuery =
-      if (findModel.isRegularExpressions) Regex.escape(findModel.stringToFind)
-      else findModel.stringToFind
+      if (findModel.isRegularExpressions) findModel.stringToFind
+      else Regex.escape(findModel.stringToFind)
     query =
       if (findModel.isRegularExpressions) " "
       else findModel.stringToFind.toLowerCase()
@@ -92,7 +92,7 @@ object Finder {
     unseen2grams = LinkedHashSet(allBigrams())
 
     if (!findModel.isRegularExpressions || sitesToCheck.isEmpty()) {
-      sitesToCheck = editorText.findInEditor(originalQuery)
+      sitesToCheck = editorText.findInEditor()
       digraphs = makeMap(editorText, sitesToCheck.toList())
     }
 
@@ -126,43 +126,25 @@ object Finder {
    * The algorithm is designed to defer evaluation until absolutely necessary.
    */
 
-  fun String.findInEditor(key: String,
+  fun String.findInEditor(key: String = query,
                           range: IntRange = editor.getView(),
-                          cache: Sequence<Int> = sitesToCheck): Sequence<Int> {
-    val results = clipToRange(range).find(key, cache.isEmpty())
+                          cache: IntArray = sitesToCheck): IntArray =
+    // If the cache is populated, filter it instead of redoing extra work
+    if (!cache.isEmpty())
+      cache.filter { regionMatches(it, key, 0, key.length) }.toIntArray()
+    else
+      clipToRange(range).find(originalQuery).map { it.range.first }.filterFoldedRegions()
 
-    if (cache.isEmpty() || results.isEmpty())
-      return results.map { it.range.first + range.first }
-
-    val startOfResult = results.first().range.first + range.first
-    val endOfResult = results.first().range.endInclusive + 1
-
-    val next = Sequence {
-      // If the cache is populated let's reuse it instead of doing extra work
-      val rest = cache.dropWhile { it <= endOfResult }
-      val nextSearchIndex =
-        if (rest.isEmpty() || rest.first() > range.endInclusive) endOfResult
-        else rest.first()
-
-      // To fetch the rest of the sequence, recurse over the remaining range
-      findInEditor(key, nextSearchIndex..range.endInclusive, rest).iterator()
-    }
-
-    // Do not accept any sites which fall between folded regions in the gutter
-    val isVisible = !editor.foldingModel.isOffsetCollapsed(startOfResult)
-
-    // Lazily concatenate further results to avoid fetching more than we need
-    return if (isVisible) sequenceOf(startOfResult) + next else next
-  }
+  fun CharSequence.find(key: String) = Regex(key).findAll(this)
 
   fun String.clipToRange(range: IntRange): CharSequence =
     if (length <= range.endInclusive) this
     // Be very careful to avoid substring copying here for performance reasons
-    else CharBuffer.wrap(this).subSequence(range.first, range.endInclusive + 1)
+    else CharBuffer.wrap(this).subSequence(0, range.endInclusive + 1)
 
-  fun CharSequence.find(key: String, all: Boolean): Sequence<MatchResult> =
-    if (all) Regex(key).findAll(this)
-    else generateSequence { Regex(key).find(this) }
+  // Do not accept any sites which fall between folded regions in the gutter
+  fun Sequence<Int>.filterFoldedRegions() =
+    filter { !editor.foldingModel.isOffsetCollapsed(it) }.toList().toIntArray()
 
   /**
    * Builds a map of all existing bigrams, starting from the index of the last
@@ -250,7 +232,7 @@ object Finder {
           // Never use a tag which can be partly completed by typing plaintext
           editorText.substring(index, min(it, editorText.length)) + tag[0]
         }.none {
-          //          editorText.substring(editor.getView()).contains(it)
+//          editorText.substring(editor.getView()).contains(it)
           !editorText.findInEditor(it).isEmpty()
         }
       }
@@ -325,7 +307,7 @@ object Finder {
     findModel.isRegularExpressions = false
     findModel.stringToFind = ""
     targetModeEnabled = false
-    sitesToCheck = emptySequence()
+    sitesToCheck = intArrayOf()
     digraphs.clear()
     tagMap.clear()
     query = ""
