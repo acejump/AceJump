@@ -26,7 +26,8 @@ object Finder {
   var jumpLocations: Collection<JumpInfo> = emptyList()
     private set
 
-  var originalQuery = ""
+  var isRegex = false
+  var regex = ""
   var query = ""
     private set
   private var sitesToCheck = intArrayOf()
@@ -34,22 +35,13 @@ object Finder {
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
 
-  var findModel = FindModel().apply {
-    isFindAll = true
-    setSearchHighlighters(true)
-  }
-
-  fun findOrJump(findModel: FindModel) {
-    originalQuery =
-      if (findModel.isRegularExpressions) findModel.stringToFind
-      else Regex.escape(findModel.stringToFind)
-    query =
-      if (findModel.isRegularExpressions) " "
-      else findModel.stringToFind.toLowerCase()
-
-    this.findModel = findModel
-    maybeJump()
-  }
+  fun findOrJump(findModel: FindModel) =
+    findModel.run {
+      isRegex = isRegularExpressions
+      regex = if (isRegex) stringToFind else Regex.escape(stringToFind)
+      query = if (isRegex) " " else stringToFind.toLowerCase()
+      maybeJump()
+    }
 
   fun toggleTargetMode(status: Boolean? = null): Boolean {
     if (status != null) {
@@ -91,7 +83,7 @@ object Finder {
     fun allBigrams() = with('a'..'z') { flatMap { e -> map { c -> "$e$c" } } }
     unseen2grams = LinkedHashSet(allBigrams())
 
-    if (!findModel.isRegularExpressions || sitesToCheck.isEmpty()) {
+    if (!isRegex || sitesToCheck.isEmpty()) {
       sitesToCheck = editorText.findInEditor()
       digraphs = makeMap(editorText, sitesToCheck.toList())
     }
@@ -133,11 +125,11 @@ object Finder {
     if (!cache.isEmpty())
       cache.filter { regionMatches(it, key, 0, key.length) }.toIntArray()
     else
-      clipToRange(range).find(originalQuery).map { it.range.first }.filterFoldedRegions()
+      clip(range).find(regex).map { it.range.first }.filterFoldedRegions()
 
   fun CharSequence.find(key: String) = Regex(key).findAll(this)
 
-  fun String.clipToRange(range: IntRange): CharSequence =
+  fun String.clip(range: IntRange): CharSequence =
     if (length <= range.endInclusive) this
     // Be very careful to avoid substring copying here for performance reasons
     else CharBuffer.wrap(this).subSequence(0, range.endInclusive + 1)
@@ -232,7 +224,7 @@ object Finder {
           // Never use a tag which can be partly completed by typing plaintext
           editorText.substring(index, min(it, editorText.length)) + tag[0]
         }.none {
-//          editorText.substring(editor.getView()).contains(it)
+          //          editorText.substring(editor.getView()).contains(it)
           !editorText.findInEditor(it).isEmpty()
         }
       }
@@ -241,6 +233,7 @@ object Finder {
 
       if (tag == null)
         editorText[left, right].let {
+          // TODO: Write this to this IDE log instead
           println("\"$it\" rejected: " + nonMatching.joinToString(","))
           println("No remaining tags could be assigned to word: \"$it\"")
         }
@@ -261,7 +254,7 @@ object Finder {
       }
     }
 
-    if (!findModel.isRegularExpressions || newTagMap.isEmpty())
+    if (!isRegex || newTagMap.isEmpty())
       sortValidJumpTargets(digraphs).forEach {
         if (tags.isEmpty()) return newTagMap
         tryToAssignTagToIndex(it)
@@ -304,14 +297,13 @@ object Finder {
     )).mapTo(linkedSetOf<String>(), { it })
 
   fun reset() {
-    findModel.isRegularExpressions = false
-    findModel.stringToFind = ""
+    isRegex = false
     targetModeEnabled = false
     sitesToCheck = intArrayOf()
     digraphs.clear()
     tagMap.clear()
     query = ""
-    originalQuery = ""
+    regex = ""
     unseen2grams.clear()
     jumpLocations = emptyList()
   }

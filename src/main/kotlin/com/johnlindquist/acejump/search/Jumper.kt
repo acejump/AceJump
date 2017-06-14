@@ -7,7 +7,7 @@ import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.util.TextRange
-import com.johnlindquist.acejump.search.Finder.originalQuery
+import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.AceUI.project
@@ -21,7 +21,7 @@ object Jumper {
   var hasJumped = false
 
   fun jump(jumpInfo: JumpInfo) = editor.run {
-    if (originalQuery.last().isUpperCase())
+    if (query.last().isUpperCase())
       selectFromToOffset(caretModel.offset, jumpInfo.index)
     else if (Finder.targetModeEnabled) {
       // Moving the caret will trigger a reset, flipping targetModeEnabled, so

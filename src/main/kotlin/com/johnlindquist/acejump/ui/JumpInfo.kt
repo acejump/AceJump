@@ -1,7 +1,7 @@
 package com.johnlindquist.acejump.ui
 
 import com.johnlindquist.acejump.search.Finder
-import com.johnlindquist.acejump.search.Finder.findModel
+import com.johnlindquist.acejump.search.Finder.isRegex
 import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.search.getPointFromIndex
 import com.johnlindquist.acejump.search.isFirstCharacterOfLine
@@ -25,7 +25,6 @@ import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 
 class JumpInfo(val tag: String, val index: Int) {
-  val isRegex = findModel.isRegularExpressions
   var srcPoint = editor.getPointFromIndex(index)
   var queryLength = query.length
   var trueOffset = query.length - 1

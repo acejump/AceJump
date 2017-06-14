@@ -1,8 +1,7 @@
 package com.johnlindquist.acejump.ui
 
 import com.intellij.openapi.application.ApplicationManager.getApplication
-import com.intellij.openapi.application.ModalityState
-import com.intellij.openapi.application.ModalityState.*
+import com.intellij.openapi.application.ModalityState.defaultModalityState
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColorsManager.getInstance
