@@ -125,6 +125,7 @@ object Finder {
     if (!cache.isEmpty())
       cache.filter { regionMatches(it, key, 0, key.length) }.toIntArray()
     else
+      // TODO: Maybe cached sitesToCheck do not contain all matches?
       clip(range).find(regex).map { it.range.first }.filterFoldedRegions()
 
   fun CharSequence.find(key: String) = Regex(key).findAll(this)
