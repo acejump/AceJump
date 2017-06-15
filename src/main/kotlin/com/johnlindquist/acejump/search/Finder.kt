@@ -28,6 +28,7 @@ object Finder {
     private set
 
   var isRegex = false
+  var origQ = ""
   var regex = ""
   var query = ""
     private set
@@ -39,6 +40,7 @@ object Finder {
   fun findOrJump(findModel: FindModel) =
     findModel.run {
       isRegex = isRegularExpressions
+      origQ = findModel.stringToFind
       regex = if (isRegex) findModel.compileRegExp().pattern() else
         Regex.escape(stringToFind.toLowerCase())
       query = if (isRegex) " " else stringToFind.toLowerCase()
@@ -120,7 +122,7 @@ object Finder {
    * The algorithm is designed to defer evaluation until absolutely necessary.
    */
 
-  fun String.findInEditor(key: String = query,
+  fun String.findInEditor(key: String = query.toLowerCase(),
                           range: IntRange = editor.getView(),
                           cache: IntArray = sitesToCheck): IntArray =
     // If the cache is populated, filter it instead of redoing extra work
@@ -303,6 +305,7 @@ object Finder {
     sitesToCheck = intArrayOf()
     digraphs.clear()
     tagMap.clear()
+    origQ = ""
     query = ""
     regex = ""
     unseen2grams.clear()
