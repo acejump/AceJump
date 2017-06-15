@@ -15,6 +15,7 @@ import java.lang.Math.min
 import java.nio.CharBuffer
 import java.util.*
 import kotlin.collections.LinkedHashSet
+import kotlin.text.RegexOption.*
 
 /**
  * Singleton that searches for text in the editor and tags matching results.
@@ -38,7 +39,8 @@ object Finder {
   fun findOrJump(findModel: FindModel) =
     findModel.run {
       isRegex = isRegularExpressions
-      regex = if (isRegex) stringToFind else Regex.escape(stringToFind)
+      regex = if (isRegex) findModel.compileRegExp().pattern() else
+        Regex.escape(stringToFind.toLowerCase())
       query = if (isRegex) " " else stringToFind.toLowerCase()
       maybeJump()
     }
@@ -122,13 +124,11 @@ object Finder {
                           range: IntRange = editor.getView(),
                           cache: IntArray = sitesToCheck): IntArray =
     // If the cache is populated, filter it instead of redoing extra work
-    if (!cache.isEmpty())
-      cache.filter { regionMatches(it, key, 0, key.length) }.toIntArray()
-    else
-      // TODO: Maybe cached sitesToCheck do not contain all matches?
-      clip(range).find(regex).map { it.range.first }.filterFoldedRegions()
+    if (!cache.isEmpty()) cache.filter { regionMatches(it, key, 0, key.length) }.toIntArray()
+    else clip(range).find(regex, range.first).filterFoldedRegions()
 
-  fun CharSequence.find(key: String) = Regex(key).findAll(this)
+  fun CharSequence.find(key: String, startingFrom: Int): Sequence<Int> =
+    Regex(key, MULTILINE).findAll(this, startingFrom).map { it.range.first }
 
   fun String.clip(range: IntRange): CharSequence =
     if (length <= range.endInclusive) this
@@ -233,7 +233,7 @@ object Finder {
       val tag = matching.firstOrNull()
 
       if (tag == null)
-        editorText[left, right].let {
+        String(editorText[left, right]).let {
           // TODO: Write this to this IDE log instead
           println("\"$it\" rejected: " + nonMatching.joinToString(","))
           println("No remaining tags could be assigned to word: \"$it\"")
