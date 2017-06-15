@@ -62,6 +62,7 @@ To start an instance of IntelliJ IDEA with AceJump installed, run ` ./gradlew ru
 
 ## History
 
+- 3.2.7 Minor fixes and stability improvements.
 - 3.2.6 Fixes an error affecting older versions of the IntelliJ Platform.
 - 3.2.5 AceJump 3 now supports older IntelliJ Platform and Kotlin versions.
 - 3.2.4 Tagging improvements (tags now shorter on average) and visual updates.
