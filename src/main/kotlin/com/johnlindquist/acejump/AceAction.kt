@@ -9,7 +9,7 @@ import java.awt.event.KeyEvent
 
 object AceAction : DumbAwareAction() {
   override fun update(action: AnActionEvent) {
-    action.presentation.isEnabled = (action.getData(EDITOR)) != null
+    action.presentation.isEnabled = action.getData(EDITOR) != null
   }
 
   override fun actionPerformed(e: AnActionEvent) {
@@ -21,19 +21,15 @@ object AceAction : DumbAwareAction() {
 object AceTargetAction : DumbAwareAction() {
   override fun update(action: AnActionEvent) = AceAction.update(action)
 
-  override fun actionPerformed(e: AnActionEvent) {
-    AceAction.actionPerformed(e)
-    KeyboardHandler.toggleTargetMode(true)
-  }
+  override fun actionPerformed(e: AnActionEvent) =
+    AceAction.actionPerformed(e).also { KeyboardHandler.toggleTargetMode(true) }
 }
 
 object AceLineAction : DumbAwareAction() {
   override fun update(action: AnActionEvent) = AceAction.update(action)
 
-  override fun actionPerformed(e: AnActionEvent) {
-    AceAction.actionPerformed(e)
-    KeyboardHandler.findPattern(LINE_MARK)
-  }
+  override fun actionPerformed(e: AnActionEvent) =
+    AceAction.actionPerformed(e).also { KeyboardHandler.findPattern(LINE_MARK) }
 }
 
 object AceKeyAction : DumbAwareAction() {

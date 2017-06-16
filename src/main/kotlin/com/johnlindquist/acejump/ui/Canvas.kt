@@ -5,11 +5,12 @@ import com.johnlindquist.acejump.ui.AceUI.fontWidth
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Point
+import java.awt.Rectangle
 import javax.swing.JComponent
 import javax.swing.SwingUtilities.convertPoint
 
 object Canvas : JComponent() {
-  val existingTags = hashSetOf<Point>()
+  val tags = hashSetOf<Point>()
   var jumpLocations: Collection<JumpInfo> = emptyList<JumpInfo>()
 
   fun bindToEditor(editor: Editor) =
@@ -25,19 +26,17 @@ object Canvas : JComponent() {
     if (jumpLocations.isEmpty()) return
 
     super.paint(graphics)
-    existingTags.clear()
+    tags.clear()
     jumpLocations.forEach { it.paintMe(graphics as Graphics2D) }
   }
 
-  fun registerTag(point: Point, tag: String) =
-    (-1..tag.length).forEach {
-      existingTags.add(Point(point.x + it * fontWidth, point.y))
-    }
+  fun registerTag(pt: Point, tag: String) =
+    (-1..tag.length).forEach { tags.add(Point(pt.x + it * fontWidth, pt.y)) }
 
-  fun isFree(point: Point) = !existingTags.contains(point)
+  fun isFree(point: Point) = !tags.contains(point)
 
   fun reset() {
-    existingTags.clear()
+    tags.clear()
     jumpLocations = emptyList()
   }
 }

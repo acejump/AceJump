@@ -31,14 +31,12 @@ class JumpInfo(val tag: String, val index: Int) {
 
   // TODO: Clean up this mess.
   init {
-    var i = 0
-    while (i + 1 < query.length && index + i + 1 < editorText.length &&
-      query[i + 1].toLowerCase() == editorText[index + i + 1].toLowerCase()) {
-      i++
-    }
+    var i = 1
+    while (i < query.length && index + i < editorText.length &&
+      query[i].toLowerCase() == editorText[index + i].toLowerCase()) i++
 
-    trueOffset = i
-    queryLength = i + 1
+    trueOffset = i - 1
+    queryLength = i
   }
 
   var tagPoint = editor.getPointFromIndex(index + trueOffset)
@@ -94,20 +92,15 @@ class JumpInfo(val tag: String, val index: Int) {
   }
 
   private fun highlight(g2d: Graphics2D, point: Point) {
-    if (query.isEmpty() || alignment == NONE)
-      return
+    if (query.isEmpty() || alignment == NONE) return
 
     var tagX = point.x
     val lastQueryChar = query.last()
     var tagWidth = tag.length * fontWidth
     val searchWidth = (trueOffset + 1) * fontWidth
-    val indexOfEditorChar = index + query.length - 1
-
-    val editorChar =
-      if (indexOfEditorChar < editorText.length)
-        editorText[indexOfEditorChar].toLowerCase()
-      else
-        0.toChar()
+    val charIndex = index + query.length - 1
+    val lessThanLen = charIndex < editorText.length
+    val editorChar = if (lessThanLen) editorText[charIndex].toLowerCase() else 0.toChar()
 
     // TODO: Use the built-in find-highlighter
     fun highlightAlreadyTyped() {
@@ -119,8 +112,6 @@ class JumpInfo(val tag: String, val index: Int) {
         tagWidth -= fontWidth
       }
 
-//      editor.markupModel.addRangeHighlighter(index, index + trueOffset + 1,
-//        HighlighterLayer.SELECTION, highlightStyle, HighlighterTargetArea.EXACT_RANGE)
       g2d.fillRoundRect(srcPoint.x, point.y, searchWidth, rectHeight, rectHeight - 6, rectHeight - 6)
     }
 
@@ -150,7 +141,6 @@ class JumpInfo(val tag: String, val index: Int) {
     highlightAlreadyTyped()
     highlightRemaining()
 
-    if (Finder.targetModeEnabled)
-      surroundTargetWord()
+    if (Finder.targetModeEnabled) surroundTargetWord()
   }
 }

@@ -48,11 +48,8 @@ object Finder {
     }
 
   fun toggleTargetMode(status: Boolean? = null): Boolean {
-    if (status != null) {
-      targetModeEnabled = status
-    } else {
-      targetModeEnabled = !targetModeEnabled
-    }
+    if (status != null) targetModeEnabled = status
+    else targetModeEnabled = !targetModeEnabled
     return targetModeEnabled
   }
 
@@ -105,13 +102,12 @@ object Finder {
    */
 
   private fun compact(tagMap: BiMap<String, Int>) =
-    tagMap.mapKeysTo(HashBiMap.create(tagMap.size), { e ->
+    tagMap.mapKeysTo(HashBiMap.create(tagMap.size)) { e ->
       val firstChar = e.key[0]
       val firstCharUnique = tagMap.keys.count { it[0] == firstChar } == 1
-      val queryEndsWith = query.endsWith(firstChar) && !query.endsWith(e.key)
-
+      val queryEndsWith = query.endsWith(firstChar) || query.endsWith(e.key)
       if (firstCharUnique && !queryEndsWith) firstChar.toString() else e.key
-    })
+    }
 
   /**
    * Returns a list of indices where the query begins, within the given range.
@@ -221,10 +217,7 @@ object Finder {
         } && ((idx + 1)..right).map {
           // Never use a tag which can be partly completed by typing plaintext
           editorText.substring(idx, min(it, editorText.length)) + tag[0]
-        }.none {
-          //          editorText.substring(editor.getView()).contains(it)
-          !editorText.findInEditor(it).isEmpty()
-        }
+        }.none { !editorText.findInEditor(it).isEmpty() }
       }
 
       val tag = matching.firstOrNull()
@@ -290,7 +283,7 @@ object Finder {
       String::last,
       // Minimize the distance between tag characters
       { nearby[it[0]]!!.indexOf(it.last()) }
-    )).mapTo(linkedSetOf<String>(), { it })
+    )).mapTo(linkedSetOf<String>()) { it }
 
   fun reset() {
     isRegex = false

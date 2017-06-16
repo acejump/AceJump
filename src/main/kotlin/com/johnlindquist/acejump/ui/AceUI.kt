@@ -21,8 +21,7 @@ object AceUI {
   var editor: Editor = getDefaultEditor()
     set(value) {
       editorText = value.document.text.toLowerCase()
-      if (value == field)
-        return
+      if (value == field) return
 
       // When the editor is updated, we must update some properties
       KeyboardHandler.reset()

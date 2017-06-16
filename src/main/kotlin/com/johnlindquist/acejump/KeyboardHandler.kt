@@ -29,14 +29,15 @@ import java.awt.Color.RED
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent.*
+import java.lang.System.currentTimeMillis
 import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 
 object KeyboardHandler {
   var isEnabled = false
   private var text = ""
-  private val editorActionManager = EditorActionManager.getInstance()
-  private val handler = editorActionManager.typedAction.rawHandler
+  private val editorTypeAction = EditorActionManager.getInstance().typedAction
+  private val handler = editorTypeAction.rawHandler
 
   private val keyMap = mutableMapOf(
     VK_HOME to { findPattern(START_OF_LINE) },
@@ -81,17 +82,17 @@ object KeyboardHandler {
     AncestorListener, EditorColorsListener, VisibleAreaListener {
     private val stopWatch = object : () -> Unit {
       val DELAY = 750
-      var timer = System.currentTimeMillis()
+      var timer = currentTimeMillis()
       var isRunning = false
 
       override fun invoke() {
-        timer = System.currentTimeMillis()
+        timer = currentTimeMillis()
         if (isRunning) return
         synchronized(this) {
           isRunning = true
 
-          while (System.currentTimeMillis() - timer <= DELAY) {
-            Thread.sleep(Math.abs(DELAY - (System.currentTimeMillis() - timer)))
+          while (currentTimeMillis() - timer <= DELAY) {
+            Thread.sleep(Math.abs(DELAY - (currentTimeMillis() - timer)))
           }
 
           redoQuery()
@@ -130,18 +131,19 @@ object KeyboardHandler {
     override fun caretRemoved(e: CaretEvent?) = reset()
   }
 
-  private fun configureEditor() {
-    fun interceptPrintableKeystrokes() =
-      editorActionManager.typedAction.setupRawHandler { _, key, _ ->
-        text += key
-        findString(text)
-      }
+  fun interceptPrintableKeystrokes() =
+    editorTypeAction.setupRawHandler { _, key, _ ->
+      text += key
+      findString(text)
+    }
 
-    editor.setupCursor()
-    Canvas.bindToEditor(editor)
-    interceptPrintableKeystrokes()
-    editor.addListeners()
-  }
+  private fun configureEditor() =
+    editor.run {
+      setupCursor()
+      Canvas.bindToEditor(this)
+      interceptPrintableKeystrokes()
+      addListeners()
+    }
 
   private var backup: List<*>? = null
 
@@ -166,16 +168,12 @@ object KeyboardHandler {
     }
 
   private fun startListening() {
-    fun startup() {
-      configureEditor()
-      installCustomShortcutHandler()
-    }
-
     isEnabled = true
-    startup()
+    configureEditor()
+    installCustomShortcutHandler()
   }
 
-  private fun updateUIState() {
+  private fun updateUIState() =
     if (Jumper.hasJumped) {
       Jumper.hasJumped = false
       reset()
@@ -183,7 +181,6 @@ object KeyboardHandler {
       Canvas.jumpLocations = Finder.jumpLocations
       Canvas.repaint()
     }
-  }
 
   fun redoQuery() {
     val tmpText = text
@@ -193,30 +190,29 @@ object KeyboardHandler {
     if (text.isNotEmpty()) findString(text)
   }
 
-  fun reset() {
-    fun resetUIState() {
-      text = ""
-      isEnabled = false
-      uninstallCustomShortCutHandler()
-      editorActionManager.typedAction.setupRawHandler(handler)
-      Finder.reset()
-      restoreEditorSettings()
-    }
+  fun resetUIState() {
+    text = ""
+    isEnabled = false
+    uninstallCustomShortCutHandler()
+    editorTypeAction.setupRawHandler(handler)
+    Finder.reset()
+    restoreEditorSettings()
+  }
 
+  fun reset() {
     editor.removeListeners()
     resetUIState()
   }
 
-  private fun Editor.addListeners() {
+  private fun Editor.addListeners() =
     synchronized(resetListener) {
       component.addFocusListener(resetListener)
       component.addAncestorListener(resetListener)
       scrollingModel.addVisibleAreaListener(resetListener)
       caretModel.addCaretListener(resetListener)
     }
-  }
 
-  private fun Editor.removeListeners() {
+  private fun Editor.removeListeners() =
     synchronized(resetListener) {
       if (isEnabled) {
         component.removeFocusListener(resetListener)
@@ -225,7 +221,6 @@ object KeyboardHandler {
         caretModel.removeCaretListener(resetListener)
       }
     }
-  }
 
   fun toggleTargetMode(status: Boolean? = null) =
     editor.colorsScheme.run {

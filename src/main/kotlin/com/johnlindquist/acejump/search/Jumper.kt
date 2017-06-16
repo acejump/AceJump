@@ -29,9 +29,7 @@ object Jumper {
       // we need to move the caret and select the word in one single transaction
       moveCaret(jumpInfo.index)
       selectWordAtOffset(jumpInfo.index)
-    } else {
-      moveCaret(jumpInfo.index)
-    }
+    } else moveCaret(jumpInfo.index)
 
     hasJumped = true
   }
