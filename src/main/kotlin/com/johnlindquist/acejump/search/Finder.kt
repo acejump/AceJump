@@ -32,7 +32,7 @@ object Finder {
   var regex = ""
   var query = ""
     private set
-  private var sitesToCheck = intArrayOf()
+  private var sitesToCheck = listOf<Int>()
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
@@ -73,9 +73,8 @@ object Finder {
       val last2 = query.substring(query.length - 2)
       val indexLast1 = tagMap[last1]
       val indexLast2 = tagMap[last2]
-      if (indexLast2 != null) {
-        jumpTo(JumpInfo(last2, indexLast2))
-      } else if (indexLast1 != null) {
+      if (indexLast2 != null) jumpTo(JumpInfo(last2, indexLast2))
+      else if (indexLast1 != null) {
         val charIndex = indexLast1 + query.length - 1
         if (charIndex >= editorText.length || editorText[charIndex] != last1[0])
           jumpTo(JumpInfo(last1, indexLast1))
@@ -89,7 +88,7 @@ object Finder {
 
     if (!isRegex || sitesToCheck.isEmpty()) {
       sitesToCheck = editorText.findInEditor()
-      digraphs = makeMap(editorText, sitesToCheck.toList())
+      digraphs = makeMap(editorText, sitesToCheck)
     }
 
     return compact(mapDigraphs(digraphs)).apply { tagMap = this }.run {
@@ -102,31 +101,28 @@ object Finder {
    * tags to one-character tags. This will happen if and only if:
    *
    * 1. The shortened tag is unique among the set of existing tags.
-   * 2. The shortened tag does not match the next character of text.
    * 3. The query does not end with the shortened tag, in whole or part.
    */
 
   private fun compact(tagMap: BiMap<String, Int>) =
     tagMap.mapKeysTo(HashBiMap.create(tagMap.size), { e ->
-      val firstCharacter = e.key[0].toString()
-      if (tagMap.keys.count { it[0] == e.key[0] } == 1 &&
-        !query.endsWith(firstCharacter) &&
-        !query.endsWith(e.key))
-        firstCharacter
-      else e.key
+      val firstChar = e.key[0]
+      val firstCharUnique = tagMap.keys.count { it[0] == firstChar } == 1
+      val queryEndsWith = query.endsWith(firstChar) && !query.endsWith(e.key)
+
+      if (firstCharUnique && !queryEndsWith) firstChar.toString() else e.key
     })
 
   /**
    * Returns a list of indices where the query begins, within the given range.
    * These are full indices, ie. are not offset to the beginning of the range.
-   * The algorithm is designed to defer evaluation until absolutely necessary.
    */
 
   fun String.findInEditor(key: String = query.toLowerCase(),
                           range: IntRange = editor.getView(),
-                          cache: IntArray = sitesToCheck): IntArray =
+                          cache: List<Int> = sitesToCheck): List<Int> =
     // If the cache is populated, filter it instead of redoing extra work
-    if (!cache.isEmpty()) cache.filter { regionMatches(it, key, 0, key.length) }.toIntArray()
+    if (!cache.isEmpty()) cache.filter { regionMatches(it, key, 0, key.length) }
     else clip(range).find(regex, range.first).filterFoldedRegions()
 
   fun CharSequence.find(key: String, startingFrom: Int): Sequence<Int> =
@@ -139,7 +135,7 @@ object Finder {
 
   // Do not accept any sites which fall between folded regions in the gutter
   fun Sequence<Int>.filterFoldedRegions() =
-    filter { !editor.foldingModel.isOffsetCollapsed(it) }.toList().toIntArray()
+    filter { !editor.foldingModel.isOffsetCollapsed(it) }.toList()
 
   /**
    * Builds a map of all existing bigrams, starting from the index of the last
@@ -148,7 +144,7 @@ object Finder {
    * prior to the end of a word (ie. a contiguous group of letters/digits).
    */
 
-  fun makeMap(text: CharSequence, sites: Iterable<Int>): Multimap<String, Int> =
+  fun makeMap(text: CharSequence, sites: List<Int>): Multimap<String, Int> =
     LinkedListMultimap.create<String, Int>().apply {
       sites.forEach { site ->
         val toCheck = site + query.length
@@ -206,13 +202,12 @@ object Finder {
      * number of edge cases and irregularities that must explicitly prevented.
      */
 
-    fun tryToAssignTagToIndex(index: Int) {
-      if (newTagMap.containsValue(index) || editorText.hasNearbyTag(index))
-        return
+    fun tryToAssignTagToIndex(idx: Int) {
+      if (newTagMap.containsValue(idx) || editorText.hasNearbyTag(idx)) return
 
-      val (left, right) = editorText.wordBounds(index)
+      val (left, right) = editorText.wordBounds(idx)
       val (matching, nonMatching) = tags.partition { tag ->
-        editorText[index, right].all { char ->
+        editorText[idx, right].all { char ->
           // Prevents "...a[IJ]...ij..." ij
           !digraphs.containsKey("$char${tag[0]}") &&
             // Prevents "...re[Q]...rdre[QA]sor" req
@@ -223,9 +218,9 @@ object Finder {
             newTagMap.keys.none { it[0] == char && it.last() == tag[0] } &&
             // Prevents "...i[JX]...i[IJ]..." ij;
             !(char == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
-        } && ((index + 1)..right).map {
+        } && ((idx + 1)..right).map {
           // Never use a tag which can be partly completed by typing plaintext
-          editorText.substring(index, min(it, editorText.length)) + tag[0]
+          editorText.substring(idx, min(it, editorText.length)) + tag[0]
         }.none {
           //          editorText.substring(editor.getView()).contains(it)
           !editorText.findInEditor(it).isEmpty()
@@ -241,8 +236,8 @@ object Finder {
           println("No remaining tags could be assigned to word: \"$it\"")
         }
       else
-        tagMap.inverse().getOrElse(index, { tag }).let { chosenTag ->
-          newTagMap[chosenTag] = index
+        tagMap.inverse().getOrElse(idx) { tag }.let { chosenTag ->
+          newTagMap[chosenTag] = idx
           // Prevents "...a[bc]...z[bc]..."
           tags.remove(chosenTag)
         }
@@ -250,7 +245,7 @@ object Finder {
 
     query.run {
       if (isNotEmpty()) {
-        val pTag = if (2 <= length) substring(length - 2) else last().toString()
+        val pTag = substring(max(0, length - 2))
 
         if (tagMap.contains(pTag))
           return HashBiMap.create(mapOf(pTag to tagMap[pTag]))
@@ -273,8 +268,7 @@ object Finder {
       { editorText[max(0, it - 1)].isLetterOrDigit() },
       // Target words with more unique characters to the immediate right ought
       // to have first pick for tags, since they are the most "picky" targets
-      { -editorText[it, editorText.wordBounds(it).second].distinct().size }
-    ))
+      { -editorText[it, editorText.wordBounds(it).second].distinct().size }))
 
   /**
    * Adds pre-existing tags where search string and tag are intermingled. For
@@ -283,9 +277,8 @@ object Finder {
    * filter plaintext results.
    */
 
-  private fun setupTagMap() =
-    tagMap.filterTo(HashBiMap.create<String, Int>(),
-      { (key, _) -> query == key || query.last() == key.first() })
+  private fun setupTagMap() = tagMap.filterTo(HashBiMap.create<String, Int>(),
+    { (key, _) -> query == key || query.last() == key.first() })
 
   private fun setupTags(searchResults: Multimap<String, Int>) =
     unseen2grams.sortedWith(compareBy(
@@ -302,7 +295,7 @@ object Finder {
   fun reset() {
     isRegex = false
     targetModeEnabled = false
-    sitesToCheck = intArrayOf()
+    sitesToCheck = listOf()
     digraphs.clear()
     tagMap.clear()
     origQ = ""
