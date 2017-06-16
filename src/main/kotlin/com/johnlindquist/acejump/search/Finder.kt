@@ -15,7 +15,7 @@ import java.lang.Math.min
 import java.nio.CharBuffer
 import java.util.*
 import kotlin.collections.LinkedHashSet
-import kotlin.text.RegexOption.*
+import kotlin.text.RegexOption.MULTILINE
 
 /**
  * Singleton that searches for text in the editor and tags matching results.
@@ -60,6 +60,8 @@ object Finder {
 
   private fun maybeJump() {
     jumpLocations = determineJumpLocations()
+    if (jumpLocations.isEmpty())
+      Skipper.ifQueryExistsSkipToNextOccurenceInEditor(query)
 
     // TODO: Clean up this ugliness.
     if (jumpLocations.size > 1) return

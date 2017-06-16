@@ -8,7 +8,6 @@ import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.util.TextRange
 import com.johnlindquist.acejump.search.Finder.origQ
-import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.AceUI.project
