@@ -33,7 +33,7 @@ object AceUI {
         naturalBlink = isBlinkCaret
       }
 
-      naturalColor = getInstance().globalScheme.getColor(CARET_COLOR)!!
+      naturalColor = getInstance().globalScheme.getColor(CARET_COLOR) ?: BLACK
     }
 
   val project: Project
