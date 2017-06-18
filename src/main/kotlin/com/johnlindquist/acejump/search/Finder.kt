@@ -211,11 +211,11 @@ object Finder {
             // Prevents "...re[Q]...rdre[QA]sor" req
             !newTagMap.containsKey("${tag[0]}") &&
             // Prevents "...a[IJ]...i[JX]..." ij
-            !newTagMap.contains("$char${tag[0]}") &&
+            !newTagMap.contains("$char${tag[0]}")
             // Prevents "...r[BK]iv...r[VB]in..." rivb
-            newTagMap.keys.none { it[0] == char && it.last() == tag[0] } &&
+//            newTagMap.keys.none { it[0] == char && it.last() == tag[0] } &&
             // Prevents "...i[JX]...i[IJ]..." ij;
-            !(char == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
+//            !(char == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
         } && ((idx + 1)..right).map {
           // Never use a tag which can be partly completed by typing plaintext
           editorText.substring(idx, min(it, editorText.length)) + tag[0]
