@@ -19,6 +19,7 @@ import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.Pattern.*
+import com.johnlindquist.acejump.search.Skipper
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.restoreEditorSettings
 import com.johnlindquist.acejump.ui.AceUI.setupCursor
@@ -35,6 +36,7 @@ import javax.swing.event.AncestorListener
 
 object KeyboardHandler {
   var isEnabled = false
+  var redoQueryImmediately = false
   private var text = ""
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
@@ -47,7 +49,8 @@ object KeyboardHandler {
     VK_UP to { findPattern(CODE_INDENTS) },
     VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { processBackspaceCommand() },
-    VK_ENTER to { Finder.maybeJumpIfJustOneTagRemains() }
+    VK_ENTER to { Finder.maybeJumpIfJustOneTagRemains() },
+    VK_TAB to { Skipper.ifQueryExistsSkipToNextInEditor(text) }
   )
 
   private fun findString(string: String) =
@@ -86,6 +89,8 @@ object KeyboardHandler {
       var isRunning = false
 
       override fun invoke() {
+        if (redoQueryImmediately) return redoQuery()
+
         timer = currentTimeMillis()
         if (isRunning) return
         synchronized(this) {
@@ -164,7 +169,7 @@ object KeyboardHandler {
   private fun uninstallCustomShortCutHandler() =
     editor.component.run {
       putClientProperty(ACTIONS_KEY, backup)
-      AceKeyAction::unregisterCustomShortcutSet
+      AceKeyAction.unregisterCustomShortcutSet(this)
     }
 
   private fun startListening() {
@@ -184,8 +189,12 @@ object KeyboardHandler {
 
   fun redoQuery() {
     val tmpText = text
+    val tempEnabled = isEnabled
+    val tempCache = Finder.sitesToCheck
     reset()
     activate()
+    Finder.sitesToCheck = tempCache
+    isEnabled = tempEnabled
     text = tmpText
     if (text.isNotEmpty()) findString(text)
   }
@@ -193,6 +202,7 @@ object KeyboardHandler {
   fun resetUIState() {
     text = ""
     isEnabled = false
+    redoQueryImmediately = false
     uninstallCustomShortCutHandler()
     editorTypeAction.setupRawHandler(handler)
     Finder.reset()

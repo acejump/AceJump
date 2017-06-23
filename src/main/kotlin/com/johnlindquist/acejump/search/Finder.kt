@@ -32,7 +32,7 @@ object Finder {
   var regex = ""
   var query = ""
     private set
-  private var sitesToCheck = listOf<Int>()
+  var sitesToCheck = listOf<Int>()
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
@@ -60,24 +60,24 @@ object Finder {
 
   private fun maybeJump() {
     jumpLocations = determineJumpLocations()
-    if (jumpLocations.isEmpty())
-      Skipper.ifQueryExistsSkipToNextOccurenceInEditor(query)
+    if (jumpLocations.isEmpty()) Skipper.ifQueryExistsSkipToNextInEditor(query)
 
     // TODO: Clean up this ugliness.
-    if (jumpLocations.size > 1) return
-    if (tagMap.containsKey(query))
-      return jumpTo(JumpInfo(query, tagMap[query]!!))
-    if (2 <= query.length) {
-      val last1 = query.substring(query.length - 1)
-      val last2 = query.substring(query.length - 2)
-      val indexLast1 = tagMap[last1]
-      val indexLast2 = tagMap[last2]
-      if (indexLast2 != null) jumpTo(JumpInfo(last2, indexLast2))
-      else if (indexLast1 != null) {
-        val charIndex = indexLast1 + query.length - 1
-        if (charIndex >= editorText.length || editorText[charIndex] != last1[0])
-          jumpTo(JumpInfo(last1, indexLast1))
-      }
+    if (jumpLocations.size > 1 || query.length < 2) return
+
+    val last1 = query.substring(query.length - 1)
+    val indexLast1 = tagMap[last1]
+
+    val last2 = query.substring(query.length - 2)
+    val indexLast2 = tagMap[last2]
+
+    // If the tag is two chars, the query must be at least 3
+    if (indexLast2 != null && query.length > 2)
+      jumpTo(JumpInfo(last2, indexLast2))
+    else if (indexLast1 != null) {
+      val charIndex = indexLast1 + query.length - 1
+      if (charIndex >= editorText.length || editorText[charIndex] != last1[0])
+        jumpTo(JumpInfo(last1, indexLast1))
     }
   }
 
@@ -87,7 +87,7 @@ object Finder {
 
     if (!isRegex || sitesToCheck.isEmpty()) {
       sitesToCheck = editorText.findInEditor()
-      digraphs = makeMap(editorText, sitesToCheck)
+      digraphs = makeMap(editorText, sitesToCheck.filter { it in editor.getView() })
     }
 
     return compact(mapDigraphs(digraphs)).apply { tagMap = this }.run {
@@ -117,19 +117,18 @@ object Finder {
    */
 
   fun String.findInEditor(key: String = query.toLowerCase(),
-                          range: IntRange = editor.getView(),
                           cache: List<Int> = sitesToCheck): List<Int> =
     // If the cache is populated, filter it instead of redoing extra work
     if (!cache.isEmpty()) cache.filter { regionMatches(it, key, 0, key.length) }
-    else clip(range).find(regex, range.first).filterFoldedRegions()
+    else find(regex).filterFoldedRegions()
 
-  fun CharSequence.find(key: String, startingFrom: Int): Sequence<Int> =
+  fun CharSequence.find(key: String, startingFrom: Int = 0): Sequence<Int> =
     Regex(key, MULTILINE).findAll(this, startingFrom).map { it.range.first }
 
   fun String.clip(range: IntRange): CharSequence =
     if (length <= range.endInclusive) this
     // Be very careful to avoid substring copying here for performance reasons
-    else CharBuffer.wrap(this).subSequence(0, range.endInclusive + 1)
+    else CharBuffer.wrap(this).subSequence(0, range.endInclusive)
 
   // Do not accept any sites which fall between folded regions in the gutter
   fun Sequence<Int>.filterFoldedRegions() =
@@ -205,21 +204,12 @@ object Finder {
 
       val (left, right) = editorText.wordBounds(idx)
       val (matching, nonMatching) = tags.partition { tag ->
-        editorText[idx, right].all { char ->
-          // Prevents "...a[IJ]...ij..." ij
-          !digraphs.containsKey("$char${tag[0]}") &&
-            // Prevents "...re[Q]...rdre[QA]sor" req
-            !newTagMap.containsKey("${tag[0]}") &&
-            // Prevents "...a[IJ]...i[JX]..." ij
-            !newTagMap.contains("$char${tag[0]}")
-            // Prevents "...r[BK]iv...r[VB]in..." rivb
-//            newTagMap.keys.none { it[0] == char && it.last() == tag[0] } &&
-            // Prevents "...i[JX]...i[IJ]..." ij;
-//            !(char == tag[0] && newTagMap.keys.any { it[0] == tag.last() })
-        } && ((idx + 1)..right).map {
-          // Never use a tag which can be partly completed by typing plaintext
-          editorText.substring(idx, min(it, editorText.length)) + tag[0]
-        }.none { !editorText.findInEditor(it).isEmpty() }
+        // Prevents a situation where some sites couldn't be assigned last time
+        !newTagMap.containsKey("${tag[0]}") &&
+          ((idx + 1)..right).map {
+            // Never use a tag which can be partly completed by typing plaintext
+            editorText.substring(idx, min(it, editorText.length)) + tag[0]
+          }.none { !editorText.findInEditor(it).isEmpty() }
       }
 
       val tag = matching.firstOrNull()
@@ -278,11 +268,11 @@ object Finder {
   private fun setupTags(searchResults: Multimap<String, Int>) =
     unseen2grams.sortedWith(compareBy(
       // Least frequent first-character comes first
-      { searchResults[it[0].toString()].orEmpty().size },
+//      { searchResults[it[0].toString()].orEmpty().size },
       // Adjacent keys come before non-adjacent keys
       { !adjacent[it[0]]!!.contains(it.last()) },
       // Rotate to remove "clumps" (ie. AA, AB, AC => AA BA CA)
-      String::last,
+      { it.last() },
       // Minimize the distance between tag characters
       { nearby[it[0]]!!.indexOf(it.last()) }
     )).mapTo(linkedSetOf<String>()) { it }
@@ -290,7 +280,6 @@ object Finder {
   fun reset() {
     isRegex = false
     targetModeEnabled = false
-    sitesToCheck = listOf()
     digraphs.clear()
     tagMap.clear()
     origQ = ""
