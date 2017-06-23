@@ -60,7 +60,7 @@ object Finder {
 
   private fun maybeJump() {
     jumpLocations = determineJumpLocations()
-    if (jumpLocations.isEmpty()) Skipper.ifQueryExistsSkipToNextInEditor(query)
+    if (jumpLocations.isEmpty()) Skipper.ifQueryExistsSkipToNextInEditor()
 
     // TODO: Clean up this ugliness.
     if (jumpLocations.size > 1 || query.length < 2) return

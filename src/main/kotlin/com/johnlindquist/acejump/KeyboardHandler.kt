@@ -36,7 +36,6 @@ import javax.swing.event.AncestorListener
 
 object KeyboardHandler {
   var isEnabled = false
-  var redoQueryImmediately = false
   private var text = ""
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
@@ -50,7 +49,7 @@ object KeyboardHandler {
     VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { processBackspaceCommand() },
     VK_ENTER to { Finder.maybeJumpIfJustOneTagRemains() },
-    VK_TAB to { Skipper.ifQueryExistsSkipToNextInEditor(text) }
+    VK_TAB to { Skipper.ifQueryExistsSkipToNextInEditor() }
   )
 
   private fun findString(string: String) =
@@ -89,8 +88,6 @@ object KeyboardHandler {
       var isRunning = false
 
       override fun invoke() {
-        if (redoQueryImmediately) return redoQuery()
-
         timer = currentTimeMillis()
         if (isRunning) return
         synchronized(this) {
@@ -202,7 +199,6 @@ object KeyboardHandler {
   fun resetUIState() {
     text = ""
     isEnabled = false
-    redoQueryImmediately = false
     uninstallCustomShortCutHandler()
     editorTypeAction.setupRawHandler(handler)
     Finder.reset()
