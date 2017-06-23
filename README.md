@@ -20,6 +20,12 @@ AceJump tags are *not* case sensitive. Holding down <kbd>Shift</kbd> when typing
 
 If you mistype a character while searching, just press <kbd>Backspace</kbd> to restart from scratch.
 
+If you type a string not in the editor screen, AceJump will scroll to the nearest subsequent match(es) it can find.
+
+If you press <kbd>Tab</kbd>, AceJump will scroll to the nearest group of matches it can find.
+
+If there is only one tagged result, you can press <kbd>Enter</kbd> to jump to the result.
+
 ## Installing
 
 AceJump can be installed by the unzipping the contents of `AceJump.zip` into:
