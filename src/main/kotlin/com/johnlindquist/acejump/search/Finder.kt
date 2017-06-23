@@ -280,6 +280,7 @@ object Finder {
   fun reset() {
     isRegex = false
     targetModeEnabled = false
+    sitesToCheck = listOf()
     digraphs.clear()
     tagMap.clear()
     origQ = ""
