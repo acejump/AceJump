@@ -62,6 +62,7 @@ To start an instance of IntelliJ IDEA with AceJump installed, run ` ./gradlew ru
 
 ## History
 
+- 3.3.0 AceJump now searches the entire document. Press TAB to get the next set of results!
 - 3.2.7 Minor fixes and stability improvements.
 - 3.2.6 Fixes an error affecting older versions of the IntelliJ Platform.
 - 3.2.5 AceJump 3 now supports older IntelliJ Platform and Kotlin versions.

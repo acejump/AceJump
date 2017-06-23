@@ -8,7 +8,7 @@
 
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
-  <change-notes>Minor fixes and stability improvements.</change-notes>
+  <change-notes>AceJump now searches the entire document. Press TAB to get the next set of search results!</change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 
