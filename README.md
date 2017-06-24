@@ -75,9 +75,9 @@ AceJump is supported by community members like you. PRs are highly welcome!
 
 To start IntelliJ IDEA CE with AceJump installed, run `./gradlew runIdea`. 
 
-AceJump is written in the [Kotlin](https://kotlinlang.org/) language.
-
 For documentation plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
+
+AceJump is written in [Kotlin](https://kotlinlang.org/).
 
 ## History
 
@@ -146,3 +146,4 @@ as you type.
 - [Vimperator](http://www.vimperator.org/) - A Firefox plugin with a similar UI.
 - [ace-jump-mode](https://www.emacswiki.org/emacs/AceJump) - An emacs plugin with a similar UI.
 - [EasyMotion](https://github.com/easymotion/vim-easymotion) - A Vim plugin with a similar UI.
+- [Jumpy](https://github.com/DavidLGoldberg/jumpy) - An Atom plugin with a similar UI.
