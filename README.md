@@ -30,18 +30,18 @@ If there is only one tagged result, pressing <kbd>Enter</kbd> will jump to that 
 
 ## Installing
 
-AceJump can be installed by the unzipping the contents of `AceJump.zip` into:
+Install AceJump by the unzipping the contents of `AceJump.zip` into:
 
 - `$HOME/.IdeaIC`&lt;Major Version&gt;`/config/plugins/` if you are using IntelliJ IDEA Community, or
 - `$HOME/.IntellijIdea`&lt;Major Version&gt;`/config/plugins/` if you are using IntelliJ IDEA Ultimate
 
-You can also install AceJump directly from the IDE, via **File \| Settings \| Plugins \| Browse Repositories... \| 🔍 "AceJump"**.
+Or install directly from the IDE, via **File \| Settings \| Plugins \| Browse Repositories... \| 🔍 "AceJump"**.
 
 ![Install](https://cloud.githubusercontent.com/assets/175716/11760310/cb4657e6-a064-11e5-8e07-837c2c0c40eb.png)
 
 ## Configuring
 
-If you are using [IdeaVim](https://plugins.jetbrains.com/plugin/164), copy and paste the following command into your terminal to activate AceJump with a single keystroke (the keys <kbd>f</kbd>, <kbd>F</kbd> and <kbd>g</kbd> are user-configurable):
+[IdeaVim](https://plugins.jetbrains.com/plugin/164) users can run following command to activate AceJump with a single keystroke (the keys <kbd>f</kbd>, <kbd>F</kbd> and <kbd>g</kbd> are user-configurable):
 
 ```
 echo -e '
