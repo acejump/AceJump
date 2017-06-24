@@ -18,13 +18,15 @@ Press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, <kbd>↑
 
 AceJump tags are *not* case sensitive. Holding down <kbd>Shift</kbd> when typing the last tag character will select all text from the current cursor position to that destination.
 
-If you mistype a character while searching, just press <kbd>Backspace</kbd> to restart from scratch.
+## Tips
 
-If you type a string not in the editor screen, AceJump will scroll to the nearest subsequent match(es) it can find.
+Press <kbd>Tab</kbd> when searching to jump to the next group of matches in the editor.
 
-If you press <kbd>Tab</kbd>, AceJump will scroll to the nearest group of matches it can find.
+If you mis-type a character, just press <kbd>Backspace</kbd> to restart from scratch.
 
-If there is only one tagged result, you can press <kbd>Enter</kbd> to jump to the result.
+If no matches can be found on screen, AceJump will scroll to the next match it can find.
+
+If there is only one tagged result, pressing <kbd>Enter</kbd> will jump to that result.
 
 ## Installing
 
@@ -60,11 +62,22 @@ You can change the default keyboard shortcut via **File \| Settings \| Keymap \|
 
 ## Building
 
-To build AceJump from the source, clone this repository and run `./gradlew buildPlugin`.
+To build AceJump, first clone run the Gradle task `buildPlugin`:
+
+* `git clone https://github.com/johnlindquist/AceJump && cd AceJump`
+* `./gradlew buildPlugin`
+
+The build artifact will be located in `build/distributions/`.
 
 ## Contributing
 
-To start an instance of IntelliJ IDEA with AceJump installed, run ` ./gradlew runIdea`.
+AceJump is supported by community members like you. PRs are highly welcome!
+
+To start IntelliJ IDEA CE with AceJump installed, run `./gradlew runIdea`. 
+
+AceJump is written in the [Kotlin](https://kotlinlang.org/) language.
+
+For documentation plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
 
 ## History
 

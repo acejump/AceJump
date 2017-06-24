@@ -19,16 +19,16 @@ object Skipper {
 
     val prevLogicalPosition = editor.offsetToLogicalPosition(prevIndex)
 
-    // Try to capture as many subsequent results as will fit in a screenful
-    fun maximizeCoverageOfNextOccurence(): LogicalPosition {
+    // Try to capture as many previous results as will fit in a screenful
+    fun maximizeCoverageOfPreviousOccurrence(): LogicalPosition {
       val minVisibleLine = prevLogicalPosition.line - editor.getScreenHeight()
-      val firstVisibleIndex = editor.getLineEndOffset(minVisibleLine, true)
-      val lastIndex = sitesToCheck.dropWhile { it < firstVisibleIndex }.first()
-      val center = (prevIndex + lastIndex) / 2
+      val firstVisibleIndex = editor.getLineStartOffset(minVisibleLine)
+      val firstIndex = sitesToCheck.dropWhile { it < firstVisibleIndex }.first()
+      val center = (prevIndex + firstIndex) / 2
       return editor.offsetToLogicalPosition(center)
     }
 
-    return maximizeCoverageOfNextOccurence()
+    return maximizeCoverageOfPreviousOccurrence()
   }
 
   private fun findNextPosition(): LogicalPosition? {
@@ -39,7 +39,7 @@ object Skipper {
     val nextLogicalPosition = editor.offsetToLogicalPosition(nextIndex)
 
     // Try to capture as many subsequent results as will fit in a screenful
-    fun maximizeCoverageOfNextOccurence(): LogicalPosition {
+    fun maximizeCoverageOfNextOccurrence(): LogicalPosition {
       val maxVisibleLine = nextLogicalPosition.line + editor.getScreenHeight()
       val lastVisibleIndex = editor.getLineEndOffset(maxVisibleLine, true)
       val lastIndex = sitesToCheck.dropLastWhile { it > lastVisibleIndex }.last()
@@ -47,6 +47,6 @@ object Skipper {
       return editor.offsetToLogicalPosition(center)
     }
 
-    return maximizeCoverageOfNextOccurence()
+    return maximizeCoverageOfNextOccurrence()
   }
 }
