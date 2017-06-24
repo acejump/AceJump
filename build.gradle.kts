@@ -13,7 +13,7 @@ buildscript {
 }
 
 plugins {
-  id("org.jetbrains.intellij") version "0.2.11"
+  id("org.jetbrains.intellij") version "0.2.13"
   id("org.jetbrains.kotlin.jvm") version "1.1.2"
 }
 
