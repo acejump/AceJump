@@ -1,6 +1,3 @@
-import org.gradle.script.lang.kotlin.*
-import org.jetbrains.intellij.IntelliJPluginExtension
-
 buildscript {
   repositories {
     maven { setUrl("https://dl.bintray.com/jetbrains/intellij-plugin-service") }

@@ -1,7 +1,7 @@
 package com.johnlindquist.acejump.search
 
 import com.intellij.openapi.editor.LogicalPosition
-import com.intellij.openapi.editor.ScrollType.*
+import com.intellij.openapi.editor.ScrollType.CENTER
 import com.johnlindquist.acejump.search.Finder.sitesToCheck
 import com.johnlindquist.acejump.ui.AceUI.editor
 

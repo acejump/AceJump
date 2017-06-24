@@ -29,7 +29,6 @@ import java.awt.Color.BLUE
 import java.awt.Color.RED
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
-import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent.*
 import java.lang.System.currentTimeMillis
 import javax.swing.event.AncestorEvent
