@@ -29,6 +29,7 @@ import java.awt.Color.BLUE
 import java.awt.Color.RED
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
+import java.awt.event.KeyEvent
 import java.awt.event.KeyEvent.*
 import java.lang.System.currentTimeMillis
 import javax.swing.event.AncestorEvent
@@ -39,7 +40,7 @@ object KeyboardHandler {
   private var text = ""
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
-
+  private var isShiftDown = false
   private val keyMap = mutableMapOf(
     VK_HOME to { findPattern(START_OF_LINE) },
     VK_LEFT to { findPattern(START_OF_LINE) },
@@ -49,7 +50,7 @@ object KeyboardHandler {
     VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { processBackspaceCommand() },
     VK_ENTER to { Finder.maybeJumpIfJustOneTagRemains() },
-    VK_TAB to { Skipper.ifQueryExistsSkipToNextInEditor() }
+    VK_TAB to { Skipper.ifQueryExistsSkipToNextInEditor(!isShiftDown) }
   )
 
   private fun findString(string: String) =
@@ -188,11 +189,16 @@ object KeyboardHandler {
     val tmpText = text
     val tempEnabled = isEnabled
     val tempCache = Finder.sitesToCheck
+    val tempTargetMode = Finder.targetModeEnabled
+
     reset()
     activate()
+
+    Finder.targetModeEnabled = tempTargetMode
     Finder.sitesToCheck = tempCache
     isEnabled = tempEnabled
     text = tmpText
+
     if (text.isNotEmpty()) findString(text)
   }
 

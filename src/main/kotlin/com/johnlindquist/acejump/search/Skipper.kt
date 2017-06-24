@@ -2,15 +2,14 @@ package com.johnlindquist.acejump.search
 
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType.*
-import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.Finder.sitesToCheck
 import com.johnlindquist.acejump.ui.AceUI.editor
-import com.johnlindquist.acejump.ui.AceUI.editorText
 
 object Skipper {
-  fun ifQueryExistsSkipToNextInEditor(isPrevious: Boolean = false) {
-    val nextPosition = findNextPosition() ?: return
-    editor.scrollingModel.scrollTo(nextPosition, CENTER)
+  fun ifQueryExistsSkipToNextInEditor(isNext: Boolean) {
+    val position = if (isNext) findNextPosition() ?: return
+    else findPreviousPosition() ?: return
+    editor.scrollingModel.scrollTo(position, CENTER)
   }
 
   fun findPreviousPosition(): LogicalPosition? {

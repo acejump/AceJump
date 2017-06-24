@@ -68,7 +68,8 @@ To start an instance of IntelliJ IDEA with AceJump installed, run ` ./gradlew ru
 
 ## History
 
-- 3.3.1 Fixes a minor regression.
+- 3.3.2 AceJump now persists target mode state when scrolling or tabbing.
+- 3.3.1 Fixes a minor regression where tags are not displaying correctly.
 - 3.3.0 AceJump now searches the entire document. Press TAB to get the next set of results!
 - 3.2.7 Minor fixes and stability improvements.
 - 3.2.6 Fixes an error affecting older versions of the IntelliJ Platform.

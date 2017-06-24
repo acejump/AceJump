@@ -23,7 +23,6 @@ import kotlin.text.RegexOption.MULTILINE
 
 object Finder {
   var targetModeEnabled = false
-    private set
   var jumpLocations: Collection<JumpInfo> = emptyList()
     private set
 
@@ -60,7 +59,7 @@ object Finder {
 
   private fun maybeJump() {
     jumpLocations = determineJumpLocations()
-    if (jumpLocations.isEmpty()) Skipper.ifQueryExistsSkipToNextInEditor()
+    if (jumpLocations.isEmpty()) Skipper.ifQueryExistsSkipToNextInEditor(false)
 
     // TODO: Clean up this ugliness.
     if (jumpLocations.size > 1 || query.length < 2) return
@@ -217,7 +216,7 @@ object Finder {
       if (tag == null)
         String(editorText[left, right]).let {
           // TODO: Write this to this IDE log instead
-          println("\"$it\" rejected: " + nonMatching.joinToString(","))
+          println("\"$it\" rejected: " + nonMatching.size + " tags")
           println("No remaining tags could be assigned to word: \"$it\"")
         }
       else
@@ -232,7 +231,7 @@ object Finder {
       if (isNotEmpty()) {
         val pTag = substring(max(0, length - 2))
 
-        if (tagMap.contains(pTag))
+        if (tagMap.contains(pTag) && pTag.length < query.length)
           return HashBiMap.create(mapOf(pTag to tagMap[pTag]))
       }
     }
@@ -267,8 +266,6 @@ object Finder {
 
   private fun setupTags(searchResults: Multimap<String, Int>) =
     unseen2grams.sortedWith(compareBy(
-      // Least frequent first-character comes first
-//      { searchResults[it[0].toString()].orEmpty().size },
       // Adjacent keys come before non-adjacent keys
       { !adjacent[it[0]]!!.contains(it.last()) },
       // Rotate to remove "clumps" (ie. AA, AB, AC => AA BA CA)

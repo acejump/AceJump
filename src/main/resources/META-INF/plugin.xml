@@ -20,8 +20,8 @@
     <!-- Add your actions here -->
     <action id="AceAction"
             class="com.johnlindquist.acejump.AceAction"
-            text="Activate AceJump Mode"
-            description="Search and navigate to result">
+            text="Activate AceJump mode"
+            description="Targets a character in AceJump">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
@@ -29,7 +29,7 @@
     <action id="AceLineAction"
             class="com.johnlindquist.acejump.AceLineAction"
             text="Display Line Markers"
-            description="Search and navigate to result">
+            description="Targets line markers in AceJump">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl shift SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl shift SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift SEMICOLON"/>
@@ -37,7 +37,7 @@
    <action id="AceTargetAction"
             class="com.johnlindquist.acejump.AceTargetAction"
             text="Start in Target Mode"
-            description="Search and navigate to result">
+            description="Targets a whole word in AceJump">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl alt SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl alt SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt SEMICOLON"/>
