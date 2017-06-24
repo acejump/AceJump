@@ -41,7 +41,7 @@ Or install directly from the IDE, via **File \| Settings \| Plugins \| Browse Re
 
 ## Configuring
 
-[IdeaVim](https://plugins.jetbrains.com/plugin/164) users can activate AceJump with a single keystroke (<kbd>f</kbd>, <kbd>F</kbd> and <kbd>g</kbd> are arbitrary) by running:
+[IdeaVim](https://plugins.jetbrains.com/plugin/164) users can choose to activate AceJump with a single keystroke (<kbd>f</kbd>, <kbd>F</kbd> and <kbd>g</kbd> are arbitrary) by running:
 
 ```
 echo -e '
