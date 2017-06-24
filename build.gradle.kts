@@ -3,21 +3,16 @@ import org.jetbrains.intellij.IntelliJPluginExtension
 
 buildscript {
   repositories {
-    gradleScriptKotlin()
     maven { setUrl("https://dl.bintray.com/jetbrains/intellij-plugin-service") }
-  }
-
-  dependencies {
-    classpath(kotlinModule("gradle-plugin"))
   }
 }
 
 plugins {
   id("org.jetbrains.intellij") version "0.2.13"
-  id("org.jetbrains.kotlin.jvm") version "1.1.2"
+  id("org.jetbrains.kotlin.jvm") version "1.1.3"
 }
 
-configure<IntelliJPluginExtension> {
+intellij {
   pluginName = "AceJump"
   updateSinceUntilBuild = false
 }
