@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.3.3
+
+Improve latency and fix a bug in line selection mode.
+
 ### 3.3.2
 
 AceJump now persists target mode state when scrolling or tabbing.
