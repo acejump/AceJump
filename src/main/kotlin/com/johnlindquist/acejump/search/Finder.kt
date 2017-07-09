@@ -12,9 +12,7 @@ import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.JumpInfo
 import java.lang.Math.max
 import java.lang.Math.min
-import java.nio.CharBuffer
 import java.util.*
-import kotlin.collections.LinkedHashSet
 import kotlin.text.RegexOption.MULTILINE
 
 /**
@@ -85,8 +83,9 @@ object Finder {
     unseen2grams = LinkedHashSet(allBigrams())
 
     if (!isRegex || sitesToCheck.isEmpty()) {
-      sitesToCheck = editorText.findInEditor()
-      digraphs = makeMap(editorText, sitesToCheck.filter { it in editor.getView() })
+      sitesToCheck = editorText.findText().toList()
+      digraphs = makeMap(editorText,
+        sitesToCheck.filter { it in editor.getView() })
     }
 
     return compact(mapDigraphs(digraphs)).apply { tagMap = this }.run {
@@ -115,23 +114,24 @@ object Finder {
    * These are full indices, ie. are not offset to the beginning of the range.
    */
 
-  fun String.findInEditor(key: String = query.toLowerCase(),
-                          cache: List<Int> = sitesToCheck): List<Int> =
+  fun String.findText(key: String = query.toLowerCase(),
+                      cache: List<Int> = sitesToCheck): Sequence<Int> =
     // If the cache is populated, filter it instead of redoing extra work
-    if (!cache.isEmpty()) cache.filter { regionMatches(it, key, 0, key.length) }
-    else find(regex).filterFoldedRegions()
+    if (!cache.isEmpty())
+      cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
+    else findAll(regex)
 
-  fun CharSequence.find(key: String, startingFrom: Int = 0): Sequence<Int> =
-    Regex(key, MULTILINE).findAll(this, startingFrom).map { it.range.first }
+  fun CharSequence.findAll(key: String, startingFrom: Int = 0): Sequence<Int> =
+    Regex(key, MULTILINE).findAll(this, startingFrom).mapNotNull {
+      // Do not accept any sites which fall between folded regions in the gutter
+      if (editor.foldingModel.isOffsetCollapsed(it.range.first)) null
+      else it.range.first
+    }
 
-  fun String.clip(range: IntRange): CharSequence =
-    if (length <= range.endInclusive) this
-    // Be very careful to avoid substring copying here for performance reasons
-    else CharBuffer.wrap(this).subSequence(0, range.endInclusive)
-
-  // Do not accept any sites which fall between folded regions in the gutter
-  fun Sequence<Int>.filterFoldedRegions() =
-    filter { !editor.foldingModel.isOffsetCollapsed(it) }.toList()
+  // Provides a way to short-circuit the full text search if a match is found
+  fun String.contains(key: String) = sitesToCheck.firstOrNull {
+    regionMatches(it, key, 0, key.length)
+  } != null
 
   /**
    * Builds a map of all existing bigrams, starting from the index of the last
@@ -183,7 +183,7 @@ object Finder {
     if (query.isEmpty()) return HashBiMap.create()
 
     val newTagMap: BiMap<String, Int> = setupTagMap()
-    val tags: HashSet<String> = setupTags(digraphs)
+    val tags: HashSet<String> = setupTags()
 
     fun String.hasNearbyTag(index: Int): Boolean {
       val (start, end) = wordBounds(index)
@@ -205,10 +205,10 @@ object Finder {
       val (matching, nonMatching) = tags.partition { tag ->
         // Prevents a situation where some sites couldn't be assigned last time
         !newTagMap.containsKey("${tag[0]}") &&
-          ((idx + 1)..right).map {
+          ((idx + 1)..min(right, editorText.length)).map {
             // Never use a tag which can be partly completed by typing plaintext
-            editorText.substring(idx, min(it, editorText.length)) + tag[0]
-          }.none { !editorText.findInEditor(it).isEmpty() }
+            editorText.substring(idx, it) + tag[0]
+          }.none { editorText.contains(it) }
       }
 
       val tag = matching.firstOrNull()
@@ -264,7 +264,7 @@ object Finder {
   private fun setupTagMap() = tagMap.filterTo(HashBiMap.create<String, Int>(),
     { (key, _) -> query == key || query.last() == key.first() })
 
-  private fun setupTags(searchResults: Multimap<String, Int>) =
+  private fun setupTags() =
     unseen2grams.sortedWith(compareBy(
       // Adjacent keys come before non-adjacent keys
       { !adjacent[it[0]]!!.contains(it.last()) },
