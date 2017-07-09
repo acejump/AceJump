@@ -52,9 +52,14 @@ object KeyboardHandler {
     VK_TAB to { Skipper.ifQueryExistsSkipToNextInEditor(!isShiftDown) }
   )
 
+  private fun findAgain() = getApplication().invokeLater {
+    Finder.find()
+    updateUIState()
+  }
+
   private fun findString(string: String) =
     getApplication().invokeLater {
-      Finder.findOrJump(FindModel().apply { stringToFind = string });
+      Finder.findOrJump(FindModel().apply { stringToFind = string })
       updateUIState()
     }
 
@@ -185,34 +190,19 @@ object KeyboardHandler {
     }
 
   fun redoQuery() {
-    val tmpText = text
-    val tempEnabled = isEnabled
-    val tempCache = Finder.sitesToCheck
-    val tempTargetMode = Finder.targetModeEnabled
-
-    reset()
+    reset(true)
     activate()
 
-    Finder.targetModeEnabled = tempTargetMode
-    Finder.sitesToCheck = tempCache
-    isEnabled = tempEnabled
-    text = tmpText
-
-    if (text.isNotEmpty()) findString(text)
+    if (text.isNotEmpty() || Finder.isRegex) findAgain()
   }
 
-  fun resetUIState() {
-    text = ""
+  fun reset(isRedo: Boolean = false) {
+    editor.removeListeners()
     isEnabled = false
     uninstallCustomShortCutHandler()
     editorTypeAction.setupRawHandler(handler)
-    Finder.reset()
+    if (!isRedo) { text = ""; Finder.reset() }
     restoreEditorSettings()
-  }
-
-  fun reset() {
-    editor.removeListeners()
-    resetUIState()
   }
 
   private fun Editor.addListeners() =

@@ -36,12 +36,12 @@ object Finder {
 
   fun findOrJump(findModel: FindModel) =
     findModel.run {
-      isRegex = isRegularExpressions
+      if (!isRegex) isRegex = isRegularExpressions
       origQ = findModel.stringToFind
       regex = if (isRegex) findModel.compileRegExp().pattern() else
         Regex.escape(stringToFind.toLowerCase())
-      query = if (isRegex) " " else stringToFind.toLowerCase()
-      maybeJump()
+      query = (if (isRegex) " " else "") + stringToFind.toLowerCase()
+      find()
     }
 
   fun toggleTargetMode(status: Boolean? = null): Boolean {
@@ -55,7 +55,7 @@ object Finder {
 
   fun jumpTo(jumpInfo: JumpInfo) = Jumper.jump(jumpInfo)
 
-  private fun maybeJump() {
+  fun find() {
     jumpLocations = determineJumpLocations()
     if (jumpLocations.isEmpty()) Skipper.ifQueryExistsSkipToNextInEditor(false)
 
@@ -146,7 +146,7 @@ object Finder {
         val toCheck = site + query.length
         var (p0, p1, p2) = Triple(toCheck - 1, toCheck, toCheck + 1)
         var (c0, c1, c2) = Triple(' ', ' ', ' ')
-        if (0 <= p0) c0 = text[p0]
+        if (0 <= p0 && p0 < text.length) c0 = text[p0]
         if (p1 < text.length) c1 = text[p1]
         if (p2 < text.length) c2 = text[p2]
 
