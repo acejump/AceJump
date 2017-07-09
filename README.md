@@ -62,7 +62,7 @@ You can change the default keyboard shortcut via **File \| Settings \| Keymap \|
 
 ## Building
 
-To build AceJump, first clone run the Gradle task `buildPlugin`:
+To build AceJump, clone then run the Gradle task `buildPlugin`:
 
 * `git clone https://github.com/johnlindquist/AceJump && cd AceJump`
 * `./gradlew buildPlugin`
@@ -71,11 +71,11 @@ The build artifact will be located in `build/distributions/`.
 
 ## Contributing
 
-AceJump is supported by community members like you. PRs are highly welcome!
+AceJump is supported by community members like you. Contributions are highly welcome!
 
 To start IntelliJ IDEA CE with AceJump installed, run `./gradlew runIdea`. 
 
-For documentation plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
+For documentation on plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
 
 AceJump is written in [Kotlin](https://kotlinlang.org/).
 
