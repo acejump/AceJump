@@ -4,7 +4,7 @@
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177444/124fb534-a74d-11e6-8912-1d220ae27091.png)
 
-Press the AceJump shortcut a second time before completing a tag to activate *Target Mode*. Once *Target Mode* is activated, jumping to a tag will select an entire word. *Target Mode* can also be activated directly by pressing the shortcut for `AceTargetAction` (assigned to <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd> by default).
+Press the AceJump shortcut a second time before completing a tag to activate *Target Mode*. Once *Target Mode* is activated, jumping to a tag will select an entire word. *Target Mode* can also be activated directly by pressing the shortcut for `AceTargetAction` (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd> by default).
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177362/a9976398-a74c-11e6-955d-df029c7b329b.png)
 
@@ -51,7 +51,7 @@ map g :action AceLineAction<CR>
 ' >> ~/.ideavimrc
 ```
 
-You can change the default keyboard shortcut via **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter⏎</kbd>.
+To change the default keyboard shortcuts, open **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter⏎</kbd>.
 
 ![Keymap](https://cloud.githubusercontent.com/assets/175716/11760350/911aed4c-a065-11e5-8f17-49bc97ad1dad.png)
 
