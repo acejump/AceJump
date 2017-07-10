@@ -79,6 +79,7 @@ object Finder {
   }
 
   private fun determineJumpLocations(): Collection<JumpInfo> {
+
     fun allBigrams() = with('a'..'z') { flatMap { e -> map { c -> "$e$c" } } }
     unseen2grams = LinkedHashSet(allBigrams())
 
