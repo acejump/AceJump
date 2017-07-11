@@ -9,6 +9,7 @@ import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
 import com.johnlindquist.acejump.search.Pattern.Companion.nearby
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorText
+import com.johnlindquist.acejump.ui.AceUI.settings
 import com.johnlindquist.acejump.ui.JumpInfo
 import java.lang.Math.max
 import java.lang.Math.min
@@ -78,9 +79,9 @@ object Finder {
     }
   }
 
-  private fun determineJumpLocations(): Collection<JumpInfo> {
+  fun allBigrams() = with(settings.allowedChars) { flatMap { e -> map { c -> "$e$c" } } }
 
-    fun allBigrams() = with('a'..'z') { flatMap { e -> map { c -> "$e$c" } } }
+  private fun determineJumpLocations(): Collection<JumpInfo> {
     unseen2grams = LinkedHashSet(allBigrams())
 
     if (!isRegex || sitesToCheck.isEmpty()) {

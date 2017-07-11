@@ -6,19 +6,16 @@ import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.search.getPointFromIndex
 import com.johnlindquist.acejump.search.isFirstCharacterOfLine
 import com.johnlindquist.acejump.search.wordBounds
-import com.johnlindquist.acejump.ui.AceUI.acejumpHighlightColor
-import com.johnlindquist.acejump.ui.AceUI.boxColor
 import com.johnlindquist.acejump.ui.AceUI.editor
-import com.johnlindquist.acejump.ui.AceUI.editorHighlightColor
 import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.AceUI.fontHeight
 import com.johnlindquist.acejump.ui.AceUI.fontWidth
 import com.johnlindquist.acejump.ui.AceUI.rectHOffset
 import com.johnlindquist.acejump.ui.AceUI.rectHeight
+import com.johnlindquist.acejump.ui.AceUI.settings
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
-import java.awt.Color.BLACK
 import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.RenderingHints.KEY_ANTIALIASING
@@ -57,7 +54,7 @@ class JumpInfo(val tag: String, val index: Int) {
 
     //the foreground text
     font = AceUI.font
-    color = BLACK
+    color = settings.tagForegroundColor
     drawString(tag.toUpperCase(), tagPosition.x, tagPosition.y + fontHeight)
   }
 
@@ -105,7 +102,7 @@ class JumpInfo(val tag: String, val index: Int) {
     // TODO: Use the built-in find-highlighter
     fun highlightAlreadyTyped() {
       g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
-      g2d.color = acejumpHighlightColor
+      g2d.color = settings.textHighLightColor
       if (lastQueryChar == tag.first() && lastQueryChar != editorChar) {
         g2d.fillRoundRect(tagX, point.y, fontWidth, rectHeight, rectHeight - 6, rectHeight - 6)
         tagX += fontWidth
@@ -116,7 +113,7 @@ class JumpInfo(val tag: String, val index: Int) {
     }
 
     fun highlightRemaining() {
-      g2d.color = editorHighlightColor
+      g2d.color = settings.tagBackgroundColor
       val hasSpaceToTheRight = editorText.length <= index + 1 ||
         editorText[index + 1].isWhitespace()
 
@@ -129,7 +126,7 @@ class JumpInfo(val tag: String, val index: Int) {
     fun surroundTargetWord() {
       g2d.composite = getInstance(SRC_OVER, 1.toFloat())
       val (wordStart, wordEnd) = editorText.wordBounds(index)
-      g2d.color = boxColor
+      g2d.color = settings.targetModeColor
 
       val xPosition = editor.getPointFromIndex(wordStart).x
       val width = (wordEnd - wordStart) * fontWidth

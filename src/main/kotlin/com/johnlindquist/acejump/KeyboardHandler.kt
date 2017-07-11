@@ -22,11 +22,10 @@ import com.johnlindquist.acejump.search.Pattern.*
 import com.johnlindquist.acejump.search.Skipper
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.restoreEditorSettings
+import com.johnlindquist.acejump.ui.AceUI.settings
 import com.johnlindquist.acejump.ui.AceUI.setupCursor
 import com.johnlindquist.acejump.ui.Canvas
 import org.jetbrains.concurrency.runAsync
-import java.awt.Color.BLUE
-import java.awt.Color.RED
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent.*
@@ -226,9 +225,9 @@ object KeyboardHandler {
   fun toggleTargetMode(status: Boolean? = null) =
     editor.colorsScheme.run {
       if (Finder.toggleTargetMode(status))
-        setColor(CARET_COLOR, RED)
+        setColor(CARET_COLOR, settings.targetModeColor)
       else
-        setColor(CARET_COLOR, BLUE)
+        setColor(CARET_COLOR, settings.jumpModeColor)
       Canvas.repaint()
     }
 }

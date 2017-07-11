@@ -13,6 +13,8 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.getDefaultEditor
+import com.johnlindquist.acejump.settings.AceSettingsPage
+import java.awt.Color
 import java.awt.Color.*
 import java.awt.Font
 import java.awt.Font.BOLD
@@ -57,16 +59,21 @@ object AceUI {
     get() = editor.colorsScheme.editorFontSize
   val lineHeight: Int
     get() = editor.lineHeight
-  val lineSpacing: Float
-    get() = scheme.lineSpacing
   val rectHeight: Int
     get() = fontHeight + 3
   val rectHOffset: Int
     get() = lineHeight - (editor as EditorImpl).descent - fontHeight
 
-  val boxColor = red
-  val editorHighlightColor = yellow
-  val acejumpHighlightColor = green
+  data class UserSettings(var allowedChars: List<Char> = ('a'..'z').toList(),
+                          var jumpModeColor: Color = blue,
+                          var targetModeColor: Color = red,
+                          var textHighLightColor: Color = green,
+                          var tagForegroundColor: Color = black,
+                          var tagBackgroundColor: Color = yellow)
+
+  var settings = UserSettings()
+  var defaults = UserSettings()
+  var gui = AceSettingsPage()
 
   fun Editor.setupCursor() {
     naturalBlock = settings.isBlockCursor
@@ -76,7 +83,7 @@ object AceUI {
     settings.isBlinkCaret = false
 
     naturalColor = colorsScheme.getColor(CARET_COLOR)!!
-    colorsScheme.setColor(CARET_COLOR, BLUE)
+    colorsScheme.setColor(CARET_COLOR, AceUI.settings.jumpModeColor)
   }
 
   fun restoreEditorSettings() {
