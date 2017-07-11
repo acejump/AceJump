@@ -7,9 +7,9 @@ import com.google.common.collect.Multimap
 import com.intellij.find.FindModel
 import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
 import com.johnlindquist.acejump.search.Pattern.Companion.nearby
+import com.johnlindquist.acejump.settings.AceConfig.settings
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorText
-import com.johnlindquist.acejump.ui.AceUI.settings
 import com.johnlindquist.acejump.ui.JumpInfo
 import java.lang.Math.max
 import java.lang.Math.min

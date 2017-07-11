@@ -20,9 +20,9 @@ import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.Pattern.*
 import com.johnlindquist.acejump.search.Skipper
+import com.johnlindquist.acejump.settings.AceConfig.settings
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.restoreEditorSettings
-import com.johnlindquist.acejump.ui.AceUI.settings
 import com.johnlindquist.acejump.ui.AceUI.setupCursor
 import com.johnlindquist.acejump.ui.Canvas
 import org.jetbrains.concurrency.runAsync

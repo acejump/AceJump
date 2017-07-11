@@ -13,7 +13,7 @@ import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.johnlindquist.acejump.KeyboardHandler
 import com.johnlindquist.acejump.search.getDefaultEditor
-import com.johnlindquist.acejump.settings.AceSettingsPage
+import com.johnlindquist.acejump.settings.AceConfig
 import java.awt.Color
 import java.awt.Color.*
 import java.awt.Font
@@ -71,9 +71,6 @@ object AceUI {
                           var tagForegroundColor: Color = black,
                           var tagBackgroundColor: Color = yellow)
 
-  var settings = UserSettings()
-  var gui = AceSettingsPage()
-
   fun Editor.setupCursor() {
     naturalBlock = settings.isBlockCursor
     settings.isBlockCursor = true
@@ -82,7 +79,7 @@ object AceUI {
     settings.isBlinkCaret = false
 
     naturalColor = colorsScheme.getColor(CARET_COLOR)!!
-    colorsScheme.setColor(CARET_COLOR, AceUI.settings.jumpModeColor)
+    colorsScheme.setColor(CARET_COLOR, AceConfig.settings.jumpModeColor)
   }
 
   fun restoreEditorSettings() {

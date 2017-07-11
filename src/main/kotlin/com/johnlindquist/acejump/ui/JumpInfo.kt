@@ -6,13 +6,13 @@ import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.search.getPointFromIndex
 import com.johnlindquist.acejump.search.isFirstCharacterOfLine
 import com.johnlindquist.acejump.search.wordBounds
+import com.johnlindquist.acejump.settings.AceConfig.settings
 import com.johnlindquist.acejump.ui.AceUI.editor
 import com.johnlindquist.acejump.ui.AceUI.editorText
 import com.johnlindquist.acejump.ui.AceUI.fontHeight
 import com.johnlindquist.acejump.ui.AceUI.fontWidth
 import com.johnlindquist.acejump.ui.AceUI.rectHOffset
 import com.johnlindquist.acejump.ui.AceUI.rectHeight
-import com.johnlindquist.acejump.ui.AceUI.settings
 import com.johnlindquist.acejump.ui.JumpInfo.Alignment.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance

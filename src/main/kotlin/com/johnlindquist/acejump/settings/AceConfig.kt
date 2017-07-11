@@ -2,18 +2,19 @@ package com.johnlindquist.acejump.settings
 
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
 import com.intellij.openapi.options.Configurable
 import com.johnlindquist.acejump.ui.AceUI.UserSettings
-import com.johnlindquist.acejump.ui.AceUI.gui
-import com.johnlindquist.acejump.ui.AceUI.settings
 import javax.swing.JComponent
 
-@State(name = "AceConfig")
+@State(name = "AceConfig", storages = arrayOf(Storage("AceJump.xml")))
 object AceConfig : Configurable, PersistentStateComponent<UserSettings> {
   override fun getState() = settings
   override fun loadState(state: UserSettings) {
     settings = state
   }
+  var settings = UserSettings()
+  var gui = AceSettingsPage()
 
   override fun getDisplayName() = "AceJump"
 
