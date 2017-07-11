@@ -5,7 +5,7 @@ import java.awt.Color
 import javax.swing.JPanel
 import javax.swing.JTextField
 
-class AceSettingsPage {
+internal class AceSettingsPage {
   lateinit var tagCharacters: JTextField
   lateinit var jumpModeColorChooser: ColorPanel
   lateinit var targetModeColorChooser: ColorPanel

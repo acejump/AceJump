@@ -14,7 +14,7 @@ object AceConfig : Configurable, PersistentStateComponent<UserSettings> {
     settings = state
   }
   var settings = UserSettings()
-  var gui = AceSettingsPage()
+  private var gui = AceSettingsPage()
 
   override fun getDisplayName() = "AceJump"
 
