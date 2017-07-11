@@ -15,7 +15,7 @@ class AceSettingsPage {
   lateinit var rootPanel: JPanel
 
   var allowedChars: List<Char>
-    get() = tagCharacters.text.toList().distinct()
+    get() = tagCharacters.text.toLowerCase().toList().distinct()
     set(value) = tagCharacters.setText(value.joinToString(""))
 
   var jumpModeColor: Color?
@@ -27,7 +27,7 @@ class AceSettingsPage {
     get() = targetModeColorChooser.selectedColor
     set(value) { targetModeColorChooser.selectedColor = value }
 
-  var textHighlighterColor: Color?
+  var textHighlightColor: Color?
     get() = textHighlightColorChooser.selectedColor
     set(value) { textHighlightColorChooser.selectedColor = value }
 

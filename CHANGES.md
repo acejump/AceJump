@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.3.4
+
+Add a settings page. (Settings > Tools > AceJump)
+
 ### 3.3.3
 
 Improve latency and fix a bug in line selection mode.

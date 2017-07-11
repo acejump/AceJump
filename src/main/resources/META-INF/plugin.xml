@@ -9,11 +9,7 @@
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
   <change-notes>
-    Improve latency and fix a bug in line selection mode.
-
-    AceJump now searches the entire document.
-
-    Press TAB to fetch the next set of results!
+    Add a settings page. (Settings > Tools > AceJump)
   </change-notes>
 
   <depends>com.intellij.modules.platform</depends>

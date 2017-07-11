@@ -72,7 +72,6 @@ object AceUI {
                           var tagBackgroundColor: Color = yellow)
 
   var settings = UserSettings()
-  var defaults = UserSettings()
   var gui = AceSettingsPage()
 
   fun Editor.setupCursor() {
