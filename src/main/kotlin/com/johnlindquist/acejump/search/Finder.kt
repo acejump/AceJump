@@ -268,10 +268,6 @@ object Finder {
 
   private fun setupTags() =
     unseen2grams.sortedWith(compareBy(
-      // Adjacent keys come before non-adjacent keys
-      { !adjacent[it[0]]!!.contains(it.last()) },
-      // Rotate to remove "clumps" (ie. AA, AB, AC => AA BA CA)
-      { it.last() },
       // Minimize the distance between tag characters
       { nearby[it[0]]!!.indexOf(it.last()) }
     )).mapTo(linkedSetOf<String>()) { it }
