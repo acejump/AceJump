@@ -64,12 +64,12 @@ object AceUI {
   val rectHOffset: Int
     get() = lineHeight - (editor as EditorImpl).descent - fontHeight
 
-  data class UserSettings(var allowedChars: List<Char> = ('a'..'z').toList(),
-                          var jumpModeColor: Color = blue,
-                          var targetModeColor: Color = red,
-                          var textHighLightColor: Color = green,
-                          var tagForegroundColor: Color = black,
-                          var tagBackgroundColor: Color = yellow)
+  data class Settings(var allowedChars: List<Char> = ('a'..'z').toList(),
+                      var jumpModeColor: Color = blue,
+                      var targetModeColor: Color = red,
+                      var textHighLightColor: Color = green,
+                      var tagForegroundColor: Color = black,
+                      var tagBackgroundColor: Color = yellow)
 
   fun Editor.setupCursor() {
     naturalBlock = settings.isBlockCursor

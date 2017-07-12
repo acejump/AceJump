@@ -22,7 +22,6 @@ internal class AceSettingsPage {
     get() = jumpModeColorChooser.selectedColor
     set(value) { jumpModeColorChooser.selectedColor = value }
 
-
   var targetModeColor: Color?
     get() = targetModeColorChooser.selectedColor
     set(value) { targetModeColorChooser.selectedColor = value }
