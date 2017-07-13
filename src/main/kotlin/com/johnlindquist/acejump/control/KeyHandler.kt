@@ -139,7 +139,7 @@ object KeyHandler {
     override fun caretRemoved(e: CaretEvent?) = reset()
   }
 
-  fun interceptPrintableKeystrokes() =
+  private fun interceptPrintableKeystrokes() =
     editorTypeAction.setupRawHandler { _, key, _ ->
       text += key
       findString(text)
@@ -155,12 +155,13 @@ object KeyHandler {
 
   private var backup: List<*>? = null
 
-  // Bulenkov: BuildInfo, Graphics2DLog, DrawString/DrawChars, IDEEventQueue.dispatcher
-  // This is a grotesque hack to support older IntelliJ Platforms.
+  // TODO: Replace this with `BuildInfo.api`, check: idea/146.1211+ ref.:
+  // https://github.com/JetBrains/intellij-community/commit/10f16fcd919e4f846930eaa65943e373267f2039#diff-83ee176e2a4882290ced6a65443866cbL70
   private val ACTIONS_KEY = AnAction::class.java.declaredFields.first {
     it.name == "ACTIONS_KEY" || it.name == "ourClientProperty"
   }.get(null)
 
+  // Investigate replacing this with `IDEEventQueue.*Dispatcher(...)`
   private fun installCustomShortcutHandler() =
     editor.component.run {
       backup = getClientProperty(ACTIONS_KEY) as List<*>?

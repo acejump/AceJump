@@ -25,6 +25,7 @@ class AceSettingsPage {
   var tagForegroundColor by tagForegroundColorChooser
   var tagBackgroundColor by tagBackgroundColorChooser
 
+  // Removal pending support for https://youtrack.jetbrains.com/issue/KT-8658
   private operator fun ColorPanel.getValue(a: AceSettingsPage, p: KProperty<*>) = selectedColor
   private operator fun ColorPanel.setValue(a: AceSettingsPage, p: KProperty<*>, c: Color?) { selectedColor = c }
 }
