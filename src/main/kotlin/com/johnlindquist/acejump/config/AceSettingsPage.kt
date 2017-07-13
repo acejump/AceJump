@@ -4,8 +4,9 @@ import com.intellij.ui.ColorPanel
 import java.awt.Color
 import javax.swing.JPanel
 import javax.swing.JTextField
+import kotlin.reflect.KProperty
 
-internal class AceSettingsPage {
+class AceSettingsPage {
   lateinit var tagCharacters: JTextField
   lateinit var jumpModeColorChooser: ColorPanel
   lateinit var targetModeColorChooser: ColorPanel
@@ -18,25 +19,12 @@ internal class AceSettingsPage {
     get() = tagCharacters.text.toLowerCase().toList().distinct()
     set(value) = tagCharacters.setText(value.joinToString(""))
 
-  var jumpModeColor: Color?
-    get() = jumpModeColorChooser.selectedColor
-    set(value) { jumpModeColorChooser.selectedColor = value }
+  var jumpModeColor by jumpModeColorChooser
+  var targetModeColor by targetModeColorChooser
+  var textHighlightColor by textHighlightColorChooser
+  var tagForegroundColor by tagForegroundColorChooser
+  var tagBackgroundColor by tagBackgroundColorChooser
 
-  var targetModeColor: Color?
-    get() = targetModeColorChooser.selectedColor
-    set(value) { targetModeColorChooser.selectedColor = value }
-
-  var textHighlightColor: Color?
-    get() = textHighlightColorChooser.selectedColor
-    set(value) { textHighlightColorChooser.selectedColor = value }
-
-
-  var tagForegroundColor: Color?
-    get() = tagForegroundColorChooser.selectedColor
-    set(value) { tagForegroundColorChooser.selectedColor = value }
-
-
-  var tagBackgroundColor: Color?
-    get() = tagBackgroundColorChooser.selectedColor
-    set(value) { tagBackgroundColorChooser.selectedColor = value }
+  private operator fun ColorPanel.getValue(a: AceSettingsPage, p: KProperty<*>) = selectedColor
+  private operator fun ColorPanel.setValue(a: AceSettingsPage, p: KProperty<*>, c: Color?) { selectedColor = c }
 }
