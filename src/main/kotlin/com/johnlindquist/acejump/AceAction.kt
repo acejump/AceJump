@@ -18,14 +18,14 @@ object AceAction : DumbAwareAction() {
   }
 }
 
-object AceTargetAction : DumbAwareAction() {
+class AceTargetAction : DumbAwareAction() {
   override fun update(action: AnActionEvent) = AceAction.update(action)
 
   override fun actionPerformed(e: AnActionEvent) =
     AceAction.actionPerformed(e).also { KeyboardHandler.toggleTargetMode(true) }
 }
 
-object AceLineAction : DumbAwareAction() {
+class AceLineAction : DumbAwareAction() {
   override fun update(action: AnActionEvent) = AceAction.update(action)
 
   override fun actionPerformed(e: AnActionEvent) =
