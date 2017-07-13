@@ -6,11 +6,11 @@ import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
-import com.johnlindquist.acejump.search.Pattern.Companion.nearby
-import com.johnlindquist.acejump.settings.AceConfig.settings
-import com.johnlindquist.acejump.ui.AceUI.editor
-import com.johnlindquist.acejump.ui.AceUI.editorText
-import com.johnlindquist.acejump.ui.JumpInfo
+import com.johnlindquist.acejump.config.AceConfig.settings
+import com.johnlindquist.acejump.search.Pattern.Companion.distance
+import com.johnlindquist.acejump.view.Marker
+import com.johnlindquist.acejump.view.Model.editor
+import com.johnlindquist.acejump.view.Model.editorText
 import java.lang.Math.max
 import java.lang.Math.min
 import java.util.*
@@ -22,7 +22,7 @@ import kotlin.text.RegexOption.MULTILINE
 
 object Finder {
   var targetModeEnabled = false
-  var jumpLocations: Collection<JumpInfo> = emptyList()
+  var jumpLocations: Collection<Marker> = emptyList()
     private set
 
   var isRegex = false
@@ -53,9 +53,9 @@ object Finder {
   }
 
   fun maybeJumpIfJustOneTagRemains() =
-    tagMap.entries.firstOrNull()?.run { jumpTo(JumpInfo(key, value)) }
+    tagMap.entries.firstOrNull()?.run { jumpTo(Marker(key, value)) }
 
-  fun jumpTo(jumpInfo: JumpInfo) = Jumper.jump(jumpInfo)
+  fun jumpTo(marker: Marker) = Jumper.jump(marker)
 
   fun find() {
     jumpLocations = determineJumpLocations()
@@ -72,17 +72,17 @@ object Finder {
 
     // If the tag is two chars, the query must be at least 3
     if (indexLast2 != null && query.length > 2)
-      jumpTo(JumpInfo(last2, indexLast2))
+      jumpTo(Marker(last2, indexLast2))
     else if (indexLast1 != null) {
       val charIndex = indexLast1 + query.length - 1
       if (charIndex >= editorText.length || editorText[charIndex] != last1[0])
-        jumpTo(JumpInfo(last1, indexLast1))
+        jumpTo(Marker(last1, indexLast1))
     }
   }
 
   fun allBigrams() = with(settings.allowedChars) { flatMap { e -> map { c -> "$e$c" } } }
 
-  private fun determineJumpLocations(): Collection<JumpInfo> {
+  private fun determineJumpLocations(): Collection<Marker> {
     unseen2grams = LinkedHashSet(allBigrams())
 
     if (!isRegex || sitesToCheck.isEmpty()) {
@@ -92,7 +92,7 @@ object Finder {
     }
 
     return compact(mapDigraphs(digraphs)).apply { tagMap = this }.run {
-      values.map { JumpInfo(inverse()[it]!!, it) }.sortedBy { it.index }
+      values.map { Marker(inverse()[it]!!, it) }.sortedBy { it.index }
     }
   }
 
@@ -266,10 +266,9 @@ object Finder {
     { (key, _) -> query == key || query.last() == key.first() })
 
   private fun setupTags() =
-    unseen2grams.sortedWith(compareBy(
-      // Minimize the distance between tag characters
-      { nearby[it[0]]!!.indexOf(it.last()) }
-    )).mapTo(linkedSetOf<String>()) { it }
+    // Minimize the distance between tag characters
+    unseen2grams.sortedWith(compareBy({ distance(it[0], it.last()) }))
+      .mapTo(linkedSetOf<String>()) { it }
 
   fun reset() {
     isRegex = false

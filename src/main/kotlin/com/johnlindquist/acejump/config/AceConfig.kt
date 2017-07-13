@@ -1,10 +1,10 @@
-package com.johnlindquist.acejump.settings
+package com.johnlindquist.acejump.config
 
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.options.Configurable
-import com.johnlindquist.acejump.ui.AceUI.Settings
+import com.johnlindquist.acejump.view.Model.Settings
 import javax.swing.JComponent
 
 @State(name = "AceConfig", storages = arrayOf(Storage("AceJump.xml")))

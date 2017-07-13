@@ -3,7 +3,7 @@ package com.johnlindquist.acejump.search
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType.CENTER
 import com.johnlindquist.acejump.search.Finder.sitesToCheck
-import com.johnlindquist.acejump.ui.AceUI.editor
+import com.johnlindquist.acejump.view.Model.editor
 
 object Skipper {
   fun ifQueryExistsSkipToNextInEditor(isNext: Boolean) {

@@ -8,10 +8,10 @@ import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.util.TextRange
 import com.johnlindquist.acejump.search.Finder.origQ
-import com.johnlindquist.acejump.ui.AceUI.editor
-import com.johnlindquist.acejump.ui.AceUI.editorText
-import com.johnlindquist.acejump.ui.AceUI.project
-import com.johnlindquist.acejump.ui.JumpInfo
+import com.johnlindquist.acejump.view.Marker
+import com.johnlindquist.acejump.view.Model.editor
+import com.johnlindquist.acejump.view.Model.editorText
+import com.johnlindquist.acejump.view.Model.project
 import java.lang.Math.max
 import java.lang.Math.min
 import java.util.*
@@ -20,15 +20,15 @@ object Jumper {
   @Volatile
   var hasJumped = false
 
-  fun jump(jumpInfo: JumpInfo) = editor.run {
+  fun jump(marker: Marker) = editor.run {
     if (origQ.last().isUpperCase())
-      selectFromToOffset(caretModel.offset, jumpInfo.index)
+      selectFromToOffset(caretModel.offset, marker.index)
     else if (Finder.targetModeEnabled) {
       // Moving the caret will trigger a reset, flipping targetModeEnabled, so
       // we need to move the caret and select the word in one single transaction
-      moveCaret(jumpInfo.index)
-      selectWordAtOffset(jumpInfo.index)
-    } else moveCaret(jumpInfo.index)
+      moveCaret(marker.index)
+      selectWordAtOffset(marker.index)
+    } else moveCaret(marker.index)
 
     hasJumped = true
   }

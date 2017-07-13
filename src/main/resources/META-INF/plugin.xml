@@ -19,16 +19,14 @@
   <idea-version since-build="143.379"/>
 
   <extensions defaultExtensionNs="com.intellij">
-    <!--<applicationService serviceImplementation="com.johnlindquist.acejump.settings.AceConfig"/>-->
-    <!--<applicationConfigurable instance="com.johnlindquist.acejump.settings.AceConfig"/>-->
-    <applicationService serviceInterface="com.johnlindquist.acejump.settings.AceConfig" serviceImplementation="com.johnlindquist.acejump.settings.AceConfig"/>
-    <applicationConfigurable groupId="tools" displayName="AceJump" id="preferences.AceConfigurable" instance="com.johnlindquist.acejump.settings.AceConfig"/>
+    <applicationService serviceInterface="com.johnlindquist.acejump.config.AceConfig" serviceImplementation="com.johnlindquist.acejump.config.AceConfig"/>
+    <applicationConfigurable groupId="tools" displayName="AceJump" id="preferences.AceConfigurable" instance="com.johnlindquist.acejump.config.AceConfig"/>
   </extensions>
 
   <actions>
     <!-- Add your actions here -->
     <action id="AceAction"
-            class="com.johnlindquist.acejump.AceAction"
+            class="com.johnlindquist.acejump.control.AceAction"
             text="Activate AceJump mode"
             description="Targets a character in AceJump">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
@@ -36,7 +34,7 @@
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
     </action>
     <action id="AceLineAction"
-            class="com.johnlindquist.acejump.AceLineAction"
+            class="com.johnlindquist.acejump.control.AceLineAction"
             text="Display Line Markers"
             description="Targets line markers in AceJump">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl shift SEMICOLON"/>
@@ -44,7 +42,7 @@
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift SEMICOLON"/>
     </action>
    <action id="AceTargetAction"
-            class="com.johnlindquist.acejump.AceTargetAction"
+            class="com.johnlindquist.acejump.control.AceTargetAction"
             text="Start in Target Mode"
             description="Targets a whole word in AceJump">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl alt SEMICOLON"/>

@@ -1,4 +1,4 @@
-package com.johnlindquist.acejump.settings
+package com.johnlindquist.acejump.config
 
 import com.intellij.ui.ColorPanel
 import java.awt.Color

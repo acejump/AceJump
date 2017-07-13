@@ -1,4 +1,4 @@
-package com.johnlindquist.acejump
+package com.johnlindquist.acejump.control
 
 import com.intellij.find.FindModel
 import com.intellij.openapi.actionSystem.AnAction
@@ -15,16 +15,16 @@ import com.intellij.openapi.editor.event.CaretListener
 import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.util.SmartList
+import com.johnlindquist.acejump.config.AceConfig.settings
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Pattern
 import com.johnlindquist.acejump.search.Pattern.*
 import com.johnlindquist.acejump.search.Skipper
-import com.johnlindquist.acejump.settings.AceConfig.settings
-import com.johnlindquist.acejump.ui.AceUI.editor
-import com.johnlindquist.acejump.ui.AceUI.restoreEditorSettings
-import com.johnlindquist.acejump.ui.AceUI.setupCursor
-import com.johnlindquist.acejump.ui.Canvas
+import com.johnlindquist.acejump.view.Canvas
+import com.johnlindquist.acejump.view.Model
+import com.johnlindquist.acejump.view.Model.editor
+import com.johnlindquist.acejump.view.Model.setupCursor
 import org.jetbrains.concurrency.runAsync
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
@@ -33,7 +33,7 @@ import java.lang.System.currentTimeMillis
 import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 
-object KeyboardHandler {
+object KeyHandler {
   var isEnabled = false
   private var text = ""
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
@@ -105,11 +105,13 @@ object KeyboardHandler {
           isRunning = false
         }
       }
+
+      fun restart() = runAsync(this)
     }
 
     override fun visibleAreaChanged(e: VisibleAreaEvent?) {
       if (e!!.isHorizontalScroll()) return
-      runAsync(stopWatch)
+      stopWatch.restart()
     }
 
     fun VisibleAreaEvent.isHorizontalScroll() =
@@ -195,12 +197,12 @@ object KeyboardHandler {
     if (text.isNotEmpty() || Finder.isRegex) findAgain()
   }
 
-  fun reset(isRedo: Boolean = false) {
+  fun reset(redo: Boolean = false) {
     editor.removeListeners()
     isEnabled = false
     uninstallCustomShortCutHandler()
     editorTypeAction.setupRawHandler(handler)
-    if (!isRedo) { text = ""; Finder.reset() }
+    if (!redo) { text = ""; Finder.reset() }
     restoreEditorSettings()
   }
 
@@ -230,4 +232,25 @@ object KeyboardHandler {
         setColor(CARET_COLOR, settings.jumpModeColor)
       Canvas.repaint()
     }
+
+  fun restoreEditorSettings() {
+    restoreCanvas()
+    restoreCursor()
+  }
+
+  private fun restoreCanvas() =
+    editor.component.run {
+      Canvas.reset()
+      remove(Canvas)
+      repaint()
+    }
+
+  private fun restoreCursor() =
+    getApplication().invokeAndWait({
+      editor.run {
+        settings.isBlinkCaret = Model.naturalBlink
+        settings.isBlockCursor = Model.naturalBlock
+        colorsScheme.setColor(CARET_COLOR, Model.naturalColor)
+      }
+    }, defaultModalityState())
 }

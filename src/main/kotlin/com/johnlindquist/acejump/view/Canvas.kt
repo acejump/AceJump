@@ -1,7 +1,7 @@
-package com.johnlindquist.acejump.ui
+package com.johnlindquist.acejump.view
 
 import com.intellij.openapi.editor.Editor
-import com.johnlindquist.acejump.ui.AceUI.fontWidth
+import com.johnlindquist.acejump.view.Model.fontWidth
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Point
@@ -10,7 +10,7 @@ import javax.swing.SwingUtilities.convertPoint
 
 object Canvas : JComponent() {
   val tags = hashSetOf<Point>()
-  var jumpLocations: Collection<JumpInfo> = emptyList()
+  var jumpLocations: Collection<Marker> = emptyList()
 
   fun bindToEditor(editor: Editor) =
     editor.run {
