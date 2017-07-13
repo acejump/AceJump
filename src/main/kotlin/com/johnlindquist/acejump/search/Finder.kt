@@ -5,7 +5,7 @@ import com.google.common.collect.HashBiMap
 import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
 import com.intellij.find.FindModel
-import com.johnlindquist.acejump.search.Pattern.Companion.adjacent
+import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.search.Pattern.Companion.nearby
 import com.johnlindquist.acejump.settings.AceConfig.settings
 import com.johnlindquist.acejump.ui.AceUI.editor
@@ -34,6 +34,7 @@ object Finder {
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
+  private val logger = Logger.getInstance(Finder::class.java)
 
   fun findOrJump(findModel: FindModel) =
     findModel.run {
@@ -85,7 +86,7 @@ object Finder {
     unseen2grams = LinkedHashSet(allBigrams())
 
     if (!isRegex || sitesToCheck.isEmpty()) {
-      sitesToCheck = editorText.findText().toList()
+      sitesToCheck = editorText.findMatchingSites().toList()
       digraphs = makeMap(editorText,
         sitesToCheck.filter { it in editor.getView() })
     }
@@ -116,8 +117,8 @@ object Finder {
    * These are full indices, ie. are not offset to the beginning of the range.
    */
 
-  fun String.findText(key: String = query.toLowerCase(),
-                      cache: List<Int> = sitesToCheck): Sequence<Int> =
+  fun String.findMatchingSites(key: String = query.toLowerCase(),
+                               cache: List<Int> = sitesToCheck): Sequence<Int> =
     // If the cache is populated, filter it instead of redoing extra work
     if (!cache.isEmpty())
       cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
@@ -217,9 +218,7 @@ object Finder {
 
       if (tag == null)
         String(editorText[left, right]).let {
-          // TODO: Write this to this IDE log instead
-          println("\"$it\" rejected: " + nonMatching.size + " tags")
-          println("No remaining tags could be assigned to word: \"$it\"")
+          logger.info("\"$it\" rejected: " + nonMatching.size + " tags.")
         }
       else
         tagMap.inverse().getOrElse(idx) { tag }.let { chosenTag ->
