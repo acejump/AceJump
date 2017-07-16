@@ -7,12 +7,12 @@ import javax.swing.JTextField
 import kotlin.reflect.KProperty
 
 class AceSettingsPage {
-  lateinit var tagCharacters: JTextField
-  lateinit var jumpModeColorChooser: ColorPanel
-  lateinit var targetModeColorChooser: ColorPanel
-  lateinit var textHighlightColorChooser: ColorPanel
-  lateinit var tagForegroundColorChooser: ColorPanel
-  lateinit var tagBackgroundColorChooser: ColorPanel
+  private lateinit var tagCharacters: JTextField
+  private lateinit var jumpModeColorChooser: ColorPanel
+  private lateinit var targetModeColorChooser: ColorPanel
+  private lateinit var textHighlightColorChooser: ColorPanel
+  private lateinit var tagForegroundColorChooser: ColorPanel
+  private lateinit var tagBackgroundColorChooser: ColorPanel
   lateinit var rootPanel: JPanel
 
   var allowedChars: List<Char>

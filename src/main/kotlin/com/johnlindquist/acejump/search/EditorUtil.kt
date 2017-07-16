@@ -88,8 +88,6 @@ fun Editor.getVisualLineAtTopOfScreen() =
 /**
  * Gets the number of actual lines in the file
  *
- * @param editor The editor
- *
  * @return The file line count
  */
 
@@ -99,8 +97,6 @@ fun Editor.getLineCount() = document.run {
 
 /**
  * Gets the actual number of characters in the file
- *
- * @param e            The editor
  *
  * @param includeEndNewLine True include newline
  *
@@ -119,8 +115,6 @@ fun Editor.getFileSize(includeEndNewLine: Boolean = false): Int {
  * This is rounded down to the nearest whole line if there is a partial line
  * visible at the bottom of the screen.
  *
- * @param e The editor
- *
  * @return The number of screen lines
  */
 
@@ -130,8 +124,6 @@ fun Editor.getScreenHeight() =
 
 /**
  * Converts a visual line number to a logical line number.
- *
- * @param e The editor
  *
  * @param line   The visual line number to convert
  *
@@ -143,8 +135,6 @@ fun Editor.visualLineToLogicalLine(line: Int) =
 
 /**
  * Returns the offset of the start of the requested line.
- *
- * @param editor The editor
  *
  * @param line   The logical line to get the start offset for.
  *
@@ -159,8 +149,6 @@ fun Editor.getLineStartOffset(line: Int) =
 
 /**
  * Returns the offset of the end of the requested line.
- *
- * @param editor   The editor
  *
  * @param line     The logical line to get the end offset for
  *
@@ -179,8 +167,6 @@ fun Editor.getLineEndOffset(line: Int, allowEnd: Boolean) =
  * Ensures that the supplied logical line is within the range 0 (incl) and the
  * number of logical lines in the file (excl).
  *
- * @param editor The editor
- *
  * @param line   The logical line number to normalize
  *
  * @return The normalized logical line number
@@ -192,8 +178,6 @@ fun Editor.normalizeLine(line: Int) = max(0, min(line, getLineCount() - 1))
  * Ensures that the supplied offset for the given logical line is within the
  * range for the line. If allowEnd is true, the range will allow for the offset
  * to be one past the last character on the line.
- *
- * @param e   The editor
  *
  * @param line     The logical line number
  *

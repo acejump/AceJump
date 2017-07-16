@@ -33,7 +33,7 @@ object Jumper {
     hasJumped = true
   }
 
-  fun Editor.moveCaret(offset: Int) {
+  private fun Editor.moveCaret(offset: Int) {
     // Add current caret position to navigation history
     CommandProcessor.getInstance().executeCommand(project,
       aceJumpHistoryAppender, "AceJumpHistoryAppender",
@@ -51,7 +51,7 @@ object Jumper {
     }
   }
 
-  fun Editor.selectWordAtOffset(offset: Int = caretModel.offset) {
+  private fun Editor.selectWordAtOffset(offset: Int = caretModel.offset) {
     val ranges = ArrayList<TextRange>()
     addWordSelection(false, editorText, offset, ranges)
 

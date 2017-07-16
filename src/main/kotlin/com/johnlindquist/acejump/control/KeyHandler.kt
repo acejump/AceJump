@@ -34,7 +34,7 @@ import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 
 object KeyHandler {
-  var isEnabled = false
+  private var isEnabled = false
   private var text = ""
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
@@ -87,9 +87,9 @@ object KeyHandler {
   private val resetListener = object : CaretListener, FocusListener,
     AncestorListener, EditorColorsListener, VisibleAreaListener {
     private val stopWatch = object : () -> Unit {
-      val DELAY = 750
-      var timer = currentTimeMillis()
-      var isRunning = false
+      private val DELAY = 750
+      private var timer = currentTimeMillis()
+      private var isRunning = false
 
       override fun invoke() {
         timer = currentTimeMillis()
@@ -114,7 +114,7 @@ object KeyHandler {
       stopWatch.restart()
     }
 
-    fun VisibleAreaEvent.isHorizontalScroll() =
+    private fun VisibleAreaEvent.isHorizontalScroll() =
       oldRectangle != newRectangle &&
         oldRectangle.width == newRectangle.width &&
         oldRectangle.height == newRectangle.height &&
@@ -234,7 +234,7 @@ object KeyHandler {
       Canvas.repaint()
     }
 
-  fun restoreEditorSettings() {
+  private fun restoreEditorSettings() {
     restoreCanvas()
     restoreCursor()
   }

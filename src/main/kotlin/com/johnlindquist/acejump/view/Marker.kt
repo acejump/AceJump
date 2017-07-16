@@ -22,9 +22,9 @@ import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 
 class Marker(val tag: String, val index: Int) {
-  var srcPoint = editor.getPointFromIndex(index)
-  var queryLength = query.length
-  var trueOffset = query.length - 1
+  private var srcPoint = editor.getPointFromIndex(index)
+  private var queryLength = query.length
+  private var trueOffset = query.length - 1
 
   // TODO: Clean up this mess.
   init {
@@ -36,7 +36,7 @@ class Marker(val tag: String, val index: Int) {
     queryLength = i
   }
 
-  var tagPoint = editor.getPointFromIndex(index + trueOffset)
+  private var tagPoint = editor.getPointFromIndex(index + trueOffset)
 
   private var alignment = RIGHT
 

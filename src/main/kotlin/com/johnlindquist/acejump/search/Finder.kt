@@ -55,7 +55,7 @@ object Finder {
   fun maybeJumpIfJustOneTagRemains() =
     tagMap.entries.firstOrNull()?.run { jumpTo(Marker(key, value)) }
 
-  fun jumpTo(marker: Marker) = Jumper.jump(marker)
+  private fun jumpTo(marker: Marker) = Jumper.jump(marker)
 
   fun find() {
     jumpLocations = determineJumpLocations()
@@ -117,7 +117,7 @@ object Finder {
    * These are full indices, ie. are not offset to the beginning of the range.
    */
 
-  fun String.findMatchingSites(key: String = query.toLowerCase(),
+  private fun String.findMatchingSites(key: String = query.toLowerCase(),
                                cache: List<Int> = sitesToCheck): Sequence<Int> =
     // If the cache is populated, filter it instead of redoing extra work
     if (!cache.isEmpty())
@@ -132,7 +132,7 @@ object Finder {
     }
 
   // Provides a way to short-circuit the full text search if a match is found
-  fun String.contains(key: String) = sitesToCheck.firstOrNull {
+  private operator fun String.contains(key: String) = sitesToCheck.firstOrNull {
     regionMatches(it, key, 0, key.length)
   } != null
 
@@ -211,7 +211,7 @@ object Finder {
           ((idx + 1)..min(right, editorText.length)).map {
             // Never use a tag which can be partly completed by typing plaintext
             editorText.substring(idx, it) + tag[0]
-          }.none { editorText.contains(it) }
+          }.none { it in editorText }
       }
 
       val tag = matching.firstOrNull()
@@ -268,7 +268,7 @@ object Finder {
   private fun setupTags() =
     // Minimize the distance between tag characters
     unseen2grams.sortedWith(compareBy({ distance(it[0], it.last()) }))
-      .mapTo(linkedSetOf<String>()) { it }
+      .mapTo(linkedSetOf()) { it }
 
   fun reset() {
     isRegex = false

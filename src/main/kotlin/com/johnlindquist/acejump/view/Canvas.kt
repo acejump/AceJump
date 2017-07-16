@@ -9,7 +9,7 @@ import javax.swing.JComponent
 import javax.swing.SwingUtilities.convertPoint
 
 object Canvas : JComponent() {
-  val tags = hashSetOf<Point>()
+  private val tags = hashSetOf<Point>()
   var jumpLocations: Collection<Marker> = emptyList()
 
   fun bindToEditor(editor: Editor) =
