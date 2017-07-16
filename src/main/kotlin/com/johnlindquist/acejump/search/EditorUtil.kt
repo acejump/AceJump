@@ -143,9 +143,11 @@ fun Editor.visualLineToLogicalLine(line: Int) =
  */
 
 fun Editor.getLineStartOffset(line: Int) =
-  if (line < 0) 0
-  else if (line >= getLineCount()) getFileSize()
-  else document.getLineStartOffset(line)
+  when {
+      line < 0 -> 0
+      line >= getLineCount() -> getFileSize()
+      else -> document.getLineStartOffset(line)
+  }
 
 /**
  * Returns the offset of the end of the requested line.
@@ -159,9 +161,11 @@ fun Editor.getLineStartOffset(line: Int) =
  */
 
 fun Editor.getLineEndOffset(line: Int, allowEnd: Boolean) =
-  if (line < 0) 0
-  else if (line >= getLineCount()) getFileSize(allowEnd)
-  else document.getLineEndOffset(line) - if (allowEnd) 0 else 1
+  when {
+      line < 0 -> 0
+      line >= getLineCount() -> getFileSize(allowEnd)
+      else -> document.getLineEndOffset(line) - if (allowEnd) 0 else 1
+  }
 
 /**
  * Ensures that the supplied logical line is within the range 0 (incl) and the

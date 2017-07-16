@@ -73,11 +73,13 @@ class Marker(val tag: String, val index: Int) {
     val isFirstCharacterOfLine = editor.isFirstCharacterOfLine(index)
     val canAlignLeft = !isFirstCharacterOfLine && canvas.isFree(left)
 
-    alignment = if (nextCharIsWhiteSpace) RIGHT
-    else if (isFirstCharacterOfLine) RIGHT
-    else if (canAlignLeft) LEFT
-    else if (canAlignRight) RIGHT
-    else NONE
+    alignment = when {
+        nextCharIsWhiteSpace -> RIGHT
+        isFirstCharacterOfLine -> RIGHT
+        canAlignLeft -> LEFT
+        canAlignRight -> RIGHT
+        else -> NONE
+    }
 
     return when (alignment) {
 //      TOP -> top

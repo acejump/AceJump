@@ -4,22 +4,13 @@
 ## Directory-based project format:
 .idea/
 
-## File-based project format:
-*.ipr
-*.iws
-
 ## Plugin-specific files:
-AceJump.jar
-
 # IntelliJ
 /out/
 
 ### Gradle template
 .gradle
 build/
-
-# Ignore Gradle GUI config
-gradle-app.setting
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar

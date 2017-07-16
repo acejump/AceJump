@@ -47,8 +47,7 @@ object Finder {
     }
 
   fun toggleTargetMode(status: Boolean? = null): Boolean {
-    if (status != null) targetModeEnabled = status
-    else targetModeEnabled = !targetModeEnabled
+    targetModeEnabled = status ?: !targetModeEnabled
     return targetModeEnabled
   }
 
