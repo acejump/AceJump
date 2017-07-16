@@ -118,13 +118,12 @@ object Finder {
    */
 
   private fun String.findMatchingSites(key: String = query.toLowerCase(),
-                               cache: List<Int> = sitesToCheck): Sequence<Int> =
+                                       cache: List<Int> = sitesToCheck) =
     // If the cache is populated, filter it instead of redoing extra work
-    if (!cache.isEmpty())
-      cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
-    else findAll(regex)
+    if (cache.isEmpty()) findAll(regex)
+    else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
 
-  fun CharSequence.findAll(key: String, startingFrom: Int = 0): Sequence<Int> =
+  private fun CharSequence.findAll(key: String, startingFrom: Int = 0) =
     Regex(key, MULTILINE).findAll(this, startingFrom).mapNotNull {
       // Do not accept any sites which fall between folded regions in the gutter
       if (editor.foldingModel.isOffsetCollapsed(it.range.first)) null
@@ -132,9 +131,9 @@ object Finder {
     }
 
   // Provides a way to short-circuit the full text search if a match is found
-  private operator fun String.contains(key: String) = sitesToCheck.firstOrNull {
-    regionMatches(it, key, 0, key.length)
-  } != null
+  private operator fun String.contains(key: String) =
+    if (sitesToCheck.isEmpty()) findMatchingSites(key).any()
+    else sitesToCheck.any { regionMatches(it, key, 0, key.length) }
 
   /**
    * Builds a map of all existing bigrams, starting from the index of the last
