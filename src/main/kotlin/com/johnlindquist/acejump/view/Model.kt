@@ -65,7 +65,7 @@ object Model {
   data class Settings(var allowedChars: List<Char> = ('a'..'z').toList(),
                       var jumpModeColor: Color = blue,
                       var targetModeColor: Color = red,
-                      var textHighLightColor: Color = green,
+                      var textHighlightColor: Color = green,
                       var tagForegroundColor: Color = black,
                       var tagBackgroundColor: Color = yellow)
 

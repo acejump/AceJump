@@ -9,13 +9,16 @@ import com.johnlindquist.acejump.view.Model.Settings
 import javax.swing.JComponent
 
 @State(name = "AceConfig", storages = arrayOf(Storage("AceJump.xml")))
-object AceConfig : ApplicationComponent, Configurable, PersistentStateComponent<Settings> {
+class AceConfig : ApplicationComponent, Configurable, PersistentStateComponent<Settings> {
+  companion object {
+    var settings = Settings()
+  }
+
   override fun getState() = settings
   override fun loadState(state: Settings) {
     settings = state
   }
-  
-  var settings = Settings()
+
   private var gui = AceSettingsPage()
 
   override fun getDisplayName() = "AceJump"
@@ -27,7 +30,7 @@ object AceConfig : ApplicationComponent, Configurable, PersistentStateComponent<
     gui.allowedChars != settings.allowedChars ||
       gui.jumpModeColor != settings.jumpModeColor ||
       gui.targetModeColor != settings.targetModeColor ||
-      gui.textHighlightColor != settings.textHighLightColor ||
+      gui.textHighlightColor != settings.textHighlightColor ||
       gui.tagForegroundColor != settings.tagForegroundColor ||
       gui.tagBackgroundColor != settings.tagBackgroundColor
 
@@ -35,7 +38,7 @@ object AceConfig : ApplicationComponent, Configurable, PersistentStateComponent<
     settings.allowedChars = gui.allowedChars
     gui.jumpModeColor?.let { settings.jumpModeColor = it }
     gui.targetModeColor?.let { settings.targetModeColor = it }
-    gui.textHighlightColor?.let { settings.textHighLightColor = it }
+    gui.textHighlightColor?.let { settings.textHighlightColor = it }
     gui.tagForegroundColor?.let { settings.tagForegroundColor = it }
     gui.tagBackgroundColor?.let { settings.tagBackgroundColor = it }
   }
@@ -44,7 +47,7 @@ object AceConfig : ApplicationComponent, Configurable, PersistentStateComponent<
     gui.allowedChars = settings.allowedChars
     gui.jumpModeColor = settings.jumpModeColor
     gui.targetModeColor = settings.targetModeColor
-    gui.textHighlightColor = settings.textHighLightColor
+    gui.textHighlightColor = settings.textHighlightColor
     gui.tagForegroundColor = settings.tagForegroundColor
     gui.tagBackgroundColor = settings.tagBackgroundColor
   }

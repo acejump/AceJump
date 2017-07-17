@@ -6,7 +6,7 @@ import com.google.common.collect.LinkedListMultimap
 import com.google.common.collect.Multimap
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
-import com.johnlindquist.acejump.config.AceConfig.settings
+import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.Pattern.Companion.distance
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor

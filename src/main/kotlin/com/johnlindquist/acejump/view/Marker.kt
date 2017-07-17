@@ -1,6 +1,6 @@
 package com.johnlindquist.acejump.view
 
-import com.johnlindquist.acejump.config.AceConfig.settings
+import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Finder.isRegex
 import com.johnlindquist.acejump.search.Finder.query
@@ -104,7 +104,7 @@ class Marker(val tag: String, val index: Int) {
     // TODO: Use the built-in find-highlighter
     fun highlightAlreadyTyped() {
       g2d.composite = getInstance(SRC_OVER, 0.40.toFloat())
-      g2d.color = settings.textHighLightColor
+      g2d.color = settings.textHighlightColor
       if (lastQueryChar == tag.first() && lastQueryChar != editorChar) {
         g2d.fillRoundRect(tagX, point.y, fontWidth, rectHeight, rectHeight - 6, rectHeight - 6)
         tagX += fontWidth

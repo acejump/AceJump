@@ -18,14 +18,13 @@
   <vendor url="https://github.com/johnlindquist/AceJump">AceJump</vendor>
   <idea-version since-build="143.379"/>
 
-  <!--<application-components>-->
-    <!--<component>-->
-      <!--<implementation-class>com.johnlindquist.acejump.config.AceConfig</implementation-class>-->
-    <!--</component>-->
-  <!--</application-components>-->
+  <application-components>
+    <component>
+      <implementation-class>com.johnlindquist.acejump.config.AceConfig</implementation-class>
+    </component>
+  </application-components>
 
   <extensions defaultExtensionNs="com.intellij">
-    <!--<applicationService serviceInterface="com.johnlindquist.acejump.config.AceConfig" serviceImplementation="com.johnlindquist.acejump.config.AceConfig"/>-->
     <applicationConfigurable groupId="tools" displayName="AceJump" id="preferences.AceConfigurable" instance="com.johnlindquist.acejump.config.AceConfig"/>
   </extensions>
 

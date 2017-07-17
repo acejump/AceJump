@@ -15,7 +15,7 @@ import com.intellij.openapi.editor.event.CaretListener
 import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.util.SmartList
-import com.johnlindquist.acejump.config.AceConfig.settings
+import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Pattern
