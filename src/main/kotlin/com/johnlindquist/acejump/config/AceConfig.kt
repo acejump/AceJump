@@ -9,7 +9,7 @@ import com.johnlindquist.acejump.view.Model.Settings
 import javax.swing.JComponent
 
 @State(name = "AceConfig", storages = arrayOf(Storage("AceJump.xml")))
-class AceConfig : ApplicationComponent, Configurable, PersistentStateComponent<Settings> {
+class AceConfig : Configurable, PersistentStateComponent<Settings> {
   companion object {
     var settings = Settings()
   }
