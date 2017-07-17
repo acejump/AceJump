@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.config
 
+import com.intellij.openapi.components.ApplicationComponent
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
@@ -8,7 +9,7 @@ import com.johnlindquist.acejump.view.Model.Settings
 import javax.swing.JComponent
 
 @State(name = "AceConfig", storages = arrayOf(Storage("AceJump.xml")))
-object AceConfig : Configurable, PersistentStateComponent<Settings> {
+object AceConfig : ApplicationComponent, Configurable, PersistentStateComponent<Settings> {
   override fun getState() = settings
   override fun loadState(state: Settings) {
     settings = state
