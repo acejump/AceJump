@@ -16,11 +16,8 @@ import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.util.SmartList
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
-import com.johnlindquist.acejump.search.Finder
-import com.johnlindquist.acejump.search.Jumper
-import com.johnlindquist.acejump.search.Pattern
+import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Pattern.*
-import com.johnlindquist.acejump.search.Skipper
 import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Model
 import com.johnlindquist.acejump.view.Model.editor
@@ -36,6 +33,7 @@ import javax.swing.event.AncestorListener
 object KeyHandler {
   private var isEnabled = false
   private var text = ""
+  private var range = 0..0
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
   private var isShiftDown = false
@@ -110,21 +108,19 @@ object KeyHandler {
     }
 
     override fun visibleAreaChanged(e: VisibleAreaEvent?) {
-      if (e!!.isHorizontalScroll()) return
+      if (canSurviveViewAdjustment()) return
       stopWatch.restart()
     }
 
-    private fun VisibleAreaEvent.isHorizontalScroll() =
-      oldRectangle != newRectangle &&
-        oldRectangle.width == newRectangle.width &&
-        oldRectangle.height == newRectangle.height &&
-        oldRectangle.y == newRectangle.y
+    private fun canSurviveViewAdjustment() =
+      with(editor.getView()) { first == range.first && last <= range.last }
 
     override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoQuery()
 
     override fun ancestorAdded(event: AncestorEvent?) = reset()
 
-    override fun ancestorMoved(event: AncestorEvent?) = reset()
+    override fun ancestorMoved(event: AncestorEvent?) =
+      if (canSurviveViewAdjustment()) Unit else reset()
 
     override fun ancestorRemoved(event: AncestorEvent?) = reset()
 
@@ -148,6 +144,7 @@ object KeyHandler {
   private fun configureEditor() =
     editor.run {
       setupCursor()
+      range = getView()
       Canvas.bindToEditor(this)
       interceptPrintableKeystrokes()
       addListeners()
@@ -203,7 +200,9 @@ object KeyHandler {
     isEnabled = false
     uninstallCustomShortCutHandler()
     editorTypeAction.setupRawHandler(handler)
-    if (!redo) { text = ""; Finder.reset() }
+    if (!redo) {
+      text = ""; Finder.reset()
+    }
     restoreEditorSettings()
   }
 
