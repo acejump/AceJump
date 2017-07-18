@@ -1,6 +1,5 @@
 package com.johnlindquist.acejump.config
 
-import com.intellij.openapi.components.ApplicationComponent
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
@@ -19,12 +18,12 @@ class AceConfig : Configurable, PersistentStateComponent<Settings> {
     settings = state
   }
 
-  private var gui = AceSettingsPage()
+  private var gui = AceSettingsPanel()
 
   override fun getDisplayName() = "AceJump"
 
   override fun createComponent(): JComponent =
-    AceSettingsPage().apply { gui = this }.rootPanel
+     AceSettingsPanel().apply { gui = this }.rootPanel
 
   override fun isModified() =
     gui.allowedChars != settings.allowedChars ||
@@ -43,12 +42,5 @@ class AceConfig : Configurable, PersistentStateComponent<Settings> {
     gui.tagBackgroundColor?.let { settings.tagBackgroundColor = it }
   }
 
-  override fun reset() {
-    gui.allowedChars = settings.allowedChars
-    gui.jumpModeColor = settings.jumpModeColor
-    gui.targetModeColor = settings.targetModeColor
-    gui.textHighlightColor = settings.textHighlightColor
-    gui.tagForegroundColor = settings.tagForegroundColor
-    gui.tagBackgroundColor = settings.tagBackgroundColor
-  }
+  override fun reset() = gui.reset(settings)
 }
