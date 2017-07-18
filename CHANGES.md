@@ -1,5 +1,10 @@
 # Changelog
 
+
+### 3.3.5
+
+Minor bugfix release. Improve handling of window resizing.
+
 ### 3.3.4
 
 Add a settings page. (Settings > Tools > AceJump)
