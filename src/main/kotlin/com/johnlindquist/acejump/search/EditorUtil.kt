@@ -4,6 +4,7 @@ import com.intellij.find.FindModel
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.VisualPosition
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
 import java.awt.Point
@@ -29,8 +30,9 @@ fun String.wordBounds(index: Int): Pair<Int, Int> {
   return Pair(front, end)
 }
 
-fun getDefaultEditor() = FileEditorManager.getInstance(ProjectManager
-  .getInstance().openProjects[0]).run { selectedTextEditor ?: allEditors[0] }
+fun getDefaultEditor(): Editor = FileEditorManager.getInstance(ProjectManager
+  .getInstance().openProjects[0]).run { selectedTextEditor ?:
+    allEditors.first { it is TextEditor } as Editor }
 
 fun Editor.getPointFromIndex(index: Int) = RelativePoint(contentComponent,
   visualPositionToXY(offsetToVisualPosition(index))).originalPoint!!
