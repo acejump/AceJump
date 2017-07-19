@@ -30,7 +30,7 @@ fun String.wordBounds(index: Int): Pair<Int, Int> {
 }
 
 fun getDefaultEditor() = FileEditorManager.getInstance(ProjectManager
-  .getInstance().openProjects[0]).selectedTextEditor!!
+  .getInstance().openProjects[0]).run { selectedTextEditor ?: allEditors[0] }
 
 fun Editor.getPointFromIndex(index: Int) = RelativePoint(contentComponent,
   visualPositionToXY(offsetToVisualPosition(index))).originalPoint!!
@@ -144,9 +144,9 @@ fun Editor.visualLineToLogicalLine(line: Int) =
 
 fun Editor.getLineStartOffset(line: Int) =
   when {
-      line < 0 -> 0
-      line >= getLineCount() -> getFileSize()
-      else -> document.getLineStartOffset(line)
+    line < 0 -> 0
+    line >= getLineCount() -> getFileSize()
+    else -> document.getLineStartOffset(line)
   }
 
 /**
@@ -162,9 +162,9 @@ fun Editor.getLineStartOffset(line: Int) =
 
 fun Editor.getLineEndOffset(line: Int, allowEnd: Boolean) =
   when {
-      line < 0 -> 0
-      line >= getLineCount() -> getFileSize(allowEnd)
-      else -> document.getLineEndOffset(line) - if (allowEnd) 0 else 1
+    line < 0 -> 0
+    line >= getLineCount() -> getFileSize(allowEnd)
+    else -> document.getLineEndOffset(line) - if (allowEnd) 0 else 1
   }
 
 /**
