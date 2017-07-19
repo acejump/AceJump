@@ -12,7 +12,7 @@ object Skipper {
     editor.scrollingModel.scrollTo(position, CENTER)
   }
 
-  fun findPreviousPosition(): LogicalPosition? {
+  private fun findPreviousPosition(): LogicalPosition? {
     val prevIndex = sitesToCheck
       .dropLastWhile { it < editor.getView().first }
       .lastOrNull() ?: sitesToCheck.lastOrNull() ?: return null

@@ -70,34 +70,34 @@ class AceSettingsPanel {
     rootPanel.add(separator2, GridConstraints(5, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_WANT_GROW, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false))
   }
 
-    /**
-     * @noinspection ALL
-     */
-    private fun loadLabelText(component: JLabel, text: String) {
-      val result = StringBuffer()
-      var haveMnemonic = false
-      var mnemonic = '\u0000'
-      var mnemonicIndex = -1
-      var i = 0
-      while (i < text.length) {
-        if (text[i] == '&') {
-          i++
-          if (i == text.length) break
-          if (!haveMnemonic && text[i] != '&') {
-            haveMnemonic = true
-            mnemonic = text[i]
-            mnemonicIndex = result.length
-          }
-        }
-        result.append(text[i])
+  /**
+   * @noinspection ALL
+   */
+  private fun loadLabelText(component: JLabel, text: String) {
+    val result = StringBuffer()
+    var haveMnemonic = false
+    var mnemonic = '\u0000'
+    var mnemonicIndex = -1
+    var i = 0
+    while (i < text.length) {
+      if (text[i] == '&') {
         i++
+        if (i == text.length) break
+        if (!haveMnemonic && text[i] != '&') {
+          haveMnemonic = true
+          mnemonic = text[i]
+          mnemonicIndex = result.length
+        }
       }
-      component.text = result.toString()
-      if (haveMnemonic) {
-        component.setDisplayedMnemonic(mnemonic)
-        component.displayedMnemonicIndex = mnemonicIndex
-      }
+      result.append(text[i])
+      i++
     }
+    component.text = result.toString()
+    if (haveMnemonic) {
+      component.setDisplayedMnemonic(mnemonic)
+      component.displayedMnemonicIndex = mnemonicIndex
+    }
+  }
 
   var allowedChars: List<Char>
     get() = tagCharacters.text.toLowerCase().toList().distinct()

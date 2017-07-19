@@ -219,20 +219,20 @@ object Finder {
           logger.info("\"$it\" rejected: " + nonMatching.size + " tags.")
         }
       else
-        tagMap.inverse().getOrElse(idx) { tag }.let { chosenTag ->
-          newTagMap[chosenTag] = idx
-          // Prevents "...a[bc]...z[bc]..."
-          tags.remove(chosenTag)
-        }
+        tagMap.inverse().getOrElse(idx) { tag }
+          .let { chosenTag ->
+            newTagMap[chosenTag] = idx
+            // Prevents "...a[bc]...z[bc]..."
+            tags.remove(chosenTag)
+          }
     }
 
     query.run {
-      if (isNotEmpty()) {
-        val pTag = substring(max(0, length - 2))
-
-        if (tagMap.contains(pTag) && pTag.length < query.length)
-          return HashBiMap.create(mapOf(pTag to tagMap[pTag]))
-      }
+      if (isNotEmpty())
+        substring(max(0, length - 2)).let {
+          if (tagMap.contains(it) && it.length < length)
+            return HashBiMap.create(mapOf(it to tagMap[it]))
+        }
     }
 
     if (!isRegex || newTagMap.isEmpty())
