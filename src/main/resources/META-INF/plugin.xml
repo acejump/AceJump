@@ -9,7 +9,7 @@
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
   <change-notes>
-    Minor bugfix release. Improve handling of window resizing.
+    Fix for https://github.com/johnlindquist/AceJump/issues/129
   </change-notes>
 
   <depends>com.intellij.modules.platform</depends>

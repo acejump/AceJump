@@ -1,6 +1,10 @@
 # Changelog
 
 
+### 3.3.6
+
+Fix for https://github.com/johnlindquist/AceJump/issues/129.
+
 ### 3.3.5
 
 Minor bugfix release. Improve handling of window resizing.
