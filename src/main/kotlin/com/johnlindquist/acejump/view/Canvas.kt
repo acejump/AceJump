@@ -8,6 +8,13 @@ import java.awt.Point
 import javax.swing.JComponent
 import javax.swing.SwingUtilities.convertPoint
 
+/**
+ * Overlay composed of all graphical tags. Maintains a registry of tags' visual
+ * positions once assigned. We should avoid painting two tags to the same space.
+ *
+ * @see Marker
+ */
+
 object Canvas : JComponent() {
   private val tags = hashSetOf<Point>()
   var jumpLocations: Collection<Marker> = emptyList()

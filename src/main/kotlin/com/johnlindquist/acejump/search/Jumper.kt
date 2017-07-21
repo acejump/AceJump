@@ -16,6 +16,10 @@ import java.lang.Math.max
 import java.lang.Math.min
 import java.util.*
 
+/**
+ * Caret controller. Responsible for moving the caret once a tag is selected.
+ */
+
 object Jumper {
   @Volatile
   var hasJumped = false

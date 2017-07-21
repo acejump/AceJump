@@ -1,5 +1,9 @@
 package com.johnlindquist.acejump.search
 
+/**
+ * Patterns related to key priority, separation, and regexps for line mode.
+ */
+
 enum class Pattern(val string: String) {
   END_OF_LINE("\\n"),
   START_OF_LINE("^.|^\\n"),

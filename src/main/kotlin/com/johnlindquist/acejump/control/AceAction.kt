@@ -14,7 +14,7 @@ object AceAction : DumbAwareAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     editor = e.getData(EDITOR) ?: editor
-    KeyHandler.activate()
+    Handler.activate()
   }
 }
 
@@ -22,19 +22,19 @@ class AceTargetAction : DumbAwareAction() {
   override fun update(action: AnActionEvent) = AceAction.update(action)
 
   override fun actionPerformed(e: AnActionEvent) =
-    AceAction.actionPerformed(e).also { KeyHandler.toggleTargetMode(true) }
+    AceAction.actionPerformed(e).also { Handler.toggleTargetMode(true) }
 }
 
 class AceLineAction : DumbAwareAction() {
   override fun update(action: AnActionEvent) = AceAction.update(action)
 
   override fun actionPerformed(e: AnActionEvent) =
-    AceAction.actionPerformed(e).also { KeyHandler.findPattern(LINE_MARK) }
+    AceAction.actionPerformed(e).also { Handler.findPattern(LINE_MARK) }
 }
 
 object AceKeyAction : DumbAwareAction() {
   override fun actionPerformed(e: AnActionEvent) {
     val inputEvent = e.inputEvent as? KeyEvent ?: return
-    KeyHandler.processCommand(inputEvent.keyCode)
+    Handler.processCommand(inputEvent.keyCode)
   }
 }

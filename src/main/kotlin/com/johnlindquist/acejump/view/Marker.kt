@@ -21,6 +21,13 @@ import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 import com.johnlindquist.acejump.view.Model.editorText as text
 
+/**
+ * All functionality related to tag highlighting (ie. the visual overlay which
+ * AceJump paints when displaying search results). Tags are "captioned" with two
+ * or fewer characters. To select a tag, a user will type the tag's assigned
+ * caption, which will move the cursor to a known index in the document.
+ */
+
 class Marker(val tag: String, val index: Int) {
   private var srcPoint = editor.getPointFromIndex(index)
   private var queryLength = query.length

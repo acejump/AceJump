@@ -3,6 +3,10 @@ package com.johnlindquist.acejump.control
 import org.jetbrains.concurrency.runAsync
 import java.lang.System.currentTimeMillis
 
+/**
+ * Timer for triggering events with a designated delay.
+ */
+
 object Trigger : () -> Unit {
   private var delay = 750
   private var timer = currentTimeMillis()

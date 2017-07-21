@@ -10,12 +10,16 @@ import com.intellij.openapi.editor.markup.EffectType.BOXED
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.Project
 import com.johnlindquist.acejump.config.AceConfig
-import com.johnlindquist.acejump.control.KeyHandler
+import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.search.getDefaultEditor
 import java.awt.Color
 import java.awt.Color.*
 import java.awt.Font
 import java.awt.Font.BOLD
+
+/**
+ * Data holder for all settings and IDE components needed by AceJump.
+ */
 
 object Model {
   var editor: Editor = getDefaultEditor()
@@ -24,7 +28,7 @@ object Model {
       if (value == field) return
 
       // When the editor is updated, we must update some properties
-      KeyHandler.reset()
+      Handler.reset()
 
       field = value
 

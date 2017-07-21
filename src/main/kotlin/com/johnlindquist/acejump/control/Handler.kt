@@ -28,7 +28,11 @@ import java.awt.event.KeyEvent.*
 import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 
-object KeyHandler {
+/**
+ * Handles all incoming keystrokes, IDE notifications, and UI updates.
+ */
+
+object Handler {
   private var isEnabled = false
   private var text = ""
   private var range = 0..0

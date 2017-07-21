@@ -5,6 +5,10 @@ import com.intellij.openapi.editor.ScrollType.CENTER
 import com.johnlindquist.acejump.search.Finder.sitesToCheck
 import com.johnlindquist.acejump.view.Model.editor
 
+/**
+ * Responsible for changing the vertical scroll position inside an editor.
+ */
+
 object Skipper {
   fun ifQueryExistsSkipToNextInEditor(isNext: Boolean) {
     val position = if (isNext) findNextPosition() ?: return
