@@ -22,11 +22,9 @@ import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Model
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.setupCursor
-import org.jetbrains.concurrency.runAsync
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent.*
-import java.lang.System.currentTimeMillis
 import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 
@@ -84,32 +82,9 @@ object KeyHandler {
 
   private val resetListener = object : CaretListener, FocusListener,
     AncestorListener, EditorColorsListener, VisibleAreaListener {
-    private val stopWatch = object : () -> Unit {
-      private val DELAY = 750
-      private var timer = currentTimeMillis()
-      private var isRunning = false
-
-      override fun invoke() {
-        timer = currentTimeMillis()
-        if (isRunning) return
-        synchronized(this) {
-          isRunning = true
-
-          while (currentTimeMillis() - timer <= DELAY) {
-            Thread.sleep(Math.abs(DELAY - (currentTimeMillis() - timer)))
-          }
-
-          redoQuery()
-          isRunning = false
-        }
-      }
-
-      fun restart() = runAsync(this)
-    }
-
     override fun visibleAreaChanged(e: VisibleAreaEvent?) {
       if (canSurviveViewAdjustment()) return
-      stopWatch.restart()
+      Trigger.restart { redoQuery() }
     }
 
     private fun canSurviveViewAdjustment() =
@@ -138,7 +113,7 @@ object KeyHandler {
   private fun interceptPrintableKeystrokes() =
     editorTypeAction.setupRawHandler { _, key, _ ->
       text += key
-      findString(text)
+      Trigger.restart(250) { findString(text) }
     }
 
   private fun configureEditor() =

@@ -9,9 +9,13 @@ enum class Pattern(val string: String) {
     CODE_INDENTS.string);
 
   companion object {
-    fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!!.indexOf(toKey)
+    fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]
 
-    private var nearby = mapOf(
+    fun priotity(char: Char) = best[char]
+
+    private val best: Map<Char, Int> = "fjghdkslavncmbxzrutyeiwoqp".mapIndices()
+
+    private val nearby = mapOf(
       // Values are QWERTY keys sorted by physical proximity to the map key
       'j' to "jikmnhuolbgypvftcdrxsezawq8796054321",
       'f' to "ftgvcdryhbxseujnzawqikmolp5463728190",
@@ -49,6 +53,8 @@ enum class Pattern(val string: String) {
       '8' to "8796054321uiyhjkotgbnmlprfvedcwsxqaz",
       '9' to "9807654321ioujklpyhnmtgbrfvedcwsxqaz",
       '0' to "0987654321opiklujmyhntgbrfvedcwsxqaz")
-      .mapValues { it.value.toHashSet() }
+      .mapValues { it.value.mapIndices() }
+
+    private fun String.mapIndices() = mapIndexed { i, c -> Pair(c, i) }.toMap()
   }
 }

@@ -8,6 +8,7 @@ import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.Pattern.Companion.distance
+import com.johnlindquist.acejump.search.Pattern.Companion.priotity
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
@@ -184,7 +185,7 @@ object Finder {
     if (query.isEmpty()) return HashBiMap.create()
 
     val newTagMap: BiMap<String, Int> = setupTagMap()
-    val tags: HashSet<String> = setupTags()
+    val availableTags: HashSet<String> = setupTags()
 
     fun String.hasNearbyTag(index: Int): Boolean {
       val (start, end) = wordBounds(index)
@@ -203,7 +204,7 @@ object Finder {
       if (newTagMap.containsValue(idx) || editorText.hasNearbyTag(idx)) return
 
       val (left, right) = editorText.wordBounds(idx)
-      val (matching, nonMatching) = tags.partition { tag ->
+      val (matching, nonMatching) = availableTags.partition { tag ->
         // Prevents a situation where some sites couldn't be assigned last time
         !newTagMap.containsKey("${tag[0]}") &&
           ((idx + 1)..min(right, editorText.length)).map {
@@ -223,7 +224,7 @@ object Finder {
           .let { chosenTag ->
             newTagMap[chosenTag] = idx
             // Prevents "...a[bc]...z[bc]..."
-            tags.remove(chosenTag)
+            availableTags.remove(chosenTag)
           }
     }
 
@@ -237,7 +238,7 @@ object Finder {
 
     if (!isRegex || newTagMap.isEmpty())
       sortValidJumpTargets(digraphs).forEach {
-        if (tags.isEmpty()) return newTagMap
+        if (availableTags.isEmpty()) return newTagMap
         tryToAssignTagToIndex(it)
       }
 
@@ -265,7 +266,9 @@ object Finder {
 
   private fun setupTags() =
     // Minimize the distance between tag characters
-    unseen2grams.sortedWith(compareBy({ distance(it[0], it.last()) }))
+    unseen2grams.sortedWith(compareBy(
+      { priotity(it.last()) },
+      { distance(it[0], it.last()) }))
       .mapTo(linkedSetOf()) { it }
 
   fun reset() {
