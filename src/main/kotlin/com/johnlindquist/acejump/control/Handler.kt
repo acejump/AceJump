@@ -124,8 +124,10 @@ object Handler {
   private fun interceptPrintableKeystrokes() =
     editorTypeAction.setupRawHandler { _, key, _ ->
       text += key
-      if (text.length < 3) text.find(skim = true)
-      Trigger.restart(250) { text.find() }
+      if (text.length < 2) {
+        text.find(skim = true)
+        Trigger.restart(400L) { text.find() }
+      } else text.find()
     }
 
   private fun configureEditor() =
