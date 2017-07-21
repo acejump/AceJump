@@ -17,6 +17,14 @@ operator fun Point.component2() = y
 operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 operator fun FindModel.invoke(t: FindModel.() -> Unit) = clone().apply(t)
 
+fun List<Int>.hasTagBetweenOldAndNewViewTop(old: IntRange, new: IntRange) =
+  lastOrNull { it < old.first } ?: -1 < new.first
+
+fun List<Int>.hasTagBetweenOldAndNewViewBottom(old: IntRange, new: IntRange) =
+  firstOrNull { it > old.last } ?: new.last >= new.last
+
+fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
+
 /**
  * Identifies the bounds of a word, defined as a contiguous group of letters
  * and digits, by expanding the provided index until a non-matching character
@@ -31,8 +39,10 @@ fun String.wordBounds(index: Int): Pair<Int, Int> {
 }
 
 fun getDefaultEditor(): Editor = FileEditorManager.getInstance(ProjectManager
-  .getInstance().openProjects[0]).run { selectedTextEditor ?:
-    allEditors.first { it is TextEditor } as Editor }
+  .getInstance().openProjects[0]).run {
+  selectedTextEditor ?:
+    allEditors.first { it is TextEditor } as Editor
+}
 
 fun Editor.getPointFromIndex(index: Int) = RelativePoint(contentComponent,
   visualPositionToXY(offsetToVisualPosition(index))).originalPoint!!

@@ -8,7 +8,7 @@ import java.lang.System.currentTimeMillis
  */
 
 object Trigger : () -> Unit {
-  private var delay = 750
+  private var delay = 0L
   private var timer = currentTimeMillis()
   private var isRunning = false
   private var invokable: () -> Unit = {}
@@ -19,9 +19,8 @@ object Trigger : () -> Unit {
     synchronized(this) {
       isRunning = true
 
-      while (currentTimeMillis() - timer <= delay) {
+      while (currentTimeMillis() - timer <= delay)
         Thread.sleep(Math.abs(delay - (currentTimeMillis() - timer)))
-      }
 
       invokable.invoke()
 
@@ -29,7 +28,7 @@ object Trigger : () -> Unit {
     }
   }
 
-  fun restart(delay: Int = 750, function: () -> Unit) {
+  fun restart(delay: Long = 750, function: () -> Unit) {
     this.delay = delay
     invokable = function
     runAsync(this)

@@ -36,10 +36,13 @@ object Finder {
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
   private val logger = Logger.getInstance(Finder::class.java)
+  var applyTags = true
 
-  fun findOrJump(findModel: FindModel) =
+  fun findOrJump(findModel: FindModel, skim: Boolean = false) =
     findModel.run {
-      if (!isRegex) isRegex = isRegularExpressions
+      if (!isRegex) {
+        isRegex = isRegularExpressions; applyTags = !skim
+      }
       origQ = findModel.stringToFind
       regex = if (isRegex) findModel.compileRegExp().pattern() else
         Regex.escape(stringToFind.toLowerCase())
@@ -80,19 +83,21 @@ object Finder {
     }
   }
 
-  fun allBigrams() = with(settings.allowedChars) { flatMap { e -> map { c -> "$e$c" } } }
+  fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
 
   private fun determineJumpLocations(): Collection<Marker> {
     unseen2grams = LinkedHashSet(allBigrams())
 
     if (!isRegex || sitesToCheck.isEmpty()) {
-      sitesToCheck = editorText.findMatchingSites().toList()
-      digraphs = makeMap(editorText,
-        sitesToCheck.filter { it in editor.getView() })
+      sitesToCheck = findMatchingSites().toList()
+
+      if(!applyTags) return sitesToCheck.map { Marker(null, it) }
+
+      digraphs = makeMap(editorText, sitesToCheck.filter { it in editor.getView() })
     }
 
     return compact(mapDigraphs(digraphs)).apply { tagMap = this }.run {
-      values.map { Marker(inverse()[it]!!, it) }.sortedBy { it.index }
+      values.map { Marker(inverse()[it]!!, it) }
     }
   }
 
@@ -117,11 +122,12 @@ object Finder {
    * These are full indices, ie. are not offset to the beginning of the range.
    */
 
-  private fun String.findMatchingSites(key: String = query.toLowerCase(),
-                                       cache: List<Int> = sitesToCheck) =
+  fun findMatchingSites(key: String = query.toLowerCase(),
+                        source: String = editorText,
+                        cache: List<Int> = sitesToCheck) =
     // If the cache is populated, filter it instead of redoing extra work
-    if (cache.isEmpty()) findAll(regex)
-    else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
+    if (cache.isEmpty()) source.findAll(regex)
+    else cache.asSequence().filter { source.regionMatches(it, key, 0, key.length) }
 
   private fun CharSequence.findAll(key: String, startingFrom: Int = 0) =
     Regex(key, MULTILINE).findAll(this, startingFrom).mapNotNull {

@@ -27,6 +27,7 @@ import java.awt.event.FocusListener
 import java.awt.event.KeyEvent.*
 import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
+import kotlin.system.measureTimeMillis
 
 /**
  * Handles all incoming keystrokes, IDE notifications, and UI updates.
@@ -40,11 +41,11 @@ object Handler {
   private val handler = editorTypeAction.rawHandler
   private var isShiftDown = false
   private val keyMap = mutableMapOf(
-    VK_HOME to { findPattern(START_OF_LINE) },
-    VK_LEFT to { findPattern(START_OF_LINE) },
-    VK_RIGHT to { findPattern(END_OF_LINE) },
-    VK_END to { findPattern(END_OF_LINE) },
-    VK_UP to { findPattern(CODE_INDENTS) },
+    VK_HOME to { START_OF_LINE.find() },
+    VK_LEFT to { START_OF_LINE.find() },
+    VK_RIGHT to { END_OF_LINE.find() },
+    VK_END to { END_OF_LINE.find() },
+    VK_UP to { CODE_INDENTS.find() },
     VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { processBackspaceCommand() },
     VK_ENTER to { Finder.maybeJumpIfJustOneTagRemains() },
@@ -56,17 +57,19 @@ object Handler {
     updateUIState()
   }
 
-  private fun findString(string: String) =
+  private fun String.find(skim: Boolean = false) =
     getApplication().invokeLater {
-      Finder.findOrJump(FindModel().apply { stringToFind = string })
+      Finder.findOrJump(FindModel().apply { stringToFind = this@find }, skim)
       updateUIState()
     }
 
-  fun findPattern(pattern: Pattern) =
+  fun findPattern(pattern: Pattern) = pattern.find()
+
+  private fun Pattern.find() =
     getApplication().invokeLater {
       Finder.reset()
       Finder.findOrJump(FindModel().apply {
-        stringToFind = pattern.string
+        stringToFind = string
         isRegularExpressions = true
       })
       updateUIState()
@@ -87,14 +90,18 @@ object Handler {
   private val resetListener = object : CaretListener, FocusListener,
     AncestorListener, EditorColorsListener, VisibleAreaListener {
     override fun visibleAreaChanged(e: VisibleAreaEvent?) {
-      if (canSurviveViewAdjustment()) return
-      Trigger.restart { redoQuery() }
+      val elapsed = measureTimeMillis { if (canSurviveViewAdjustment()) return }
+      Trigger.restart(delay = (750L - elapsed).coerceAtLeast(0L)) { redoFind() }
     }
 
-    private fun canSurviveViewAdjustment() =
-      with(editor.getView()) { first == range.first && last <= range.last }
+    private fun canSurviveViewAdjustment(): Boolean =
+      editor.getView().run {
+        if (first in range && last in range) return true
+        else Finder.sitesToCheck.hasTagBetweenOldAndNewViewTop(range, this)
+          && Finder.sitesToCheck.hasTagBetweenOldAndNewViewBottom(range, this)
+      }
 
-    override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoQuery()
+    override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoFind()
 
     override fun ancestorAdded(event: AncestorEvent?) = reset()
 
@@ -117,7 +124,8 @@ object Handler {
   private fun interceptPrintableKeystrokes() =
     editorTypeAction.setupRawHandler { _, key, _ ->
       text += key
-      Trigger.restart(250) { findString(text) }
+      if (text.length < 3) text.find(skim = true)
+      Trigger.restart(250) { text.find() }
     }
 
   private fun configureEditor() =
@@ -167,7 +175,7 @@ object Handler {
       Canvas.repaint()
     }
 
-  fun redoQuery() {
+  fun redoFind() {
     reset(true)
     activate()
 
