@@ -3,8 +3,6 @@ package com.johnlindquist.acejump.control
 import com.intellij.find.FindModel
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
-import com.intellij.openapi.application.ApplicationManager.getApplication
-import com.intellij.openapi.application.ModalityState.defaultModalityState
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
@@ -34,9 +32,11 @@ import kotlin.system.measureTimeMillis
  */
 
 object Handler {
-  private var isEnabled = false
+  private var enabled = false
   private var text = ""
   private var range = 0..0
+  private var scrollX = 0
+  private var scrollY = 0
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
   private var isShiftDown = false
@@ -52,13 +52,8 @@ object Handler {
     VK_TAB to { Skipper.ifQueryExistsSkipToNextInEditor(!isShiftDown) }
   )
 
-  private fun findAgain() = getApplication().invokeLater {
-    Finder.find()
-    updateUIState()
-  }
-
   private fun String.find(skim: Boolean = false) =
-    getApplication().invokeLater {
+    runLater {
       Finder.findOrJump(FindModel().apply { stringToFind = this@find }, skim)
       updateUIState()
     }
@@ -66,7 +61,7 @@ object Handler {
   fun findPattern(pattern: Pattern) = pattern.find()
 
   private fun Pattern.find() =
-    getApplication().invokeLater {
+    runLater {
       Finder.reset()
       Finder.findOrJump(FindModel().apply {
         stringToFind = string
@@ -75,9 +70,7 @@ object Handler {
       updateUIState()
     }
 
-  fun activate() = getApplication().invokeAndWait({
-    if (!isEnabled) startListening() else toggleTargetMode()
-  }, defaultModalityState())
+  fun activate() = runNow { if (!enabled) start() else toggleTargetMode() }
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
@@ -134,6 +127,8 @@ object Handler {
     editor.run {
       setupCursor()
       range = getView()
+      scrollX = scrollingModel.horizontalScrollOffset
+      scrollY = scrollingModel.verticalScrollOffset
       Canvas.bindToEditor(this)
       interceptPrintableKeystrokes()
       addListeners()
@@ -162,8 +157,8 @@ object Handler {
       AceKeyAction.unregisterCustomShortcutSet(this)
     }
 
-  private fun startListening() {
-    isEnabled = true
+  private fun start() {
+    enabled = true
     configureEditor()
     installCustomShortcutHandler()
   }
@@ -178,20 +173,21 @@ object Handler {
     }
 
   fun redoFind() {
-    reset(true)
-    activate()
-
-    if (text.isNotEmpty() || Finder.isRegex) findAgain()
+    runNow { restoreCanvas(); Canvas.bindToEditor(editor) }
+    if (text.isNotEmpty() || Finder.isRegex)
+      runLater {
+        Finder.find()
+        updateUIState()
+      }
   }
 
-  fun reset(redo: Boolean = false) {
+  fun reset() {
     editor.removeListeners()
-    isEnabled = false
+    enabled = false
     uninstallCustomShortCutHandler()
     editorTypeAction.setupRawHandler(handler)
-    if (!redo) {
-      text = ""; Finder.reset()
-    }
+    text = ""
+    Finder.reset()
     restoreEditorSettings()
   }
 
@@ -205,7 +201,7 @@ object Handler {
 
   private fun Editor.removeListeners() =
     synchronized(resetListener) {
-      if (isEnabled) {
+      if (enabled) {
         component.removeFocusListener(resetListener)
         component.removeAncestorListener(resetListener)
         scrollingModel.removeVisibleAreaListener(resetListener)
@@ -223,9 +219,12 @@ object Handler {
     }
 
   private fun restoreEditorSettings() {
+    restoreScroll()
     restoreCanvas()
     restoreCursor()
   }
+
+  private fun restoreScroll() = editor.scrollingModel.scroll(scrollX, scrollY)
 
   private fun restoreCanvas() =
     editor.component.run {
@@ -234,12 +233,11 @@ object Handler {
       repaint()
     }
 
-  private fun restoreCursor() =
-    getApplication().invokeAndWait({
-      editor.run {
-        settings.isBlinkCaret = Model.naturalBlink
-        settings.isBlockCursor = Model.naturalBlock
-        colorsScheme.setColor(CARET_COLOR, Model.naturalColor)
-      }
-    }, defaultModalityState())
+  private fun restoreCursor() = runNow {
+    editor.run {
+      settings.isBlinkCaret = Model.naturalBlink
+      settings.isBlockCursor = Model.naturalBlock
+      colorsScheme.setColor(CARET_COLOR, Model.naturalColor)
+    }
+  }
 }

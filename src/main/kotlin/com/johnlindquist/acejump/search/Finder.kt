@@ -56,7 +56,7 @@ object Finder {
   }
 
   fun maybeJumpIfJustOneTagRemains() =
-    tagMap.entries.firstOrNull()?.run { jumpTo(Marker(key, value)) }
+    tagMap.entries.firstOrNull()?.run { jumpTo(Marker(key, value)); true } ?: false
 
   private fun jumpTo(marker: Marker) = Jumper.jump(marker)
 

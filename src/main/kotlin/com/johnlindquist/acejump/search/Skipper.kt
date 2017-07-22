@@ -13,6 +13,7 @@ object Skipper {
   fun ifQueryExistsSkipToNextInEditor(isNext: Boolean) {
     val position = if (isNext) findNextPosition() ?: return
     else findPreviousPosition() ?: return
+    editor.scrollingModel.disableAnimation()
     editor.scrollingModel.scrollTo(position, CENTER)
   }
 

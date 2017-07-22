@@ -37,7 +37,7 @@ object Jumper {
     hasJumped = true
   }
 
-  private fun Editor.moveCaret(offset: Int) {
+  fun moveCaret(offset: Int) = editor.run {
     // Add current caret position to navigation history
     CommandProcessor.getInstance().executeCommand(project,
       aceJumpHistoryAppender, "AceJumpHistoryAppender",

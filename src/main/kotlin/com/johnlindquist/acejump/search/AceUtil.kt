@@ -1,6 +1,8 @@
 package com.johnlindquist.acejump.search
 
 import com.intellij.find.FindModel
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ModalityState.defaultModalityState
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.VisualPosition
 import com.intellij.openapi.fileEditor.FileEditorManager
@@ -25,6 +27,10 @@ fun List<Int>.hasTagBetweenOldAndNewViewBottom(old: IntRange, new: IntRange) =
 
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 
+fun runNow(t: () -> Unit) =
+  ApplicationManager.getApplication().invokeAndWait(t, defaultModalityState())
+
+fun runLater(t: () -> Unit) = ApplicationManager.getApplication().invokeLater(t)
 /**
  * Identifies the bounds of a word, defined as a contiguous group of letters
  * and digits, by expanding the provided index until a non-matching character

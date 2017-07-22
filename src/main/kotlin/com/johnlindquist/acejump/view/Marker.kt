@@ -30,7 +30,6 @@ class Marker(val tag: String?, val index: Int) {
   private var srcPoint = editor.getPointFromIndex(index)
   private var queryLength = query.length
   private var trueOffset = query.length - 1
-  private val searchWidth = queryLength * fontWidth
 
   // TODO: Clean up this mess.
   init {
@@ -42,9 +41,9 @@ class Marker(val tag: String?, val index: Int) {
     queryLength = i
   }
 
+  private val searchWidth = queryLength * fontWidth
   private var tagPoint = editor.getPointFromIndex(index + trueOffset)
   private var yPosition = tagPoint.y
-
   private var alignment = RIGHT
 
   enum class Alignment { /*TOP, BOTTOM,*/ LEFT, RIGHT, NONE }
@@ -52,11 +51,11 @@ class Marker(val tag: String?, val index: Int) {
   fun paintMe(graphics2D: Graphics2D) = graphics2D.run {
     setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
-    highlightText()
-
     tag?.alignTag(Canvas)
       ?.apply { Canvas.registerTag(this, tag) }
       ?.let { highlightTag(it); drawTagForeground(it) }
+
+    highlightText()
   }
 
   private fun Graphics2D.highlightText() {
@@ -112,13 +111,16 @@ class Marker(val tag: String?, val index: Int) {
     var tagX = point?.x
     val lastQueryChar = query.last()
     var tagWidth = tag?.length?.times(fontWidth) ?: 0
+    val charIndex = index + query.length - 1
+    val beforeEnd = charIndex < text.length
+    val textChar = if (beforeEnd) text[charIndex].toLowerCase() else 0.toChar()
 
     // TODO: Use the built-in find-highlighter
     fun highlightAlreadyTyped() {
       composite = getInstance(SRC_OVER, 0.40.toFloat())
       color = settings.textHighlightColor
 
-      if (tag != null && lastQueryChar == tag.first()) {
+      if (tag != null && lastQueryChar == tag.first() &&  lastQueryChar != textChar) {
         fillRoundRect(tagX!!, yPosition, fontWidth, rectHeight, arcD, arcD)
         tagX += fontWidth
         tagWidth -= fontWidth
