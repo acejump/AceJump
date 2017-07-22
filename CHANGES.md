@@ -1,5 +1,8 @@
 # Changelog
 
+### 3.4.0
+
+Restores original scroll position if tab search cancelled. Minor improvements to latency and tag painting.
 
 ### 3.3.6
 

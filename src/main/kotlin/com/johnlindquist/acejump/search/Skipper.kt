@@ -10,11 +10,13 @@ import com.johnlindquist.acejump.view.Model.editor
  */
 
 object Skipper {
-  fun ifQueryExistsSkipToNextInEditor(isNext: Boolean) {
-    val position = if (isNext) findNextPosition() ?: return
-    else findPreviousPosition() ?: return
+  fun doesQueryExistIfSoSkipToIt(isNext: Boolean = true): Boolean {
+    val position = if (isNext) findNextPosition() ?: return false
+    else findPreviousPosition() ?: return false
     editor.scrollingModel.disableAnimation()
     editor.scrollingModel.scrollTo(position, CENTER)
+
+    return true
   }
 
   private fun findPreviousPosition(): LogicalPosition? {

@@ -9,4 +9,4 @@ intellij {
 }
 
 group = "com.johnlindquist"
-version = "3.3.6"
+version = "3.4.0"

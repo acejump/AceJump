@@ -23,6 +23,7 @@ import com.johnlindquist.acejump.view.Model.setupCursor
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import java.awt.event.KeyEvent.*
+import javax.swing.JComponent
 import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 import kotlin.system.measureTimeMillis
@@ -41,30 +42,31 @@ object Handler {
   private val handler = editorTypeAction.rawHandler
   private var isShiftDown = false
   private val keyMap = mutableMapOf(
-    VK_HOME to { START_OF_LINE.find() },
-    VK_LEFT to { START_OF_LINE.find() },
-    VK_RIGHT to { END_OF_LINE.find() },
-    VK_END to { END_OF_LINE.find() },
-    VK_UP to { CODE_INDENTS.find() },
+    VK_HOME to { findPattern(START_OF_LINE) },
+    VK_LEFT to { findPattern(START_OF_LINE) },
+    VK_RIGHT to { findPattern(END_OF_LINE) },
+    VK_END to { findPattern(END_OF_LINE) },
+    VK_UP to { findPattern(CODE_INDENTS) },
     VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { processBackspaceCommand() },
     VK_ENTER to { Finder.maybeJumpIfJustOneTagRemains() },
-    VK_TAB to { Skipper.ifQueryExistsSkipToNextInEditor(!isShiftDown) }
+    VK_TAB to { Skipper.doesQueryExistIfSoSkipToIt(!isShiftDown) }
   )
 
-  private fun String.find(skim: Boolean = false) =
+  private fun find(key: String, skim: Boolean = false) =
     runLater {
-      Finder.findOrJump(FindModel().apply { stringToFind = this@find }, skim)
-      updateUIState()
+      if(Finder.findOrJump(FindModel().apply { stringToFind = key }, skim)) {
+        updateUIState()
+      } else {
+        text = text.dropLast(1)
+      }
     }
 
-  fun findPattern(pattern: Pattern) = pattern.find()
-
-  private fun Pattern.find() =
+  fun findPattern(pattern: Pattern) =
     runLater {
       Finder.reset()
       Finder.findOrJump(FindModel().apply {
-        stringToFind = string
+        stringToFind = pattern.string
         isRegularExpressions = true
       })
       updateUIState()
@@ -118,9 +120,9 @@ object Handler {
     editorTypeAction.setupRawHandler { _, key, _ ->
       text += key
       if (text.length < 2) {
-        text.find(skim = true)
-        Trigger.restart(400L) { text.find() }
-      } else text.find()
+        find(text, skim = true)
+        Trigger.restart(400L) { find(text) }
+      } else find(text)
     }
 
   private fun configureEditor() =
@@ -143,24 +145,22 @@ object Handler {
   }.get(null)
 
   // Investigate replacing this with `IDEEventQueue.*Dispatcher(...)`
-  private fun installCustomShortcutHandler() =
-    editor.component.run {
-      backup = getClientProperty(ACTIONS_KEY) as List<*>?
-      putClientProperty(ACTIONS_KEY, SmartList<AnAction>(AceKeyAction))
-      val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
-      AceKeyAction.registerCustomShortcutSet(css, this)
-    }
+  private fun JComponent.installCustomShortcutHandler() {
+    backup = getClientProperty(ACTIONS_KEY) as List<*>?
+    putClientProperty(ACTIONS_KEY, SmartList<AnAction>(AceKeyAction))
+    val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
+    AceKeyAction.registerCustomShortcutSet(css, this)
+  }
 
-  private fun uninstallCustomShortCutHandler() =
-    editor.component.run {
-      putClientProperty(ACTIONS_KEY, backup)
-      AceKeyAction.unregisterCustomShortcutSet(this)
-    }
+  private fun JComponent.uninstallCustomShortCutHandler() {
+    putClientProperty(ACTIONS_KEY, backup)
+    AceKeyAction.unregisterCustomShortcutSet(this)
+  }
 
   private fun start() {
     enabled = true
     configureEditor()
-    installCustomShortcutHandler()
+    editor.component.installCustomShortcutHandler()
   }
 
   private fun updateUIState() =
@@ -173,7 +173,11 @@ object Handler {
     }
 
   fun redoFind() {
-    runNow { restoreCanvas(); Canvas.bindToEditor(editor) }
+    runNow {
+      editor.restoreCanvas()
+      Canvas.bindToEditor(editor)
+    }
+
     if (text.isNotEmpty() || Finder.isRegex)
       runLater {
         Finder.find()
@@ -183,12 +187,12 @@ object Handler {
 
   fun reset() {
     editor.removeListeners()
-    enabled = false
-    uninstallCustomShortCutHandler()
+    editor.component.uninstallCustomShortCutHandler()
     editorTypeAction.setupRawHandler(handler)
+    enabled = false
     text = ""
     Finder.reset()
-    restoreEditorSettings()
+    editor.restoreSettings()
   }
 
   private fun Editor.addListeners() =
@@ -218,26 +222,27 @@ object Handler {
       Canvas.repaint()
     }
 
-  private fun restoreEditorSettings() {
+  private fun Editor.restoreSettings() {
     restoreScroll()
     restoreCanvas()
     restoreCursor()
   }
 
-  private fun restoreScroll() = editor.scrollingModel.scroll(scrollX, scrollY)
+  private fun Editor.restoreScroll() {
+    if (editor.caretModel.offset !in editor.getView())
+      scrollingModel.scroll(scrollX, scrollY)
+  }
 
-  private fun restoreCanvas() =
-    editor.component.run {
+  private fun Editor.restoreCanvas() =
+    component.run {
       Canvas.reset()
       remove(Canvas)
       repaint()
     }
 
-  private fun restoreCursor() = runNow {
-    editor.run {
-      settings.isBlinkCaret = Model.naturalBlink
-      settings.isBlockCursor = Model.naturalBlock
-      colorsScheme.setColor(CARET_COLOR, Model.naturalColor)
-    }
+  private fun Editor.restoreCursor() = runNow {
+    settings.isBlinkCaret = Model.naturalBlink
+    settings.isBlockCursor = Model.naturalBlock
+    colorsScheme.setColor(CARET_COLOR, Model.naturalColor)
   }
 }

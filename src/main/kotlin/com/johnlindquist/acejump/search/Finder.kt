@@ -38,16 +38,17 @@ object Finder {
   private val logger = Logger.getInstance(Finder::class.java)
   var applyTags = true
 
-  fun findOrJump(findModel: FindModel, skim: Boolean = false) =
+  fun findOrJump(findModel: FindModel, skim: Boolean = false): Boolean =
     findModel.run {
       if (!isRegex) {
-        isRegex = isRegularExpressions; applyTags = !skim
+        isRegex = isRegularExpressions
+        applyTags = !skim
       }
-      origQ = findModel.stringToFind
-      regex = if (isRegex) findModel.compileRegExp().pattern() else
+      origQ = stringToFind
+      regex = if (isRegex) compileRegExp().pattern() else
         Regex.escape(stringToFind.toLowerCase())
       query = (if (isRegex) " " else "") + stringToFind.toLowerCase()
-      find()
+      return find()
     }
 
   fun toggleTargetMode(status: Boolean? = null): Boolean {
@@ -60,12 +61,11 @@ object Finder {
 
   private fun jumpTo(marker: Marker) = Jumper.jump(marker)
 
-  fun find() {
+  fun find(): Boolean {
     jumpLocations = determineJumpLocations()
-    if (jumpLocations.isEmpty()) Skipper.ifQueryExistsSkipToNextInEditor(false)
 
     // TODO: Clean up this ugliness.
-    if (jumpLocations.size > 1 || query.length < 2) return
+    if (jumpLocations.size > 1 || query.length < 2) return true
 
     val last1 = query.substring(query.length - 1)
     val indexLast1 = tagMap[last1]
@@ -80,7 +80,12 @@ object Finder {
       val charIndex = indexLast1 + query.length - 1
       if (charIndex >= editorText.length || editorText[charIndex] != last1[0])
         jumpTo(Marker(last1, indexLast1))
+    } else {
+      // There is no sign of a matching result or tag
+      return false
     }
+
+    return true
   }
 
   fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
@@ -89,16 +94,19 @@ object Finder {
     unseen2grams = LinkedHashSet(allBigrams())
 
     if (!isRegex || sitesToCheck.isEmpty()) {
-      sitesToCheck = findMatchingSites().toList()
+      findMatchingSites().toList().let {
+        if (it.isNotEmpty()) sitesToCheck = it
+        else return listOf()
+      }
 
-      if(!applyTags) return sitesToCheck.map { Marker(null, it) }
+      if (!applyTags) return sitesToCheck.map { Marker(null, it) }
 
       digraphs = makeMap(editorText, sitesToCheck.filter { it in editor.getView() })
     }
 
-    return compact(mapDigraphs(digraphs)).apply { tagMap = this }.run {
-      values.map { Marker(inverse()[it]!!, it) }
-    }
+    return compact(mapDigraphs(digraphs))
+      .apply { tagMap = this }
+      .run { values.map { Marker(inverse()[it]!!, it) } }
   }
 
   /**
