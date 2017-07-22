@@ -31,19 +31,18 @@ object Finder {
   var regex = ""
   var query = ""
     private set
-  var sitesToCheck = listOf<Int>()
+  var textMatches = listOf<Int>()
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
   private val logger = Logger.getInstance(Finder::class.java)
-  var applyTags = true
+  var applyTagsFully = true
 
   fun findOrJump(findModel: FindModel, skim: Boolean = false): Boolean =
     findModel.run {
-      if (!isRegex) {
-        isRegex = isRegularExpressions
-        applyTags = !skim
-      }
+      if (!isRegex) isRegex = isRegularExpressions
+
+      applyTagsFully = !skim
       origQ = stringToFind
       regex = if (isRegex) compileRegExp().pattern() else
         Regex.escape(stringToFind.toLowerCase())
@@ -57,15 +56,18 @@ object Finder {
   }
 
   fun maybeJumpIfJustOneTagRemains() =
-    tagMap.entries.firstOrNull()?.run { jumpTo(Marker(key, value)); true } ?: false
+    tagMap.entries.firstOrNull()?.run { jumpTo(Marker(query, key, value)); true } ?: false
 
   private fun jumpTo(marker: Marker) = Jumper.jump(marker)
 
   fun find(): Boolean {
-    jumpLocations = determineJumpLocations()
+    jumpLocations = collectJumpLocations()
 
     // TODO: Clean up this ugliness.
     if (jumpLocations.size > 1 || query.length < 2) return true
+
+    // There is no sign of a matching result or tag, must be a dead end
+    if (textMatches.isEmpty() && jumpLocations.isEmpty()) return false
 
     val last1 = query.substring(query.length - 1)
     val indexLast1 = tagMap[last1]
@@ -74,15 +76,15 @@ object Finder {
     val indexLast2 = tagMap[last2]
 
     // If the tag is two chars, the query must be at least 3
-    if (indexLast2 != null && query.length > 2)
-      jumpTo(Marker(last2, indexLast2))
-    else if (indexLast1 != null) {
+    if (indexLast2 != null) {
+      if (query.length > 2)
+        jumpTo(Marker(query, last2, indexLast2))
+    } else if (indexLast1 != null) {
       val charIndex = indexLast1 + query.length - 1
       if (charIndex >= editorText.length || editorText[charIndex] != last1[0])
-        jumpTo(Marker(last1, indexLast1))
-    } else {
-      // There is no sign of a matching result or tag
-      return false
+        jumpTo(Marker(query, last1, indexLast1))
+    } else if (jumpLocations.isEmpty()) {
+      Skipper.doesQueryExistIfSoSkipToIt()
     }
 
     return true
@@ -90,23 +92,22 @@ object Finder {
 
   fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
 
-  private fun determineJumpLocations(): Collection<Marker> {
+  private fun collectJumpLocations(): Collection<Marker> {
     unseen2grams = LinkedHashSet(allBigrams())
 
-    if (!isRegex || sitesToCheck.isEmpty()) {
-      findMatchingSites().toList().let {
-        if (it.isNotEmpty()) sitesToCheck = it
-        else return listOf()
-      }
+    if (!isRegex || textMatches.isEmpty()) {
+      textMatches = findMatchingSites().toList()
 
-      if (!applyTags) return sitesToCheck.map { Marker(null, it) }
+      if (!applyTagsFully && textMatches.size > settings.allowedChars.size)
+        return textMatches.map { Marker(query, null, it) }
 
-      digraphs = makeMap(editorText, sitesToCheck.filter { it in editor.getView() })
+      digraphs = makeMap(editorText, textMatches.filter { it in editor.getView() })
     }
 
-    return compact(mapDigraphs(digraphs))
-      .apply { tagMap = this }
-      .run { values.map { Marker(inverse()[it]!!, it) } }
+    return mapDigraphs(digraphs)
+      .let { compact(it) }
+      .apply { if (this.isNotEmpty()) tagMap = this }
+      .run { values.map { Marker(query, inverse()[it]!!, it) } }
   }
 
   /**
@@ -132,7 +133,7 @@ object Finder {
 
   fun findMatchingSites(key: String = query.toLowerCase(),
                         source: String = editorText,
-                        cache: List<Int> = sitesToCheck) =
+                        cache: List<Int> = textMatches) =
     // If the cache is populated, filter it instead of redoing extra work
     if (cache.isEmpty()) source.findAll(regex)
     else cache.asSequence().filter { source.regionMatches(it, key, 0, key.length) }
@@ -146,8 +147,8 @@ object Finder {
 
   // Provides a way to short-circuit the full text search if a match is found
   private operator fun String.contains(key: String) =
-    if (sitesToCheck.isEmpty()) findMatchingSites(key).any()
-    else sitesToCheck.any { regionMatches(it, key, 0, key.length) }
+    if (textMatches.isEmpty()) findMatchingSites(key).any()
+    else textMatches.any { regionMatches(it, key, 0, key.length) }
 
   /**
    * Builds a map of all existing bigrams, starting from the index of the last
@@ -280,15 +281,16 @@ object Finder {
 
   private fun setupTags() =
     // Minimize the distance between tag characters
-    unseen2grams.sortedWith(compareBy(
-      { priotity(it.last()) },
-      { distance(it[0], it.last()) }))
+    unseen2grams.filter { it[0] != query[0] }
+      .sortedWith(compareBy(
+        { distance(it[0], it.last()) },
+        { priotity(it.first()) }))
       .mapTo(linkedSetOf()) { it }
 
   fun reset() {
     isRegex = false
     targetModeEnabled = false
-    sitesToCheck = listOf()
+    textMatches = listOf()
     digraphs.clear()
     tagMap.clear()
     origQ = ""

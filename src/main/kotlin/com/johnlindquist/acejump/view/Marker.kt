@@ -3,7 +3,6 @@ package com.johnlindquist.acejump.view
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Finder.isRegex
-import com.johnlindquist.acejump.search.Finder.query
 import com.johnlindquist.acejump.view.Marker.Alignment.*
 import com.johnlindquist.acejump.view.Model.arcD
 import com.johnlindquist.acejump.view.Model.editor
@@ -26,7 +25,7 @@ import com.johnlindquist.acejump.view.Model.editorText as text
  * caption, which will move the cursor to a known index in the document.
  */
 
-class Marker(val tag: String?, val index: Int) {
+class Marker(val query: String, val tag: String?, val index: Int) {
   private var srcPoint = editor.getPointFromIndex(index)
   private var queryLength = query.length
   private var trueOffset = query.length - 1

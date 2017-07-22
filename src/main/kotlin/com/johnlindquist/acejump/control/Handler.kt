@@ -92,8 +92,8 @@ object Handler {
     private fun canSurviveViewAdjustment(): Boolean =
       editor.getView().run {
         if (first in range && last in range) return true
-        else Finder.sitesToCheck.hasTagBetweenOldAndNewViewTop(range, this)
-          && Finder.sitesToCheck.hasTagBetweenOldAndNewViewBottom(range, this)
+        else Finder.textMatches.hasTagBetweenOldAndNewViewTop(range, this)
+          && Finder.textMatches.hasTagBetweenOldAndNewViewBottom(range, this)
       }
 
     override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoFind()
