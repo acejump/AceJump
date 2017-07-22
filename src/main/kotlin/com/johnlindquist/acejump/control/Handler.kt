@@ -55,7 +55,7 @@ object Handler {
 
   private fun find(key: String, skim: Boolean = false) =
     runLater {
-      if(Finder.findOrJump(FindModel().apply { stringToFind = key }, skim)) {
+      if (Finder.findOrJump(FindModel().apply { stringToFind = key }, skim)) {
         updateUIState()
       } else {
         text = text.dropLast(1)
@@ -92,8 +92,9 @@ object Handler {
     private fun canSurviveViewAdjustment(): Boolean =
       editor.getView().run {
         if (first in range && last in range) return true
-        else Finder.textMatches.hasTagBetweenOldAndNewViewTop(range, this)
-          && Finder.textMatches.hasTagBetweenOldAndNewViewBottom(range, this)
+        else if(Finder.isRegex) return false
+        else !Finder.textMatches.hasMatchBetweenOldAndNewViewTop(range, this)
+          && !Finder.textMatches.hasMatchBetweenOldAndNewViewBottom(range, this)
       }
 
     override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoFind()

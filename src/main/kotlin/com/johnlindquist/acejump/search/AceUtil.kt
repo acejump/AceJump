@@ -9,6 +9,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
+import com.johnlindquist.acejump.view.Model
 import java.awt.Point
 import java.lang.Math.max
 import java.lang.Math.min
@@ -19,11 +20,11 @@ operator fun Point.component2() = y
 operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 operator fun FindModel.invoke(t: FindModel.() -> Unit) = clone().apply(t)
 
-fun List<Int>.hasTagBetweenOldAndNewViewTop(old: IntRange, new: IntRange) =
-  lastOrNull { it < old.first } ?: -1 < new.first
+fun List<Int>.hasMatchBetweenOldAndNewViewTop(old: IntRange, new: IntRange) =
+  lastOrNull { it < old.first } ?: -1 >= new.first
 
-fun List<Int>.hasTagBetweenOldAndNewViewBottom(old: IntRange, new: IntRange) =
-  firstOrNull { it > old.last } ?: new.last >= new.last
+fun List<Int>.hasMatchBetweenOldAndNewViewBottom(old: IntRange, new: IntRange) =
+  firstOrNull { it > old.last } ?: new.last < new.last
 
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 
@@ -31,6 +32,14 @@ fun runNow(t: () -> Unit) =
   ApplicationManager.getApplication().invokeAndWait(t, defaultModalityState())
 
 fun runLater(t: () -> Unit) = ApplicationManager.getApplication().invokeLater(t)
+
+fun CharSequence.findAll(key: String, startingFrom: Int = 0) =
+  Regex(key, RegexOption.MULTILINE).findAll(this, startingFrom).mapNotNull {
+    // Do not accept any sites which fall between folded regions in the gutter
+    if (Model.editor.foldingModel.isOffsetCollapsed(it.range.first)) null
+    else it.range.first
+  }
+
 /**
  * Identifies the bounds of a word, defined as a contiguous group of letters
  * and digits, by expanding the provided index until a non-matching character

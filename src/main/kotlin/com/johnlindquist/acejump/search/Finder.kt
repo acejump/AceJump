@@ -15,7 +15,6 @@ import com.johnlindquist.acejump.view.Model.editorText
 import java.lang.Math.max
 import java.lang.Math.min
 import java.util.*
-import kotlin.text.RegexOption.MULTILINE
 
 /**
  * Singleton that searches for text in the editor and tags matching results.
@@ -95,14 +94,12 @@ object Finder {
   private fun collectJumpLocations(): Collection<Marker> {
     unseen2grams = LinkedHashSet(allBigrams())
 
-    if (!isRegex || textMatches.isEmpty()) {
-      textMatches = findMatchingSites().toList()
+    textMatches = findMatchingSites().toList()
 
-      if (!applyTagsFully && textMatches.size > settings.allowedChars.size)
-        return textMatches.map { Marker(query, null, it) }
+    if (!applyTagsFully && textMatches.size > settings.allowedChars.size)
+      return textMatches.map { Marker(query, null, it) }
 
-      digraphs = makeMap(editorText, textMatches.filter { it in editor.getView() })
-    }
+    digraphs = makeMap(editorText, textMatches.filter { it in editor.getView() })
 
     return mapDigraphs(digraphs)
       .let { compact(it) }
@@ -136,14 +133,8 @@ object Finder {
                         cache: List<Int> = textMatches) =
     // If the cache is populated, filter it instead of redoing extra work
     if (cache.isEmpty()) source.findAll(regex)
+    else if (isRegex) cache.asSequence()
     else cache.asSequence().filter { source.regionMatches(it, key, 0, key.length) }
-
-  private fun CharSequence.findAll(key: String, startingFrom: Int = 0) =
-    Regex(key, MULTILINE).findAll(this, startingFrom).mapNotNull {
-      // Do not accept any sites which fall between folded regions in the gutter
-      if (editor.foldingModel.isOffsetCollapsed(it.range.first)) null
-      else it.range.first
-    }
 
   // Provides a way to short-circuit the full text search if a match is found
   private operator fun String.contains(key: String) =
@@ -158,7 +149,10 @@ object Finder {
    */
 
   fun makeMap(text: CharSequence, sites: List<Int>): Multimap<String, Int> =
-    LinkedListMultimap.create<String, Int>().apply {
+    if (isRegex) LinkedListMultimap.create<String, Int>().apply {
+      sites.forEach { put(" ", it) }
+    }
+    else LinkedListMultimap.create<String, Int>().apply {
       sites.forEach { site ->
         val toCheck = site + query.length
         var (p0, p1, p2) = Triple(toCheck - 1, toCheck, toCheck + 1)
@@ -251,17 +245,17 @@ object Finder {
         }
     }
 
-    if (!isRegex || newTagMap.isEmpty())
-      sortValidJumpTargets(digraphs).forEach {
-        if (availableTags.isEmpty()) return newTagMap
-        tryToAssignTagToIndex(it)
-      }
+    sortValidJumpTargets(digraphs).forEach {
+      if (availableTags.isEmpty()) return newTagMap
+      tryToAssignTagToIndex(it)
+    }
 
     return newTagMap
   }
 
   private fun sortValidJumpTargets(digraphs: Multimap<String, Int>) =
-    digraphs.asMap().entries.sortedBy { it.value.size }
+    if (isRegex) digraphs.values()
+    else digraphs.asMap().entries.sortedBy { it.value.size }
       .flatMap { it.value }.sortedWith(compareBy(
       // Ensure that the first letter of a word is prioritized for tagging
       { editorText[max(0, it - 1)].isLetterOrDigit() },
