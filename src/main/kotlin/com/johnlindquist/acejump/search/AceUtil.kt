@@ -158,7 +158,8 @@ fun Editor.getScreenHeight() =
  */
 
 fun Editor.visualLineToLogicalLine(line: Int) =
-  normalizeLine(visualToLogicalPosition(VisualPosition(line, 0)).line)
+  normalizeLine(visualToLogicalPosition(
+    VisualPosition(line.coerceAtLeast(0), 0)).line)
 
 /**
  * Returns the offset of the start of the requested line.
