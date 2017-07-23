@@ -37,9 +37,11 @@ object Finder {
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
   private val logger = Logger.getInstance(Finder::class.java)
+  var findModel = FindModel()
   var skim = true
 
   fun findOrJump(findModel: FindModel, skim: Boolean = false) {
+    this.findModel = findModel
     if (!isRegex) isRegex = findModel.isRegularExpressions
 
     this.skim = skim
@@ -47,7 +49,6 @@ object Finder {
     regex = if (isRegex) findModel.compileRegExp().pattern() else
       Regex.escape(findModel.stringToFind.toLowerCase())
     query = (if (isRegex) " " else "") + findModel.stringToFind.toLowerCase()
-//    query = findModel.stringToFind.let { if(isRegex && Pattern.hasPattern(it)) "" else it  }
 
     find()
   }

@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.control
 
+import com.intellij.find.EditorSearchSession
 import com.intellij.find.FindModel
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
@@ -15,6 +16,7 @@ import com.johnlindquist.acejump.search.Skipper.storeScroll
 import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Model
 import com.johnlindquist.acejump.view.Model.editor
+import com.johnlindquist.acejump.view.Model.project
 import com.johnlindquist.acejump.view.Model.setupCursor
 import com.johnlindquist.acejump.view.Model.viewBounds
 import java.awt.event.KeyEvent.*
@@ -126,6 +128,7 @@ object Handler {
       Jumper.hasJumped = false
       reset()
     } else {
+      EditorSearchSession.start(editor, Finder.findModel, project)
       Canvas.jumpLocations = Finder.markers
       Canvas.repaint()
     }

@@ -54,7 +54,7 @@ class Marker(val query: String, val tag: String?, val index: Int) {
       ?.apply { Canvas.registerTag(this, tag) }
       ?.let { highlightTag(it); drawTagForeground(it) }
 
-    highlightText()
+//    highlightText()
   }
 
   private fun Graphics2D.highlightText() {
