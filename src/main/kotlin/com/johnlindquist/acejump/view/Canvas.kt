@@ -39,7 +39,7 @@ object Canvas : JComponent() {
   fun registerTag(pt: Point, tag: String) =
     (-1..tag.length).forEach { tags.add(Point(pt.x + it * fontWidth, pt.y)) }
 
-  fun isFree(point: Point) = !tags.contains(point)
+  fun isFree(point: Point) = point !in tags
 
   fun reset() {
     tags.clear()

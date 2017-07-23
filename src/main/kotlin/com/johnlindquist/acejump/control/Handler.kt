@@ -16,6 +16,8 @@ import com.intellij.util.SmartList
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Pattern.*
+import com.johnlindquist.acejump.search.Skipper.restoreScroll
+import com.johnlindquist.acejump.search.Skipper.storeScroll
 import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Model
 import com.johnlindquist.acejump.view.Model.editor
@@ -36,8 +38,6 @@ object Handler {
   private var enabled = false
   private var text = ""
   private var range = 0..0
-  private var scrollX = 0
-  private var scrollY = 0
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
   private var isShiftDown = false
@@ -128,10 +128,9 @@ object Handler {
 
   private fun configureEditor() =
     editor.run {
+      storeScroll()
       setupCursor()
       range = getView()
-      scrollX = scrollingModel.horizontalScrollOffset
-      scrollY = scrollingModel.verticalScrollOffset
       Canvas.bindToEditor(this)
       interceptPrintableKeystrokes()
       addListeners()
@@ -227,11 +226,6 @@ object Handler {
     restoreScroll()
     restoreCanvas()
     restoreCursor()
-  }
-
-  private fun Editor.restoreScroll() {
-    if (editor.caretModel.offset !in editor.getView())
-      scrollingModel.scroll(scrollX, scrollY)
   }
 
   private fun Editor.restoreCanvas() =

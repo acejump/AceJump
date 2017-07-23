@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.search
 
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType.CENTER
 import com.johnlindquist.acejump.search.Finder.textMatches
@@ -10,6 +11,9 @@ import com.johnlindquist.acejump.view.Model.editor
  */
 
 object Skipper {
+  private var scrollX = 0
+  private var scrollY = 0
+
   fun doesQueryExistIfSoSkipToIt(isNext: Boolean = true): Boolean {
     val position = if (isNext) findNextPosition() ?: return false
     else findPreviousPosition() ?: return false
@@ -55,5 +59,14 @@ object Skipper {
     }
 
     return maximizeCoverageOfNextOccurrence()
+  }
+
+  fun Editor.storeScroll() {
+    scrollX = scrollingModel.horizontalScrollOffset
+    scrollY = scrollingModel.verticalScrollOffset
+  }
+
+  fun Editor.restoreScroll() {
+    if (caretModel.offset !in getView()) scrollingModel.scroll(scrollX, scrollY)
   }
 }

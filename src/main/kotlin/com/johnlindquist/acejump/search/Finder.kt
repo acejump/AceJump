@@ -241,7 +241,7 @@ object Finder {
     query.run {
       if (isNotEmpty())
         substring(max(0, length - 2)).let {
-          if (tagMap.contains(it) && it.length < length)
+          if (it in tagMap && it.length < length)
             return HashBiMap.create(mapOf(it to tagMap[it]))
         }
     }

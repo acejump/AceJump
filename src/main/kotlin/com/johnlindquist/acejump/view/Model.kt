@@ -40,13 +40,13 @@ object Model {
       naturalColor = getInstance().globalScheme.getColor(CARET_COLOR) ?: BLACK
     }
 
-  val project: Project
-    get() = editor.project!!
+  val project: Project?
+    get() = editor.project
   var editorText = editor.document.text.toLowerCase()
 
   var naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
   var naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
-  var naturalColor = getInstance().globalScheme.getColor(CARET_COLOR)!!
+  var naturalColor = getInstance().globalScheme.getColor(CARET_COLOR) ?: BLACK
 
   val targetModeStyle = TextAttributes(null, null, RED, BOXED, Font.PLAIN)
   val highlightStyle = TextAttributes(null, GREEN, GREEN, BOXED, Font.PLAIN)
@@ -81,7 +81,7 @@ object Model {
     naturalBlink = settings.isBlinkCaret
     settings.isBlinkCaret = false
 
-    naturalColor = colorsScheme.getColor(CARET_COLOR)!!
+    naturalColor = colorsScheme.getColor(CARET_COLOR) ?: BLACK
     colorsScheme.setColor(CARET_COLOR, AceConfig.settings.jumpModeColor)
   }
 }
