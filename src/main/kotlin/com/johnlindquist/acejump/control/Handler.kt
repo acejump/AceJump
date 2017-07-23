@@ -6,12 +6,6 @@ import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
-import com.intellij.openapi.editor.colors.EditorColorsListener
-import com.intellij.openapi.editor.colors.EditorColorsScheme
-import com.intellij.openapi.editor.event.CaretEvent
-import com.intellij.openapi.editor.event.CaretListener
-import com.intellij.openapi.editor.event.VisibleAreaEvent
-import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.intellij.util.SmartList
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.*
@@ -22,13 +16,8 @@ import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Model
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.setupCursor
-import java.awt.event.FocusEvent
-import java.awt.event.FocusListener
 import java.awt.event.KeyEvent.*
 import javax.swing.JComponent
-import javax.swing.event.AncestorEvent
-import javax.swing.event.AncestorListener
-import kotlin.system.measureTimeMillis
 
 /**
  * Handles all incoming keystrokes, IDE notifications, and UI updates.
@@ -37,7 +26,6 @@ import kotlin.system.measureTimeMillis
 object Handler {
   private var enabled = false
   private var text = ""
-  private var range = 0..0
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
   private var isShiftDown = false
@@ -82,41 +70,6 @@ object Handler {
     updateUIState()
   }
 
-  private val resetListener = object : CaretListener, FocusListener,
-    AncestorListener, EditorColorsListener, VisibleAreaListener {
-    override fun visibleAreaChanged(e: VisibleAreaEvent?) {
-      val elapsed = measureTimeMillis { if (canSurviveViewAdjustment()) return }
-      Trigger.restart(delay = (750L - elapsed).coerceAtLeast(0L)) { redoFind() }
-    }
-
-    private fun canSurviveViewAdjustment(): Boolean =
-      editor.getView().run {
-        if (first in range && last in range) return true
-        else if(Finder.isRegex) return false
-        else !Finder.textMatches.hasMatchBetweenOldAndNewViewTop(range, this)
-          && !Finder.textMatches.hasMatchBetweenOldAndNewViewBottom(range, this)
-      }
-
-    override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoFind()
-
-    override fun ancestorAdded(event: AncestorEvent?) = reset()
-
-    override fun ancestorMoved(event: AncestorEvent?) =
-      if (canSurviveViewAdjustment()) Unit else reset()
-
-    override fun ancestorRemoved(event: AncestorEvent?) = reset()
-
-    override fun focusLost(e: FocusEvent?) = reset()
-
-    override fun focusGained(e: FocusEvent?) = reset()
-
-    override fun caretAdded(e: CaretEvent?) = reset()
-
-    override fun caretPositionChanged(e: CaretEvent?) = reset()
-
-    override fun caretRemoved(e: CaretEvent?) = reset()
-  }
-
   private fun interceptPrintableKeystrokes() =
     editorTypeAction.setupRawHandler { _, key, _ ->
       text += key
@@ -130,10 +83,10 @@ object Handler {
     editor.run {
       storeScroll()
       setupCursor()
-      range = getView()
+      Model.viewBounds = getView()
       Canvas.bindToEditor(this)
       interceptPrintableKeystrokes()
-      addListeners()
+      Listener.enable()
     }
 
   private var backup: List<*>? = null
@@ -186,7 +139,7 @@ object Handler {
   }
 
   fun reset() {
-    editor.removeListeners()
+    if (enabled) Listener.disable()
     editor.component.uninstallCustomShortCutHandler()
     editorTypeAction.setupRawHandler(handler)
     enabled = false
@@ -194,24 +147,6 @@ object Handler {
     Finder.reset()
     editor.restoreSettings()
   }
-
-  private fun Editor.addListeners() =
-    synchronized(resetListener) {
-      component.addFocusListener(resetListener)
-      component.addAncestorListener(resetListener)
-      scrollingModel.addVisibleAreaListener(resetListener)
-      caretModel.addCaretListener(resetListener)
-    }
-
-  private fun Editor.removeListeners() =
-    synchronized(resetListener) {
-      if (enabled) {
-        component.removeFocusListener(resetListener)
-        component.removeAncestorListener(resetListener)
-        scrollingModel.removeVisibleAreaListener(resetListener)
-        caretModel.removeCaretListener(resetListener)
-      }
-    }
 
   fun toggleTargetMode(status: Boolean? = null) =
     editor.colorsScheme.run {

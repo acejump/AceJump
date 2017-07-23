@@ -66,6 +66,7 @@ object Model {
   val rectHOffset: Int
     get() = lineHeight - (editor as EditorImpl).descent - fontHeight
   val arcD = rectHeight - 6
+  var viewBounds = 0..0
 
   data class Settings(var allowedChars: List<Char> = ('a'..'z').toList(),
                       var jumpModeColor: Color = blue,

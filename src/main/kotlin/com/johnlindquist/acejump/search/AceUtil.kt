@@ -20,11 +20,6 @@ operator fun Point.component2() = y
 operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 operator fun FindModel.invoke(t: FindModel.() -> Unit) = clone().apply(t)
 
-fun List<Int>.hasMatchBetweenOldAndNewViewTop(old: IntRange, new: IntRange) =
-  lastOrNull { it < old.first } ?: -1 >= new.first
-
-fun List<Int>.hasMatchBetweenOldAndNewViewBottom(old: IntRange, new: IntRange) =
-  firstOrNull { it > old.last } ?: new.last < new.last
 
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 

@@ -7,6 +7,7 @@ import com.google.common.collect.Multimap
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
+import com.johnlindquist.acejump.search.Finder.textMatches
 import com.johnlindquist.acejump.search.Pattern.Companion.distance
 import com.johnlindquist.acejump.search.Pattern.Companion.priotity
 import com.johnlindquist.acejump.view.Marker
@@ -89,7 +90,7 @@ object Finder {
     return true
   }
 
-  fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
+  private fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
 
   private fun collectJumpLocations(): Collection<Marker> {
     unseen2grams = LinkedHashSet(allBigrams())
@@ -130,12 +131,12 @@ object Finder {
    */
 
   fun findMatchingSites(key: String = query.toLowerCase(),
-                        source: String = editorText,
+                        src: String = editorText,
                         cache: List<Int> = textMatches) =
     // If the cache is populated, filter it instead of redoing extra work
-    if (cache.isEmpty()) source.findAll(regex)
+    if (cache.isEmpty()) src.findAll(regex)
     else if (isRegex) cache.asSequence()
-    else cache.asSequence().filter { source.regionMatches(it, key, 0, key.length) }
+    else cache.asSequence().filter { src.regionMatches(it, key, 0, key.length) }
 
   // Provides a way to short-circuit the full text search if a match is found
   private operator fun String.contains(key: String) =
@@ -189,6 +190,10 @@ object Finder {
    *
    * A. Should be as short as possible. A tag may be "compacted" later.
    * B. Should prefer keys that are physically closer to the last key pressed.
+   *
+   * @param digraphs All strings to be tagged and indices where to find them
+   *
+   * @return A list of all tags and their corresponding indices
    */
 
   private fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
@@ -197,23 +202,24 @@ object Finder {
     val newTagMap: BiMap<String, Int> = setupTagMap()
     val availableTags: HashSet<String> = setupTags()
 
-    fun String.hasNearbyTag(index: Int): Boolean {
-      val (start, end) = wordBounds(index)
-      val (left, right) = Pair(max(start, index - 2), min(end, index + 2))
-      return (left..right).any { newTagMap.containsValue(it) }
-    }
-
     /**
      * Iterates through the remaining available tags, until we find one that
      * matches our criteria, i.e. does not collide with an existing tag or
      * plaintext string. To have the desired behavior, this has a surprising
      * number of edge cases and irregularities that must explicitly prevented.
+     *
+     * @param idx the index which a tag is to be assigned
      */
 
     fun tryToAssignTagToIndex(idx: Int) {
-      if (newTagMap.containsValue(idx) || editorText.hasNearbyTag(idx)) return
-
       val (left, right) = editorText.wordBounds(idx)
+
+      fun hasNearbyTag(index: Int) =
+        Pair(max(left, index - 2), min(right, index + 2))
+          .run { (first..second).any { newTagMap.containsValue(it) } }
+
+      if (hasNearbyTag(idx)) return
+
       val (matching, nonMatching) = availableTags.partition { tag ->
         // Prevents a situation where some sites couldn't be assigned last time
         !newTagMap.containsKey("${tag[0]}") &&
@@ -257,7 +263,7 @@ object Finder {
   private fun sortValidJumpTargets(digraphs: Multimap<String, Int>) =
     if (isRegex) digraphs.values()
     else digraphs.asMap().entries.sortedBy { it.value.size }
-      .flatMap { it.value }.sortedWith(compareBy(
+      .flatMapTo(HashSet(), { it.value }).sortedWith(compareBy(
       // Ensure that the first letter of a word is prioritized for tagging
       { editorText[max(0, it - 1)].isLetterOrDigit() },
       // Target words with more unique characters to the immediate right ought
@@ -294,4 +300,18 @@ object Finder {
     unseen2grams.clear()
     jumpLocations = emptyList()
   }
+
+  /**
+   * Returns true if the Finder contains a match in the new view, that is not
+   * contained (visible) in the old view. This method assumes that textMatches
+   * are sorted from least to greatest.
+   *
+   * @see textMatches
+   *
+   * @return true if there is a match in the new range not in the old range
+   */
+
+  fun hasMatchBetweenOldAndNewView(old: IntRange, new: IntRange) =
+    textMatches.lastOrNull { it < old.first } ?: -1 >= new.first ||
+      textMatches.firstOrNull { it > old.last } ?: new.last < new.last
 }
