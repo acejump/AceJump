@@ -93,13 +93,14 @@ object Finder {
 
   private fun collectJumpLocations(): Collection<Marker> {
     unseen2grams = LinkedHashSet(allBigrams())
-
     textMatches = findMatchingSites().toList()
 
-    if (!applyTagsFully && textMatches.size > settings.allowedChars.size)
+    val matchesInView = textMatches.filter { it in editor.getView() }
+
+    if (!applyTagsFully && matchesInView.size > settings.allowedChars.size)
       return textMatches.map { Marker(query, null, it) }
 
-    digraphs = makeMap(editorText, textMatches.filter { it in editor.getView() })
+    digraphs = makeMap(editorText, matchesInView)
 
     return mapDigraphs(digraphs)
       .let { compact(it) }
