@@ -16,6 +16,7 @@ import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Model
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.setupCursor
+import com.johnlindquist.acejump.view.Model.viewBounds
 import java.awt.event.KeyEvent.*
 import javax.swing.JComponent
 
@@ -29,7 +30,7 @@ object Handler {
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
   private var isShiftDown = false
-  private val keyMap = mutableMapOf(
+  private val keyMap = mapOf(
     VK_HOME to { findPattern(START_OF_LINE) },
     VK_LEFT to { findPattern(START_OF_LINE) },
     VK_RIGHT to { findPattern(END_OF_LINE) },
@@ -41,13 +42,17 @@ object Handler {
     VK_TAB to { Skipper.doesQueryExistIfSoSkipToIt(!isShiftDown) }
   )
 
+  private fun findOrDropLast(key: String) =
+    if (!Finder.isQueryDeadEnd(text)) {
+      find(key)
+    } else {
+      text = text.dropLast(1)
+    }
+
   private fun find(key: String, skim: Boolean = false) =
     runLater {
-      if (Finder.findOrJump(FindModel().apply { stringToFind = key }, skim)) {
-        updateUIState()
-      } else {
-        text = text.dropLast(1)
-      }
+      Finder.findOrJump(FindModel().apply { stringToFind = key }, skim)
+      updateUIState()
     }
 
   fun findPattern(pattern: Pattern) =
@@ -75,15 +80,15 @@ object Handler {
       text += key
       if (text.length < 2) {
         find(text, skim = true)
-        Trigger.restart(400L) { find(text) }
-      } else find(text)
+        Trigger.restart(400L) { find(text, skim = false) }
+      } else findOrDropLast(text)
     }
 
   private fun configureEditor() =
     editor.run {
       storeScroll()
       setupCursor()
-      Model.viewBounds = getView()
+      viewBounds = getView()
       Canvas.bindToEditor(this)
       interceptPrintableKeystrokes()
       Listener.enable()
@@ -121,7 +126,7 @@ object Handler {
       Jumper.hasJumped = false
       reset()
     } else {
-      Canvas.jumpLocations = Finder.jumpLocations
+      Canvas.jumpLocations = Finder.markers
       Canvas.repaint()
     }
 

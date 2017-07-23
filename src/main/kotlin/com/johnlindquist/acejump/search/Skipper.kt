@@ -5,6 +5,7 @@ import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType.CENTER
 import com.johnlindquist.acejump.search.Finder.textMatches
 import com.johnlindquist.acejump.view.Model.editor
+import com.johnlindquist.acejump.view.Model.viewBounds
 
 /**
  * Responsible for changing the vertical scroll position inside an editor.
@@ -19,6 +20,7 @@ object Skipper {
     else findPreviousPosition() ?: return false
     editor.scrollingModel.disableAnimation()
     editor.scrollingModel.scrollTo(position, CENTER)
+    viewBounds = editor.getView()
 
     return true
   }
@@ -44,7 +46,7 @@ object Skipper {
 
   private fun findNextPosition(): LogicalPosition? {
     val nextIndex = textMatches
-      .dropWhile { it < editor.getView().endInclusive }
+      .dropWhile { it <= editor.getView().last }
       .firstOrNull() ?: textMatches.firstOrNull() ?: return null
 
     val nextLogicalPosition = editor.offsetToLogicalPosition(nextIndex)
