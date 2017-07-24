@@ -14,12 +14,17 @@ import java.awt.Point
 import java.lang.Math.max
 import java.lang.Math.min
 
+var FindModel.skim: Boolean
+  get() = Finder.skim
+  set(value) {
+    Finder.skim = value
+  }
+
 operator fun Point.component1() = x
 operator fun Point.component2() = y
 
 operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 operator fun FindModel.invoke(t: FindModel.() -> Unit) = clone().apply(t)
-
 
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 

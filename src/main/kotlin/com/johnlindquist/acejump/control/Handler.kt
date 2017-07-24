@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
+import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.util.SmartList
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.*
@@ -49,21 +50,16 @@ object Handler {
       text = text.dropLast(1)
     }
 
-  private fun find(key: String, skim: Boolean = false) =
-    runLater {
-      Finder.findOrJump(FindModel().apply { stringToFind = key }, skim)
-      updateUIState()
-    }
+  private fun find(key: String, doSkim: Boolean = false) =
+    Highlighter.search(FindModel().apply { stringToFind = key; skim = doSkim })
 
   fun findPattern(pattern: Pattern) =
-    runLater {
+    Highlighter.search(FindModel().apply {
+      stringToFind = pattern.string
+      isRegularExpressions = true
+      skim = false
       Finder.reset()
-      Finder.findOrJump(FindModel().apply {
-        stringToFind = pattern.string
-        isRegularExpressions = true
-      })
-      updateUIState()
-    }
+    })
 
   fun activate() = runNow { if (!enabled) start() else toggleTargetMode() }
 
@@ -72,7 +68,7 @@ object Handler {
   private fun processBackspaceCommand() {
     text = ""
     Finder.reset()
-    Searcher.discard()
+    Highlighter.discard()
     updateUIState()
   }
 
@@ -80,8 +76,8 @@ object Handler {
     editorTypeAction.setupRawHandler { _, key, _ ->
       text += key
       if (text.length < 2) {
-        find(text, skim = true)
-        Trigger.restart(400L) { find(text, skim = false) }
+        find(text, doSkim = true)
+        Trigger.restart(400L) { find(text, doSkim = false) }
       } else findOrDropLast()
     }
 
@@ -122,12 +118,11 @@ object Handler {
     editor.component.installCustomShortcutHandler()
   }
 
-  private fun updateUIState() =
+  fun updateUIState() =
     if (Jumper.hasJumped) {
       Jumper.hasJumped = false
       reset()
     } else {
-      Searcher.search(Finder.findModel)
       Canvas.jumpLocations = Finder.markers
       Canvas.repaint()
     }
@@ -152,7 +147,7 @@ object Handler {
     enabled = false
     text = ""
     Finder.reset()
-    Searcher.discard()
+    Highlighter.discard()
     editor.restoreSettings()
   }
 
@@ -169,6 +164,7 @@ object Handler {
     restoreScroll()
     restoreCanvas()
     restoreCursor()
+    restoreColors()
   }
 
   private fun Editor.restoreCanvas() =
@@ -181,6 +177,14 @@ object Handler {
   private fun Editor.restoreCursor() = runNow {
     settings.isBlinkCaret = Model.naturalBlink
     settings.isBlockCursor = Model.naturalBlock
-    colorsScheme.setColor(CARET_COLOR, Model.naturalColor)
+  }
+
+  private fun Editor.restoreColors() = runNow {
+    colorsScheme.run {
+      setColor(CARET_COLOR, Model.naturalColor)
+      setAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES,
+        getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
+          .apply { backgroundColor = Model.naturalHighlight })
+    }
   }
 }

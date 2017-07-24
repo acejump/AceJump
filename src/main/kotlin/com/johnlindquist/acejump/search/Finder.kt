@@ -27,25 +27,24 @@ object Finder {
     private set
 
   var isRegex = false
-  var origQ = ""
   var regex = ""
   var query = ""
     private set
   var textMatches = listOf<Int>()
-  private var cacheWord = ""
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
   private val logger = Logger.getInstance(Finder::class.java)
   var findModel = FindModel()
-  var skim = true
+  var skim = false
 
-  fun findOrJump(findModel: FindModel, skim: Boolean = false) {
+  fun findOrJump(findModel: FindModel, results: List<Int>?) {
+    if (results != null && results.isNotEmpty()) textMatches = results
+    else return
+
     if (!isRegex) isRegex = findModel.isRegularExpressions
     this.findModel = findModel
 
-    this.skim = skim
-    origQ = findModel.stringToFind
     regex = if (isRegex) findModel.compileRegExp().pattern() else
       Regex.escape(findModel.stringToFind.toLowerCase())
     query = (if (isRegex) " " else "") + findModel.stringToFind.toLowerCase()
@@ -91,19 +90,11 @@ object Finder {
   private fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
 
   private fun computeMarkers() {
-    if (query.isNotEmpty() && cacheWord == query && !isRegex) markers
-
     unseen2grams = LinkedHashSet(allBigrams())
-    textMatches = findMatchingSites().toList()
 
-    val matchesInView = textMatches.filter { it in editor.getView() }
+    val resultsInView = textMatches.filter { it in editor.getView() }
 
-    if (skim && matchesInView.size > settings.allowedChars.size && !isRegex)
-      markers = textMatches.map { Marker(query, null, it); return }
-
-    cacheWord = query
-
-    digraphs = makeMap(editorText, matchesInView)
+    digraphs = makeMap(editorText, resultsInView)
 
     markers = mapDigraphs(digraphs)
       .let { compact(it) }
@@ -126,21 +117,6 @@ object Finder {
       val queryEndsWith = query.endsWith(firstChar) || query.endsWith(e.key)
       if (firstCharUnique && !queryEndsWith) firstChar.toString() else e.key
     }
-
-  /**
-   * Returns a list of indices where the query begins, within the given range.
-   * These are full indices, ie. are not offset to the beginning of the range.
-   */
-
-  private fun findMatchingSites(key: String = query,
-                                src: String = editorText,
-                                cache: List<Int> = textMatches) =
-    // If the cache is populated, filter it instead of redoing extra work
-    if (cache.isEmpty() || !isCacheValid()) src.findAll(regex)
-    else if (isRegex) cache.asSequence()
-    else cache.asSequence().filter { src.regionMatches(it, key, 0, key.length) }
-
-  private fun isCacheValid() = query.startsWith(cacheWord) || isRegex
 
   // Provides a way to short-circuit the full text search if a match is found
   private operator fun String.contains(key: String) =
@@ -299,10 +275,8 @@ object Finder {
     textMatches = listOf()
     digraphs.clear()
     tagMap.clear()
-    origQ = ""
     query = ""
     regex = ""
-    cacheWord = ""
     unseen2grams.clear()
     markers = emptyList()
   }
