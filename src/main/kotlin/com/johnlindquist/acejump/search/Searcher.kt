@@ -34,7 +34,7 @@ object Searcher : Disposable {
     }
 
     if (Finder.hasTagsStartingWithChar(findModel.stringToFind.last())) return
-    livePreviewController.on()
+    livePreviewController.updateInBackground(findModel, false)
   }
 
   private fun init() {
