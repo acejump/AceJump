@@ -127,6 +127,7 @@ object Handler {
       Jumper.hasJumped = false
       reset()
     } else {
+      Searcher.search(Finder.findModel)
       Canvas.jumpLocations = Finder.markers
       Canvas.repaint()
     }
