@@ -45,7 +45,7 @@ internal object Listener : CaretListener, FocusListener, AncestorListener,
     Trigger.restart(delay = (750L - elapsed).coerceAtLeast(0L)) { redoFind() }
   }
 
-  private fun canTagsSurviveViewResize(): Boolean =
+  private fun canTagsSurviveViewResize() =
     editor.getView().run {
       if (first in viewBounds && last in viewBounds) return true
       else if (Finder.isRegex) return false

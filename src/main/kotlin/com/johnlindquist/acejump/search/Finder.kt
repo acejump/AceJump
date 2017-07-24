@@ -41,8 +41,8 @@ object Finder {
   var skim = true
 
   fun findOrJump(findModel: FindModel, skim: Boolean = false) {
-    this.findModel = findModel
     if (!isRegex) isRegex = findModel.isRegularExpressions
+    this.findModel = findModel
 
     this.skim = skim
     origQ = findModel.stringToFind
@@ -144,8 +144,7 @@ object Finder {
 
   // Provides a way to short-circuit the full text search if a match is found
   private operator fun String.contains(key: String) =
-    if (textMatches.isEmpty()) findMatchingSites(key).any()
-    else textMatches.any { regionMatches(it, key, 0, key.length) }
+    textMatches.any { regionMatches(it, key, 0, key.length) }
 
   /**
    * Builds a map of all existing bigrams, starting from the index of the last
@@ -330,4 +329,7 @@ object Finder {
     computeMarkers()
     return textMatches.isEmpty() && markers.isEmpty()
   }
+
+  fun hasTagsStartingWithChar(c: Char) = tagMap.any { it.key.startsWith(c.toLowerCase()) }
+  fun hasTagsAtIndex(i: Int) = tagMap.containsValue(i)
 }

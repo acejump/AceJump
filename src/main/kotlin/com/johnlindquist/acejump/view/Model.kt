@@ -2,6 +2,7 @@ package com.johnlindquist.acejump.view
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
+import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.openapi.editor.colors.EditorColorsManager.getInstance
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
@@ -44,9 +45,12 @@ object Model {
     get() = editor.project
   var editorText = editor.document.text.toLowerCase()
 
+  var globalScheme = getInstance().globalScheme
+
   var naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
   var naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
-  var naturalColor = getInstance().globalScheme.getColor(CARET_COLOR) ?: BLACK
+  var naturalColor = globalScheme.getColor(CARET_COLOR) ?: BLACK
+  var naturalHighlight = globalScheme.getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES).backgroundColor
 
   val targetModeStyle = TextAttributes(null, null, RED, BOXED, Font.PLAIN)
   val highlightStyle = TextAttributes(null, GREEN, GREEN, BOXED, Font.PLAIN)

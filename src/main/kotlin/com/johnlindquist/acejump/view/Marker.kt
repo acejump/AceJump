@@ -54,7 +54,8 @@ class Marker(val query: String, val tag: String?, val index: Int) {
       ?.apply { Canvas.registerTag(this, tag) }
       ?.let { highlightTag(it); drawTagForeground(it) }
 
-//    highlightText()
+    if (Finder.isRegex)
+      highlightText()
   }
 
   private fun Graphics2D.highlightText() {
@@ -119,7 +120,7 @@ class Marker(val query: String, val tag: String?, val index: Int) {
       composite = getInstance(SRC_OVER, 0.40.toFloat())
       color = settings.textHighlightColor
 
-      if (tag != null && lastQueryChar == tag.first() &&  lastQueryChar != textChar) {
+      if (tag != null && lastQueryChar == tag.first() && lastQueryChar != textChar) {
         fillRoundRect(tagX!!, yPosition, fontWidth, rectHeight, arcD, arcD)
         tagX += fontWidth
         tagWidth -= fontWidth

@@ -1,6 +1,5 @@
 package com.johnlindquist.acejump.control
 
-import com.intellij.find.EditorSearchSession
 import com.intellij.find.FindModel
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
@@ -16,7 +15,6 @@ import com.johnlindquist.acejump.search.Skipper.storeScroll
 import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Model
 import com.johnlindquist.acejump.view.Model.editor
-import com.johnlindquist.acejump.view.Model.project
 import com.johnlindquist.acejump.view.Model.setupCursor
 import com.johnlindquist.acejump.view.Model.viewBounds
 import java.awt.event.KeyEvent.*
@@ -44,9 +42,9 @@ object Handler {
     VK_TAB to { Skipper.doesQueryExistIfSoSkipToIt(!isShiftDown) }
   )
 
-  private fun findOrDropLast(key: String) =
+  private fun findOrDropLast() =
     if (!Finder.isQueryDeadEnd(text)) {
-      find(key)
+      find(text)
     } else {
       text = text.dropLast(1)
     }
@@ -74,6 +72,7 @@ object Handler {
   private fun processBackspaceCommand() {
     text = ""
     Finder.reset()
+    Searcher.discard()
     updateUIState()
   }
 
@@ -83,7 +82,7 @@ object Handler {
       if (text.length < 2) {
         find(text, skim = true)
         Trigger.restart(400L) { find(text, skim = false) }
-      } else findOrDropLast(text)
+      } else findOrDropLast()
     }
 
   private fun configureEditor() =
@@ -128,7 +127,6 @@ object Handler {
       Jumper.hasJumped = false
       reset()
     } else {
-      EditorSearchSession.start(editor, Finder.findModel, project)
       Canvas.jumpLocations = Finder.markers
       Canvas.repaint()
     }
@@ -153,6 +151,7 @@ object Handler {
     enabled = false
     text = ""
     Finder.reset()
+    Searcher.discard()
     editor.restoreSettings()
   }
 
