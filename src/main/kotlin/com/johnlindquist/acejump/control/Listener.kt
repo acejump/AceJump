@@ -8,7 +8,7 @@ import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.johnlindquist.acejump.control.Handler.redoFind
 import com.johnlindquist.acejump.control.Handler.reset
-import com.johnlindquist.acejump.search.Finder
+import com.johnlindquist.acejump.search.Tagger
 import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.viewBounds
@@ -48,8 +48,8 @@ internal object Listener : CaretListener, FocusListener, AncestorListener,
   private fun canTagsSurviveViewResize() =
     editor.getView().run {
       if (first in viewBounds && last in viewBounds) return true
-      else if (Finder.isRegex) return false
-      else !Finder.hasMatchBetweenOldAndNewView(viewBounds, this)
+      else if (Tagger.isRegex) return false
+      else !Tagger.hasMatchBetweenOldAndNewView(viewBounds, this)
     }
 
   override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoFind()

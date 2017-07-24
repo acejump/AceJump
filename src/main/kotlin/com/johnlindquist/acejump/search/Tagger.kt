@@ -7,9 +7,9 @@ import com.google.common.collect.Multimap
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
-import com.johnlindquist.acejump.search.Finder.textMatches
 import com.johnlindquist.acejump.search.Pattern.Companion.distance
 import com.johnlindquist.acejump.search.Pattern.Companion.priotity
+import com.johnlindquist.acejump.search.Tagger.textMatches
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
@@ -21,7 +21,7 @@ import java.util.*
  * Singleton that searches for text in the editor and tags matching results.
  */
 
-object Finder {
+object Tagger {
   var targetModeEnabled = false
   var markers: Collection<Marker> = emptyList()
     private set
@@ -34,12 +34,12 @@ object Finder {
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
-  private val logger = Logger.getInstance(Finder::class.java)
+  private val logger = Logger.getInstance(Tagger::class.java)
   var findModel = FindModel()
   var skim = false
 
-  fun findOrJump(findModel: FindModel, results: List<Int>?) {
-    if (results != null && results.isNotEmpty()) textMatches = results
+  fun markOrJump(findModel: FindModel, results: List<Int>?) {
+    if (results != null) textMatches = results
     else return
 
     if (!isRegex) isRegex = findModel.isRegularExpressions
@@ -49,7 +49,7 @@ object Finder {
       Regex.escape(findModel.stringToFind.toLowerCase())
     query = (if (isRegex) " " else "") + findModel.stringToFind.toLowerCase()
 
-    find()
+    mark()
   }
 
   fun toggleTargetMode(status: Boolean? = null): Boolean {
@@ -62,8 +62,8 @@ object Finder {
 
   private fun jumpTo(marker: Marker) = Jumper.jump(marker)
 
-  fun find() {
-    computeMarkers()
+  fun mark() {
+    if (textMatches.isNotEmpty()) computeMarkers()
 
     // TODO: Clean up this ugliness.
     if (markers.size > 1 || query.length < 2) return
@@ -282,7 +282,7 @@ object Finder {
   }
 
   /**
-   * Returns true if the Finder contains a match in the new view, that is not
+   * Returns true if the Tagger contains a match in the new view, that is not
    * contained (visible) in the old view. This method assumes that textMatches
    * are sorted from least to greatest.
    *
@@ -304,6 +304,10 @@ object Finder {
     return textMatches.isEmpty() && markers.isEmpty()
   }
 
-  fun hasTagsStartingWithChar(c: Char) = tagMap.any { it.key.startsWith(c.toLowerCase()) }
+  fun hasTagSuffix(query: String) = tagMap.any {
+    query.endsWith(it.key.first(), true) ||
+      query.endsWith(it.key, true)
+  }
+
   fun hasTagsAtIndex(i: Int) = tagMap.containsValue(i)
 }

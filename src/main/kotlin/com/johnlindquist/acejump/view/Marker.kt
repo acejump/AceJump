@@ -2,7 +2,7 @@ package com.johnlindquist.acejump.view
 
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.*
-import com.johnlindquist.acejump.search.Finder.isRegex
+import com.johnlindquist.acejump.search.Tagger.isRegex
 import com.johnlindquist.acejump.view.Marker.Alignment.*
 import com.johnlindquist.acejump.view.Model.arcD
 import com.johnlindquist.acejump.view.Model.editor
@@ -54,7 +54,7 @@ class Marker(val query: String, val tag: String?, val index: Int) {
       ?.apply { Canvas.registerTag(this, tag) }
       ?.let { highlightTag(it); drawTagForeground(it) }
 
-    if (Finder.isRegex)
+    if (Tagger.isRegex)
       highlightText()
   }
 
@@ -150,6 +150,6 @@ class Marker(val query: String, val tag: String?, val index: Int) {
     highlightAlreadyTyped()
     highlightRemaining()
 
-    if (Finder.targetModeEnabled) surroundTargetWord()
+    if (Tagger.targetModeEnabled) surroundTargetWord()
   }
 }

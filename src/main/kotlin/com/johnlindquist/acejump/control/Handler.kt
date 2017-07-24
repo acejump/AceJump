@@ -1,6 +1,5 @@
 package com.johnlindquist.acejump.control
 
-import com.intellij.find.FindModel
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.editor.Editor
@@ -11,6 +10,7 @@ import com.intellij.util.SmartList
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Pattern.*
+import com.johnlindquist.acejump.search.Searcher.search
 import com.johnlindquist.acejump.search.Skipper.restoreScroll
 import com.johnlindquist.acejump.search.Skipper.storeScroll
 import com.johnlindquist.acejump.view.Canvas
@@ -27,58 +27,38 @@ import javax.swing.JComponent
 
 object Handler {
   private var enabled = false
-  private var text = ""
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
   private var isShiftDown = false
   private val keyMap = mapOf(
-    VK_HOME to { findPattern(START_OF_LINE) },
-    VK_LEFT to { findPattern(START_OF_LINE) },
-    VK_RIGHT to { findPattern(END_OF_LINE) },
-    VK_END to { findPattern(END_OF_LINE) },
-    VK_UP to { findPattern(CODE_INDENTS) },
+    VK_HOME to { search(START_OF_LINE) },
+    VK_LEFT to { search(START_OF_LINE) },
+    VK_RIGHT to { search(END_OF_LINE) },
+    VK_END to { search(END_OF_LINE) },
+    VK_UP to { search(CODE_INDENTS) },
     VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { processBackspaceCommand() },
-    VK_ENTER to { Finder.maybeJumpIfJustOneTagRemains() },
+    VK_ENTER to { Tagger.maybeJumpIfJustOneTagRemains() },
     VK_TAB to { Skipper.doesQueryExistIfSoSkipToIt(!isShiftDown) }
   )
-
-  private fun findOrDropLast() =
-    if (!Finder.isQueryDeadEnd(text)) {
-      find(text)
-    } else {
-      text = text.dropLast(1)
-    }
-
-  private fun find(key: String, doSkim: Boolean = false) =
-    Highlighter.search(FindModel().apply { stringToFind = key; skim = doSkim })
-
-  fun findPattern(pattern: Pattern) =
-    Highlighter.search(FindModel().apply {
-      stringToFind = pattern.string
-      isRegularExpressions = true
-      skim = false
-      Finder.reset()
-    })
 
   fun activate() = runNow { if (!enabled) start() else toggleTargetMode() }
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
   private fun processBackspaceCommand() {
-    text = ""
-    Finder.reset()
-    Highlighter.discard()
+    Tagger.reset()
+    Searcher.discard()
     updateUIState()
   }
 
   private fun interceptPrintableKeystrokes() =
     editorTypeAction.setupRawHandler { _, key, _ ->
-      text += key
-      if (text.length < 2) {
-        find(text, doSkim = true)
-        Trigger.restart(400L) { find(text, doSkim = false) }
-      } else findOrDropLast()
+      Searcher.query += key
+      if (Searcher.query.length < 2) {
+        Searcher.skim()
+        Trigger.restart(400L) { Searcher.search() }
+      } else Searcher.findOrDropLast(Searcher.query)
     }
 
   private fun configureEditor() =
@@ -123,7 +103,7 @@ object Handler {
       Jumper.hasJumped = false
       reset()
     } else {
-      Canvas.jumpLocations = Finder.markers
+      Canvas.jumpLocations = Tagger.markers
       Canvas.repaint()
     }
 
@@ -133,9 +113,9 @@ object Handler {
       Canvas.bindToEditor(editor)
     }
 
-    if (text.isNotEmpty() || Finder.isRegex)
+    if (Searcher.query.isNotEmpty() || Tagger.isRegex)
       runLater {
-        Finder.find()
+        Tagger.mark()
         updateUIState()
       }
   }
@@ -145,15 +125,14 @@ object Handler {
     editor.component.uninstallCustomShortCutHandler()
     editorTypeAction.setupRawHandler(handler)
     enabled = false
-    text = ""
-    Finder.reset()
-    Highlighter.discard()
+    Tagger.reset()
+    Searcher.discard()
     editor.restoreSettings()
   }
 
   fun toggleTargetMode(status: Boolean? = null) =
     editor.colorsScheme.run {
-      if (Finder.toggleTargetMode(status))
+      if (Tagger.toggleTargetMode(status))
         setColor(CARET_COLOR, settings.targetModeColor)
       else
         setColor(CARET_COLOR, settings.jumpModeColor)

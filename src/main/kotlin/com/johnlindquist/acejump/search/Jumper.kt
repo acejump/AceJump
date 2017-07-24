@@ -24,9 +24,9 @@ object Jumper {
   var hasJumped = false
 
   fun jump(marker: Marker) = editor.run {
-    if (Finder.findModel.stringToFind.last().isUpperCase())
+    if (Tagger.findModel.stringToFind.last().isUpperCase())
       selectFromToOffset(caretModel.offset, marker.index)
-    else if (Finder.targetModeEnabled) {
+    else if (Tagger.targetModeEnabled) {
       // Moving the caret will trigger a reset, flipping targetModeEnabled, so
       // we need to move the caret and select the word in one single transaction
       moveCaret(marker.index)

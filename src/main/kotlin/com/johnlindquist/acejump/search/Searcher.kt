@@ -8,21 +8,29 @@ import com.intellij.openapi.Disposable
 import com.intellij.openapi.editor.colors.EditorColors
 import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.view.Model.editor
+import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.project
 import java.awt.Color
 
-object Highlighter : Disposable, SearchResults.SearchResultsListener {
-  private var model: FindModel = FindModel()
+object Searcher : Disposable, SearchResults.SearchResultsListener {
+  var query: String = ""
+    set(value) {
+      model = FindModel().apply { stringToFind = value }
+      field = value
+    }
+
+  var model: FindModel = FindModel()
+
   override fun searchResultsUpdated(sr: SearchResults?) {
     results?.occurrences
       ?.filter { it.startOffset in editor.getView() }
       .let { resultsInView = it }
 
-    if (!model.skim) doFind()
+    doFind()
   }
 
   private fun SearchResults.filterOrNarrowInView() =
-    resultsInView?.partition { Finder.hasTagsAtIndex(it.startOffset) }?.run {
+    resultsInView?.partition { Tagger.hasTagsAtIndex(it.startOffset) }?.run {
       second.forEach { exclude(it) }
       resultsInView = first
     }
@@ -36,26 +44,43 @@ object Highlighter : Disposable, SearchResults.SearchResultsListener {
 
   private lateinit var livePreviewController: LivePreviewController
 
+  fun skim() = search(model.apply { skim = true })
+
+  fun search(string: String = query) = search(FindModel().apply { stringToFind = string })
+
+  fun search(pattern: Pattern) =
+    Searcher.search(FindModel().apply {
+      stringToFind = pattern.string
+      isRegularExpressions = true
+      skim = false
+      Tagger.reset()
+    })
+
   fun search(findModel: FindModel) {
     model = findModel
     if (results == null) init()
 
     results?.filterOrNarrowInView()
 
-    val hasTags = Finder.hasTagsStartingWithChar(model.stringToFind.last())
-    if (!hasTags) livePreviewController.updateInBackground(model, false)
-    if (hasTags) doFind()
+    livePreviewController.updateInBackground(model, false)
   }
 
   private fun doFind() =
     runLater {
-      Finder.findOrJump(model, results?.occurrences?.map { it.startOffset })
+      Tagger.markOrJump(model, results?.occurrences?.map { it.startOffset })
       results?.filterOrNarrowInView()
       Handler.updateUIState()
     }
 
+  fun findOrDropLast(text: String = query) =
+    if (!isQueryDeadEnd(text)) {
+      search(text)
+    } else {
+      query = text.dropLast(1)
+    }
+
   private fun init() {
-    results = SearchResults(editor, project).apply { addListener(Highlighter) }
+    results = SearchResults(editor, project).apply { addListener(Searcher) }
 
     editor.colorsScheme.run {
       setAttributes(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES,
@@ -67,9 +92,15 @@ object Highlighter : Disposable, SearchResults.SearchResultsListener {
     livePreviewController.on()
   }
 
+  fun isQueryDeadEnd(query: String) =
+    results?.occurrences?.any { editorText.regionMatches(it.startOffset, query, 0, query.length) } ?: true ||
+      !Tagger.hasTagSuffix(query)
+
   fun getResultsInView() = resultsInView?.map { it.startOffset }
 
   fun discard() {
+    query = ""
+    model = FindModel()
     results?.removeListener(this)
     results?.dispose()
     livePreviewController.off()
