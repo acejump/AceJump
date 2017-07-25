@@ -59,11 +59,21 @@ object Tagger {
   private fun jumpTo(marker: Marker) = Jumper.jump(marker)
 
   fun mark() {
+    giveJumpOpportunity()
+
     if (textMatches.isNotEmpty()) computeMarkers()
 
     // TODO: Clean up this ugliness.
     if (markers.size > 1 || query.length < 2) return
 
+    giveJumpOpportunity()
+
+    if (markers.isEmpty()) {
+      Skipper.doesQueryExistIfSoSkipToIt()
+    }
+  }
+
+  private fun giveJumpOpportunity(): Boolean {
     val last1 = query.substring(query.length - 1)
     val indexLast1 = tagMap[last1]
 
@@ -72,15 +82,20 @@ object Tagger {
 
     // If the tag is two chars, the query must be at least 3
     if (indexLast2 != null) {
-      if (query.length > 2)
+      if (query.length > 2) {
         jumpTo(Marker(query, last2, indexLast2))
+        return true
+        }
+
     } else if (indexLast1 != null) {
       val charIndex = indexLast1 + query.length - 1
-      if (charIndex >= editorText.length || editorText[charIndex] != last1[0])
+      if (charIndex >= editorText.length || editorText[charIndex] != last1[0]) {
         jumpTo(Marker(query, last1, indexLast1))
-    } else if (markers.isEmpty()) {
-      Skipper.doesQueryExistIfSoSkipToIt()
+        return true
+      }
     }
+
+    return false
   }
 
   private fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
