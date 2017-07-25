@@ -3,6 +3,7 @@ package com.johnlindquist.acejump.control
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.project.DumbAwareAction
+import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Pattern.LINE_MARK
 import com.johnlindquist.acejump.view.Model.editor
 import java.awt.event.KeyEvent
@@ -29,7 +30,7 @@ class AceLineAction : DumbAwareAction() {
   override fun update(action: AnActionEvent) = AceAction.update(action)
 
   override fun actionPerformed(e: AnActionEvent) =
-    AceAction.actionPerformed(e).also { Handler.findPattern(LINE_MARK) }
+    AceAction.actionPerformed(e).also { Finder.search(LINE_MARK) }
 }
 
 object AceKeyAction : DumbAwareAction() {

@@ -24,7 +24,7 @@ object Jumper {
   var hasJumped = false
 
   fun jump(marker: Marker) = editor.run {
-    if (Tagger.findModel.stringToFind.last().isUpperCase())
+    if (Finder.isShiftSelectEnabled)
       selectFromToOffset(caretModel.offset, marker.index)
     else if (Tagger.targetModeEnabled) {
       // Moving the caret will trigger a reset, flipping targetModeEnabled, so

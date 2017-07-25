@@ -28,8 +28,8 @@ object Trigger : () -> Unit {
     }
   }
 
-  fun restart(delay: Long = 750, function: () -> Unit) {
-    this.delay = delay
+  operator fun invoke(withDelay: Long = 750, function: () -> Unit) {
+    this.delay = withDelay
     invokable = function
     runAsync(this)
   }

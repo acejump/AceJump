@@ -42,7 +42,7 @@ internal object Listener : CaretListener, FocusListener, AncestorListener,
 
   override fun visibleAreaChanged(e: VisibleAreaEvent?) {
     val elapsed = measureTimeMillis { if (canTagsSurviveViewResize()) return }
-    Trigger.restart(delay = (750L - elapsed).coerceAtLeast(0L)) { redoFind() }
+    Trigger(withDelay = (750L - elapsed).coerceAtLeast(0L)) { redoFind() }
   }
 
   private fun canTagsSurviveViewResize() =

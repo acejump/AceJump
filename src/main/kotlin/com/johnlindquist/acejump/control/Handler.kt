@@ -9,8 +9,8 @@ import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIB
 import com.intellij.util.SmartList
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.*
+import com.johnlindquist.acejump.search.Finder.search
 import com.johnlindquist.acejump.search.Pattern.*
-import com.johnlindquist.acejump.search.Searcher.search
 import com.johnlindquist.acejump.search.Skipper.restoreScroll
 import com.johnlindquist.acejump.search.Skipper.storeScroll
 import com.johnlindquist.acejump.view.Canvas
@@ -48,18 +48,12 @@ object Handler {
 
   private fun processBackspaceCommand() {
     Tagger.reset()
-    Searcher.discard()
+    Finder.discard()
     updateUIState()
   }
 
   private fun interceptPrintableKeystrokes() =
-    editorTypeAction.setupRawHandler { _, key, _ ->
-      Searcher.query += key
-      if (Searcher.query.length < 2) {
-        Searcher.skim()
-        Trigger.restart(400L) { Searcher.search() }
-      } else Searcher.findOrDropLast(Searcher.query)
-    }
+    editorTypeAction.setupRawHandler { _, key, _ -> Finder.query += key }
 
   private fun configureEditor() =
     editor.run {
@@ -113,7 +107,7 @@ object Handler {
       Canvas.bindToEditor(editor)
     }
 
-    if (Searcher.query.isNotEmpty() || Tagger.isRegex)
+    if (Finder.query.isNotEmpty() || Tagger.isRegex)
       runLater {
         Tagger.mark()
         updateUIState()
@@ -126,7 +120,7 @@ object Handler {
     editorTypeAction.setupRawHandler(handler)
     enabled = false
     Tagger.reset()
-    Searcher.discard()
+    Finder.discard()
     editor.restoreSettings()
   }
 

@@ -35,15 +35,11 @@ object Tagger {
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
   private val logger = Logger.getInstance(Tagger::class.java)
-  var findModel = FindModel()
   var skim = false
 
   fun markOrJump(findModel: FindModel, results: List<Int>?) {
-    if (results != null) textMatches = results
-    else return
-
+    if (results != null) textMatches = results else return
     if (!isRegex) isRegex = findModel.isRegularExpressions
-    this.findModel = findModel
 
     regex = if (isRegex) findModel.compileRegExp().pattern() else
       Regex.escape(findModel.stringToFind.toLowerCase())
