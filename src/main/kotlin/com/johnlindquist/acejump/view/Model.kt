@@ -67,7 +67,7 @@ object Model {
     get() = editor.lineHeight
   val rectHeight: Int
     get() = fontHeight + 3
-  val rectHOffset: Int
+  val rectVOffset: Int
     get() = lineHeight - (editor as EditorImpl).descent - fontHeight
   val arcD = rectHeight - 6
   var viewBounds = 0..0

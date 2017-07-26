@@ -1,5 +1,5 @@
 plugins {
-  id("org.jetbrains.intellij") version "0.2.14"
+  id("org.jetbrains.intellij") version "0.2.15"
   id("org.jetbrains.kotlin.jvm") version "1.1.3"
 }
 
@@ -9,4 +9,4 @@ intellij {
 }
 
 group = "com.johnlindquist"
-version = "3.4.0"
+version = "3.4.1"

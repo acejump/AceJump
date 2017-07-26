@@ -8,8 +8,8 @@ import com.johnlindquist.acejump.view.Model.arcD
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.fontHeight
 import com.johnlindquist.acejump.view.Model.fontWidth
-import com.johnlindquist.acejump.view.Model.rectHOffset
 import com.johnlindquist.acejump.view.Model.rectHeight
+import com.johnlindquist.acejump.view.Model.rectVOffset
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
 import java.awt.Graphics2D
@@ -42,7 +42,7 @@ class Marker(val query: String, val tag: String?, val index: Int) {
 
   private val searchWidth = queryLength * fontWidth
   private var tagPoint = editor.getPointFromIndex(index + trueOffset)
-  private var yPosition = tagPoint.y
+  private var yPosition = tagPoint.y + rectVOffset
   private var alignment = RIGHT
 
   enum class Alignment { /*TOP, BOTTOM,*/ LEFT, RIGHT, NONE }
@@ -74,12 +74,11 @@ class Marker(val query: String, val tag: String?, val index: Int) {
   }
 
   private fun String.alignTag(canvas: Canvas): Point {
-    val y = tagPoint.y + rectHOffset
     val x = tagPoint.x + fontWidth
 //    val top = Point(x - fontWidth, y - fontHeight)
 //    val bottom = Point(x - fontWidth, y + fontHeight)
-    val left = Point(srcPoint.x - fontWidth * length, y)
-    val right = Point(x, y)
+    val left = Point(srcPoint.x - fontWidth * length, yPosition)
+    val right = Point(x, yPosition)
 
     val nextCharIsWhiteSpace = text.length <= index + 1 ||
       text[index + 1].isWhitespace()

@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.4.1
+
+Fixes a regression affecting tag alignment when line spacing is greater than 1.0.
+
 ### 3.4.0
 
 Restores original scroll position if tab search cancelled. Minor improvements to latency and tag painting.
