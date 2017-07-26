@@ -35,12 +35,13 @@ object Tagger {
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
   private val logger = Logger.getInstance(Tagger::class.java)
 
-  fun markOrJump(model: FindModel, results: List<Int>?) {
-    if (results == null || (query.isNotEmpty() && model.stringToFind == query)) return
+  fun markOrJump(model: FindModel, results: List<Int>) {
     textMatches = results
     if (!isRegex) isRegex = model.isRegularExpressions
     else Regex.escape(model.stringToFind.toLowerCase())
-    query = (if (isRegex) " " else "") + model.stringToFind.toLowerCase()
+    query = (if (model.isRegularExpressions) " "
+    else if (isRegex) " " + model.stringToFind
+    else model.stringToFind).toLowerCase()
 
     mark()
   }
@@ -65,9 +66,7 @@ object Tagger {
 
     giveJumpOpportunity()
 
-    if (markers.isEmpty()) {
-      Skipper.doesQueryExistIfSoSkipToIt()
-    }
+    if (markers.isEmpty()) Skipper.doesQueryExistIfSoSkipToIt()
   }
 
   private fun giveJumpOpportunity(): Boolean {
@@ -90,17 +89,23 @@ object Tagger {
   private fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
 
   private fun computeMarkers() {
+    if (Finder.skim && !isRegex) {
+      markers = textMatches.map { Marker(query, null, it) }
+      return
+    }
+
     unseen2grams = LinkedHashSet(allBigrams())
 
-    val resultsInView = textMatches.filter { it in editor.getView() }
+    val (inView, outOfView) = textMatches.partition { it in editor.getView() }
 
-    digraphs = makeMap(editorText, resultsInView)
+    digraphs = makeMap(editorText, inView)
 
     markers =
       (if (hasTagSuffix(query)) HashBiMap.create(filterTags())
       else mapDigraphs(digraphs).let { compact(it) })
         .apply { if (this.isNotEmpty()) tagMap = this }
-        .run { values.map { Marker(query, inverse()[it]!!, it) } }
+        .map { Marker(query, it.key, it.value) }
+        .plus(outOfView.map { Marker(query, null, it) })
   }
 
   private fun filterTags() = tagMap.filter { query.endsWith(it.key.first()) }
@@ -135,8 +140,7 @@ object Tagger {
   fun makeMap(text: CharSequence, sites: List<Int>): Multimap<String, Int> =
     if (isRegex) LinkedListMultimap.create<String, Int>().apply {
       sites.forEach { put(" ", it) }
-    }
-    else LinkedListMultimap.create<String, Int>().apply {
+    } else LinkedListMultimap.create<String, Int>().apply {
       sites.forEach { site ->
         val toCheck = site + query.length
         var (p0, p1, p2) = Triple(toCheck - 1, toCheck, toCheck + 1)

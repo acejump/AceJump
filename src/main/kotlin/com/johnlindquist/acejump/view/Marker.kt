@@ -50,12 +50,12 @@ class Marker(val query: String, val tag: String?, val index: Int) {
   fun paintMe(graphics2D: Graphics2D) = graphics2D.run {
     setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
-    tag?.alignTag(Canvas)
-      ?.apply { Canvas.registerTag(this, tag) }
-      ?.let { highlightTag(it); drawTagForeground(it) }
+    if (!Finder.skim)
+      tag?.alignTag(Canvas)
+        ?.apply { Canvas.registerTag(this, tag) }
+        ?.let { highlightTag(it); drawTagForeground(it) }
 
-    if (Tagger.isRegex)
-      highlightText()
+    highlightText()
   }
 
   private fun Graphics2D.highlightText() {

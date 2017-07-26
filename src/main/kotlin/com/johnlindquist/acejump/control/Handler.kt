@@ -14,6 +14,7 @@ import com.johnlindquist.acejump.search.Pattern.*
 import com.johnlindquist.acejump.search.Skipper.restoreScroll
 import com.johnlindquist.acejump.search.Skipper.storeScroll
 import com.johnlindquist.acejump.view.Canvas
+import com.johnlindquist.acejump.view.Canvas.bindCanvas
 import com.johnlindquist.acejump.view.Model
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.setupCursor
@@ -60,7 +61,7 @@ object Handler {
       storeScroll()
       setupCursor()
       viewBounds = getView()
-      Canvas.bindToEditor(this)
+      bindCanvas()
       interceptPrintableKeystrokes()
       Listener.enable()
     }
@@ -104,7 +105,7 @@ object Handler {
   fun redoFind() {
     runNow {
       editor.restoreCanvas()
-      Canvas.bindToEditor(editor)
+      editor.bindCanvas()
     }
 
     if (Finder.query.isNotEmpty() || Tagger.isRegex)

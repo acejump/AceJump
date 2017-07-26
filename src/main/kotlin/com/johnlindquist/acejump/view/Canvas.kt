@@ -19,14 +19,13 @@ object Canvas : JComponent() {
   private val tags = hashSetOf<Point>()
   var jumpLocations: Collection<Marker> = emptyList()
 
-  fun bindToEditor(editor: Editor) =
-    editor.run {
-      contentComponent.add(Canvas)
-      val viewport = scrollingModel.visibleArea
-      setBounds(0, 0, viewport.width + 1000, viewport.height + 1000)
-      val loc = convertPoint(Canvas, location, component.rootPane)
-      setLocation(-loc.x, -loc.y)
-    }
+  fun Editor.bindCanvas() {
+    contentComponent.add(Canvas)
+    val viewport = scrollingModel.visibleArea
+    setBounds(0, 0, viewport.width + 1000, viewport.height + 1000)
+    val loc = convertPoint(Canvas, location, component.rootPane)
+    setLocation(-loc.x, -loc.y)
+  }
 
   override fun paint(graphics: Graphics) {
     if (jumpLocations.isEmpty()) return

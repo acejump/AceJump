@@ -4,33 +4,23 @@ import com.intellij.find.FindModel
 import com.intellij.find.FindResult
 import com.intellij.find.impl.livePreview.LivePreviewController
 import com.intellij.find.impl.livePreview.SearchResults
-import com.intellij.find.impl.livePreview.SelectionManager
 import com.intellij.openapi.Disposable
-import com.intellij.openapi.editor.colors.EditorColors
+import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.control.Trigger
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.project
-import java.awt.Color
 
 object Finder : Disposable, SearchResults.SearchResultsListener {
-  private lateinit var highlighters: LivePreviewController
+  private var highlighters: LivePreviewController? = null
   private var results: SearchResults? = null
   private var resultsInView: List<FindResult>? = null
-  private var resultsManager: SelectionManager? = null
   private var model = FindModel()
   val isShiftSelectEnabled
     get() = model.stringToFind.last().isUpperCase()
 
   var skim = false
-
-  private var FindModel.skim: Boolean
-    get() = Finder.skim
-    set(value) {
-      Finder.skim = value
-    }
-
 
   var query: String = ""
     set(value) {
@@ -38,7 +28,7 @@ object Finder : Disposable, SearchResults.SearchResultsListener {
 
       if (value.isNotEmpty()) {
         model = FindModel().apply { stringToFind = value }
-        if (value.length == 1) skim().apply { Trigger(400L) { search() } }
+        if (value.length == 1) skim().apply { Trigger(350L) { search() } }
         else findOrDropLast(value)
       }
     }
@@ -54,7 +44,10 @@ object Finder : Disposable, SearchResults.SearchResultsListener {
     doTag()
   }
 
-  private fun skim() = search(model.apply { skim = true })
+  private fun skim() {
+    skim = true
+    search(model)
+  }
 
   fun search(string: String = query) = search(FindModel().apply { stringToFind = string })
 
@@ -68,15 +61,13 @@ object Finder : Disposable, SearchResults.SearchResultsListener {
   fun search(findModel: FindModel) {
     model = findModel
     if (results == null) init()
-//    results!!.filterOrNarrowInView()
-    if (Tagger.hasTagSuffix(query)) {
-      dimHighlighters()
-      doTag()
-    } else highlighters.updateInBackground(model, false)
+    if (Tagger.hasTagSuffix(query)) doTag()
+    else highlighters?.updateInBackground(model, false)
   }
 
   private fun doTag() {
-    Tagger.markOrJump(model, results?.occurrences?.map { it.startOffset })
+    Tagger.markOrJump(model, results?.occurrences?.map { it.startOffset } ?: listOf())
+    skim = false
     Handler.updateUIState()
   }
 
@@ -86,43 +77,28 @@ object Finder : Disposable, SearchResults.SearchResultsListener {
     }
 
   private fun init() {
-    results = SearchResults(editor, project).apply {
-      resultsManager = SelectionManager(this)
-      addListener(Finder)
-    }
+    results = SearchResults(editor, project).apply { addListener(Finder) }
 
     editor.colorsScheme.run {
-      setAttributes(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES,
-        getAttributes(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES)
-          .apply { backgroundColor = Color.GREEN })
+      setAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES,
+        getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
+          .apply { backgroundColor = null; effectColor = null; errorStripeColor = null })
     }
 
     highlighters = LivePreviewController(results, null, this)
-    highlighters.on()
-  }
-
-  fun dimHighlighters() {
-    editor.colorsScheme.run { setAttributes(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES, getAttributes(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES).apply { backgroundColor = Color.LIGHT_GRAY }) }
+    highlighters?.on()
   }
 
   private fun isQueryAlive(query: String) =
     results?.occurrences?.any { editorText.regionMatches(it.startOffset, query, 0, query.length) } ?: true ||
       Tagger.hasTagSuffix(query)
 
-  private fun SearchResults.filterOrNarrowInView() =
-    resultsInView?.partition { Tagger.hasTagsAtIndex(it.startOffset) }?.run {
-      second.forEach { exclude(it) }
-      resultsInView = first
-    }
-
-  fun getResultsInView() = resultsInView?.map { it.startOffset }
-
   fun discard() {
     query = ""
     model = FindModel()
     results?.removeListener(this)
     results?.dispose()
-    highlighters.off()
+    highlighters?.off()
     results = null
     resultsInView = null
   }
