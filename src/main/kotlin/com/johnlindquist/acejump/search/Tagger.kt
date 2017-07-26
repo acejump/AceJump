@@ -27,7 +27,6 @@ object Tagger {
     private set
 
   var isRegex = false
-  var regex = ""
   var query = ""
     private set
   var textMatches = listOf<Int>()
@@ -35,15 +34,13 @@ object Tagger {
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
   private val logger = Logger.getInstance(Tagger::class.java)
-  var skim = false
 
-  fun markOrJump(findModel: FindModel, results: List<Int>?) {
-    if (results != null) textMatches = results else return
-    if (!isRegex) isRegex = findModel.isRegularExpressions
-
-    regex = if (isRegex) findModel.compileRegExp().pattern() else
-      Regex.escape(findModel.stringToFind.toLowerCase())
-    query = (if (isRegex) " " else "") + findModel.stringToFind.toLowerCase()
+  fun markOrJump(model: FindModel, results: List<Int>?) {
+    if (results == null || (query.isNotEmpty() && model.stringToFind == query)) return
+    textMatches = results
+    if (!isRegex) isRegex = model.isRegularExpressions
+    else Regex.escape(model.stringToFind.toLowerCase())
+    query = (if (isRegex) " " else "") + model.stringToFind.toLowerCase()
 
     mark()
   }
@@ -74,23 +71,15 @@ object Tagger {
   }
 
   private fun giveJumpOpportunity(): Boolean {
-    val last1 = query.substring(query.length - 1)
-    val indexLast1 = tagMap[last1]
-
-    val last2 = query.substring(query.length - 2)
-    val indexLast2 = tagMap[last2]
-
-    // If the tag is two chars, the query must be at least 3
-    if (indexLast2 != null) {
-      if (query.length > 2) {
-        jumpTo(Marker(query, last2, indexLast2))
-        return true
-        }
-
-    } else if (indexLast1 != null) {
-      val charIndex = indexLast1 + query.length - 1
-      if (charIndex >= editorText.length || editorText[charIndex] != last1[0]) {
-        jumpTo(Marker(query, last1, indexLast1))
+    if (query.length > 2 && tagMap[query.takeLast(2)] != null) {
+      jumpTo(Marker(query, query.takeLast(2), tagMap[query.takeLast(2)]!!))
+      return true
+    }
+    if (query.length > 1 && tagMap[query.takeLast(1)] != null) {
+      val indexLast1 = tagMap[query.takeLast(1)]!!
+      val cIdx = (indexLast1 + query.length - 1).coerceAtMost(editorText.length)
+      if (editorText[cIdx] != query.last()) {
+        jumpTo(Marker(query, query.takeLast(1), indexLast1))
         return true
       }
     }
@@ -107,11 +96,14 @@ object Tagger {
 
     digraphs = makeMap(editorText, resultsInView)
 
-    markers = mapDigraphs(digraphs)
-      .let { compact(it) }
-      .apply { if (this.isNotEmpty()) tagMap = this }
-      .run { values.map { Marker(query, inverse()[it]!!, it) } }
+    markers =
+      (if (hasTagSuffix(query)) HashBiMap.create(filterTags())
+      else mapDigraphs(digraphs).let { compact(it) })
+        .apply { if (this.isNotEmpty()) tagMap = this }
+        .run { values.map { Marker(query, inverse()[it]!!, it) } }
   }
+
+  private fun filterTags() = tagMap.filter { query.endsWith(it.key.first()) }
 
   /**
    * Shortens assigned tags. Effectively, this will only shorten two-character
@@ -241,7 +233,9 @@ object Tagger {
         }
     }
 
-    if (isRegex && !newTagMap.isEmpty() && newTagMap.values.all { it in editor.getView() }) return newTagMap
+    if (isRegex && newTagMap.isNotEmpty() &&
+      newTagMap.values.all { it in editor.getView() })
+      return newTagMap
 
     sortValidJumpTargets(digraphs).forEach {
       if (availableTags.isEmpty()) return newTagMap
@@ -287,7 +281,6 @@ object Tagger {
     digraphs.clear()
     tagMap.clear()
     query = ""
-    regex = ""
     unseen2grams.clear()
     markers = emptyList()
   }

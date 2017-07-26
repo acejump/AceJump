@@ -14,12 +14,6 @@ import java.awt.Point
 import java.lang.Math.max
 import java.lang.Math.min
 
-var FindModel.skim: Boolean
-  get() = Tagger.skim
-  set(value) {
-    Tagger.skim = value
-  }
-
 operator fun Point.component1() = x
 operator fun Point.component2() = y
 

@@ -23,6 +23,15 @@ object Finder : Disposable, SearchResults.SearchResultsListener {
   val isShiftSelectEnabled
     get() = model.stringToFind.last().isUpperCase()
 
+  var skim = false
+
+  private var FindModel.skim: Boolean
+    get() = Finder.skim
+    set(value) {
+      Finder.skim = value
+    }
+
+
   var query: String = ""
     set(value) {
       field = value
@@ -59,17 +68,17 @@ object Finder : Disposable, SearchResults.SearchResultsListener {
   fun search(findModel: FindModel) {
     model = findModel
     if (results == null) init()
-    results!!.filterOrNarrowInView()
-    if (!Tagger.hasTagSuffix(query)) highlighters.updateInBackground(model, false)
-    else doTag()
+//    results!!.filterOrNarrowInView()
+    if (Tagger.hasTagSuffix(query)) {
+      dimHighlighters()
+      doTag()
+    } else highlighters.updateInBackground(model, false)
   }
 
-  private fun doTag() =
-    runLater {
-      Tagger.markOrJump(model, results?.occurrences?.map { it.startOffset })
-      results!!.filterOrNarrowInView()
-      Handler.updateUIState()
-    }
+  private fun doTag() {
+    Tagger.markOrJump(model, results?.occurrences?.map { it.startOffset })
+    Handler.updateUIState()
+  }
 
   private fun findOrDropLast(text: String = query) =
     if (isQueryAlive(text)) search(text) else {
@@ -90,6 +99,10 @@ object Finder : Disposable, SearchResults.SearchResultsListener {
 
     highlighters = LivePreviewController(results, null, this)
     highlighters.on()
+  }
+
+  fun dimHighlighters() {
+    editor.colorsScheme.run { setAttributes(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES, getAttributes(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES).apply { backgroundColor = Color.LIGHT_GRAY }) }
   }
 
   private fun isQueryAlive(query: String) =
