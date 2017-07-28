@@ -8,7 +8,12 @@ import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.viewBounds
 
 /**
- * Responsible for changing the vertical scroll position inside an editor.
+ * Updates the editor's vertical scroll position to make search results visible.
+ * This will occur when the user presses TAB OR searches for text that does not
+ * currently appear on the screen. Once scrolling is complete, the Listener will
+ * trigger an update that re-paint tags to the screen.
+ *
+ * @see com.johnlindquist.acejump.control.Listener
  */
 
 object Skipper {

@@ -8,6 +8,10 @@ import com.johnlindquist.acejump.search.Pattern.LINE_MARK
 import com.johnlindquist.acejump.view.Model.editor
 import java.awt.event.KeyEvent
 
+/**
+ * Entry point for all actions. The IntelliJ Platform calls AceJump here.
+ */
+
 object AceAction : DumbAwareAction() {
   override fun update(action: AnActionEvent) {
     action.presentation.isEnabled = action.getData(EDITOR) != null

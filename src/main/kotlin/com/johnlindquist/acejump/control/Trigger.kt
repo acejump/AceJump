@@ -5,7 +5,8 @@ import org.jetbrains.concurrency.runAsync
 import java.lang.System.currentTimeMillis
 
 /**
- * Timer for triggering events with a designated delay.
+ * Timer for triggering events with a designated delay. May be invoked multiple
+ * times inside the delay, but doing so will only prolong the event from firing.
  */
 
 object Trigger : () -> Unit {
@@ -34,9 +35,9 @@ object Trigger : () -> Unit {
     }
   }
 
-  operator fun invoke(withDelay: Long = 750, function: () -> Unit) {
+  operator fun invoke(withDelay: Long = 750, event: () -> Unit) {
     this.delay = withDelay
-    invokable = function
+    invokable = event
     runAsync(this)
   }
 }

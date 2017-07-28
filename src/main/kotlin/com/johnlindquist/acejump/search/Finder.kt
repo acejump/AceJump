@@ -1,23 +1,30 @@
 package com.johnlindquist.acejump.search
 
-import com.intellij.codeInsight.highlighting.HighlightManager
 import com.intellij.find.FindModel
-import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
-import com.intellij.openapi.editor.markup.*
+import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.editor.markup.HighlighterTargetArea.EXACT_RANGE
+import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.control.Trigger
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.markup
-import java.awt.Color.GREEN
-import java.awt.Font
+import com.johnlindquist.acejump.view.Model.targetModeHighlightStyle
+import com.johnlindquist.acejump.view.Model.textHighlightStyle
 import kotlin.text.RegexOption.MULTILINE
+
+/**
+ * Singleton that searches for text in editor and highlights matching results.
+ *
+ * @see Tagger
+ */
 
 object Finder {
   private var results = emptySet<Int>()
   private var resultsInView = setOf<RangeHighlighter>()
-  private var highlightManager: HighlightManager? = null
   private var model = FindModel()
+  private var TEXT_HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
+  private var TARGET_HIGHLIGHT_LAYER = HighlighterLayer.LAST + 2
 
   val isShiftSelectEnabled
     get() = model.stringToFind.last().isUpperCase()
@@ -33,7 +40,6 @@ object Finder {
     }
 
   private fun skim() {
-    init()
     skim = true
     search(FindModel().apply { stringToFind = query })
     Trigger(350L) { search() }
@@ -43,7 +49,7 @@ object Finder {
     search(FindModel().apply { stringToFind = Regex.escape(string) })
 
   fun search(pattern: Pattern) =
-    Finder.search(FindModel().apply {
+    search(FindModel().apply {
       stringToFind = pattern.string
       isRegularExpressions = true
       Tagger.reset()
@@ -51,28 +57,31 @@ object Finder {
 
   fun search(findModel: FindModel) {
     model = findModel
-
-    if (!Tagger.hasTagSuffix(query)) {
-      results = editorText.findMatchingSites().toHashSet()
-      results.highlight()
-    }
+    if (!Tagger.hasTagSuffix(query)) highlight()
 
     results.tag()
   }
 
-  private fun Set<Int>.highlight() =
-    mapNotNull {
-      val highlighter: RangeHighlighter = createRangeHighlighter(it)
-      if (highlighter.startOffset in editor.getView()) highlighter else null
-    }.let { resultsInView = it.toSet() }
-
-  private fun createRangeHighlighter(it: Int): RangeHighlighter {
-    return editor.markupModel.addRangeHighlighter(it,
-      if (model.isRegularExpressions) it + 1 else it + query.length,
-      HighlighterLayer.LAST + 1,
-      TextAttributes(null, GREEN, null, EffectType.ROUNDED_BOX, Font.PLAIN),
-      HighlighterTargetArea.EXACT_RANGE)
+  private fun highlight() {
+    results = editorText.findMatchingSites().toHashSet()
+    resultsInView = results.mapNotNull {
+      if (Jumper.targetModeEnabled) createTargetHighlighter(it)
+      val textHighlight = createTextHighlighter(it)
+      if (textHighlight.startOffset in editor.getView()) textHighlight else null
+    }.toSet()
   }
+
+  private fun createTargetHighlighter(index: Int) {
+    if (!editorText[index].isLetterOrDigit()) return
+    val (wordStart, wordEnd) = editorText.wordBounds(index)
+    markup.addRangeHighlighter(wordStart, wordEnd,
+      TARGET_HIGHLIGHT_LAYER, targetModeHighlightStyle, EXACT_RANGE)
+  }
+
+  private fun createTextHighlighter(it: Int) =
+    markup.addRangeHighlighter(it,
+      if (model.isRegularExpressions) it + 1 else it + query.length,
+      TEXT_HIGHLIGHT_LAYER, textHighlightStyle, EXACT_RANGE)
 
   private fun Set<Int>.tag() = runLater {
     Tagger.markOrJump(model, resultsInView.map { it.startOffset }.toSet(), this)
@@ -80,7 +89,7 @@ object Finder {
       if (!Tagger.hasTagsAtIndex(it.startOffset)) markup.removeHighlighter(it)
     }
     skim = false
-    Handler.updateUIState()
+    Handler.paintTagMarkers()
   }
 
   /**
@@ -101,15 +110,6 @@ object Finder {
       else it.range.first
     }
 
-  private fun init() {
-    editor.colorsScheme.run {
-      setAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES,
-        getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
-          .apply { backgroundColor = GREEN })
-    }
-    highlightManager = HighlightManager.getInstance(editor.project)
-  }
-
   private fun searchForQueryOrDropLastCharacter() =
     if (query.isValidQuery()) search() else query = query.dropLast(1)
 
@@ -121,17 +121,8 @@ object Finder {
     markup.removeAllHighlighters()
     query = ""
     model = FindModel()
-    highlightManager = null
     results = emptySet()
     resultsInView = emptySet()
-  }
-}
-
-object T {
-  operator fun plusAssign(i: Int) {}
-
-  init {
-    T += 1
   }
 }
 

@@ -40,6 +40,12 @@ internal object Listener : CaretListener, FocusListener, AncestorListener,
       }
     }
 
+  /**
+   * This callback is very jittery. We need to delay repainting tags by a short
+   * duration in order to prevent flashing tag syndrome.
+   *
+   * @see Trigger
+   */
   override fun visibleAreaChanged(e: VisibleAreaEvent?) {
     val elapsed = measureTimeMillis { if (canTagsSurviveViewResize()) return }
     Trigger(withDelay = (750L - elapsed).coerceAtLeast(0L)) { redoFind() }

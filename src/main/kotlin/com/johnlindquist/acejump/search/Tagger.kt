@@ -8,7 +8,7 @@ import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.Pattern.Companion.distance
-import com.johnlindquist.acejump.search.Pattern.Companion.priotity
+import com.johnlindquist.acejump.search.Pattern.Companion.priority
 import com.johnlindquist.acejump.search.Tagger.textMatches
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor
@@ -18,11 +18,12 @@ import java.lang.Math.min
 import java.util.*
 
 /**
- * Singleton that searches for text in the editor and tags matching results.
+ * Singleton that works with Finder to tag text search results in the editor.
+ *
+ * @see Finder
  */
 
 object Tagger {
-  var targetModeEnabled = false
   var markers: List<Marker> = emptyList()
     private set
 
@@ -48,18 +49,13 @@ object Tagger {
       else if (regex) " " + model.stringToFind
       else model.stringToFind).toLowerCase()
 
-    mark()
-  }
-
-  fun toggleTargetMode(status: Boolean? = null): Boolean {
-    targetModeEnabled = status ?: !targetModeEnabled
-    return targetModeEnabled
+    markTags()
   }
 
   fun maybeJumpIfJustOneTagRemains() =
     tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
 
-  fun mark() {
+  fun markTags() {
     if (textMatches.isNotEmpty()) computeMarkers()
     if (markers.size > 1 || query.length < 2) return
 
@@ -268,13 +264,13 @@ object Tagger {
     // Minimize the distance between tag characters
     unseen2grams.filter { it[0] != query[0] }
       .sortedWith(compareBy(
+        { it[0].isDigit() || it[1].isDigit() },
         { distance(it[0], it.last()) },
-        { priotity(it.first()) }))
+        { priority(it.first()) }))
       .mapTo(linkedSetOf()) { it }
 
   fun reset() {
     regex = false
-    targetModeEnabled = false
     textMatches = emptySet()
     digraphs.clear()
     tagMap.clear()

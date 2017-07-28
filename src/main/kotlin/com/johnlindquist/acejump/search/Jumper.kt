@@ -21,11 +21,17 @@ import java.util.*
 object Jumper {
   @Volatile
   var hasJumped = false
+  var targetModeEnabled = false
+
+  fun toggleTargetMode(status: Boolean? = null): Boolean {
+    targetModeEnabled = status ?: !targetModeEnabled
+    return targetModeEnabled
+  }
 
   fun jump(index: Int) = editor.run {
     if (Finder.isShiftSelectEnabled)
       selectFromToOffset(caretModel.offset, index)
-    else if (Tagger.targetModeEnabled) {
+    else if (targetModeEnabled) {
       // Moving the caret will trigger a reset, flipping targetModeEnabled, so
       // we need to move the caret and select the word in one single transaction
       moveCaret(index)
@@ -64,5 +70,10 @@ object Jumper {
     val endOfWordOffset = min(firstRange.endOffset, editorText.length)
 
     selectFromToOffset(startOfWordOffset, endOfWordOffset)
+  }
+
+  fun reset() {
+    targetModeEnabled = false
+    hasJumped = false
   }
 }

@@ -18,6 +18,10 @@ import javax.swing.SwingUtilities.convertPoint
 object Canvas : JComponent() {
   private val tags = hashSetOf<Point>()
   var jumpLocations: Collection<Marker> = emptyList()
+    set(value) {
+      field = value
+      repaint()
+    }
 
   fun Editor.bindCanvas() {
     contentComponent.add(Canvas)
@@ -41,7 +45,7 @@ object Canvas : JComponent() {
   fun isFree(point: Point) = point !in tags
 
   fun reset() {
-    tags.clear()
     jumpLocations = emptyList()
+    tags.clear()
   }
 }

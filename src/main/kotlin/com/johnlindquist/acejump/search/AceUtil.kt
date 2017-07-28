@@ -41,10 +41,10 @@ fun CharSequence.findAll(key: String, startingFrom: Int = 0) =
  */
 
 fun String.wordBounds(index: Int): Pair<Int, Int> {
-  var (front, end) = Pair(index, index)
-  while (0 < front && get(front - 1).isJavaIdentifierPart()) front--
-  while (end < length && get(end).isJavaIdentifierPart()) end++
-  return Pair(front, end)
+  var (first, last) = Pair(index, index)
+  while (0 < first && get(first - 1).isJavaIdentifierPart()) first--
+  while (last < length && get(last).isJavaIdentifierPart()) last++
+  return Pair(first, last)
 }
 
 fun getDefaultEditor(): Editor = FileEditorManager.getInstance(ProjectManager

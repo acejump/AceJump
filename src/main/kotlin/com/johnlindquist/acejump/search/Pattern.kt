@@ -13,13 +13,12 @@ enum class Pattern(val string: String) {
     CODE_INDENTS.string);
 
   companion object {
-    fun hasPattern(s: String) = Pattern.values().any { it.string == s }
-
     fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]
 
-    fun priotity(char: Char) = best[char]
+    fun priority(char: Char) = priority[char]
 
-    private val best: Map<Char, Int> = "fjghdkslavncmbxzrutyeiwoqp".mapIndices()
+    private val priority: Map<Char, Int> =
+      "fjghdkslavncmbxzrutyeiwoqp5849673210".mapIndices()
 
     private val nearby = mapOf(
       // Values are QWERTY keys sorted by physical proximity to the map key

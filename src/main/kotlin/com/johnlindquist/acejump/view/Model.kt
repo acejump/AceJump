@@ -7,14 +7,17 @@ import com.intellij.openapi.editor.colors.EditorColorsManager.getInstance
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.markup.EffectType.BOXED
+import com.intellij.openapi.editor.markup.EffectType.ROUNDED_BOX
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.johnlindquist.acejump.config.AceConfig
+import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.search.getDefaultEditor
 import java.awt.Color
 import java.awt.Color.*
 import java.awt.Font
 import java.awt.Font.BOLD
+import java.awt.Font.PLAIN
 
 /**
  * Data holder for all settings and IDE components needed by AceJump.
@@ -52,8 +55,10 @@ object Model {
   var naturalColor = globalScheme.getColor(CARET_COLOR) ?: BLACK
   var naturalHighlight = globalScheme.getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES).backgroundColor
 
-  val targetModeStyle = TextAttributes(null, null, RED, BOXED, Font.PLAIN)
-  val highlightStyle = TextAttributes(null, GREEN, GREEN, BOXED, Font.PLAIN)
+  val targetModeHighlightStyle =
+    TextAttributes(null, null, settings.targetModeColor, ROUNDED_BOX, PLAIN)
+  val textHighlightStyle =
+    TextAttributes(null, GREEN, settings.textHighlightColor, BOXED, PLAIN)
 
   val scheme
     get() = editor.colorsScheme

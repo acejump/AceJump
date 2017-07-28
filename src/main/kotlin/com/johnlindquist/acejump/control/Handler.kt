@@ -50,7 +50,7 @@ object Handler {
   private fun processBackspaceCommand() {
     Tagger.reset()
     Finder.discard()
-    updateUIState()
+    paintTagMarkers()
   }
 
   private fun interceptPrintableKeystrokes() =
@@ -93,14 +93,8 @@ object Handler {
     editor.component.installCustomShortcutHandler()
   }
 
-  fun updateUIState() =
-    if (Jumper.hasJumped) {
-      Jumper.hasJumped = false
-      reset()
-    } else {
-      Canvas.jumpLocations = Tagger.markers
-      Canvas.repaint()
-    }
+  fun paintTagMarkers() =
+    if (Jumper.hasJumped) reset() else Canvas.jumpLocations = Tagger.markers
 
   fun redoFind() {
     runNow {
@@ -110,8 +104,8 @@ object Handler {
 
     if (Finder.query.isNotEmpty() || Tagger.regex)
       runLater {
-        Tagger.mark()
-        updateUIState()
+        Tagger.markTags()
+        paintTagMarkers()
       }
   }
 
@@ -121,13 +115,14 @@ object Handler {
     editorTypeAction.setupRawHandler(handler)
     enabled = false
     Tagger.reset()
+    Jumper.reset()
     Finder.discard()
     editor.restoreSettings()
   }
 
   fun toggleTargetMode(status: Boolean? = null) =
     editor.colorsScheme.run {
-      if (Tagger.toggleTargetMode(status))
+      if (Jumper.toggleTargetMode(status))
         setColor(CARET_COLOR, settings.targetModeColor)
       else
         setColor(CARET_COLOR, settings.jumpModeColor)

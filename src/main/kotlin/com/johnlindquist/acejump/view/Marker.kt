@@ -1,8 +1,11 @@
 package com.johnlindquist.acejump.view
 
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
-import com.johnlindquist.acejump.search.*
+import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Tagger.regex
+import com.johnlindquist.acejump.search.getPointFromIndex
+import com.johnlindquist.acejump.search.hasSpaceRight
+import com.johnlindquist.acejump.search.isFirstCharacterOfLine
 import com.johnlindquist.acejump.view.Marker.Alignment.*
 import com.johnlindquist.acejump.view.Model.arcD
 import com.johnlindquist.acejump.view.Model.editor
@@ -40,7 +43,6 @@ class Marker(val query: String, val tag: String?, val index: Int) {
     queryLength = i
   }
 
-  private val searchWidth = queryLength * fontWidth
   private var tagPoint = editor.getPointFromIndex(index + trueOffset)
   private var yPosition = tagPoint.y + rectVOffset
   private var alignment = RIGHT
@@ -54,13 +56,6 @@ class Marker(val query: String, val tag: String?, val index: Int) {
       tag?.alignTag(Canvas)
         ?.apply { Canvas.registerTag(this, tag) }
         ?.let { highlightTag(it); drawTagForeground(it) }
-  }
-
-  private fun Graphics2D.highlightText() {
-    color = settings.textHighlightColor
-    composite = getInstance(SRC_OVER, 0.40.toFloat())
-
-    fillRoundRect(srcPoint.x, yPosition, searchWidth, rectHeight, arcD, arcD)
   }
 
   private fun Graphics2D.drawTagForeground(tagPosition: Point?) {
@@ -112,8 +107,7 @@ class Marker(val query: String, val tag: String?, val index: Int) {
     val beforeEnd = charIndex < text.length
     val textChar = if (beforeEnd) text[charIndex].toLowerCase() else 0.toChar()
 
-    // TODO: Use the built-in find-highlighter
-    fun highlightAlreadyTyped() {
+    fun highlightFirst() {
       composite = getInstance(SRC_OVER, 0.40.toFloat())
       color = settings.textHighlightColor
 
@@ -124,7 +118,7 @@ class Marker(val query: String, val tag: String?, val index: Int) {
       }
     }
 
-    fun highlightRemaining() {
+    fun highlightLast() {
       color = settings.tagBackgroundColor
       if (alignment != RIGHT || text.hasSpaceRight(index) || regex)
         composite = getInstance(SRC_OVER, 1.toFloat())
@@ -132,21 +126,7 @@ class Marker(val query: String, val tag: String?, val index: Int) {
       fillRoundRect(tagX!!, yPosition, tagWidth, rectHeight, arcD, arcD)
     }
 
-    fun surroundTargetWord() {
-      color = settings.targetModeColor
-      composite = getInstance(SRC_OVER, 1.toFloat())
-      val (wordStart, wordEnd) = text.wordBounds(index)
-
-      val xPosition = editor.getPointFromIndex(wordStart).x
-      val wordWidth = (wordEnd - wordStart) * fontWidth
-
-      if (text[index].isLetterOrDigit())
-        drawRoundRect(xPosition, yPosition, wordWidth, rectHeight, arcD, arcD)
-    }
-
-    highlightAlreadyTyped()
-    highlightRemaining()
-
-    if (Tagger.targetModeEnabled) surroundTargetWord()
+    highlightFirst()
+    highlightLast()
   }
 }
