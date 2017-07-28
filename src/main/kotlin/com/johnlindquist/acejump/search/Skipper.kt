@@ -26,7 +26,7 @@ object Skipper {
   }
 
   private fun findPreviousPosition(): LogicalPosition? {
-    val prevIndex = textMatches
+    val prevIndex = textMatches.toList()
       .dropLastWhile { it < editor.getView().first }
       .lastOrNull() ?: textMatches.lastOrNull() ?: return null
 
@@ -55,7 +55,7 @@ object Skipper {
     fun maximizeCoverageOfNextOccurrence(): LogicalPosition {
       val maxVisibleLine = nextLogicalPosition.line + editor.getScreenHeight()
       val lastVisibleIndex = editor.getLineEndOffset(maxVisibleLine, true)
-      val lastIndex = textMatches.dropLastWhile { it > lastVisibleIndex }.last()
+      val lastIndex = textMatches.toList().dropLastWhile { it > lastVisibleIndex }.last()
       val center = (nextIndex + lastIndex) / 2
       return editor.offsetToLogicalPosition(center)
     }

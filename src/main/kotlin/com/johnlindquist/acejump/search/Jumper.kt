@@ -7,7 +7,6 @@ import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.util.TextRange
-import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.project
@@ -23,15 +22,15 @@ object Jumper {
   @Volatile
   var hasJumped = false
 
-  fun jump(marker: Marker) = editor.run {
+  fun jump(index: Int) = editor.run {
     if (Finder.isShiftSelectEnabled)
-      selectFromToOffset(caretModel.offset, marker.index)
+      selectFromToOffset(caretModel.offset, index)
     else if (Tagger.targetModeEnabled) {
       // Moving the caret will trigger a reset, flipping targetModeEnabled, so
       // we need to move the caret and select the word in one single transaction
-      moveCaret(marker.index)
-      selectWordAtOffset(marker.index)
-    } else moveCaret(marker.index)
+      moveCaret(index)
+      selectWordAtOffset(index)
+    } else moveCaret(index)
 
     hasJumped = true
   }

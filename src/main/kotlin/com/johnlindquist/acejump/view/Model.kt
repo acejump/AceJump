@@ -4,12 +4,10 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.openapi.editor.colors.EditorColorsManager.getInstance
-import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.markup.EffectType.BOXED
 import com.intellij.openapi.editor.markup.TextAttributes
-import com.intellij.openapi.project.Project
 import com.johnlindquist.acejump.config.AceConfig
 import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.search.getDefaultEditor
@@ -23,7 +21,7 @@ import java.awt.Font.BOLD
  */
 
 object Model {
-  var editor: Editor = getDefaultEditor()
+  var editor = getDefaultEditor()
     set(value) {
       editorText = value.document.text.toLowerCase()
       if (value == field) return
@@ -41,7 +39,9 @@ object Model {
       naturalColor = getInstance().globalScheme.getColor(CARET_COLOR) ?: BLACK
     }
 
-  val project: Project?
+  val markup
+    get() = editor.markupModel
+  val project
     get() = editor.project
   var editorText = editor.document.text.toLowerCase()
 
@@ -55,19 +55,19 @@ object Model {
   val targetModeStyle = TextAttributes(null, null, RED, BOXED, Font.PLAIN)
   val highlightStyle = TextAttributes(null, GREEN, GREEN, BOXED, Font.PLAIN)
 
-  val scheme: EditorColorsScheme
+  val scheme
     get() = editor.colorsScheme
-  val font: Font
+  val font
     get() = Font(scheme.editorFontName, BOLD, scheme.editorFontSize)
   val fontWidth
     get() = editor.component.getFontMetrics(font).stringWidth("w")
-  val fontHeight: Int
+  val fontHeight
     get() = editor.colorsScheme.editorFontSize
-  val lineHeight: Int
+  val lineHeight
     get() = editor.lineHeight
-  val rectHeight: Int
+  val rectHeight
     get() = fontHeight + 3
-  val rectVOffset: Int
+  val rectVOffset
     get() = lineHeight - (editor as EditorImpl).descent - fontHeight
   val arcD = rectHeight - 6
   var viewBounds = 0..0

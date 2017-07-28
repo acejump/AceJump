@@ -2,7 +2,7 @@ package com.johnlindquist.acejump.view
 
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.*
-import com.johnlindquist.acejump.search.Tagger.isRegex
+import com.johnlindquist.acejump.search.Tagger.regex
 import com.johnlindquist.acejump.view.Marker.Alignment.*
 import com.johnlindquist.acejump.view.Model.arcD
 import com.johnlindquist.acejump.view.Model.editor
@@ -54,8 +54,6 @@ class Marker(val query: String, val tag: String?, val index: Int) {
       tag?.alignTag(Canvas)
         ?.apply { Canvas.registerTag(this, tag) }
         ?.let { highlightTag(it); drawTagForeground(it) }
-
-    highlightText()
   }
 
   private fun Graphics2D.highlightText() {
@@ -128,7 +126,7 @@ class Marker(val query: String, val tag: String?, val index: Int) {
 
     fun highlightRemaining() {
       color = settings.tagBackgroundColor
-      if (alignment != RIGHT || text.hasSpaceRight(index) || isRegex)
+      if (alignment != RIGHT || text.hasSpaceRight(index) || regex)
         composite = getInstance(SRC_OVER, 1.toFloat())
 
       fillRoundRect(tagX!!, yPosition, tagWidth, rectHeight, arcD, arcD)

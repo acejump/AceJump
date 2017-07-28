@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.control
 
+import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.concurrency.runAsync
 import java.lang.System.currentTimeMillis
 
@@ -8,6 +9,7 @@ import java.lang.System.currentTimeMillis
  */
 
 object Trigger : () -> Unit {
+  private val logger = Logger.getInstance(Trigger::class.java)
   private var delay = 0L
   private var timer = currentTimeMillis()
   private var isRunning = false
@@ -22,7 +24,11 @@ object Trigger : () -> Unit {
       while (currentTimeMillis() - timer <= delay)
         Thread.sleep(Math.abs(delay - (currentTimeMillis() - timer)))
 
-      invokable.invoke()
+      try {
+        invokable.invoke()
+      } catch (e: Exception) {
+        logger.error("Exception occurred while triggering event!", e)
+      }
 
       isRunning = false
     }

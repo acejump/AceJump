@@ -49,8 +49,7 @@ fun String.wordBounds(index: Int): Pair<Int, Int> {
 
 fun getDefaultEditor(): Editor = FileEditorManager.getInstance(ProjectManager
   .getInstance().openProjects[0]).run {
-  selectedTextEditor ?:
-    allEditors.first { it is TextEditor } as Editor
+  selectedTextEditor ?: allEditors.first { it is TextEditor } as Editor
 }
 
 fun Editor.getPointFromIndex(index: Int) = RelativePoint(contentComponent,

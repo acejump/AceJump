@@ -23,25 +23,30 @@ import java.util.*
 
 object Tagger {
   var targetModeEnabled = false
-  var markers: Collection<Marker> = emptyList()
+  var markers: List<Marker> = emptyList()
     private set
 
-  var isRegex = false
+  var regex = false
   var query = ""
     private set
-  var textMatches = listOf<Int>()
+  var textMatches: Set<Int> = emptySet()
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
   private val logger = Logger.getInstance(Tagger::class.java)
+  var resultsInView: Set<Int> = emptySet()
 
-  fun markOrJump(model: FindModel, results: List<Int>) {
+  private val Iterable<Int>.allInView
+    get() = all { it in editor.getView() }
+
+  fun markOrJump(model: FindModel, resultsInView: Set<Int>, results: Set<Int>) {
+    this.resultsInView = resultsInView
     textMatches = results
-    if (!isRegex) isRegex = model.isRegularExpressions
-    else Regex.escape(model.stringToFind.toLowerCase())
-    query = (if (model.isRegularExpressions) " "
-    else if (isRegex) " " + model.stringToFind
-    else model.stringToFind).toLowerCase()
+    if (!regex) regex = model.isRegularExpressions
+    else
+      query = (if (model.isRegularExpressions) " "
+      else if (regex) " " + model.stringToFind
+      else model.stringToFind).toLowerCase()
 
     mark()
   }
@@ -52,16 +57,10 @@ object Tagger {
   }
 
   fun maybeJumpIfJustOneTagRemains() =
-    tagMap.entries.firstOrNull()?.run { jumpTo(Marker(query, key, value)); true } ?: false
-
-  private fun jumpTo(marker: Marker) = Jumper.jump(marker)
+    tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
 
   fun mark() {
-    giveJumpOpportunity()
-
     if (textMatches.isNotEmpty()) computeMarkers()
-
-    // TODO: Clean up this ugliness.
     if (markers.size > 1 || query.length < 2) return
 
     giveJumpOpportunity()
@@ -69,46 +68,43 @@ object Tagger {
     if (markers.isEmpty()) Skipper.doesQueryExistIfSoSkipToIt()
   }
 
-  private fun giveJumpOpportunity(): Boolean {
-    if (query.length > 2 && tagMap[query.takeLast(2)] != null) {
-      jumpTo(Marker(query, query.takeLast(2), tagMap[query.takeLast(2)]!!))
-      return true
-    }
-    if (query.length > 1 && tagMap[query.takeLast(1)] != null) {
-      val indexLast1 = tagMap[query.takeLast(1)]!!
-      val cIdx = (indexLast1 + query.length - 1).coerceAtMost(editorText.length)
-      if (editorText[cIdx] != query.last()) {
-        jumpTo(Marker(query, query.takeLast(1), indexLast1))
-        return true
-      }
-    }
-
-    return false
+  private fun giveJumpOpportunity() {
+    tagMap.forEach { if(query.completes(it.key)) Jumper.jump(it.value) }
+//    if (query.length > 2 && tagMap[query.takeLast(2)] != null) {
+//      Jumper.jump(tagMap[query.takeLast(2)]!!)
+//      return true
+//    }
+//    if (query.length > 1 && tagMap[query.takeLast(1)] != null) {
+//      val indexLast1 = tagMap[query.takeLast(1)]!!
+//      val cIdx = (indexLast1 + query.length - 1).coerceAtMost(editorText.length)
+//      if (editorText[cIdx] != query.last()) {
+//        Jumper.jump(indexLast1)
+//        return true
+//      }
+//    }
+//
+//    return false
   }
 
   private fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
 
   private fun computeMarkers() {
-    if (Finder.skim && !isRegex) {
+    if (Finder.skim && !regex) {
       markers = textMatches.map { Marker(query, null, it) }
       return
     }
 
     unseen2grams = LinkedHashSet(allBigrams())
-
-    val (inView, outOfView) = textMatches.partition { it in editor.getView() }
-
-    digraphs = makeMap(editorText, inView)
+    digraphs = makeMap(editorText, resultsInView)
 
     markers =
-      (if (hasTagSuffix(query)) HashBiMap.create(filterTags())
+      (if (hasTagSuffix(query)) HashBiMap.create(tagMap.filterByQuery(query))
       else mapDigraphs(digraphs).let { compact(it) })
         .apply { if (this.isNotEmpty()) tagMap = this }
         .map { Marker(query, it.key, it.value) }
-        .plus(outOfView.map { Marker(query, null, it) })
   }
 
-  private fun filterTags() = tagMap.filter { query.endsWith(it.key.first()) }
+  fun Map<String, Int>.filterByQuery(q: String) = filter { q.completes(it.key) }
 
   /**
    * Shortens assigned tags. Effectively, this will only shorten two-character
@@ -137,8 +133,8 @@ object Tagger {
    * prior to the end of a word (ie. a contiguous group of letters/digits).
    */
 
-  fun makeMap(text: CharSequence, sites: List<Int>): Multimap<String, Int> =
-    if (isRegex) LinkedListMultimap.create<String, Int>().apply {
+  fun makeMap(text: CharSequence, sites: Set<Int>): Multimap<String, Int> =
+    if (regex) LinkedListMultimap.create<String, Int>().apply {
       sites.forEach { put(" ", it) }
     } else LinkedListMultimap.create<String, Int>().apply {
       sites.forEach { site ->
@@ -184,7 +180,7 @@ object Tagger {
 
   private fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
     if (query.isEmpty()) return HashBiMap.create()
-    val newTagMap: BiMap<String, Int> = transferExistingTagsMatchingQuery()
+    val newTagMap: BiMap<String, Int> = transferAnyExistingTagsThatMatchQuery()
     val availableTags: HashSet<String> = setupTags()
 
     /**
@@ -237,9 +233,7 @@ object Tagger {
         }
     }
 
-    if (isRegex && newTagMap.isNotEmpty() &&
-      newTagMap.values.all { it in editor.getView() })
-      return newTagMap
+    newTagMap.run { if (regex && isNotEmpty() && values.allInView) return this }
 
     sortValidJumpTargets(digraphs).forEach {
       if (availableTags.isEmpty()) return newTagMap
@@ -250,7 +244,7 @@ object Tagger {
   }
 
   private fun sortValidJumpTargets(digraphs: Multimap<String, Int>) =
-    if (isRegex) digraphs.values()
+    if (regex) digraphs.values()
     else digraphs.asMap().entries.sortedBy { it.value.size }
       .flatMapTo(HashSet(), { it.value }).sortedWith(compareBy(
       // Ensure that the first letter of a word is prioritized for tagging
@@ -266,7 +260,7 @@ object Tagger {
    * filter plaintext results.
    */
 
-  private fun transferExistingTagsMatchingQuery() =
+  private fun transferAnyExistingTagsThatMatchQuery() =
     tagMap.filterTo(HashBiMap.create<String, Int>(),
       { (key, _) -> query == key || query.last() == key.first() })
 
@@ -279,9 +273,9 @@ object Tagger {
       .mapTo(linkedSetOf()) { it }
 
   fun reset() {
-    isRegex = false
+    regex = false
     targetModeEnabled = false
-    textMatches = listOf()
+    textMatches = emptySet()
     digraphs.clear()
     tagMap.clear()
     query = ""
@@ -292,7 +286,7 @@ object Tagger {
   /**
    * Returns true if the Tagger contains a match in the new view, that is not
    * contained (visible) in the old view. This method assumes that textMatches
-   * are sorted from least to greatest.
+   * are in ascending order by index.
    *
    * @see textMatches
    *
@@ -303,19 +297,7 @@ object Tagger {
     textMatches.lastOrNull { it < old.first } ?: -1 >= new.first ||
       textMatches.firstOrNull { it > old.last } ?: new.last < new.last
 
-  // There is no sign of a matching result or tag, must be a dead end
-  fun isQueryDeadEnd(queryString: String): Boolean {
-    if (query.isEmpty()) return false
-    if (query == queryString) return textMatches.isEmpty() && markers.isEmpty()
-    query = queryString
-    computeMarkers()
-    return textMatches.isEmpty() && markers.isEmpty()
-  }
-
-  fun hasTagSuffix(query: String) = tagMap.any {
-    query.endsWith(it.key.first(), true) ||
-      query.endsWith(it.key, true)
-  }
-
-  fun hasTagsAtIndex(i: Int) = tagMap.containsValue(i)
+  fun hasTagSuffix(query: String) = tagMap.any { query.completes(it.key) }
+  fun String.completes(tag: String) = endsWith(tag.first()) || endsWith(tag)
+  fun hasTagsAtIndex(i: Int) = Finder.skim || tagMap.containsValue(i)
 }

@@ -108,7 +108,7 @@ object Handler {
       editor.bindCanvas()
     }
 
-    if (Finder.query.isNotEmpty() || Tagger.isRegex)
+    if (Finder.query.isNotEmpty() || Tagger.regex)
       runLater {
         Tagger.mark()
         updateUIState()
