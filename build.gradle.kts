@@ -3,10 +3,6 @@ plugins {
   id("org.jetbrains.kotlin.jvm") version "1.1.3"
 }
 
-configurations.all {
-  resolutionStrategy.cacheDynamicVersionsFor(10, TimeUnit.DAYS)
-}
-
 intellij {
   pluginName = "AceJump"
   updateSinceUntilBuild = false

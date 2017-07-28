@@ -21,8 +21,9 @@ import kotlin.text.RegexOption.MULTILINE
 
 object Finder {
   private var results = hashSetOf<Int>()
-  private var allResults = listOf<RangeHighlighter>()
-  private var resultsInView = listOf<RangeHighlighter>()
+  private var textHighlights = listOf<RangeHighlighter>()
+  private var viewHighlights = listOf<RangeHighlighter>()
+  private var wordHighlights = listOf<RangeHighlighter>()
   private var model = FindModel()
   private var TEXT_HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
   private var TARGET_HIGHLIGHT_LAYER = HighlighterLayer.LAST + 2
@@ -66,20 +67,18 @@ object Finder {
   }
 
   private fun highlightResults() = runLater {
-    markup.removeAllHighlighters()
-//    allResults = allResults.narrowResultsBy { it.startOffset !in results }
     if (results.size < 26) skim = false
 
+    if (Jumper.targetModeEnabled && wordHighlights.isEmpty())
+      wordHighlights = results.mapNotNull { createTargetHighlighter(it) }
+    else wordHighlights = emptyList()
 
-    val resultsInView = mutableListOf<RangeHighlighter>()
-    allResults = results.map {
-      if (Jumper.targetModeEnabled) createTargetHighlighter(it)
-      createTextHighlighter(it).apply {
-        if (startOffset in editor.getView()) resultsInView.add(this)
-      }
-    }
+    textHighlights.forEach { markup.removeHighlighter(it) }
+    textHighlights = results.map { createTextHighlighter(it) }
 
-    this.resultsInView = resultsInView
+    wordHighlights.narrowResultsBy { (it.startOffset..it.endOffset).none { it in results } }
+    textHighlights = textHighlights.narrowResultsBy { it.startOffset !in results }
+    viewHighlights = viewHighlights.narrowResultsBy { it.startOffset !in results }
   }
 
   private fun List<RangeHighlighter>.narrowResultsBy(f: (RangeHighlighter) -> Boolean) =
@@ -90,12 +89,13 @@ object Finder {
       } else true
     }
 
-  private fun createTargetHighlighter(index: Int) {
-    if (!editorText[index].isLetterOrDigit()) return
-    val (wordStart, wordEnd) = editorText.wordBounds(index)
-    markup.addRangeHighlighter(wordStart, wordEnd,
-      TARGET_HIGHLIGHT_LAYER, targetModeHighlightStyle, EXACT_RANGE)
-  }
+  private fun createTargetHighlighter(index: Int): RangeHighlighter? =
+    if (!editorText[index].isLetterOrDigit()) null
+    else {
+      val (wordStart, wordEnd) = editorText.wordBounds(index)
+      markup.addRangeHighlighter(wordStart, wordEnd,
+        TARGET_HIGHLIGHT_LAYER, targetModeHighlightStyle, EXACT_RANGE)
+    }
 
   private fun createTextHighlighter(it: Int) =
     markup.addRangeHighlighter(it,
@@ -104,7 +104,7 @@ object Finder {
 
   private fun Set<Int>.tag() = runLater {
     Tagger.markOrJump(model, this)
-    resultsInView = resultsInView.narrowResultsBy { Tagger canDiscard it.startOffset }
+    viewHighlights.narrowResultsBy { Tagger canDiscard it.startOffset }
     skim = false
     Handler.paintTagMarkers()
   }
@@ -139,8 +139,9 @@ object Finder {
     query = ""
     model = FindModel()
     results = hashSetOf()
-    allResults = listOf()
-    resultsInView = listOf()
+    textHighlights = listOf()
+    viewHighlights = listOf()
+    wordHighlights = listOf()
   }
 }
 

@@ -47,6 +47,7 @@ fun String.wordBounds(index: Int): Pair<Int, Int> {
   return Pair(first, last)
 }
 
+
 fun getDefaultEditor(): Editor = FileEditorManager.getInstance(ProjectManager
   .getInstance().openProjects[0]).run {
   selectedTextEditor ?: allEditors.first { it is TextEditor } as Editor
