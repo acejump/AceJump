@@ -35,19 +35,19 @@ object Tagger {
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
   private val logger = Logger.getInstance(Tagger::class.java)
-  var resultsInView: Set<Int> = emptySet()
+  var textMatchesInView: Set<Int> = emptySet()
 
   private val Iterable<Int>.allInView
     get() = all { it in editor.getView() }
 
-  fun markOrJump(model: FindModel, resultsInView: Set<Int>, results: Set<Int>) {
-    this.resultsInView = resultsInView
+  fun markOrJump(model: FindModel, results: Set<Int>) {
+    textMatchesInView = results.filter { it in editor.getView() }.toSet()
     textMatches = results
     if (!regex) regex = model.isRegularExpressions
-    else
-      query = (if (model.isRegularExpressions) " "
-      else if (regex) " " + model.stringToFind
-      else model.stringToFind).toLowerCase()
+
+    query = (if (model.isRegularExpressions) " "
+    else if (regex) " " + model.stringToFind
+    else model.stringToFind).toLowerCase()
 
     markTags()
   }
@@ -65,7 +65,7 @@ object Tagger {
   }
 
   private fun giveJumpOpportunity() {
-    tagMap.forEach { if(query.completes(it.key)) Jumper.jump(it.value) }
+    tagMap.forEach { if (query completes it.key) Jumper.jump(it.value) }
 //    if (query.length > 2 && tagMap[query.takeLast(2)] != null) {
 //      Jumper.jump(tagMap[query.takeLast(2)]!!)
 //      return true
@@ -91,16 +91,13 @@ object Tagger {
     }
 
     unseen2grams = LinkedHashSet(allBigrams())
-    digraphs = makeMap(editorText, resultsInView)
+    digraphs = makeMap(editorText, textMatchesInView)
 
-    markers =
-      (if (hasTagSuffix(query)) HashBiMap.create(tagMap.filterByQuery(query))
-      else mapDigraphs(digraphs).let { compact(it) })
-        .apply { if (this.isNotEmpty()) tagMap = this }
-        .map { Marker(query, it.key, it.value) }
+    markers = mapDigraphs(digraphs).let { compact(it) }
+      .apply { if (this.isNotEmpty()) tagMap = this }
+      .map { Marker(query, it.key, it.value) }
   }
 
-  fun Map<String, Int>.filterByQuery(q: String) = filter { q.completes(it.key) }
 
   /**
    * Shortens assigned tags. Effectively, this will only shorten two-character
@@ -176,7 +173,7 @@ object Tagger {
 
   private fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
     if (query.isEmpty()) return HashBiMap.create()
-    val newTagMap: BiMap<String, Int> = transferAnyExistingTagsThatMatchQuery()
+    val newTags: BiMap<String, Int> = transferExistingTagsCompatibleWithQuery()
     val availableTags: HashSet<String> = setupTags()
 
     /**
@@ -193,13 +190,13 @@ object Tagger {
 
       fun hasNearbyTag(index: Int) =
         Pair(max(left, index - 2), min(right, index + 2))
-          .run { (first..second).any { newTagMap.containsValue(it) } }
+          .run { (first..second).any { newTags.containsValue(it) } }
 
       if (hasNearbyTag(idx)) return
 
       val (matching, nonMatching) = availableTags.partition { tag ->
         // Prevents a situation where some sites couldn't be assigned last time
-        !newTagMap.containsKey("${tag[0]}") &&
+        !newTags.containsKey("${tag[0]}") &&
           ((idx + 1)..min(right, editorText.length)).map {
             // Never use a tag which can be partly completed by typing plaintext
             editorText.substring(idx, it) + tag[0]
@@ -215,7 +212,7 @@ object Tagger {
       else
         tagMap.inverse().getOrElse(idx) { tag }
           .let { chosenTag ->
-            newTagMap[chosenTag] = idx
+            newTags[chosenTag] = idx
             // Prevents "...a[bc]...z[bc]..."
             availableTags.remove(chosenTag)
           }
@@ -229,14 +226,14 @@ object Tagger {
         }
     }
 
-    newTagMap.run { if (regex && isNotEmpty() && values.allInView) return this }
+    newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
 
     sortValidJumpTargets(digraphs).forEach {
-      if (availableTags.isEmpty()) return newTagMap
+      if (availableTags.isEmpty()) return newTags
       tryToAssignTagToIndex(it)
     }
 
-    return newTagMap
+    return newTags
   }
 
   private fun sortValidJumpTargets(digraphs: Multimap<String, Int>) =
@@ -256,9 +253,14 @@ object Tagger {
    * filter plaintext results.
    */
 
-  private fun transferAnyExistingTagsThatMatchQuery() =
-    tagMap.filterTo(HashBiMap.create<String, Int>(),
-      { (key, _) -> query == key || query.last() == key.first() })
+  private fun transferExistingTagsCompatibleWithQuery() =
+    if (hasTagSuffix(query)) {
+      tagMap.filterTo(HashBiMap.create<String, Int>(),
+        { (tag, idx) -> textMatchesInView.contains(idx) && query completes tag })
+    } else {
+      tagMap.filterTo(HashBiMap.create<String, Int>(),
+        { (_, idx) -> textMatchesInView.contains(idx) })
+    }
 
   private fun setupTags() =
     // Minimize the distance between tag characters
@@ -272,6 +274,7 @@ object Tagger {
   fun reset() {
     regex = false
     textMatches = emptySet()
+    textMatchesInView = emptySet()
     digraphs.clear()
     tagMap.clear()
     query = ""
@@ -293,7 +296,7 @@ object Tagger {
     textMatches.lastOrNull { it < old.first } ?: -1 >= new.first ||
       textMatches.firstOrNull { it > old.last } ?: new.last < new.last
 
-  fun hasTagSuffix(query: String) = tagMap.any { query.completes(it.key) }
-  fun String.completes(tag: String) = endsWith(tag.first()) || endsWith(tag)
-  fun hasTagsAtIndex(i: Int) = Finder.skim || tagMap.containsValue(i)
+  fun hasTagSuffix(query: String) = tagMap.any { query completes it.key }
+  infix fun String.completes(tag: String) = endsWith(tag.first()) || endsWith(tag)
+  infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i))
 }

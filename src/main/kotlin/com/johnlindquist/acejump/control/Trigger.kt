@@ -26,7 +26,7 @@ object Trigger : () -> Unit {
         Thread.sleep(Math.abs(delay - (currentTimeMillis() - timer)))
 
       try {
-        invokable.invoke()
+        invokable()
       } catch (e: Exception) {
         logger.error("Exception occurred while triggering event!", e)
       }
