@@ -123,11 +123,12 @@ object Handler {
   fun toggleTargetMode(status: Boolean? = null) =
     editor.colorsScheme.run {
       if (Jumper.toggleTargetMode(status)) {
-        TODO("Toggle jump mode in Finder")
         setColor(CARET_COLOR, settings.targetModeColor)
       }
       else
         setColor(CARET_COLOR, settings.jumpModeColor)
+
+      Finder.repaintWordTargets()
       Canvas.repaint()
     }
 

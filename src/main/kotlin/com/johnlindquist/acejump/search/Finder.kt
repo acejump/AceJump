@@ -69,19 +69,25 @@ object Finder {
   private fun highlightResults() = runLater {
     if (results.size < 26) skim = false
 
-    if (Jumper.targetModeEnabled && wordHighlights.isEmpty())
-      wordHighlights = results.mapNotNull { createTargetHighlighter(it) }
-    else wordHighlights = emptyList()
-
     textHighlights.forEach { markup.removeHighlighter(it) }
     textHighlights = results.map { createTextHighlighter(it) }
 
-    wordHighlights.narrowResultsBy { (it.startOffset..it.endOffset).none { it in results } }
-    textHighlights = textHighlights.narrowResultsBy { it.startOffset !in results }
-    viewHighlights = viewHighlights.narrowResultsBy { it.startOffset !in results }
+    if (Jumper.targetModeEnabled && wordHighlights.isEmpty()) repaintWordTargets()
+
+    wordHighlights.narrowResultsBy { (startOffset..endOffset).none { it in results } }
+    textHighlights = textHighlights.narrowResultsBy { startOffset !in results }
+    viewHighlights = textHighlights.filter { it.startOffset in editor.getView() }
   }
 
-  private fun List<RangeHighlighter>.narrowResultsBy(f: (RangeHighlighter) -> Boolean) =
+  fun repaintWordTargets() =
+    if (Jumper.targetModeEnabled)
+      wordHighlights = textHighlights.map { createTargetHighlighter(it) }
+    else {
+      wordHighlights.forEach { markup.removeHighlighter(it) }
+      wordHighlights = emptyList()
+    }
+
+  private fun List<RangeHighlighter>.narrowResultsBy(f: RangeHighlighter.() -> Boolean) =
     filter {
       if (f(it)) {
         markup.removeHighlighter(it)
@@ -89,13 +95,12 @@ object Finder {
       } else true
     }
 
-  private fun createTargetHighlighter(index: Int): RangeHighlighter? =
-    if (!editorText[index].isLetterOrDigit()) null
-    else {
-      val (wordStart, wordEnd) = editorText.wordBounds(index)
-      markup.addRangeHighlighter(wordStart, wordEnd,
-        TARGET_HIGHLIGHT_LAYER, targetModeHighlightStyle, EXACT_RANGE)
-    }
+  private fun createTargetHighlighter(textHighlighter: RangeHighlighter): RangeHighlighter {
+    val startHighlight = editorText.wordBounds(textHighlighter.startOffset).first
+    val endHighlight = editorText.wordBounds(textHighlighter.endOffset - 1).second
+    return markup.addRangeHighlighter(startHighlight, endHighlight,
+      TARGET_HIGHLIGHT_LAYER, targetModeHighlightStyle, EXACT_RANGE)
+  }
 
   private fun createTextHighlighter(it: Int) =
     markup.addRangeHighlighter(it,
@@ -104,7 +109,7 @@ object Finder {
 
   private fun Set<Int>.tag() = runLater {
     Tagger.markOrJump(model, this)
-    viewHighlights.narrowResultsBy { Tagger canDiscard it.startOffset }
+    viewHighlights.narrowResultsBy { Tagger canDiscard startOffset }
     skim = false
     Handler.paintTagMarkers()
   }

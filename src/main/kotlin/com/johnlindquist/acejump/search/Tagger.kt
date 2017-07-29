@@ -56,30 +56,29 @@ object Tagger {
     tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
 
   fun markTags() {
-    if (textMatches.isNotEmpty()) computeMarkers()
-    if (markers.size > 1 || query.length < 2) return
-
     giveJumpOpportunity()
+
+    computeMarkers()
+
+    if (markers.size > 1 || query.length < 2) return
 
     if (markers.isEmpty()) Skipper.doesQueryExistIfSoSkipToIt()
   }
 
   private fun giveJumpOpportunity() {
-    tagMap.forEach { if (query completes it.key) Jumper.jump(it.value) }
-//    if (query.length > 2 && tagMap[query.takeLast(2)] != null) {
-//      Jumper.jump(tagMap[query.takeLast(2)]!!)
-//      return true
-//    }
-//    if (query.length > 1 && tagMap[query.takeLast(1)] != null) {
-//      val indexLast1 = tagMap[query.takeLast(1)]!!
-//      val cIdx = (indexLast1 + query.length - 1).coerceAtMost(editorText.length)
-//      if (editorText[cIdx] != query.last()) {
-//        Jumper.jump(indexLast1)
-//        return true
-//      }
-//    }
-//
-//    return false
+//    tagMap.forEach { if (query completes it.key) Jumper.jump(it.value) }
+    if (query.length > 2 && tagMap[query.takeLast(2)] != null) {
+      Jumper.jump(tagMap[query.takeLast(2)]!!)
+      return
+    }
+    if (query.length > 1 && tagMap[query.takeLast(1)] != null) {
+      val indexLast1 = tagMap[query.takeLast(1)]!!
+      val cIdx = (indexLast1 + query.length - 1).coerceAtMost(editorText.length)
+      if (editorText[cIdx] != query.last()) {
+        Jumper.jump(indexLast1)
+        return
+      }
+    }
   }
 
   private fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
@@ -254,13 +253,8 @@ object Tagger {
    */
 
   private fun transferExistingTagsCompatibleWithQuery() =
-    if (hasTagSuffix(query)) {
       tagMap.filterTo(HashBiMap.create<String, Int>(),
-        { (tag, idx) -> textMatchesInView.contains(idx) && query completes tag })
-    } else {
-      tagMap.filterTo(HashBiMap.create<String, Int>(),
-        { (_, idx) -> textMatchesInView.contains(idx) })
-    }
+        { (tag, _) -> query completes tag })
 
   private fun setupTags() =
     // Minimize the distance between tag characters

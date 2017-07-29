@@ -4,12 +4,12 @@ import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState.defaultModalityState
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.VisualPosition
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
-import com.johnlindquist.acejump.view.Model
 import java.awt.Point
 import java.lang.Math.max
 import java.lang.Math.min
@@ -27,12 +27,12 @@ fun runNow(t: () -> Unit) =
 
 fun runLater(t: () -> Unit) = ApplicationManager.getApplication().invokeLater(t)
 
-fun CharSequence.findAll(key: String, startingFrom: Int = 0) =
-  Regex(key, RegexOption.MULTILINE).findAll(this, startingFrom).mapNotNull {
-    // Do not accept any sites which fall between folded regions in the gutter
-    if (Model.editor.foldingModel.isOffsetCollapsed(it.range.first)) null
-    else it.range.first
-  }
+fun Editor.offsetCenter(first: Int, second: Int): LogicalPosition {
+  val firstIndexLine = offsetToLogicalPosition(first).line
+  val lastIndexLine = offsetToLogicalPosition(second).line
+  val center = (firstIndexLine + lastIndexLine) / 2
+  return offsetToLogicalPosition(getLineStartOffset(center))
+}
 
 /**
  * Identifies the bounds of a word, defined as a contiguous group of letters
@@ -46,7 +46,6 @@ fun String.wordBounds(index: Int): Pair<Int, Int> {
   while (last < length && get(last).isJavaIdentifierPart()) last++
   return Pair(first, last)
 }
-
 
 fun getDefaultEditor(): Editor = FileEditorManager.getInstance(ProjectManager
   .getInstance().openProjects[0]).run {
@@ -170,6 +169,9 @@ fun Editor.getLineStartOffset(line: Int) =
     line >= getLineCount() -> getFileSize()
     else -> document.getLineStartOffset(line)
   }
+
+fun Editor.getLineStartOffsetForOffset(offset: Int) =
+  getLineStartOffset(offsetToLogicalPosition(offset).line)
 
 /**
  * Returns the offset of the end of the requested line.

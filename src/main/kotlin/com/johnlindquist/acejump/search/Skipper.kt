@@ -31,8 +31,7 @@ object Skipper {
   }
 
   private fun findPreviousPosition(): LogicalPosition? {
-    val prevIndex = textMatches.toList()
-      .dropLastWhile { it < editor.getView().first }
+    val prevIndex = textMatches.toList().dropLastWhile { it < viewBounds.first }
       .lastOrNull() ?: textMatches.lastOrNull() ?: return null
 
     val prevLogicalPosition = editor.offsetToLogicalPosition(prevIndex)
@@ -42,16 +41,14 @@ object Skipper {
       val minVisibleLine = prevLogicalPosition.line - editor.getScreenHeight()
       val firstVisibleIndex = editor.getLineStartOffset(minVisibleLine)
       val firstIndex = textMatches.dropWhile { it < firstVisibleIndex }.first()
-      val center = (prevIndex + firstIndex) / 2
-      return editor.offsetToLogicalPosition(center)
+      return editor.offsetCenter(firstIndex, prevIndex)
     }
 
     return maximizeCoverageOfPreviousOccurrence()
   }
 
   private fun findNextPosition(): LogicalPosition? {
-    val nextIndex = textMatches
-      .dropWhile { it <= editor.getView().last }
+    val nextIndex = textMatches.dropWhile { it <= viewBounds.last }
       .firstOrNull() ?: textMatches.firstOrNull() ?: return null
 
     val nextLogicalPosition = editor.offsetToLogicalPosition(nextIndex)
@@ -61,12 +58,12 @@ object Skipper {
       val maxVisibleLine = nextLogicalPosition.line + editor.getScreenHeight()
       val lastVisibleIndex = editor.getLineEndOffset(maxVisibleLine, true)
       val lastIndex = textMatches.toList().dropLastWhile { it > lastVisibleIndex }.last()
-      val center = (nextIndex + lastIndex) / 2
-      return editor.offsetToLogicalPosition(center)
+      return editor.offsetCenter(nextIndex, lastIndex)
     }
 
     return maximizeCoverageOfNextOccurrence()
   }
+
 
   fun Editor.storeScroll() {
     scrollX = scrollingModel.horizontalScrollOffset
