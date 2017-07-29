@@ -35,13 +35,11 @@ object Tagger {
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
   private val logger = Logger.getInstance(Tagger::class.java)
-  var textMatchesInView: Set<Int> = emptySet()
 
   private val Iterable<Int>.allInView
     get() = all { it in editor.getView() }
 
   fun markOrJump(model: FindModel, results: Set<Int>) {
-    textMatchesInView = results.filter { it in editor.getView() }.toSet()
     textMatches = results
     if (!regex) regex = model.isRegularExpressions
 
@@ -76,6 +74,8 @@ object Tagger {
       markers = textMatches.map { Marker(query, null, it) }
       return
     }
+
+    val textMatchesInView = textMatches.filter { it in editor.getView() }.toSet()
 
     unseen2grams = LinkedHashSet(allBigrams())
     digraphs = makeMap(editorText, textMatchesInView)
@@ -254,7 +254,6 @@ object Tagger {
   fun reset() {
     regex = false
     textMatches = emptySet()
-    textMatchesInView = emptySet()
     digraphs.clear()
     tagMap.clear()
     query = ""

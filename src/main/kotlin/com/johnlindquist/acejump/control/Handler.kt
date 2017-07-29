@@ -104,7 +104,7 @@ object Handler {
 
     if (Finder.query.isNotEmpty() || Tagger.regex)
       runLater {
-        Tagger.markTags()
+        Finder.search()
         paintTagMarkers()
       }
   }

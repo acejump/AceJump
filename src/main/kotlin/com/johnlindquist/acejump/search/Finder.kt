@@ -26,7 +26,7 @@ object Finder {
   private var wordHighlights = listOf<RangeHighlighter>()
   private var model = FindModel()
   private var TEXT_HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
-  private var TARGET_HIGHLIGHT_LAYER = HighlighterLayer.LAST + 2
+  private var TARGET_HIGHLIGHT_LAYER = TEXT_HIGHLIGHT_LAYER + 1
 
   val isShiftSelectEnabled
     get() = model.stringToFind.last().isUpperCase()
@@ -37,10 +37,10 @@ object Finder {
     set(value) {
       field = value.toLowerCase()
       when {
-          value.isEmpty() -> return
-          value.length == 1 -> skim()
-          value.isValidQuery() -> search()
-          else -> field = field.dropLast(1)
+        value.isEmpty() -> return
+        value.length == 1 -> skim()
+        value.isValidQuery() -> search()
+        else -> field = field.dropLast(1)
       }
     }
 
@@ -51,7 +51,7 @@ object Finder {
   }
 
   fun search(string: String = query) =
-    search(FindModel().apply { stringToFind = string })
+    search(model.apply { stringToFind = string })
 
   fun search(pattern: Pattern) =
     search(FindModel().apply {
@@ -128,12 +128,22 @@ object Finder {
     if (cache.isEmpty()) findAll(model.stringToFind)
     else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
 
+  private fun Set<Int>.isValid() =
+    editor.getView().let { view ->
+      first() < view.first && last() > view.last
+    }
+
   private fun CharSequence.findAll(key: String, startingFrom: Int = 0) =
-    Regex(key, MULTILINE).findAll(this, startingFrom).mapNotNull {
+    generateSequence({
+      Regex(key, MULTILINE).find(this, startingFrom)
+    }, nextResult()).mapNotNull {
       // Do not accept any sites which fall between folded regions in the gutter
       if (editor.foldingModel.isOffsetCollapsed(it.range.first)) null
       else it.range.first
     }
+
+  private fun  nextResult(): (MatchResult) -> MatchResult? {}
+
 
   private fun String.isValidQuery() =
     results.any { editorText.regionMatches(it, this, 0, length) } ||
