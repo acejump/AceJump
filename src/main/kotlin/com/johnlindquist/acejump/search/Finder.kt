@@ -36,9 +36,12 @@ object Finder {
   var query: String = ""
     set(value) {
       field = value.toLowerCase()
-
-      if (value.isEmpty()) return
-      if (value.length == 1) skim() else searchForQueryOrDropLastCharacter()
+      when {
+          value.isEmpty() -> return
+          value.length == 1 -> skim()
+          value.isValidQuery() -> search()
+          else -> field = field.dropLast(1)
+      }
     }
 
   private fun skim() {
@@ -131,9 +134,6 @@ object Finder {
       if (editor.foldingModel.isOffsetCollapsed(it.range.first)) null
       else it.range.first
     }
-
-  private fun searchForQueryOrDropLastCharacter() =
-    if (query.isValidQuery()) search() else query = query.dropLast(1)
 
   private fun String.isValidQuery() =
     results.any { editorText.regionMatches(it, this, 0, length) } ||

@@ -40,7 +40,7 @@ object Handler {
     VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { processBackspaceCommand() },
     VK_ENTER to { Tagger.maybeJumpIfJustOneTagRemains() },
-    VK_TAB to { Skipper.doesQueryExistIfSoSkipToIt(!isShiftDown) }
+    VK_TAB to { Skipper.ifQueryExistsSkipAhead(!isShiftDown) }
   )
 
   fun activate() = runNow { if (!enabled) start() else toggleTargetMode() }

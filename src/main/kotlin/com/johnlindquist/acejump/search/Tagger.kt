@@ -57,21 +57,17 @@ object Tagger {
     tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
 
   fun markTags() {
-
     computeMarkers()
 
-    if (markers.size > 1 || query.length < 2) return
-
-    if (markers.isEmpty()) Skipper.doesQueryExistIfSoSkipToIt()
+    if (markers.isEmpty() && query.length > 1) Skipper.ifQueryExistsSkipAhead()
   }
 
-  private fun giveJumpOpportunity() {
+  private fun giveJumpOpportunity() =
     tagMap.forEach {
       if (query.endsWith(it.key)) {
         return Jumper.jump(it.value)
       }
     }
-  }
 
   private fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
 
@@ -88,7 +84,6 @@ object Tagger {
       .apply { if (this.isNotEmpty()) tagMap = this }
       .map { (tag, index) -> Marker(query, tag, index) }
   }
-
 
   /**
    * Shortens assigned tags. Effectively, this will only shorten two-character
@@ -171,7 +166,7 @@ object Tagger {
      * Iterates through the remaining available tags, until we find one that
      * matches our criteria, i.e. does not collide with an existing tag or
      * plaintext string. To have the desired behavior, this has a surprising
-     * number of edge cases and irregularities that must explicitly prevented.
+     * number of edge cases that must explicitly prevented.
      *
      * @param idx the index which a tag is to be assigned
      */
@@ -186,12 +181,7 @@ object Tagger {
       if (hasNearbyTag(idx)) return
 
       val (matching, nonMatching) = availableTags.partition { tag ->
-        // Prevents a situation where some sites couldn't be assigned last time
-        !newTags.containsKey("${tag[0]}") &&
-          ((idx + 1)..min(right, editorText.length)).map {
-            // Never use a tag which can be partly completed by typing plaintext
-            editorText.substring(idx, it) + tag[0]
-          }.none { it in editorText }
+        !newTags.containsKey("${tag[0]}") && !tag.collidesWithText(idx, right)
       }
 
       val tag = matching.firstOrNull()
@@ -207,14 +197,6 @@ object Tagger {
             // Prevents "...a[bc]...z[bc]..."
             availableTags.remove(chosenTag)
           }
-    }
-
-    query.run {
-      if (isNotEmpty())
-        substring(max(0, length - 2)).let {
-          if (it in tagMap && it.length < length)
-            return HashBiMap.create(mapOf(it to tagMap[it]))
-        }
     }
 
     newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
@@ -297,4 +279,20 @@ object Tagger {
   fun hasTagSuffix(query: String) = tagMap.any { query overlaps it.key }
   infix fun String.overlaps(xx: String) = endsWith(xx.first()) || endsWith(xx)
   infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i))
+
+  /**
+   * Returns true IFF the receiver, inserted between the left and right indices,
+   * matches an existing substring elsewhere in the editor text. We should never
+   * use a tag which can be partly completed by typing plaintext, where the tag
+   * is the receiver, the tag index is the leftIndex, and rightIndex is the last
+   * character we care about (this is usually the last letter of the same word).
+   *
+   * @param leftIndex index where a tag is to be used
+   * @param rightIndex index of last character (ie. end of the word)
+   */
+
+  private fun String.collidesWithText(leftIndex: Int, rightIndex: Int) =
+    ((leftIndex + 1)..min(rightIndex, editorText.length)).map {
+      editorText.substring(leftIndex, it) + this[0]
+    }.any { it in editorText }
 }

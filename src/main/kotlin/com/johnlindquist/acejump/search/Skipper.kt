@@ -20,7 +20,7 @@ object Skipper {
   private var scrollX = 0
   private var scrollY = 0
 
-  fun doesQueryExistIfSoSkipToIt(isNext: Boolean = true): Boolean {
+  fun ifQueryExistsSkipAhead(isNext: Boolean = true): Boolean {
     val position = if (isNext) findNextPosition() ?: return false
     else findPreviousPosition() ?: return false
     editor.scrollingModel.disableAnimation()

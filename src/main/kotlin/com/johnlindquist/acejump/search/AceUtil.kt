@@ -59,7 +59,7 @@ fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)
 
 fun Editor.getView(): IntRange {
-  val firstVisibleLine = getVisualLineAtTopOfScreen()
+  val firstVisibleLine = max(0, getVisualLineAtTopOfScreen() - 1)
   val firstLine = visualLineToLogicalLine(firstVisibleLine)
   val startOffset = getLineStartOffset(firstLine)
 
@@ -169,9 +169,6 @@ fun Editor.getLineStartOffset(line: Int) =
     line >= getLineCount() -> getFileSize()
     else -> document.getLineStartOffset(line)
   }
-
-fun Editor.getLineStartOffsetForOffset(offset: Int) =
-  getLineStartOffset(offsetToLogicalPosition(offset).line)
 
 /**
  * Returns the offset of the end of the requested line.
