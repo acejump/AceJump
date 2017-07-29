@@ -49,6 +49,7 @@ object Tagger {
     else if (regex) " " + model.stringToFind
     else model.stringToFind).toLowerCase()
 
+    giveJumpOpportunity()
     markTags()
   }
 
@@ -56,7 +57,6 @@ object Tagger {
     tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
 
   fun markTags() {
-    giveJumpOpportunity()
 
     computeMarkers()
 
@@ -66,17 +66,9 @@ object Tagger {
   }
 
   private fun giveJumpOpportunity() {
-//    tagMap.forEach { if (query completes it.key) Jumper.jump(it.value) }
-    if (query.length > 2 && tagMap[query.takeLast(2)] != null) {
-      Jumper.jump(tagMap[query.takeLast(2)]!!)
-      return
-    }
-    if (query.length > 1 && tagMap[query.takeLast(1)] != null) {
-      val indexLast1 = tagMap[query.takeLast(1)]!!
-      val cIdx = (indexLast1 + query.length - 1).coerceAtMost(editorText.length)
-      if (editorText[cIdx] != query.last()) {
-        Jumper.jump(indexLast1)
-        return
+    tagMap.forEach {
+      if (query.endsWith(it.key)) {
+        return Jumper.jump(it.value)
       }
     }
   }
@@ -94,7 +86,7 @@ object Tagger {
 
     markers = mapDigraphs(digraphs).let { compact(it) }
       .apply { if (this.isNotEmpty()) tagMap = this }
-      .map { Marker(query, it.key, it.value) }
+      .map { (tag, index) -> Marker(query, tag, index) }
   }
 
 
@@ -235,6 +227,14 @@ object Tagger {
     return newTags
   }
 
+  /**
+   * Sorts jump targets to determine which positions get first choice for tags,
+   * by taking into account the structure of the surrounding text. For example,
+   * if the jump target is the first letter in a word, it is advantageous to
+   * prioritize this location (in case we run out of tags), since the user is
+   * more likely to target words by their leading character than not.
+   */
+
   private fun sortValidJumpTargets(digraphs: Multimap<String, Int>) =
     if (regex) digraphs.values()
     else digraphs.asMap().entries.sortedBy { it.value.size }
@@ -246,15 +246,19 @@ object Tagger {
       { -editorText[it, editorText.wordBounds(it).second].distinct().size }))
 
   /**
-   * Adds pre-existing tags where search string and tag are intermingled. For
-   * example, tags starting with the last character of the query should be
-   * considered. The user could be starting to select a tag, or continuing to
-   * filter plaintext results.
+   * Adds pre-existing tags where search string and tag overlap. For example,
+   * tags starting with the last character of the query should be considered.
    */
 
   private fun transferExistingTagsCompatibleWithQuery() =
-      tagMap.filterTo(HashBiMap.create<String, Int>(),
-        { (tag, _) -> query completes tag })
+    tagMap.filterTo(HashBiMap.create(), { (tag, _) -> query overlaps tag })
+
+  /**
+   * Sorts available tags by key distance. Tags that are ergonomically easier to
+   * type will be assigned first, ie. we should prefer to use tags which contain
+   * repeated keys (ex. FF, JJ), and tags which contain physically adjacent keys
+   * (ex. 12, 21) to keys that are located further apart on the keyboard.
+   */
 
   private fun setupTags() =
     // Minimize the distance between tag characters
@@ -290,7 +294,7 @@ object Tagger {
     textMatches.lastOrNull { it < old.first } ?: -1 >= new.first ||
       textMatches.firstOrNull { it > old.last } ?: new.last < new.last
 
-  fun hasTagSuffix(query: String) = tagMap.any { query completes it.key }
-  infix fun String.completes(tag: String) = endsWith(tag.first()) || endsWith(tag)
+  fun hasTagSuffix(query: String) = tagMap.any { query overlaps it.key }
+  infix fun String.overlaps(xx: String) = endsWith(xx.first()) || endsWith(xx)
   infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i))
 }

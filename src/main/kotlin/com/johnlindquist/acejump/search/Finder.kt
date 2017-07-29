@@ -74,8 +74,8 @@ object Finder {
 
     if (Jumper.targetModeEnabled && wordHighlights.isEmpty()) repaintWordTargets()
 
-    wordHighlights.narrowResultsBy { (startOffset..endOffset).none { it in results } }
-    textHighlights = textHighlights.narrowResultsBy { startOffset !in results }
+    wordHighlights.narrowBy { (startOffset..endOffset).none { it in results } }
+    textHighlights = textHighlights.narrowBy { startOffset !in results }
     viewHighlights = textHighlights.filter { it.startOffset in editor.getView() }
   }
 
@@ -87,7 +87,7 @@ object Finder {
       wordHighlights = emptyList()
     }
 
-  private fun List<RangeHighlighter>.narrowResultsBy(f: RangeHighlighter.() -> Boolean) =
+  fun List<RangeHighlighter>.narrowBy(f: RangeHighlighter.() -> Boolean) =
     filter {
       if (f(it)) {
         markup.removeHighlighter(it)
@@ -109,7 +109,7 @@ object Finder {
 
   private fun Set<Int>.tag() = runLater {
     Tagger.markOrJump(model, this)
-    viewHighlights.narrowResultsBy { Tagger canDiscard startOffset }
+    viewHighlights.narrowBy { Tagger canDiscard startOffset }
     skim = false
     Handler.paintTagMarkers()
   }
