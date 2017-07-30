@@ -24,7 +24,6 @@ object Finder {
   private var viewHighlights = listOf<RangeHighlighter>()
   private var model = FindModel()
   private var TEXT_HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
-  private var TARGET_HIGHLIGHT_LAYER = TEXT_HIGHLIGHT_LAYER + 1
 
   val isShiftSelectEnabled
     get() = model.stringToFind.last().isUpperCase()
@@ -114,7 +113,7 @@ object Finder {
     if (cache.isEmpty()) findAll(model.stringToFind)
     else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
 
-  private fun Set<Int>.isValid() =
+  private fun Set<Int>.isCacheValidForRange() =
     editor.getView().let { view ->
       first() < view.first && last() > view.last
     }

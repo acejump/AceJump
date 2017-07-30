@@ -31,6 +31,7 @@ object Tagger {
   var query = ""
     private set
   var textMatches: Set<Int> = emptySet()
+  var allTagged = false
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
@@ -75,14 +76,29 @@ object Tagger {
       return
     }
 
-    val textMatchesInView = textMatches.filter { it in editor.getView() }.toSet()
+    markers = scan().apply { if (this.isNotEmpty()) tagMap = this }
+      .map { (tag, index) -> Marker(query, tag, index) }
+  }
+
+  private fun scan(deep: Boolean = false): BiMap<String, Int> {
+    val textMatchesInView =
+      if (deep) {
+        allTagged = true
+        textMatches
+      } else {
+        allTagged = false
+        textMatches.filter { it in editor.getView() }.toSet()
+      }
 
     unseen2grams = LinkedHashSet(allBigrams())
     digraphs = makeMap(editorText, textMatchesInView)
 
-    markers = mapDigraphs(digraphs).let { compact(it) }
-      .apply { if (this.isNotEmpty()) tagMap = this }
-      .map { (tag, index) -> Marker(query, tag, index) }
+    val tags = mapDigraphs(digraphs).let { compact(it) }
+    val uniToBigram = tags.count { it.key.length == 1 }.toDouble() / tags.size
+    // If there are few unigrams, let's use all bigrams and try to cover all
+    if (uniToBigram < 0.5 && !deep && allTagged && !Finder.skim) scan(true)
+
+    return tags
   }
 
   /**
@@ -171,14 +187,14 @@ object Tagger {
      * @param idx the index which a tag is to be assigned
      */
 
-    fun tryToAssignTagToIndex(idx: Int) {
+    fun tryToAssignTagToIndex(idx: Int): Boolean {
       val (left, right) = editorText.wordBounds(idx)
 
       fun hasNearbyTag(index: Int) =
         Pair(max(left, index - 2), min(right, index + 2))
           .run { (first..second).any { newTags.containsValue(it) } }
 
-      if (hasNearbyTag(idx)) return
+      if (hasNearbyTag(idx)) return true
 
       val (matching, nonMatching) = availableTags.partition { tag ->
         !newTags.containsKey("${tag[0]}") && !tag.collidesWithText(idx, right)
@@ -189,6 +205,7 @@ object Tagger {
       if (tag == null)
         String(editorText[left, right]).let {
           logger.info("\"$it\" rejected: " + nonMatching.size + " tags.")
+          return false
         }
       else
         tagMap.inverse().getOrElse(idx) { tag }
@@ -197,13 +214,23 @@ object Tagger {
             // Prevents "...a[bc]...z[bc]..."
             availableTags.remove(chosenTag)
           }
+      return true
     }
 
     newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
 
+    // Hope for the best
+    allTagged = true
     sortValidJumpTargets(digraphs).forEach {
-      if (availableTags.isEmpty()) return newTags
-      tryToAssignTagToIndex(it)
+      if (availableTags.isEmpty()) {
+        allTagged = false; return newTags
+      }
+      if (!tryToAssignTagToIndex(it)) {
+        // But fail as soon as we miss one
+        allTagged = false
+        // We already outside the view, no need to search further if it failed
+        if(it !in editor.getView()) return newTags
+      }
     }
 
     return newTags
@@ -218,9 +245,10 @@ object Tagger {
    */
 
   private fun sortValidJumpTargets(digraphs: Multimap<String, Int>) =
-    if (regex) digraphs.values()
+    if (regex) digraphs.values().sortedBy { it !in editor.getView() }
     else digraphs.asMap().entries.sortedBy { it.value.size }
       .flatMapTo(HashSet(), { it.value }).sortedWith(compareBy(
+      { it !in editor.getView() },
       // Ensure that the first letter of a word is prioritized for tagging
       { editorText[max(0, it - 1)].isLetterOrDigit() },
       // Target words with more unique characters to the immediate right ought
@@ -253,6 +281,7 @@ object Tagger {
 
   fun reset() {
     regex = false
+    allTagged = false
     textMatches = emptySet()
     digraphs.clear()
     tagMap.clear()

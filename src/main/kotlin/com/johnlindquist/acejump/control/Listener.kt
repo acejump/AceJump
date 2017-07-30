@@ -24,7 +24,6 @@ internal object Listener : FocusListener, AncestorListener,
         component.addFocusListener(Listener)
         component.addAncestorListener(Listener)
         scrollingModel.addVisibleAreaListener(Listener)
-//        caretModel.addCaretListener(Listener)
       }
     }
 
@@ -34,7 +33,6 @@ internal object Listener : FocusListener, AncestorListener,
         component.removeFocusListener(Listener)
         component.removeAncestorListener(Listener)
         scrollingModel.removeVisibleAreaListener(Listener)
-//        caretModel.removeCaretListener(Listener)
       }
     }
 
@@ -52,6 +50,7 @@ internal object Listener : FocusListener, AncestorListener,
   private fun canTagsSurviveViewResize() =
     editor.getView().run {
       if (first in viewBounds && last in viewBounds) return true
+      else if (Tagger.allTagged) return true
       else if (Tagger.regex) return false
       else !Tagger.hasMatchBetweenOldAndNewView(viewBounds, this)
     }
@@ -68,10 +67,4 @@ internal object Listener : FocusListener, AncestorListener,
   override fun focusLost(e: FocusEvent?) = reset()
 
   override fun focusGained(e: FocusEvent?) = reset()
-
-//  override fun caretAdded(e: CaretEvent?) = reset()
-//
-//  override fun caretPositionChanged(e: CaretEvent?) = reset()
-//
-//  override fun caretRemoved(e: CaretEvent?) = reset()
 }

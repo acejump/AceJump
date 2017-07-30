@@ -66,6 +66,8 @@ class Marker(val query: String, val tag: String?, val index: Int)
 
   override fun paint(editor: Editor, highlight: RangeHighlighter, g: Graphics) =
     (g as Graphics2D).run {
+      setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
+
       color = settings.textHighlightColor
       fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
 
