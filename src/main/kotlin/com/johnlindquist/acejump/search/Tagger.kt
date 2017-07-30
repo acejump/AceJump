@@ -36,6 +36,12 @@ object Tagger {
   private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
   private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
   private val logger = Logger.getInstance(Tagger::class.java)
+  private var frequency = mutableMapOf<Char, Int>()
+
+  fun MutableMap<Char, Int>.putOrIncrement(char: Char) {
+    putIfAbsent(char, 0)
+    put(char, get(char)!! + 1)
+  }
 
   private val Iterable<Int>.allInView
     get() = all { it in editor.getView() }
@@ -145,6 +151,7 @@ object Tagger {
         put("$c1$c2", site)
 
         while (c1.isLetterOrDigit()) {
+          frequency.putOrIncrement(c1)
           unseen2grams.remove("$c0$c1")
           unseen2grams.remove("$c1$c2")
           p0++; p1++; p2++
@@ -219,6 +226,8 @@ object Tagger {
 
     newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
 
+    var totalRejects = 0
+
     // Hope for the best
     allTagged = true
     sortValidJumpTargets(digraphs).forEach {
@@ -228,10 +237,13 @@ object Tagger {
       if (!tryToAssignTagToIndex(it)) {
         // But fail as soon as we miss one
         allTagged = false
+        totalRejects++
         // We already outside the view, no need to search further if it failed
         if (it !in editor.getView()) return newTags
       }
     }
+
+    println("Total rejects: $totalRejects")
 
     return newTags
   }
@@ -276,6 +288,7 @@ object Tagger {
       .sortedWith(compareBy(
         { it[0].isDigit() || it[1].isDigit() },
         { distance(it[0], it.last()) },
+        { frequency[it[0]] },
         { priority(it.first()) }))
       .mapTo(linkedSetOf()) { it }
 
@@ -286,6 +299,7 @@ object Tagger {
     digraphs.clear()
     tagMap.clear()
     query = ""
+    frequency = mutableMapOf()
     unseen2grams.clear()
     markers = emptyList()
   }
@@ -324,6 +338,7 @@ object Tagger {
 
   private fun String.collidesWithText(leftIndex: Int, rightIndex: Int) =
     ((leftIndex + 1)..min(rightIndex, editorText.length)).map {
-      editorText.substring(leftIndex, it) + this[0]
+      editorText.substring(leftIndex,
+        it) + this[0] // && it in editorText.view()?
     }.any { it in editorText }
 }
