@@ -2,8 +2,6 @@ package com.johnlindquist.acejump.control
 
 import com.intellij.openapi.editor.colors.EditorColorsListener
 import com.intellij.openapi.editor.colors.EditorColorsScheme
-import com.intellij.openapi.editor.event.CaretEvent
-import com.intellij.openapi.editor.event.CaretListener
 import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.johnlindquist.acejump.control.Handler.redoFind
@@ -18,7 +16,7 @@ import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 import kotlin.system.measureTimeMillis
 
-internal object Listener : CaretListener, FocusListener, AncestorListener,
+internal object Listener : FocusListener, AncestorListener,
   EditorColorsListener, VisibleAreaListener {
   fun enable() =
     synchronized(this) {
@@ -26,7 +24,7 @@ internal object Listener : CaretListener, FocusListener, AncestorListener,
         component.addFocusListener(Listener)
         component.addAncestorListener(Listener)
         scrollingModel.addVisibleAreaListener(Listener)
-        caretModel.addCaretListener(Listener)
+//        caretModel.addCaretListener(Listener)
       }
     }
 
@@ -36,7 +34,7 @@ internal object Listener : CaretListener, FocusListener, AncestorListener,
         component.removeFocusListener(Listener)
         component.removeAncestorListener(Listener)
         scrollingModel.removeVisibleAreaListener(Listener)
-        caretModel.removeCaretListener(Listener)
+//        caretModel.removeCaretListener(Listener)
       }
     }
 
@@ -71,9 +69,9 @@ internal object Listener : CaretListener, FocusListener, AncestorListener,
 
   override fun focusGained(e: FocusEvent?) = reset()
 
-  override fun caretAdded(e: CaretEvent?) = reset()
-
-  override fun caretPositionChanged(e: CaretEvent?) = reset()
-
-  override fun caretRemoved(e: CaretEvent?) = reset()
+//  override fun caretAdded(e: CaretEvent?) = reset()
+//
+//  override fun caretPositionChanged(e: CaretEvent?) = reset()
+//
+//  override fun caretRemoved(e: CaretEvent?) = reset()
 }

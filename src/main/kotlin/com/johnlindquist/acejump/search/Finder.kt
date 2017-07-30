@@ -6,11 +6,12 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea.EXACT_RANGE
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.control.Trigger
+import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.markup
 import com.johnlindquist.acejump.view.Model.targetModeHighlightStyle
-import com.johnlindquist.acejump.view.Model.textHighlightStyle
+import java.util.regex.MatchResult
 import kotlin.text.RegexOption.MULTILINE
 
 /**
@@ -47,7 +48,7 @@ object Finder {
   private fun skim() {
     skim = true
     search(FindModel().apply { stringToFind = query })
-    Trigger(350L) { search() }
+    Trigger(400L) { search() }
   }
 
   fun search(string: String = query) =
@@ -108,7 +109,9 @@ object Finder {
   private fun createTextHighlighter(it: Int) =
     markup.addRangeHighlighter(it,
       if (model.isRegularExpressions) it + 1 else it + query.length,
-      TEXT_HIGHLIGHT_LAYER, textHighlightStyle, EXACT_RANGE)
+      TEXT_HIGHLIGHT_LAYER, null, EXACT_RANGE).apply {
+      customRenderer = Marker(query, null, this.startOffset)
+    }
 
   private fun Set<Int>.tag() = runLater {
     Tagger.markOrJump(model, this)
@@ -134,16 +137,15 @@ object Finder {
     }
 
   private fun CharSequence.findAll(key: String, startingFrom: Int = 0) =
-    generateSequence({
-      Regex(key, MULTILINE).find(this, startingFrom)
-    }, nextResult()).mapNotNull {
-      // Do not accept any sites which fall between folded regions in the gutter
-      if (editor.foldingModel.isOffsetCollapsed(it.range.first)) null
-      else it.range.first
-    }
+    generateSequence({ Regex(key, MULTILINE).find(this, startingFrom) },
+      Finder::filterNextResult).map { it.range.first }
 
-  private fun  nextResult(): (MatchResult) -> MatchResult? {}
-
+  private tailrec fun filterNextResult(result: MatchResult): MatchResult? {
+    val next = result.next()
+    return if (next == null) null
+    else if (editor.isVisible(next.range.first)) next
+    else filterNextResult(next)
+  }
 
   private fun String.isValidQuery() =
     results.any { editorText.regionMatches(it, this, 0, length) } ||

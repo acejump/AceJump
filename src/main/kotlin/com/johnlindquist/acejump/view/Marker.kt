@@ -1,5 +1,8 @@
 package com.johnlindquist.acejump.view
 
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.markup.CustomHighlighterRenderer
+import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Tagger.regex
@@ -15,6 +18,7 @@ import com.johnlindquist.acejump.view.Model.rectHeight
 import com.johnlindquist.acejump.view.Model.rectVOffset
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
+import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.RenderingHints.KEY_ANTIALIASING
@@ -28,10 +32,13 @@ import com.johnlindquist.acejump.view.Model.editorText as text
  * caption, which will move the cursor to a known index in the document.
  */
 
-class Marker(val query: String, val tag: String?, val index: Int) {
+
+
+class Marker(val query: String, val tag: String?, val index: Int) : CustomHighlighterRenderer {
   private var srcPoint = editor.getPointFromIndex(index)
   private var queryLength = query.length
   private var trueOffset = query.length - 1
+  private val searchWidth = queryLength * fontWidth
 
   // TODO: Clean up this mess.
   init {
@@ -56,6 +63,16 @@ class Marker(val query: String, val tag: String?, val index: Int) {
       tag?.alignTag(Canvas)
         ?.apply { Canvas.registerTag(this, tag) }
         ?.let { highlightTag(it); drawTagForeground(it) }
+  }
+
+  override fun paint(e: Editor, r: RangeHighlighter, g: Graphics) =
+    (g as Graphics2D).highlightText()
+
+  private fun Graphics2D.highlightText() {
+    color = settings.textHighlightColor
+    composite = getInstance(SRC_OVER, 0.40.toFloat())
+
+    fillRoundRect(srcPoint.x, yPosition, searchWidth, rectHeight, arcD, arcD)
   }
 
   private fun Graphics2D.drawTagForeground(tagPosition: Point?) {

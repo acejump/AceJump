@@ -34,6 +34,8 @@ fun Editor.offsetCenter(first: Int, second: Int): LogicalPosition {
   return offsetToLogicalPosition(getLineStartOffset(center))
 }
 
+fun Editor.isVisible(offset: Int) = !foldingModel.isOffsetCollapsed(offset)
+
 /**
  * Identifies the bounds of a word, defined as a contiguous group of letters
  * and digits, by expanding the provided index until a non-matching character
