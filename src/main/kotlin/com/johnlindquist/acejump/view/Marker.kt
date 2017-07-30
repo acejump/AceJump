@@ -4,11 +4,8 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.CustomHighlighterRenderer
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
-import com.johnlindquist.acejump.search.Finder
+import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Tagger.regex
-import com.johnlindquist.acejump.search.getPointFromIndex
-import com.johnlindquist.acejump.search.hasSpaceRight
-import com.johnlindquist.acejump.search.isFirstCharacterOfLine
 import com.johnlindquist.acejump.view.Marker.Alignment.*
 import com.johnlindquist.acejump.view.Model.arcD
 import com.johnlindquist.acejump.view.Model.editor
@@ -32,10 +29,9 @@ import com.johnlindquist.acejump.view.Model.editorText as text
  * caption, which will move the cursor to a known index in the document.
  */
 
-
-
-class Marker(val query: String, val tag: String?, val index: Int) : CustomHighlighterRenderer {
-  private var srcPoint = editor.getPointFromIndex(index)
+class Marker(val query: String, val tag: String?, val index: Int)
+  : CustomHighlighterRenderer {
+  private var srcPoint = editor.getPointRelative(index, editor.contentComponent)
   private var queryLength = query.length
   private var trueOffset = query.length - 1
   private val searchWidth = queryLength * fontWidth
@@ -50,7 +46,10 @@ class Marker(val query: String, val tag: String?, val index: Int) : CustomHighli
     queryLength = i
   }
 
-  private var tagPoint = editor.getPointFromIndex(index + trueOffset)
+  private val tgIdx = index + trueOffset
+  private val start = editor.getPoint(index)
+  private val startY = start.y + rectVOffset
+  private var tagPoint = editor.getPointRelative(tgIdx, editor.contentComponent)
   private var yPosition = tagPoint.y + rectVOffset
   private var alignment = RIGHT
 
@@ -65,14 +64,23 @@ class Marker(val query: String, val tag: String?, val index: Int) : CustomHighli
         ?.let { highlightTag(it); drawTagForeground(it) }
   }
 
-  override fun paint(e: Editor, r: RangeHighlighter, g: Graphics) =
-    (g as Graphics2D).highlightText()
+  override fun paint(editor: Editor, highlight: RangeHighlighter, g: Graphics) =
+    (g as Graphics2D).run {
+      color = settings.textHighlightColor
+      fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
 
-  private fun Graphics2D.highlightText() {
-    color = settings.textHighlightColor
-    composite = getInstance(SRC_OVER, 0.40.toFloat())
+      if (Jumper.targetModeEnabled) surroundTargetWord()
+    }
 
-    fillRoundRect(srcPoint.x, yPosition, searchWidth, rectHeight, arcD, arcD)
+  private fun Graphics2D.surroundTargetWord() {
+    color = settings.targetModeColor
+    val (wordStart, wordEnd) = text.wordBounds(index)
+
+    val xPosition = editor.getPoint(wordStart).x
+    val wordWidth = (wordEnd - wordStart) * fontWidth
+
+    if (text[index].isLetterOrDigit())
+      drawRoundRect(xPosition, startY, wordWidth, rectHeight, arcD, arcD)
   }
 
   private fun Graphics2D.drawTagForeground(tagPosition: Point?) {

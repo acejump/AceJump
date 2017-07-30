@@ -13,6 +13,7 @@ import com.intellij.ui.awt.RelativePoint
 import java.awt.Point
 import java.lang.Math.max
 import java.lang.Math.min
+import javax.swing.JComponent
 
 operator fun Point.component1() = x
 operator fun Point.component2() = y
@@ -54,8 +55,10 @@ fun getDefaultEditor(): Editor = FileEditorManager.getInstance(ProjectManager
   selectedTextEditor ?: allEditors.first { it is TextEditor } as Editor
 }
 
-fun Editor.getPointFromIndex(index: Int) = RelativePoint(contentComponent,
-  visualPositionToXY(offsetToVisualPosition(index))).originalPoint!!
+fun Editor.getPoint(idx: Int) = visualPositionToXY(offsetToVisualPosition(idx))
+
+fun Editor.getPointRelative(index: Int, relativeToComponent: JComponent) =
+  RelativePoint(relativeToComponent, getPoint(index)).originalPoint!!
 
 fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)

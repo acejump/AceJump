@@ -128,7 +128,7 @@ object Handler {
       else
         setColor(CARET_COLOR, settings.jumpModeColor)
 
-      Finder.repaintWordTargets()
+      Finder.paintTextHighlights()
       Canvas.repaint()
     }
 

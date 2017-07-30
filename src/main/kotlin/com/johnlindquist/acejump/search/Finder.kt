@@ -10,8 +10,6 @@ import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.markup
-import com.johnlindquist.acejump.view.Model.targetModeHighlightStyle
-import java.util.regex.MatchResult
 import kotlin.text.RegexOption.MULTILINE
 
 /**
@@ -24,7 +22,6 @@ object Finder {
   private var results = hashSetOf<Int>()
   private var textHighlights = listOf<RangeHighlighter>()
   private var viewHighlights = listOf<RangeHighlighter>()
-  private var wordHighlights = listOf<RangeHighlighter>()
   private var model = FindModel()
   private var TEXT_HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
   private var TARGET_HIGHLIGHT_LAYER = TEXT_HIGHLIGHT_LAYER + 1
@@ -47,7 +44,7 @@ object Finder {
 
   private fun skim() {
     skim = true
-    search(FindModel().apply { stringToFind = query })
+    search(FindModel().apply { stringToFind = Regex.escape(query) })
     Trigger(400L) { search() }
   }
 
@@ -73,23 +70,16 @@ object Finder {
   private fun highlightResults() = runLater {
     if (results.size < 26) skim = false
 
-    textHighlights.forEach { markup.removeHighlighter(it) }
-    textHighlights = results.map { createTextHighlighter(it) }
+    paintTextHighlights()
 
-    if (Jumper.targetModeEnabled && wordHighlights.isEmpty()) repaintWordTargets()
-
-    wordHighlights.narrowBy { (startOffset..endOffset).none { it in results } }
     textHighlights = textHighlights.narrowBy { startOffset !in results }
     viewHighlights = textHighlights.filter { it.startOffset in editor.getView() }
   }
 
-  fun repaintWordTargets() =
-    if (Jumper.targetModeEnabled)
-      wordHighlights = textHighlights.map { createTargetHighlighter(it) }
-    else {
-      wordHighlights.forEach { markup.removeHighlighter(it) }
-      wordHighlights = emptyList()
-    }
+  fun paintTextHighlights() {
+    textHighlights.forEach { markup.removeHighlighter(it) }
+    textHighlights = results.map { createTextHighlighter(it) }
+  }
 
   fun List<RangeHighlighter>.narrowBy(f: RangeHighlighter.() -> Boolean) =
     filter {
@@ -98,13 +88,6 @@ object Finder {
         false
       } else true
     }
-
-  private fun createTargetHighlighter(textHighlighter: RangeHighlighter): RangeHighlighter {
-    val startHighlight = editorText.wordBounds(textHighlighter.startOffset).first
-    val endHighlight = editorText.wordBounds(textHighlighter.endOffset - 1).second
-    return markup.addRangeHighlighter(startHighlight, endHighlight,
-      TARGET_HIGHLIGHT_LAYER, targetModeHighlightStyle, EXACT_RANGE)
-  }
 
   private fun createTextHighlighter(it: Int) =
     markup.addRangeHighlighter(it,
@@ -158,7 +141,6 @@ object Finder {
     results = hashSetOf()
     textHighlights = listOf()
     viewHighlights = listOf()
-    wordHighlights = listOf()
   }
 }
 
