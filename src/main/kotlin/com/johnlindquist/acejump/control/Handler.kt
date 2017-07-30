@@ -40,6 +40,7 @@ object Handler {
     VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { processBackspaceCommand() },
     VK_ENTER to { Tagger.maybeJumpIfJustOneTagRemains() },
+    // TODO: recycle tags during tab search, push scanner as far as possible
     VK_TAB to { Skipper.ifQueryExistsSkipAhead(!isShiftDown) }
   )
 

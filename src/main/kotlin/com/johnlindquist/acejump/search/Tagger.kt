@@ -229,7 +229,7 @@ object Tagger {
         // But fail as soon as we miss one
         allTagged = false
         // We already outside the view, no need to search further if it failed
-        if(it !in editor.getView()) return newTags
+        if (it !in editor.getView()) return newTags
       }
     }
 
@@ -304,7 +304,10 @@ object Tagger {
     textMatches.lastOrNull { it < old.first } ?: -1 >= new.first ||
       textMatches.firstOrNull { it > old.last } ?: new.last < new.last
 
-  fun hasTagSuffix(query: String) = tagMap.any { query overlaps it.key }
+  fun hasTagSuffix(query: String) = tagMap.any {
+    query overlaps it.key && it.value in editor.getView()
+  }
+
   infix fun String.overlaps(xx: String) = endsWith(xx.first()) || endsWith(xx)
   infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i))
 
