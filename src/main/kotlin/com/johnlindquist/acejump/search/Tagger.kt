@@ -2,8 +2,6 @@ package com.johnlindquist.acejump.search
 
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
-import com.google.common.collect.LinkedListMultimap
-import com.google.common.collect.Multimap
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
@@ -30,18 +28,11 @@ object Tagger {
   var regex = false
   var query = ""
     private set
+  var full = false
   var textMatches: Set<Int> = emptySet()
-  var allTagged = false
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
-  private var unseen2grams: LinkedHashSet<String> = linkedSetOf()
-  private var digraphs: Multimap<String, Int> = LinkedListMultimap.create()
+  private var bigrams: LinkedHashSet<String> = linkedSetOf()
   private val logger = Logger.getInstance(Tagger::class.java)
-  private var frequency = mutableMapOf<Char, Int>()
-
-  fun MutableMap<Char, Int>.putOrIncrement(char: Char) {
-    putIfAbsent(char, 0)
-    put(char, get(char)!! + 1)
-  }
 
   private val Iterable<Int>.allInView
     get() = all { it in editor.getView() }
@@ -61,10 +52,11 @@ object Tagger {
   fun maybeJumpIfJustOneTagRemains() =
     tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
 
-  fun markTags() {
+  private fun markTags() {
     computeMarkers()
 
-    if (markers.isEmpty() && query.length > 1) Skipper.ifQueryExistsSkipAhead()
+    if (markers.isEmpty() && query.length > 1 && !Finder.skim)
+      Skipper.ifQueryExistsSkipAhead()
   }
 
   private fun giveJumpOpportunity() =
@@ -77,32 +69,31 @@ object Tagger {
   private fun allBigrams() = settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
 
   private fun computeMarkers() {
-    if (Finder.skim && !regex) {
-      markers = textMatches.map { Marker(query, null, it) }
-      return
-    }
+    if (Finder.skim && !regex) return
 
     markers = scan().apply { if (this.isNotEmpty()) tagMap = this }
       .map { (tag, index) -> Marker(query, tag, index) }
   }
 
-  private fun scan(deep: Boolean = false): BiMap<String, Int> {
+  private var deep: Boolean = false
+
+  private fun scan(): BiMap<String, Int> {
+    deep = false
     val textMatchesInView =
       if (deep) {
-        allTagged = true
+        full = true
         textMatches
       } else {
-        allTagged = false
+        full = false
         textMatches.filter { it in editor.getView() }.toSet()
       }
 
-    unseen2grams = LinkedHashSet(allBigrams())
-    digraphs = makeMap(editorText, textMatchesInView)
+    bigrams = LinkedHashSet(allBigrams())
 
-    val tags = mapDigraphs(digraphs).let { compact(it) }
+    val tags = mapDigraphs(textMatchesInView).let { compact(it) }
     val uniToBigram = tags.count { it.key.length == 1 }.toDouble() / tags.size
     // If there are few unigrams, let's use all bigrams and try to cover all
-    if (uniToBigram < 0.5 && !deep && allTagged && !Finder.skim) scan(true)
+    if (uniToBigram < 0.5 && !deep && full){ deep = true; scan() }
 
     return tags
   }
@@ -128,41 +119,6 @@ object Tagger {
     textMatches.any { regionMatches(it, key, 0, key.length) }
 
   /**
-   * Builds a map of all existing bigrams, starting from the index of the last
-   * character in the search results. Simultaneously builds a map of all
-   * available tags, by removing used bigrams after each search result, and
-   * prior to the end of a word (ie. a contiguous group of letters/digits).
-   */
-
-  fun makeMap(text: CharSequence, sites: Set<Int>): Multimap<String, Int> =
-    if (regex) LinkedListMultimap.create<String, Int>().apply {
-      sites.forEach { put(" ", it) }
-    } else LinkedListMultimap.create<String, Int>().apply {
-      sites.forEach { site ->
-        val toCheck = site + query.length
-        var (p0, p1, p2) = Triple(toCheck - 1, toCheck, toCheck + 1)
-        var (c0, c1, c2) = Triple(' ', ' ', ' ')
-        if (0 <= p0 && p0 < text.length) c0 = text[p0]
-        if (p1 < text.length) c1 = text[p1]
-        if (p2 < text.length) c2 = text[p2]
-
-        put("$c1", site)
-        put("$c0$c1", site)
-        put("$c1$c2", site)
-
-        while (c1.isLetterOrDigit()) {
-          frequency.putOrIncrement(c1)
-          unseen2grams.remove("$c0$c1")
-          unseen2grams.remove("$c1$c2")
-          p0++; p1++; p2++
-          c0 = text[p0]
-          c1 = if (p1 < text.length) text[p1] else ' '
-          c2 = if (p2 < text.length) text[p2] else ' '
-        }
-      }
-    }
-
-  /**
    * Maps tags to search results. Tags *must* have the following properties:
    *
    * 1. A tag must not match *any* bigrams on the screen.
@@ -180,9 +136,10 @@ object Tagger {
    * @return A list of all tags and their corresponding indices
    */
 
-  private fun mapDigraphs(digraphs: Multimap<String, Int>): BiMap<String, Int> {
+  private fun mapDigraphs(digraphs: Set<Int>): BiMap<String, Int> {
     if (query.isEmpty()) return HashBiMap.create()
     val newTags: BiMap<String, Int> = transferExistingTagsCompatibleWithQuery()
+    newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
     val availableTags: HashSet<String> = setupTags()
 
     /**
@@ -203,15 +160,18 @@ object Tagger {
 
       if (hasNearbyTag(idx)) return true
 
-      val (matching, nonMatching) = availableTags.partition { tag ->
-        !newTags.containsKey("${tag[0]}") && !tag.collidesWithText(idx, right)
-      }
+//      val (matching, nonMatching) = availableTags.partition { tag ->
+//        !newTags.containsKey("${tag[0]}") && !tag.collidesWithText(idx, right)
+//      }
 
-      val tag = matching.firstOrNull()
+//      val tag = matching.firstOrNull()
+      val tag = availableTags.firstOrNull {
+        !newTags.containsKey("${it[0]}") && !it.collidesWithText(idx, right)
+      }
 
       if (tag == null)
         String(editorText[left, right]).let {
-          logger.info("\"$it\" rejected: " + nonMatching.size + " tags.")
+          //          logger.info("\"$it\" rejected: " + nonMatching.size + " tags.")
           return false
         }
       else
@@ -224,19 +184,16 @@ object Tagger {
       return true
     }
 
-    newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
-
     var totalRejects = 0
 
     // Hope for the best
-    allTagged = true
     sortValidJumpTargets(digraphs).forEach {
       if (availableTags.isEmpty()) {
-        allTagged = false; return newTags
+        full = false; return newTags
       }
       if (!tryToAssignTagToIndex(it)) {
         // But fail as soon as we miss one
-        allTagged = false
+        full = false
         totalRejects++
         // We already outside the view, no need to search further if it failed
         if (it !in editor.getView()) return newTags
@@ -256,10 +213,10 @@ object Tagger {
    * more likely to target words by their leading character than not.
    */
 
-  private fun sortValidJumpTargets(digraphs: Multimap<String, Int>) =
-    if (regex) digraphs.values().sortedBy { it !in editor.getView() }
-    else digraphs.asMap().entries.sortedBy { it.value.size }
-      .flatMapTo(HashSet(), { it.value }).sortedWith(compareBy(
+  private fun sortValidJumpTargets(digraphs: Set<Int>) =
+    if (regex) digraphs.sortedBy { it !in editor.getView() }
+    else digraphs.sortedWith(compareBy(
+      // Sites in immediate view should come first
       { it !in editor.getView() },
       // Ensure that the first letter of a word is prioritized for tagging
       { editorText[max(0, it - 1)].isLetterOrDigit() },
@@ -284,23 +241,21 @@ object Tagger {
 
   private fun setupTags() =
     // Minimize the distance between tag characters
-    unseen2grams.filter { it[0] != query[0] }
+    bigrams.filter { it[0] != query[0] }
       .sortedWith(compareBy(
         { it[0].isDigit() || it[1].isDigit() },
         { distance(it[0], it.last()) },
-        { frequency[it[0]] },
         { priority(it.first()) }))
       .mapTo(linkedSetOf()) { it }
 
   fun reset() {
     regex = false
-    allTagged = false
+    full = false
+    deep = false
     textMatches = emptySet()
-    digraphs.clear()
     tagMap.clear()
     query = ""
-    frequency = mutableMapOf()
-    unseen2grams.clear()
+    bigrams.clear()
     markers = emptyList()
   }
 
@@ -338,7 +293,6 @@ object Tagger {
 
   private fun String.collidesWithText(leftIndex: Int, rightIndex: Int) =
     ((leftIndex + 1)..min(rightIndex, editorText.length)).map {
-      editorText.substring(leftIndex,
-        it) + this[0] // && it in editorText.view()?
+      editorText.substring(leftIndex, it) + this[0] // && it in view??
     }.any { it in editorText }
 }

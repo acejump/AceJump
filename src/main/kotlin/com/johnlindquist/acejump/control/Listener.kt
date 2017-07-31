@@ -50,7 +50,7 @@ internal object Listener : FocusListener, AncestorListener,
   private fun canTagsSurviveViewResize() =
     editor.getView().run {
       if (first in viewBounds && last in viewBounds) return true
-      else if (Tagger.allTagged) return true
+      else if (Tagger.full) return true
       else if (Tagger.regex) return false
       else !Tagger.hasMatchBetweenOldAndNewView(viewBounds, this)
     }

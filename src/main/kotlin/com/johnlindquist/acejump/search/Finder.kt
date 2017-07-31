@@ -71,11 +71,11 @@ object Finder {
 
     paintTextHighlights()
 
-    textHighlights = textHighlights.narrowBy { startOffset !in results }
     viewHighlights = textHighlights.filter { it.startOffset in editor.getView() }
   }
 
   fun paintTextHighlights() {
+    if (model.isRegularExpressions) return
     textHighlights.forEach { markup.removeHighlighter(it) }
     textHighlights = results.map { createTextHighlighter(it) }
   }
