@@ -8,9 +8,10 @@ import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.util.SmartList
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
+import com.johnlindquist.acejump.label.Pattern.*
+import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Finder.search
-import com.johnlindquist.acejump.label.Pattern.*
 import com.johnlindquist.acejump.search.Skipper.restoreScroll
 import com.johnlindquist.acejump.search.Skipper.storeScroll
 import com.johnlindquist.acejump.view.Canvas
@@ -50,7 +51,7 @@ object Handler {
 
   private fun processBackspaceCommand() {
     Tagger.reset()
-    Finder.discard()
+    Finder.reset()
     paintTagMarkers()
   }
 
@@ -117,7 +118,7 @@ object Handler {
     enabled = false
     Tagger.reset()
     Jumper.reset()
-    Finder.discard()
+    Finder.reset()
     editor.restoreSettings()
   }
 

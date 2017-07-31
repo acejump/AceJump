@@ -37,6 +37,7 @@ object Finder {
       field = value.toLowerCase()
       when {
         value.isEmpty() -> return
+        Tagger.regex -> search()
         value.length == 1 -> skim()
         value.isValidQuery() -> search()
         else -> field = field.dropLast(1)
@@ -52,12 +53,14 @@ object Finder {
   fun search(string: String = query) =
     search(model.apply { stringToFind = string })
 
-  fun search(pattern: Pattern) =
+  fun search(pattern: Pattern) {
+    reset()
     search(FindModel().apply {
       stringToFind = pattern.string
       isRegularExpressions = true
       Tagger.reset()
     })
+  }
 
   fun search(findModel: FindModel) {
     model = findModel
@@ -77,7 +80,7 @@ object Finder {
   }
 
   fun paintTextHighlights() {
-    if (model.isRegularExpressions) return
+    if (Tagger.regex) return
     textHighlights.forEach { markup.removeHighlighter(it) }
     textHighlights = results.map { createTextHighlighter(it) }
   }
@@ -135,7 +138,7 @@ object Finder {
     results.any { editorText.regionMatches(it, this, 0, length) } ||
       Tagger.hasTagSuffix(query)
 
-  fun discard() {
+  fun reset() {
     markup.removeAllHighlighters()
     query = ""
     model = FindModel()

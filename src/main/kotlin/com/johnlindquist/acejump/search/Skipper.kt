@@ -3,7 +3,7 @@ package com.johnlindquist.acejump.search
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType.CENTER
-import com.johnlindquist.acejump.search.Tagger.textMatches
+import com.johnlindquist.acejump.label.Tagger.textMatches
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.viewBounds
 

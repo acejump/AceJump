@@ -2,11 +2,11 @@ package com.johnlindquist.acejump.label
 
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
+import com.johnlindquist.acejump.search.get
 import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.search.wordBounds
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
-import com.johnlindquist.acejump.search.get
 import java.lang.Math.max
 import java.lang.Math.min
 
@@ -78,7 +78,7 @@ object Solver {
       // to have first pick for tags, since they are the most "picky" targets
       { -editorText[it, editorText.wordBounds(it).second].distinct().size }))
 
-  fun test(results: Set<Int>, tags: LinkedHashSet<String>, newTags: BiMap<String, Int>) {
+  fun solve(results: Set<Int>, tags: LinkedHashSet<String>, newTags: BiMap<String, Int>) {
     bigrams = tags
     Solver.newTags = newTags
     var totalRejects = 0

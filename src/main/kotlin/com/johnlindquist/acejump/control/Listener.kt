@@ -6,7 +6,7 @@ import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.johnlindquist.acejump.control.Handler.redoFind
 import com.johnlindquist.acejump.control.Handler.reset
-import com.johnlindquist.acejump.search.Tagger
+import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.viewBounds

@@ -4,8 +4,8 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.CustomHighlighterRenderer
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
+import com.johnlindquist.acejump.label.Tagger.regex
 import com.johnlindquist.acejump.search.*
-import com.johnlindquist.acejump.search.Tagger.regex
 import com.johnlindquist.acejump.view.Marker.Alignment.*
 import com.johnlindquist.acejump.view.Model.arcD
 import com.johnlindquist.acejump.view.Model.editor
@@ -134,6 +134,18 @@ class Marker(val query: String, val tag: String?, val index: Int)
     val beforeEnd = charIndex < text.length
     val textChar = if (beforeEnd) text[charIndex].toLowerCase() else 0.toChar()
 
+    //TODO use the IDE highlighter
+    fun highlightRegex() {
+      if (!regex) return
+      color = settings.textHighlightColor
+      composite = getInstance(SRC_OVER, 0.40.toFloat())
+
+      if (alignment == RIGHT)
+        fillRoundRect(tagX!! - fontWidth, yPosition, fontWidth, rectHeight, arcD, arcD)
+      else
+        fillRoundRect(tagX!! + tagWidth, yPosition, fontWidth, rectHeight, arcD, arcD)
+    }
+
     fun highlightFirst() {
       composite = getInstance(SRC_OVER, 0.40.toFloat())
       color = settings.textHighlightColor
@@ -153,6 +165,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
       fillRoundRect(tagX!!, yPosition, tagWidth, rectHeight, arcD, arcD)
     }
 
+    highlightRegex()
     highlightFirst()
     highlightLast()
   }

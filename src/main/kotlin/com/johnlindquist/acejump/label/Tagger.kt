@@ -7,7 +7,6 @@ import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Skipper
-import com.johnlindquist.acejump.search.Tagger.textMatches
 import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor
@@ -40,11 +39,14 @@ object Tagger {
     if (!regex) regex = model.isRegularExpressions
 
     query = (if (model.isRegularExpressions) " "
-    else if (regex) " " + model.stringToFind
     else model.stringToFind).toLowerCase()
 
-    bigrams = Pattern.setupTags(
-      query)
+    model.run {
+      if (isRegularExpressions && stringToFind.all { it.isLetterOrDigit() })
+        query += model.stringToFind
+    }
+
+    bigrams = Pattern.setupTags(query)
     giveJumpOpportunity()
     markTags()
   }
@@ -69,7 +71,7 @@ object Tagger {
     }
 
   private fun computeMarkers() {
-    if (Finder.skim && !regex) return
+    if (Finder.skim) return
 
     markers = scan().apply { if (this.isNotEmpty()) tagMap = this }
       .map { (tag, index) -> Marker(query, tag, index) }
@@ -88,9 +90,7 @@ object Tagger {
         textMatches.filter { it in editor.getView() }.toSet()
       }
 
-    val tags = assignTags(resultsToTag).let {
-      compact(it)
-    }
+    val tags = assignTags(resultsToTag).let { compact(it) }
     val uniToBigram = tags.count { it.key.length == 1 }.toDouble() / tags.size
     // If there are few unigrams, let's use all bigrams and try to cover all
     if (uniToBigram < 0.5 && !deep && full) {
@@ -142,9 +142,7 @@ object Tagger {
     if (query.isEmpty()) return HashBiMap.create()
     val newTags: BiMap<String, Int> = transferExistingTagsCompatibleWithQuery()
     newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
-    Solver.test(results,
-      bigrams,
-      newTags)
+    Solver.solve(results, bigrams, newTags)
 
     return newTags
   }
