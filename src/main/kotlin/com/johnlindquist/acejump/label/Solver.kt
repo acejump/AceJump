@@ -3,6 +3,7 @@ package com.johnlindquist.acejump.label
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.johnlindquist.acejump.search.get
+import com.johnlindquist.acejump.search.getLineEndOffset
 import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.search.wordBounds
 import com.johnlindquist.acejump.view.Model.editor
@@ -16,7 +17,7 @@ import java.lang.Math.min
  */
 
 object Solver {
-  private var bigrams: LinkedHashSet<String> = linkedSetOf()
+  private var bigrams: MutableSet<String> = linkedSetOf()
   private var newTags: BiMap<String, Int> = HashBiMap.create()
 
   /**
@@ -29,7 +30,11 @@ object Solver {
    */
 
   fun tryToAssignTagToIndex(idx: Int): Boolean {
-    val (left, right) = editorText.wordBounds(idx)
+    var (left, right) = editorText.wordBounds(idx)
+    editor.run {
+      right = (right + 3).coerceAtMost(getLineEndOffset(offsetToLogicalPosition(
+        right).line, true)) //Always include the trailing character
+    }
 
     fun hasNearbyTag(index: Int) =
       Pair(max(left, index - 2), min(right, index + 2))
@@ -67,37 +72,34 @@ object Solver {
    * more likely to target words by their leading character than not.
    */
 
-  fun sortValidJumpTargets(jumpTargets: Set<Int>) =
-    if (Tagger.regex) jumpTargets.sortedBy { it !in editor.getView() }
-    else jumpTargets.sortedWith(compareBy(
+  private fun sortValidJumpTargets(jumpTargets: Set<Int>) =
+    jumpTargets.sortedWith(compareBy(
       // Sites in immediate view should come first
       { it !in editor.getView() },
       // Ensure that the first letter of a word is prioritized for tagging
-      { editorText[max(0, it - 1)].isLetterOrDigit() },
-      // Target words with more unique characters to the immediate right ought
-      // to have first pick for tags, since they are the most "picky" targets
-      { -editorText[it, editorText.wordBounds(it).second].distinct().size }))
+      { editorText[max(0, it - 1)].isLetterOrDigit() }))
 
-  fun solve(results: Set<Int>, tags: LinkedHashSet<String>, newTags: BiMap<String, Int>) {
-    bigrams = tags
-    Solver.newTags = newTags
+  fun solve(results: Set<Int>, tags: Set<String>): BiMap<String, Int> {
+    newTags = HashBiMap.create()
+    bigrams = tags.toMutableSet()
     var totalRejects = 0
 
     // Hope for the best
     sortValidJumpTargets(results).forEach {
-      if (tags.isEmpty()) {
-        Tagger.full = false; return
+      if (bigrams.isEmpty()) {
+        Tagger.full = false; return newTags
       }
       if (!tryToAssignTagToIndex(it)) {
         // But fail as soon as we miss one
         Tagger.full = false
         totalRejects++
         // We already outside the view, no need to search further if it failed
-        if (it !in editor.getView()) return
+        if (it !in editor.getView()) return newTags
       }
     }
 
     println("Total rejects: $totalRejects")
+    return newTags
   }
 
   /**
@@ -112,7 +114,7 @@ object Solver {
    */
 
   private fun String.collidesWithText(leftIndex: Int, rightIndex: Int) =
-    ((leftIndex + 1)..min(rightIndex, editorText.length)).map {
-      editorText.substring(leftIndex, it) + this[0] // && it in view??
-    }.any { it in editorText }
+    ((leftIndex + Tagger.query.length).coerceAtMost(rightIndex)..rightIndex)
+      .map { editorText.substring(leftIndex, it) + this[0] }
+      .any { it in editorText }
 }

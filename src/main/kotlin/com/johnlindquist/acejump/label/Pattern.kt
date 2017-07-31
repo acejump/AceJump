@@ -30,10 +30,10 @@ enum class Pattern(val string: String) {
      */
 
     fun setupTags(query: String) =
-      LinkedHashSet(allBigrams()).filter { it[0] != query[0] }
+      allBigrams().filter { it[0] != query[0] }
         .sortedWith(compareBy({ it[0].isDigit() || it[1].isDigit() },
           { distance(it[0], it.last()) },
-          { priority(it.first()) })).mapTo(linkedSetOf()) { it }
+          { priority(it.first()) }))
 
     private val priority: Map<Char, Int> =
       "fjghdkslavncmbxzrutyeiwoqp5849673210".mapIndices()

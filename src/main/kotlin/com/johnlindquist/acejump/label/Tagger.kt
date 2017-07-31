@@ -4,13 +4,13 @@ import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
+import com.johnlindquist.acejump.label.Pattern.Companion.setupTags
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Skipper
 import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor
-import java.util.*
 
 /**
  * Singleton that works with Finder to tag text search results in the editor.
@@ -26,9 +26,9 @@ object Tagger {
   var query = ""
     private set
   var full = false
+  private var deep: Boolean = false
   var textMatches: Set<Int> = emptySet()
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
-  private var bigrams: LinkedHashSet<String> = linkedSetOf()
   private val logger = Logger.getInstance(Tagger::class.java)
 
   private val Iterable<Int>.allInView
@@ -46,15 +46,12 @@ object Tagger {
         query += model.stringToFind
     }
 
-    bigrams = Pattern.setupTags(query)
     giveJumpOpportunity()
     markTags()
   }
 
   fun maybeJumpIfJustOneTagRemains() =
-    tagMap.entries.firstOrNull()?.run {
-      Jumper.jump(value)
-    }
+    tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
 
   private fun markTags() {
     computeMarkers()
@@ -64,11 +61,7 @@ object Tagger {
   }
 
   private fun giveJumpOpportunity() =
-    tagMap.forEach {
-      if (query.endsWith(it.key)) {
-        return Jumper.jump(it.value)
-      }
-    }
+    tagMap.forEach { if (query.endsWith(it.key)) return Jumper.jump(it.value) }
 
   private fun computeMarkers() {
     if (Finder.skim) return
@@ -76,8 +69,6 @@ object Tagger {
     markers = scan().apply { if (this.isNotEmpty()) tagMap = this }
       .map { (tag, index) -> Marker(query, tag, index) }
   }
-
-  private var deep: Boolean = false
 
   private fun scan(): BiMap<String, Int> {
     deep = false
@@ -142,11 +133,17 @@ object Tagger {
     if (query.isEmpty()) return HashBiMap.create()
     val newTags: BiMap<String, Int> = transferExistingTagsCompatibleWithQuery()
     newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
-    Solver.solve(results, bigrams, newTags)
+
+    val vacantResults = results.filter { it !in newTags.values }.toSet()
+    val availableTags = setupTags(query).filter { it !in tagMap }.toSet()
+    if(availableTags.size < vacantResults.size) full = false
+
+    if(regex) return HashBiMap.create(availableTags.zip(vacantResults).toMap())
+
+    newTags.putAll(Solver.solve(vacantResults, availableTags))
 
     return newTags
   }
-
 
   /**
    * Adds pre-existing tags where search string and tag overlap. For example,
@@ -163,7 +160,6 @@ object Tagger {
     textMatches = emptySet()
     tagMap.clear()
     query = ""
-    bigrams.clear()
     markers = emptyList()
   }
 
