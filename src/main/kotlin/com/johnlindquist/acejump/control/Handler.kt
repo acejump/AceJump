@@ -10,7 +10,7 @@ import com.intellij.util.SmartList
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Finder.search
-import com.johnlindquist.acejump.search.Pattern.*
+import com.johnlindquist.acejump.label.Pattern.*
 import com.johnlindquist.acejump.search.Skipper.restoreScroll
 import com.johnlindquist.acejump.search.Skipper.storeScroll
 import com.johnlindquist.acejump.view.Canvas

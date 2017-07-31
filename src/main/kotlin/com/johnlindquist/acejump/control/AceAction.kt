@@ -4,7 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.project.DumbAwareAction
 import com.johnlindquist.acejump.search.Finder
-import com.johnlindquist.acejump.search.Pattern.LINE_MARK
+import com.johnlindquist.acejump.label.Pattern.LINE_MARK
 import com.johnlindquist.acejump.view.Model.editor
 import java.awt.event.KeyEvent
 

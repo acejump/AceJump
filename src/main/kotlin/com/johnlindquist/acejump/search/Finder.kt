@@ -6,6 +6,8 @@ import com.intellij.openapi.editor.markup.HighlighterTargetArea.EXACT_RANGE
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.control.Trigger
+import com.johnlindquist.acejump.label.Pattern
+import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
