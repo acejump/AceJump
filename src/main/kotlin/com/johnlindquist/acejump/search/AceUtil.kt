@@ -68,7 +68,7 @@ fun Editor.getView(): IntRange {
   val firstLine = visualLineToLogicalLine(firstVisibleLine)
   val startOffset = getLineStartOffset(firstLine)
 
-  val height = getScreenHeight()
+  val height = getScreenHeight() + 2
   val lastLine = visualLineToLogicalLine(firstVisibleLine + height)
   var endOffset = getLineEndOffset(lastLine, true)
   endOffset = normalizeOffset(lastLine, endOffset, true)

@@ -136,9 +136,9 @@ object Tagger {
 
     val vacantResults = results.filter { it !in newTags.values }.toSet()
     val availableTags = setupTags(query).filter { it !in tagMap }.toSet()
-    if(availableTags.size < vacantResults.size) full = false
+    if (availableTags.size < vacantResults.size) full = false
 
-    if(regex) return HashBiMap.create(availableTags.zip(vacantResults).toMap())
+    if (regex) return HashBiMap.create(availableTags.zip(vacantResults).toMap())
 
     newTags.putAll(Solver.solve(vacantResults, availableTags))
 
@@ -151,7 +151,8 @@ object Tagger {
    */
 
   private fun transferExistingTagsCompatibleWithQuery() =
-    tagMap.filterTo(HashBiMap.create(), { (tag, _) -> query overlaps tag })
+    tagMap.filterTo(HashBiMap.create(), { (tag, index) ->
+      query overlaps tag || index in textMatches })
 
   fun reset() {
     regex = false

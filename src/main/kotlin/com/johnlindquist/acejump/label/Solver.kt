@@ -2,7 +2,6 @@ package com.johnlindquist.acejump.label
 
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
-import com.johnlindquist.acejump.search.get
 import com.johnlindquist.acejump.search.getLineEndOffset
 import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.search.wordBounds
@@ -10,6 +9,8 @@ import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import java.lang.Math.max
 import java.lang.Math.min
+import kotlin.collections.set
+import kotlin.system.measureTimeMillis
 
 /**
  * Tumbles tags around sites to maximize the number of sites covered. Should be
@@ -29,38 +30,24 @@ object Solver {
    * @param idx the index which a tag is to be assigned
    */
 
-  fun tryToAssignTagToIndex(idx: Int): Boolean {
-    var (left, right) = editorText.wordBounds(idx)
-    editor.run {
-      right = (right + 3).coerceAtMost(getLineEndOffset(offsetToLogicalPosition(
-        right).line, true)) //Always include the trailing character
-    }
-
-    fun hasNearbyTag(index: Int) =
-      Pair(max(left, index - 2), min(right, index + 2))
-        .run { (first..second).any { newTags.containsValue(it) } }
-
-    if (hasNearbyTag(idx)) return true
-
-//      val (matching, nonMatching) = availableTags.partition { tag ->
-//        !newTags.containsKey("${tag[0]}") && !tag.collidesWithText(idx, right)
-//      }
-
-//      val tag = matching.firstOrNull()
-    val chosenTag = bigrams.firstOrNull {
-      !newTags.containsKey("${it[0]}") && !it.collidesWithText(idx, right)
-    }
-
-    if (chosenTag == null)
-      String(editorText[left, right]).let {
-        //          logger.info("\"$it\" rejected: " + nonMatching.size + " tags.")
-        return false
+  private fun tryToAssignTag(tag: String): Boolean {
+    if (tagsStats[tag]!!.isEmpty()) return false
+    val idx = tagsStats[tag]!!.firstOrNull { idx ->
+      var (left, right) = editorText.wordBounds(idx)
+      editor.run {
+        right = (right + 3).coerceAtMost(getLineEndOffset(
+          //Always include the trailing character
+          offsetToLogicalPosition(right).line, true))
       }
-    else {
-      newTags[chosenTag] = idx
-      // Prevents "...a[bc]...z[bc]..."
-      bigrams.remove(chosenTag)
-    }
+
+      fun hasNearbyTag(index: Int) =
+        Pair(max(left, index - 2), min(right, index + 2))
+          .run { (first..second).any { newTags.containsValue(it) } }
+
+      !hasNearbyTag(idx) && !newTags.containsValue(idx)
+    } ?: return true
+
+    newTags[tag] = idx
     return true
   }
 
@@ -72,33 +59,53 @@ object Solver {
    * more likely to target words by their leading character than not.
    */
 
-  private fun sortValidJumpTargets(jumpTargets: Set<Int>) =
-    jumpTargets.sortedWith(compareBy(
+  private fun MutableList<Int>.sortVaidJumpTargets() =
+    sortWith(compareBy(
       // Sites in immediate view should come first
       { it !in editor.getView() },
       // Ensure that the first letter of a word is prioritized for tagging
       { editorText[max(0, it - 1)].isLetterOrDigit() }))
 
+  private var leastFlexibleTags: List<MutableMap.MutableEntry<String, MutableList<Int>>> = listOf()
+
+  private val tagsStats: MutableMap<String, MutableList<Int>> = hashMapOf()
+
   fun solve(results: Set<Int>, tags: Set<String>): BiMap<String, Int> {
     newTags = HashBiMap.create()
     bigrams = tags.toMutableSet()
-    var totalRejects = 0
+    tagsStats.clear()
 
-    // Hope for the best
-    sortValidJumpTargets(results).forEach {
-      if (bigrams.isEmpty()) {
-        Tagger.full = false; return newTags
+    val timeElapsed = measureTimeMillis {
+      results.forEach { site ->
+        var (left, right) = editorText.wordBounds(site)
+        editor.run {
+          right = (right + 3).coerceAtMost(getLineEndOffset(
+            offsetToLogicalPosition(right).line, true))
+        }
+
+        val byLetter = bigrams.groupBy { it[0] }
+        val tagsForSite = byLetter.keys.filter {
+          !it.toString().collidesWithText(left, right)
+        }
+        tagsForSite.forEach { letter ->
+          byLetter[letter]!!.forEach { tag ->
+            tagsStats.put(tag, tagsStats.getOrDefault(tag,
+              mutableListOf()).apply { add(site) })
+          }
+        }
       }
-      if (!tryToAssignTagToIndex(it)) {
-        // But fail as soon as we miss one
-        Tagger.full = false
-        totalRejects++
-        // We already outside the view, no need to search further if it failed
-        if (it !in editor.getView()) return newTags
-      }
+
+      tagsStats.values.forEach { it.sortVaidJumpTargets() }
+      leastFlexibleTags = tagsStats.entries.sortedBy { it.value.size }
+      tagsStats.keys.forEach { tryToAssignTag(it) }
     }
 
-    println("Total rejects: $totalRejects")
+    if (tagsStats.any { it.value.isEmpty() }) Tagger.full = false
+
+    println("results size: ${results.size}")
+    println("newTags size: ${newTags.size}")
+    println("Time elapsed: $timeElapsed")
+
     return newTags
   }
 

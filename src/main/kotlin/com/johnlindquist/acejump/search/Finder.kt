@@ -101,10 +101,12 @@ object Finder {
     }
 
   private fun Set<Int>.tag() = runLater {
-    Tagger.markOrJump(model, this)
-    viewHighlights.narrowBy { Tagger canDiscard startOffset }
+    if(!skim) {
+      Tagger.markOrJump(model, this)
+      viewHighlights.narrowBy { Tagger canDiscard startOffset }
+      Handler.paintTagMarkers()
+    }
     skim = false
-    Handler.paintTagMarkers()
   }
 
   /**
