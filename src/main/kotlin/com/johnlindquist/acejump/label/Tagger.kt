@@ -107,10 +107,6 @@ object Tagger {
       if (firstCharUnique && !queryEndsWith) firstChar.toString() else e.key
     }
 
-  // Provides a way to short-circuit the full text search if a match is found
-  private operator fun String.contains(key: String) =
-    textMatches.any { regionMatches(it, key, 0, key.length) }
-
   /**
    * Maps tags to search results. Tags *must* have the following properties:
    *

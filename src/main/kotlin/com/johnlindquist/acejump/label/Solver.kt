@@ -13,14 +13,16 @@ import kotlin.collections.set
 import kotlin.system.measureTimeMillis
 
 /**
- * Tumbles tags around sites to maximize the number of sites covered. Should be
- * able tag all results in the editor, otherwise we have failed.
+ * Solves the tag assignment problem. The tag assignment problem can be stated
+ * thusly: Given a set of indices I in document D, and a set of two-character
+ * tags T, find a mapping of T->I such that D[i_n..i_(n+1)] + t_n[0] is not in
+ * {D[i_j..(i_(j+1) + 1)]}. Maximize |T->I|.
  */
 
 object Solver {
   private var bigrams: MutableSet<String> = linkedSetOf()
   private var newTags: BiMap<String, Int> = HashBiMap.create()
-
+  private var strings: Set<String> = hashSetOf()
   /**
    * Iterates through the remaining available tags, until we find one that
    * matches our criteria, i.e. does not collide with an existing tag or
@@ -75,18 +77,12 @@ object Solver {
     bigrams = tags.toMutableSet()
     tagsStats.clear()
 
+    strings = HashSet(results.map { getWordFragments(it) }.flatten())
+
     val timeElapsed = measureTimeMillis {
       results.forEach { site ->
-        var (left, right) = editorText.wordBounds(site)
-        editor.run {
-          right = (right + 3).coerceAtMost(getLineEndOffset(
-            offsetToLogicalPosition(right).line, true))
-        }
-
         val byLetter = bigrams.groupBy { it[0] }
-        val tagsForSite = byLetter.keys.filter {
-          !it.toString().collidesWithText(left, right)
-        }
+        val tagsForSite = byLetter.keys.filter { site isCompatibleWithTag it }
         tagsForSite.forEach { letter ->
           byLetter[letter]!!.forEach { tag ->
             tagsStats.put(tag, tagsStats.getOrDefault(tag,
@@ -109,9 +105,13 @@ object Solver {
     return newTags
   }
 
+  // Provides a way to short-circuit the full text search if a match is found
+  private operator fun String.contains(key: String) =
+    Tagger.textMatches.any { regionMatches(it, key, 0, key.length) }
+
   /**
-   * Returns true IFF the receiver, inserted between the left and right indices,
-   * matches an existing substring elsewhere in the editor text. We should never
+   * Returns true IFF the tag, when inserted at any position in the word, could
+   * match an existing substring elsewhere in the editor text. We should never
    * use a tag which can be partly completed by typing plaintext, where the tag
    * is the receiver, the tag index is the leftIndex, and rightIndex is the last
    * character we care about (this is usually the last letter of the same word).
@@ -120,8 +120,17 @@ object Solver {
    * @param rightIndex index of last character (ie. end of the word)
    */
 
-  private fun String.collidesWithText(leftIndex: Int, rightIndex: Int) =
-    ((leftIndex + Tagger.query.length).coerceAtMost(rightIndex)..rightIndex)
-      .map { editorText.substring(leftIndex, it) + this[0] }
-      .any { it in editorText }
+  private infix fun Int.isCompatibleWithTag(tag: Char) =
+    getWordFragments(this).map { it + tag }.none { it in strings }
+
+  private fun getWordFragments(site: Int): List<String> {
+    var right = editorText.wordBounds(site).second
+    editor.run {
+      right = (right + 3).coerceAtMost(getLineEndOffset(
+        offsetToLogicalPosition(right).line, true))
+    }
+
+    return ((site + Tagger.query.length).coerceAtMost(right)..right)
+      .map { editorText.substring(site, it) }
+  }
 }
