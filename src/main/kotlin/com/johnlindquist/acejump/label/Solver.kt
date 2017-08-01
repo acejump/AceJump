@@ -97,7 +97,7 @@ object Solver {
 
       tagsStats.values.forEach { it.sortVaidJumpTargets() }
       leastFlexibleTags = tagsStats.entries.sortedBy { it.value.size }
-      tagsStats.keys.forEach { tryToAssignTag(it) }
+      leastFlexibleTags.map { it.key }.forEach { tryToAssignTag(it) }
     }
 
     if (tagsStats.any { it.value.isEmpty() }) Tagger.full = false

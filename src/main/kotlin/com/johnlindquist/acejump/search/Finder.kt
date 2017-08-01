@@ -39,7 +39,7 @@ object Finder {
         value.isEmpty() -> return
         Tagger.regex -> search()
         value.length == 1 -> skim()
-        value.isValidQuery() -> search()
+        value.isValidQuery() -> skim()
         else -> field = field.dropLast(1)
       }
     }
@@ -101,7 +101,7 @@ object Finder {
     }
 
   private fun Set<Int>.tag() = runLater {
-    if(!skim) {
+    if (!skim) {
       Tagger.markOrJump(model, this)
       viewHighlights.narrowBy { Tagger canDiscard startOffset }
       Handler.paintTagMarkers()

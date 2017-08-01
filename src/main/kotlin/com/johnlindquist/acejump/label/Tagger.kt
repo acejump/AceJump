@@ -141,7 +141,6 @@ object Tagger {
     if (regex) return HashBiMap.create(availableTags.zip(vacantResults).toMap())
 
     newTags.putAll(Solver.solve(vacantResults, availableTags))
-
     return newTags
   }
 
