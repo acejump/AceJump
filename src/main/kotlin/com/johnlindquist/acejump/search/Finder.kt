@@ -47,7 +47,7 @@ object Finder {
   private fun skim() {
     skim = true
     search(FindModel().apply { stringToFind = Regex.escape(query) })
-    Trigger(400L) { search() }
+    Trigger(400L) { runLater { skim = false; search() } }
   }
 
   fun search(string: String = query) =

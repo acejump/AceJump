@@ -71,22 +71,21 @@ object Tagger {
   }
 
   private fun scan(): BiMap<String, Int> {
-    deep = false
-    val resultsToTag =
-      if (deep) {
-        full = true
-        textMatches
-      } else {
-        full = false
-        textMatches.filter { it in editor.getView() }.toSet()
-      }
+    deep = true
+    val resultsToTag = textMatches
+//      if (deep) {
+//        full = true
+//        textMatches
+//      }
+//      else {
+//        full = false
+//        textMatches.filter { it in editor.getView() }.toSet()
+//      }
 
     val tags = assignTags(resultsToTag).let { compact(it) }
-    val uniToBigram = tags.count { it.key.length == 1 }.toDouble() / tags.size
+//    val uniToBigram = tags.count { it.key.length == 1 }.toDouble() / tags.size
     // If there are few unigrams, let's use all bigrams and try to cover all
-    if (uniToBigram < 0.5 && !deep && full) {
-      deep = true; scan()
-    }
+//    if (uniToBigram < 0.5 && !deep && full) { deep = true; scan() }
 
     return tags
   }

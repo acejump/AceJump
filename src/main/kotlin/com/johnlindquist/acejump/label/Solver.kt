@@ -125,12 +125,14 @@ object Solver {
 
   private fun getWordFragments(site: Int): List<String> {
     var right = editorText.wordBounds(site).second
+
+    val left = (site + Tagger.query.length).coerceAtMost(right - 1)
+
     editor.run {
-      right = (right + 3).coerceAtMost(getLineEndOffset(
-        offsetToLogicalPosition(right).line, true))
+      right = (right + 3).coerceAtMost(
+        getLineEndOffset(offsetToLogicalPosition(right).line, true))
     }
 
-    return ((site + Tagger.query.length).coerceAtMost(right)..right)
-      .map { editorText.substring(site, it) }
+    return (left..right).map { editorText.substring(left, it) }
   }
 }
