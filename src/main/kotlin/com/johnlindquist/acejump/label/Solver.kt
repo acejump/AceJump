@@ -72,6 +72,24 @@ object Solver {
 
   private val tagsStats: MutableMap<String, MutableList<Int>> = hashMapOf()
 
+  /**
+   * Maps tags to search results. Tags *must* have the following properties:
+   *
+   * 1. A tag must not match *any* bigrams on the screen.
+   * 2. A tag's 1st letter must not match any letters of the covered word.
+   * 3. Tag must not match any combination of any plaintext and tag. "e(a[B)X]"
+   * 4. Once assigned, a tag must never change until it has been selected. *A.
+   *
+   * Tags *should* have the following properties:
+   *
+   * A. Should be as short as possible. A tag may be "compacted" later.
+   * B. Should prefer keys that are physically closer to the last key pressed.
+   *
+   * @param results All indices to be tagged
+   *
+   * @return A list of all tags and their corresponding indices
+   */
+
   fun solve(results: Set<Int>, tags: Set<String>): BiMap<String, Int> {
     newTags = HashBiMap.create()
     bigrams = tags.toMutableSet()

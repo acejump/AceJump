@@ -26,7 +26,6 @@ object Tagger {
   var query = ""
     private set
   var full = false
-  private var deep: Boolean = false
   var textMatches: Set<Int> = emptySet()
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private val logger = Logger.getInstance(Tagger::class.java)
@@ -71,23 +70,9 @@ object Tagger {
   }
 
   private fun scan(): BiMap<String, Int> {
-    deep = false
-    val resultsToTag =
-      if (deep) {
-        full = true
-        textMatches
-      } else {
-        full = false
-        textMatches.filter { it in editor.getView() }.toSet()
-      }
-
+    full = true
+    val resultsToTag = textMatches
     val tags = assignTags(resultsToTag).let { compact(it) }
-    val uniToBigram = tags.count { it.key.length == 1 }.toDouble() / tags.size
-    // If there are few unigrams, let's use all bigrams and try to cover all
-    if (uniToBigram < 0.5 && !deep && full) {
-      deep = true; scan()
-    }
-
     return tags
   }
 
@@ -99,7 +84,7 @@ object Tagger {
    * 3. The query does not end with the shortened tag, in whole or part.
    */
 
-  private fun compact(tagMap: BiMap<String, Int>) =
+  private fun compact(tagMap: BiMap<String, Int>): BiMap<String, Int> =
     tagMap.mapKeysTo(HashBiMap.create(tagMap.size)) { e ->
       val firstChar = e.key[0]
       val firstCharUnique = tagMap.keys.count { it[0] == firstChar } == 1
@@ -107,23 +92,6 @@ object Tagger {
       if (firstCharUnique && !queryEndsWith) firstChar.toString() else e.key
     }
 
-  /**
-   * Maps tags to search results. Tags *must* have the following properties:
-   *
-   * 1. A tag must not match *any* bigrams on the screen.
-   * 2. A tag's 1st letter must not match any letters of the covered word.
-   * 3. Tag must not match any combination of any plaintext and tag. "e(a[B)X]"
-   * 4. Once assigned, a tag must never change until it has been selected. *A.
-   *
-   * Tags *should* have the following properties:
-   *
-   * A. Should be as short as possible. A tag may be "compacted" later.
-   * B. Should prefer keys that are physically closer to the last key pressed.
-   *
-   * @param results All indices to be tagged
-   *
-   * @return A list of all tags and their corresponding indices
-   */
 
   private fun assignTags(results: Set<Int>): BiMap<String, Int> {
     if (query.isEmpty()) return HashBiMap.create()
@@ -152,7 +120,6 @@ object Tagger {
   fun reset() {
     regex = false
     full = false
-    deep = false
     textMatches = emptySet()
     tagMap.clear()
     query = ""
@@ -173,9 +140,8 @@ object Tagger {
     textMatches.lastOrNull { it < old.first } ?: -1 >= new.first ||
       textMatches.firstOrNull { it > old.last } ?: new.last < new.last
 
-  fun hasTagSuffix(query: String) = tagMap.any {
-    query overlaps it.key && it.value in editor.getView()
-  }
+  fun hasTagSuffixInView(query: String) =
+    tagMap.any { query overlaps it.key && it.value in editor.getView() }
 
   infix fun String.overlaps(xx: String) = endsWith(xx.first()) || endsWith(xx)
   infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i))

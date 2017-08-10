@@ -66,7 +66,7 @@ object Finder {
     model = findModel
 
     results = editorText.findMatchingSites().toHashSet()
-    if (!Tagger.hasTagSuffix(query)) highlightResults()
+    if (!Tagger.hasTagSuffixInView(query)) highlightResults()
 
     results.tag()
   }
@@ -138,7 +138,7 @@ object Finder {
 
   private fun String.isValidQuery() =
     results.any { editorText.regionMatches(it, this, 0, length) } ||
-      Tagger.hasTagSuffix(query)
+      Tagger.hasTagSuffixInView(query)
 
   fun reset() {
     markup.removeAllHighlighters()
