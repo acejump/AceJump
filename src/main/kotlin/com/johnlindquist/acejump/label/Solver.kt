@@ -126,7 +126,7 @@ object Solver {
   private fun getWordFragments(site: Int): List<String> {
     var right = editorText.wordBounds(site).second
 
-    val left = (site + Tagger.query.length).coerceAtMost(right - 1)
+    val left = (site + Tagger.query.length - 1).coerceAtMost(right - 1)
 
     editor.run {
       right = (right + 3).coerceAtMost(
