@@ -46,8 +46,8 @@ object Finder {
 
   private fun skim() {
     skim = true
-    search(FindModel().apply { stringToFind = Regex.escape(query) })
-    Trigger(400L) { search() }
+    search(FindModel().apply { stringToFind = query })
+    Trigger(400L) { runLater { skim = false; search() } }
   }
 
   fun search(string: String = query) =
@@ -117,7 +117,7 @@ object Finder {
   private fun String.findMatchingSites(key: String = query.toLowerCase(),
                                        cache: Set<Int> = results) =
     // If the cache is populated, filter it instead of redoing extra work
-    if (cache.isEmpty()) findAll(model.stringToFind)
+    if (cache.isEmpty()) findAll(Regex.escape(model.stringToFind))
     else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
 
   private fun Set<Int>.isCacheValidForRange() =
