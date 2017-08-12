@@ -5,10 +5,12 @@ import com.google.common.collect.HashBiMap
 import com.johnlindquist.acejump.search.getLineEndOffset
 import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.search.wordBounds
+import com.johnlindquist.acejump.search.wordBoundsPlus
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import java.lang.Math.max
 import java.lang.Math.min
+import kotlin.collections.MutableMap.MutableEntry
 import kotlin.collections.set
 import kotlin.system.measureTimeMillis
 
@@ -23,6 +25,7 @@ object Solver {
   private var bigrams: MutableSet<String> = linkedSetOf()
   private var newTags: BiMap<String, Int> = HashBiMap.create()
   private var strings: Set<String> = hashSetOf()
+
   /**
    * Iterates through the remaining available tags, until we find one that
    * matches our criteria, i.e. does not collide with an existing tag or
@@ -35,12 +38,7 @@ object Solver {
   private fun tryToAssignTag(tag: String): Boolean {
     if (tagsStats[tag]!!.isEmpty()) return false
     val idx = tagsStats[tag]!!.firstOrNull { idx ->
-      var (left, right) = editorText.wordBounds(idx)
-      editor.run {
-        right = (right + 3).coerceAtMost(getLineEndOffset(
-          //Always include the trailing character
-          offsetToLogicalPosition(right).line, true))
-      }
+      val (left, right) = editorText.wordBoundsPlus(idx)
 
       fun hasNearbyTag(index: Int) =
         Pair(max(left, index - 2), min(right, index + 2))
@@ -68,8 +66,7 @@ object Solver {
       // Ensure that the first letter of a word is prioritized for tagging
       { editorText[max(0, it - 1)].isLetterOrDigit() }))
 
-  private var leastFlexibleTags: List<MutableMap.MutableEntry<String, MutableList<Int>>> = listOf()
-
+  private var leastFlexibleTags: List<MutableEntry<String, MutableList<Int>>> = listOf()
   private val tagsStats: MutableMap<String, MutableList<Int>> = hashMapOf()
 
   /**
@@ -100,7 +97,10 @@ object Solver {
     val timeElapsed = measureTimeMillis {
       results.forEach { site ->
         val byLetter = bigrams.groupBy { it[0] }
-        val tagsForSite = byLetter.keys.filter { site isCompatibleWithTag it }
+        val tagsForSite = byLetter.keys.filter { letter ->
+          val compat = site isCompatibleWithTag letter
+        compat
+        }
         tagsForSite.forEach { letter ->
           byLetter[letter]!!.forEach { tag ->
             tagsStats.put(tag, tagsStats.getOrDefault(tag,
@@ -142,14 +142,8 @@ object Solver {
     getWordFragments(this).map { it + tag }.none { it in strings }
 
   private fun getWordFragments(site: Int): List<String> {
-    var right = editorText.wordBounds(site).second
-
-    val left = (site + Tagger.query.length - 1).coerceAtMost(right - 1)
-
-    editor.run {
-      right = (right + 3).coerceAtMost(
-        getLineEndOffset(offsetToLogicalPosition(right).line, true))
-    }
+    val left = site + Tagger.query.length - 1
+    val right = editorText.wordBoundsPlus(site).second
 
     return (left..right).map { editorText.substring(left, it) }
   }

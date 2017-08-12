@@ -47,7 +47,7 @@ object Finder {
   private fun skim() {
     skim = true
     search(FindModel().apply { stringToFind = query })
-    Trigger(400L) { runLater { skim = false; search() } }
+    Trigger(400L) { if (skim) runLater { skim = false; search() } }
   }
 
   fun search(string: String = query) =
@@ -67,27 +67,26 @@ object Finder {
 
     results = editorText.findMatchingSites().toHashSet()
     if (!Tagger.hasTagSuffixInView(query)) highlightResults()
-
-    results.tag()
+    if (!skim) tag(results)
   }
 
-  private fun highlightResults() = runLater {
+  private fun highlightResults() {
     if (results.size < 26) skim = false
-
-    paintTextHighlights()
-
-    viewHighlights = textHighlights.filter { it.startOffset in editor.getView() }
-  }
-
-  fun paintTextHighlights() {
     if (Tagger.regex) return
-    textHighlights.forEach { markup.removeHighlighter(it) }
-    textHighlights = results.map { createTextHighlighter(it) }
+    paintTextHighlights()
   }
 
-  fun List<RangeHighlighter>.narrowBy(f: RangeHighlighter.() -> Boolean) =
+  fun paintTextHighlights() =
+    runLater {
+      val tempHighlights = results.map { createTextHighlighter(it) }
+      textHighlights.forEach { markup.removeHighlighter(it) }
+      textHighlights = tempHighlights
+      viewHighlights = textHighlights.filter { it.startOffset in editor.getView() }
+    }
+
+  fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =
     filter {
-      if (f(it)) {
+      if (cond(it)) {
         markup.removeHighlighter(it)
         false
       } else true
@@ -100,14 +99,12 @@ object Finder {
       customRenderer = Marker(query, null, this.startOffset)
     }
 
-  private fun Set<Int>.tag() = runLater {
-    if (!skim) {
-      Tagger.markOrJump(model, this)
+  private fun tag(results: Set<Int>) =
+    runLater {
+      Tagger.markOrJump(model, results)
       viewHighlights.narrowBy { Tagger canDiscard startOffset }
       Handler.paintTagMarkers()
     }
-    skim = false
-  }
 
   /**
    * Returns a list of indices where the query begins, within the given range.

@@ -29,11 +29,18 @@ enum class Pattern(val string: String) {
      * keys (ex. 12, 21) to keys that are located further apart on the keyboard.
      */
 
-    fun setupTags(query: String) =
+    fun sortTags(query: String) =
       allBigrams().filter { it[0] != query[0] }
         .sortedWith(compareBy({ it[0].isDigit() || it[1].isDigit() },
           { distance(it[0], it.last()) },
           { priority(it.first()) }))
+
+    private val defaultKeyboardLayout = arrayOf(
+      "1234567890",
+      "qwertyuiop",
+      "asdfghjkl",
+      "zxcvbnm"
+    )
 
     private val priority: Map<Char, Int> =
       "fjghdkslavncmbxzrutyeiwoqp5849673210".mapIndices()

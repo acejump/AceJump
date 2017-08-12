@@ -4,7 +4,7 @@ import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
-import com.johnlindquist.acejump.label.Pattern.Companion.setupTags
+import com.johnlindquist.acejump.label.Pattern.Companion.sortTags
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Skipper
@@ -25,7 +25,7 @@ object Tagger {
   var regex = false
   var query = ""
     private set
-  var full = false
+  var full = false // Tracks whether all search results were successfully tagged
   var textMatches: Set<Int> = emptySet()
   private var tagMap: BiMap<String, Int> = HashBiMap.create()
   private val logger = Logger.getInstance(Tagger::class.java)
@@ -35,14 +35,11 @@ object Tagger {
 
   fun markOrJump(model: FindModel, results: Set<Int>) {
     textMatches = results
-    if (!regex) regex = model.isRegularExpressions
-
-    query = (if (model.isRegularExpressions) " "
-    else model.stringToFind).toLowerCase()
 
     model.run {
-      if (isRegularExpressions && stringToFind.all { it.isLetterOrDigit() })
-        query += model.stringToFind
+      if (!regex) regex = isRegularExpressions
+      query = if (isRegularExpressions) " " else stringToFind.toLowerCase()
+      if (isRegularExpressions) query += model.stringToFind
     }
 
     giveJumpOpportunity()
@@ -52,19 +49,16 @@ object Tagger {
   fun maybeJumpIfJustOneTagRemains() =
     tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
 
-  private fun markTags() {
-    computeMarkers()
-
-    if (markers.isEmpty() && query.length > 1 && !Finder.skim)
-      Skipper.ifQueryExistsSkipAhead()
-  }
-
   private fun giveJumpOpportunity() =
     tagMap.forEach { if (query.endsWith(it.key)) return Jumper.jump(it.value) }
 
-  private fun computeMarkers() {
-    if (Finder.skim) return
+  private fun markTags() {
+    computeMarkers()
 
+    if (markers.isEmpty() && query.length > 1) Skipper.ifQueryExistsSkipAhead()
+  }
+
+  private fun computeMarkers() {
     markers = scan().apply { if (this.isNotEmpty()) tagMap = this }
       .map { (tag, index) -> Marker(query, tag, index) }
   }
@@ -72,8 +66,8 @@ object Tagger {
   private fun scan(): BiMap<String, Int> {
     full = true
     val resultsToTag = textMatches
-    val tags = assignTags(resultsToTag).let { compact(it) }
-    return tags
+    if (query.isEmpty()) return HashBiMap.create()
+    return assignTags(resultsToTag).let { compact(it) }
   }
 
   /**
@@ -92,14 +86,14 @@ object Tagger {
       if (firstCharUnique && !queryEndsWith) firstChar.toString() else e.key
     }
 
-
   private fun assignTags(results: Set<Int>): BiMap<String, Int> {
-    if (query.isEmpty()) return HashBiMap.create()
     val newTags: BiMap<String, Int> = transferExistingTagsCompatibleWithQuery()
     newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
 
     val vacantResults = results.filter { it !in newTags.values }.toSet()
-    val availableTags = setupTags(query).filter { it !in tagMap }.toSet()
+    print("Vacant Res: $vacantResults")
+    val availableTags = sortTags(query).filter { it !in tagMap }.toSet()
+    print("Avail Tags: ${availableTags.take(vacantResults.size)}")
     if (availableTags.size < vacantResults.size) full = false
 
     if (regex) return HashBiMap.create(availableTags.zip(vacantResults).toMap())
@@ -115,7 +109,8 @@ object Tagger {
 
   private fun transferExistingTagsCompatibleWithQuery() =
     tagMap.filterTo(HashBiMap.create(), { (tag, index) ->
-      query overlaps tag || index in textMatches })
+      query overlaps tag || index in textMatches
+    })
 
   fun reset() {
     regex = false

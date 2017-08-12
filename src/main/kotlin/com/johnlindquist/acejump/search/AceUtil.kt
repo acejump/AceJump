@@ -50,6 +50,16 @@ fun String.wordBounds(index: Int): Pair<Int, Int> {
   return Pair(first, last)
 }
 
+fun String.wordBoundsPlus(index: Int): Pair<Int, Int> {
+  var (left, right) = wordBounds(index)
+
+  (right..(right + 3).coerceAtMost(length - 1)).asSequence()
+    .takeWhile { !(get(it) == '\n' || get(it) == '\r') }
+    .forEach { right = it }
+
+  return Pair(left, right)
+}
+
 fun getDefaultEditor(): Editor = FileEditorManager.getInstance(ProjectManager
   .getInstance().openProjects[0]).run {
   selectedTextEditor ?: allEditors.first { it is TextEditor } as Editor
