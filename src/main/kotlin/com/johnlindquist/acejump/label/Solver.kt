@@ -1,13 +1,11 @@
 package com.johnlindquist.acejump.label
 
 import com.google.common.collect.*
-import com.johnlindquist.acejump.search.getView
+import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.wordBoundsPlus
-import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import java.lang.Math.max
 import java.lang.Math.min
-import kotlin.collections.MutableMap.MutableEntry
 import kotlin.collections.set
 import kotlin.system.measureTimeMillis
 
@@ -19,8 +17,8 @@ import kotlin.system.measureTimeMillis
  */
 
 object Solver {
-  private var bigrams: MutableSet<String> = linkedSetOf()
-  private var newTags: BiMap<String, Int> = HashBiMap.create()
+  private var bigrams: MutableSet<String> = LinkedHashSet(Pattern.NUM_TAGS)
+  private var newTags: MutableMap<String, Int> = HashMap(Pattern.NUM_TAGS)
   private var strings: Set<String> = hashSetOf()
 
   /**
@@ -56,15 +54,31 @@ object Solver {
    * more likely to target words by their leading character than not.
    */
 
-  val siteComparator: Comparator<Int> = compareBy(
-      // Sites in immediate view should come first
-      { it !in editor.getView() },
-      // Ensure that the first letter of a word is prioritized for tagging
-      { editorText[max(0, it - 1)].isLetterOrDigit() })
+  val siteOrder: Comparator<Int> = compareBy(
+    // Sites in immediate view should come first
+    { it !in Finder.viewRange },
+    // Ensure that the first letter of a word is prioritized for tagging
+    { editorText[max(0, it - 1)].isLetterOrDigit() })
 
-  private var leastFlexibleTags: List<MutableEntry<String, Collection<Int>>> = listOf()
-  private val availableTagsPerSite =
-    Multimaps.synchronizedSetMultimap(LinkedHashMultimap.create<String, Int>())
+  /**
+   * Enforces tag conservation precedence. Tags have certain restrictions during
+   * assignment, ie. not all tags may be assigned to all sites. Therefore, we
+   * must spend our tag "budget" wisely, in order to cover the most sites with
+   * the tags we have at our disposal. We should consider the "most restrictive"
+   * tags first, since they have the least chance of being available as more
+   * sites are assigned.
+   *
+   * Tags which are compatible with the fewest sites should have precedence for
+   * first assignment. Here we ensure that scarce tags are prioritized for their
+   * subsequent binding to available sites.
+   *
+   * @see isCompatibleWithSite This defines how tags may be assigned to sites.
+   */
+
+  val tagOrder: Comparator<String> = Ordering.natural()
+
+  private val availableTagsPerSite = Multimaps.synchronizedSetMultimap(
+    TreeMultimap.create<String, Int>(tagOrder, siteOrder))
 
   /**
    * Maps tags to search results. Tags *must* have the following properties:
@@ -84,29 +98,32 @@ object Solver {
    * @return A list of all tags and their corresponding indices
    */
 
-  fun solve(results: Set<Int>, tags: Set<String>): BiMap<String, Int> {
-    newTags = HashBiMap.create()
+  fun solve(results: Set<Int>, tags: Set<String>): Map<String, Int> {
+    newTags = HashMap(Pattern.NUM_TAGS)
     bigrams = tags.toMutableSet()
     availableTagsPerSite.clear()
 
     strings = HashSet(results.map { getWordFragments(it) }.flatten())
 
     val timeElapsed = measureTimeMillis {
-      results.forEach { site ->
-        val byLetter = bigrams.groupBy { it[0] }
-        val tagsForSite = byLetter.keys.filter { letter ->
-          val compat = site isCompatibleWithTag letter
-        compat
+      results.parallelStream().forEach { site ->
+        val firstLetters = bigrams.groupBy { it[0] }
+        val tagsForSite = firstLetters.keys.filter { letter ->
+          val compat  = site isCompatibleWithTag letter
+          if(!compat) println("Site $site rejected $letter")
+          compat
         }
+
         tagsForSite.forEach { letter ->
-          byLetter[letter]!!.forEach { tag ->
+          firstLetters[letter]!!.forEach { tag ->
             availableTagsPerSite.put(tag, site)
           }
         }
       }
 
-      leastFlexibleTags = availableTagsPerSite.asMap().entries.sortedBy { it.value.size }
-      leastFlexibleTags.map { it.key }.forEach { tryToAssignTag(it) }
+      // Tag conservation precedence is in effect. Scarce tags come first!
+      availableTagsPerSite.asMap().entries.sortedBy { it.value.size }
+        .map { it.key }.forEach { tryToAssignTag(it) }
     }
 
     if (availableTagsPerSite.asMap().any { it.value.isEmpty() }) Tagger.full = false
@@ -134,7 +151,14 @@ object Solver {
    */
 
   private infix fun Int.isCompatibleWithTag(tag: Char) =
-    getWordFragments(this).map { it + tag }.none { it in strings }
+    getWordFragments(this).map { it + tag }.none {
+
+      val inS = it in strings
+
+      if(inS) println(it)
+
+      inS
+    }
 
   private fun getWordFragments(site: Int): List<String> {
     val left = site + Tagger.query.length - 1

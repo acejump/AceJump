@@ -30,6 +30,12 @@ enum class Pattern(val string: String) {
         return field
       }
 
+    var NUM_TAGS: Int = 1296
+      get() = settings.allowedChars.size.let { it * it }
+
+    var NUM_CHARS: Int = 36
+      get() = settings.allowedChars.size
+
     /**
      * Sorts available tags by key distance. Tags which are ergonomically easier
      * to type will be assigned first. We should prefer to use tags that contain

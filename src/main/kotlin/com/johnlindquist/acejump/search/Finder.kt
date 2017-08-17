@@ -31,11 +31,15 @@ object Finder {
   val isShiftSelectEnabled
     get() = model.stringToFind.last().isUpperCase()
 
+  var viewRange = 0..0
+
   var skim = false
 
   var query: String = ""
     set(value) {
       field = value.toLowerCase()
+      viewRange = editor.getView()
+
       when {
         value.isEmpty() -> return
         Tagger.regex -> search()
@@ -77,13 +81,12 @@ object Finder {
     paintTextHighlights()
   }
 
-  fun paintTextHighlights() =
-    runLater {
-      val tempHighlights = results.map { createTextHighlighter(it) }
-      textHighlights.forEach { markup.removeHighlighter(it) }
-      textHighlights = tempHighlights
-      viewHighlights = textHighlights.filter { it.startOffset in editor.getView() }
-    }
+  fun paintTextHighlights() {
+    val tempHighlights = results.map { createTextHighlighter(it) }
+    textHighlights.forEach { markup.removeHighlighter(it) }
+    textHighlights = tempHighlights
+    viewHighlights = textHighlights.filter { it.startOffset in viewRange }
+  }
 
   private fun createTextHighlighter(it: Int) =
     markup.addRangeHighlighter(it,
@@ -93,10 +96,10 @@ object Finder {
     }
 
   private fun tag(results: Set<Int>) {
-      Tagger.markOrJump(model, results)
-      viewHighlights = viewHighlights.narrowBy { Tagger canDiscard startOffset }
-      Handler.paintTagMarkers()
-    }
+    Tagger.markOrJump(model, results)
+    viewHighlights = viewHighlights.narrowBy { Tagger canDiscard startOffset }
+    Handler.paintTagMarkers()
+  }
 
   fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =
     filter {
@@ -118,7 +121,7 @@ object Finder {
     else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
 
   private fun Set<Int>.isCacheValidForRange() =
-    editor.getView().let { view ->
+    viewRange.let { view ->
       first() < view.first && last() > view.last
     }
 

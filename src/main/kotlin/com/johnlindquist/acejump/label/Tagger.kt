@@ -1,16 +1,12 @@
 package com.johnlindquist.acejump.label
 
-import com.google.common.collect.BiMap
-import com.google.common.collect.HashBiMap
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.label.Pattern.Companion.sortTags
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Skipper
-import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.view.Marker
-import com.johnlindquist.acejump.view.Model.editor
 
 /**
  * Singleton that works with Finder to tag text search results in the editor.
@@ -27,11 +23,11 @@ object Tagger {
     private set
   var full = false // Tracks whether all search results were successfully tagged
   var textMatches: Set<Int> = emptySet()
-  private var tagMap: BiMap<String, Int> = HashBiMap.create()
+  private var tagMap: Map<String, Int> = emptyMap()
   private val logger = Logger.getInstance(Tagger::class.java)
 
   private val Iterable<Int>.allInView
-    get() = all { it in editor.getView() }
+    get() = all { it in Finder.viewRange }
 
   fun markOrJump(model: FindModel, results: Set<Int>) {
     textMatches = results
@@ -63,10 +59,10 @@ object Tagger {
       .map { (tag, index) -> Marker(query, tag, index) }
   }
 
-  private fun scan(): BiMap<String, Int> {
+  private fun scan(): Map<String, Int> {
     full = true
     val resultsToTag = textMatches
-    if (query.isEmpty()) return HashBiMap.create()
+    if (query.isEmpty()) return emptyMap()
     return assignTags(resultsToTag).let { compact(it) }
   }
 
@@ -78,16 +74,16 @@ object Tagger {
    * 3. The query does not end with the shortened tag, in whole or part.
    */
 
-  private fun compact(tagMap: BiMap<String, Int>): BiMap<String, Int> =
-    tagMap.mapKeysTo(HashBiMap.create(tagMap.size)) { e ->
+  private fun compact(tagMap: Map<String, Int>): Map<String, Int> =
+    tagMap.mapKeysTo(HashMap(tagMap.size)) { e ->
       val firstChar = e.key[0]
       val firstCharUnique = tagMap.keys.count { it[0] == firstChar } == 1
       val queryEndsWith = query.endsWith(firstChar) || query.endsWith(e.key)
       if (firstCharUnique && !queryEndsWith) firstChar.toString() else e.key
     }
 
-  private fun assignTags(results: Set<Int>): BiMap<String, Int> {
-    val newTags: BiMap<String, Int> = transferExistingTagsCompatibleWithQuery()
+  private fun assignTags(results: Set<Int>): Map<String, Int> {
+    val newTags = transferExistingTagsCompatibleWithQuery()
     newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
     if(hasTagSuffixInView(query)) return newTags
 
@@ -97,7 +93,7 @@ object Tagger {
     println("Avail Tags: ${availableTags.take(vacantResults.size)}")
     if (availableTags.size < vacantResults.size) full = false
 
-    if (regex) return HashBiMap.create(availableTags.zip(vacantResults).toMap())
+    if (regex) return availableTags.zip(vacantResults).toMap()
 
     newTags.putAll(Solver.solve(vacantResults, availableTags))
     return newTags
@@ -109,7 +105,7 @@ object Tagger {
    */
 
   private fun transferExistingTagsCompatibleWithQuery() =
-    tagMap.filterTo(HashBiMap.create(), { (tag, index) ->
+    tagMap.filterTo(HashMap(), { (tag, index) ->
       query overlaps tag || index in textMatches
     })
 
@@ -117,7 +113,7 @@ object Tagger {
     regex = false
     full = false
     textMatches = emptySet()
-    tagMap.clear()
+    tagMap = emptyMap()
     query = ""
     markers = emptyList()
   }
@@ -137,7 +133,7 @@ object Tagger {
       textMatches.firstOrNull { it > old.last } ?: new.last < new.last
 
   fun hasTagSuffixInView(query: String) =
-    tagMap.any { query overlaps it.key && it.value in editor.getView() }
+    tagMap.any { query overlaps it.key && it.value in Finder.viewRange }
 
   infix fun String.overlaps(xx: String) = endsWith(xx.first()) || endsWith(xx)
   infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i))
