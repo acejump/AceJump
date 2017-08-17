@@ -39,7 +39,7 @@ object Tagger {
     model.run {
       if (!regex) regex = isRegularExpressions
       query = if (isRegularExpressions) " " else stringToFind.toLowerCase()
-      if (isRegularExpressions) query += model.stringToFind
+      if (regex) query += model.stringToFind
     }
 
     giveJumpOpportunity()
@@ -89,11 +89,12 @@ object Tagger {
   private fun assignTags(results: Set<Int>): BiMap<String, Int> {
     val newTags: BiMap<String, Int> = transferExistingTagsCompatibleWithQuery()
     newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
+    if(hasTagSuffixInView(query)) return newTags
 
     val vacantResults = results.filter { it !in newTags.values }.toSet()
-    print("Vacant Res: $vacantResults")
+    println("Vacant Res: $vacantResults")
     val availableTags = sortTags(query).filter { it !in tagMap }.toSet()
-    print("Avail Tags: ${availableTags.take(vacantResults.size)}")
+    println("Avail Tags: ${availableTags.take(vacantResults.size)}")
     if (availableTags.size < vacantResults.size) full = false
 
     if (regex) return HashBiMap.create(availableTags.zip(vacantResults).toMap())

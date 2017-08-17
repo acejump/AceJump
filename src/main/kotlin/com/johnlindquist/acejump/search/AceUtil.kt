@@ -23,7 +23,7 @@ operator fun FindModel.invoke(t: FindModel.() -> Unit) = clone().apply(t)
 
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 
-fun runNow(t: () -> Unit) =
+fun runAndWait(t: () -> Unit) =
   ApplicationManager.getApplication().invokeAndWait(t, defaultModalityState())
 
 fun runLater(t: () -> Unit) = ApplicationManager.getApplication().invokeLater(t)

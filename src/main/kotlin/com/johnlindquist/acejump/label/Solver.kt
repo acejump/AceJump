@@ -1,10 +1,7 @@
 package com.johnlindquist.acejump.label
 
-import com.google.common.collect.BiMap
-import com.google.common.collect.HashBiMap
-import com.johnlindquist.acejump.search.getLineEndOffset
+import com.google.common.collect.*
 import com.johnlindquist.acejump.search.getView
-import com.johnlindquist.acejump.search.wordBounds
 import com.johnlindquist.acejump.search.wordBoundsPlus
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
@@ -36,18 +33,18 @@ object Solver {
    */
 
   private fun tryToAssignTag(tag: String): Boolean {
-    if (tagsStats[tag]!!.isEmpty()) return false
-    val idx = tagsStats[tag]!!.firstOrNull { idx ->
-      val (left, right) = editorText.wordBoundsPlus(idx)
+    if (availableTagsPerSite[tag]!!.isEmpty()) return false
+    val index = availableTagsPerSite[tag]!!.firstOrNull { index ->
+      val (left, right) = editorText.wordBoundsPlus(index)
 
       fun hasNearbyTag(index: Int) =
         Pair(max(left, index - 2), min(right, index + 2))
           .run { (first..second).any { newTags.containsValue(it) } }
 
-      !hasNearbyTag(idx) && !newTags.containsValue(idx)
+      !hasNearbyTag(index) && !newTags.containsValue(index)
     } ?: return true
 
-    newTags[tag] = idx
+    newTags[tag] = index
     return true
   }
 
@@ -59,15 +56,15 @@ object Solver {
    * more likely to target words by their leading character than not.
    */
 
-  private fun MutableList<Int>.sortVaidJumpTargets() =
-    sortWith(compareBy(
+  val siteComparator: Comparator<Int> = compareBy(
       // Sites in immediate view should come first
       { it !in editor.getView() },
       // Ensure that the first letter of a word is prioritized for tagging
-      { editorText[max(0, it - 1)].isLetterOrDigit() }))
+      { editorText[max(0, it - 1)].isLetterOrDigit() })
 
-  private var leastFlexibleTags: List<MutableEntry<String, MutableList<Int>>> = listOf()
-  private val tagsStats: MutableMap<String, MutableList<Int>> = hashMapOf()
+  private var leastFlexibleTags: List<MutableEntry<String, Collection<Int>>> = listOf()
+  private val availableTagsPerSite =
+    Multimaps.synchronizedSetMultimap(LinkedHashMultimap.create<String, Int>())
 
   /**
    * Maps tags to search results. Tags *must* have the following properties:
@@ -90,7 +87,7 @@ object Solver {
   fun solve(results: Set<Int>, tags: Set<String>): BiMap<String, Int> {
     newTags = HashBiMap.create()
     bigrams = tags.toMutableSet()
-    tagsStats.clear()
+    availableTagsPerSite.clear()
 
     strings = HashSet(results.map { getWordFragments(it) }.flatten())
 
@@ -103,18 +100,16 @@ object Solver {
         }
         tagsForSite.forEach { letter ->
           byLetter[letter]!!.forEach { tag ->
-            tagsStats.put(tag, tagsStats.getOrDefault(tag,
-              mutableListOf()).apply { add(site) })
+            availableTagsPerSite.put(tag, site)
           }
         }
       }
 
-      tagsStats.values.forEach { it.sortVaidJumpTargets() }
-      leastFlexibleTags = tagsStats.entries.sortedBy { it.value.size }
+      leastFlexibleTags = availableTagsPerSite.asMap().entries.sortedBy { it.value.size }
       leastFlexibleTags.map { it.key }.forEach { tryToAssignTag(it) }
     }
 
-    if (tagsStats.any { it.value.isEmpty() }) Tagger.full = false
+    if (availableTagsPerSite.asMap().any { it.value.isEmpty() }) Tagger.full = false
 
     println("results size: ${results.size}")
     println("newTags size: ${newTags.size}")

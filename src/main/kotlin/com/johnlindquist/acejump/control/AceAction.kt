@@ -12,7 +12,7 @@ import java.awt.event.KeyEvent
  * Entry point for all actions. The IntelliJ Platform calls AceJump here.
  */
 
-object AceAction : DumbAwareAction() {
+open class AceAction : DumbAwareAction() {
   override fun update(action: AnActionEvent) {
     action.presentation.isEnabled = action.getData(EDITOR) != null
   }
@@ -23,21 +23,21 @@ object AceAction : DumbAwareAction() {
   }
 }
 
-class AceTargetAction : DumbAwareAction() {
-  override fun update(action: AnActionEvent) = AceAction.update(action)
+class AceTargetAction : AceAction() {
+  override fun update(action: AnActionEvent) = super.update(action)
 
   override fun actionPerformed(e: AnActionEvent) =
-    AceAction.actionPerformed(e).also { Handler.toggleTargetMode(true) }
+    super.actionPerformed(e).also { Handler.toggleTargetMode(true) }
 }
 
-class AceLineAction : DumbAwareAction() {
-  override fun update(action: AnActionEvent) = AceAction.update(action)
+class AceLineAction : AceAction() {
+  override fun update(action: AnActionEvent) = super.update(action)
 
   override fun actionPerformed(e: AnActionEvent) =
-    AceAction.actionPerformed(e).also { Finder.search(LINE_MARK) }
+    super.actionPerformed(e).also { Finder.search(LINE_MARK) }
 }
 
-object AceKeyAction : DumbAwareAction() {
+object AceKeyAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) {
     val inputEvent = e.inputEvent as? KeyEvent ?: return
     Handler.processCommand(inputEvent.keyCode)

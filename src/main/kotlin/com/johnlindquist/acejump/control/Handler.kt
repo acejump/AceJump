@@ -45,7 +45,7 @@ object Handler {
     VK_TAB to { Skipper.ifQueryExistsSkipAhead(!isShiftDown) }
   )
 
-  fun activate() = runNow { if (!enabled) start() else toggleTargetMode() }
+  fun activate() = runAndWait { if (!enabled) start() else toggleTargetMode() }
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
@@ -99,7 +99,7 @@ object Handler {
     if (Jumper.hasJumped) reset() else Canvas.jumpLocations = Tagger.markers
 
   fun redoFind() {
-    runNow {
+    runAndWait {
       editor.restoreCanvas()
       editor.bindCanvas()
     }
@@ -148,12 +148,12 @@ object Handler {
       repaint()
     }
 
-  private fun Editor.restoreCursor() = runNow {
+  private fun Editor.restoreCursor() = runAndWait {
     settings.isBlinkCaret = Model.naturalBlink
     settings.isBlockCursor = Model.naturalBlock
   }
 
-  private fun Editor.restoreColors() = runNow {
+  private fun Editor.restoreColors() = runAndWait {
     colorsScheme.run {
       setColor(CARET_COLOR, Model.naturalColor)
       setAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES,

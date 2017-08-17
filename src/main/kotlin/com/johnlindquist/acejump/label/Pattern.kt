@@ -19,8 +19,16 @@ enum class Pattern(val string: String) {
 
     private fun priority(char: Char) = priority[char]
 
-    private fun allBigrams() =
-      settings.allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
+    private var _allowedChars = settings.allowedChars
+    private var allBigrams = emptyList<String>()
+      get() {
+        if (settings.allowedChars != _allowedChars || field.isEmpty()) {
+          _allowedChars = settings.allowedChars
+          field = _allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
+        }
+
+        return field
+      }
 
     /**
      * Sorts available tags by key distance. Tags which are ergonomically easier
@@ -30,10 +38,11 @@ enum class Pattern(val string: String) {
      */
 
     fun sortTags(query: String) =
-      allBigrams().filter { it[0] != query[0] }
-        .sortedWith(compareBy({ it[0].isDigit() || it[1].isDigit() },
-          { distance(it[0], it.last()) },
-          { priority(it.first()) }))
+      allBigrams.filter { it[0] != query[0] }.sortedWith(compareBy(
+        { it[0].isDigit() || it[1].isDigit() },
+        { distance(it[0], it.last()) },
+        { priority(it.first()) }
+      ))
 
     private val defaultKeyboardLayout = arrayOf(
       "1234567890",
@@ -45,7 +54,7 @@ enum class Pattern(val string: String) {
     private val priority: Map<Char, Int> =
       "fjghdkslavncmbxzrutyeiwoqp5849673210".mapIndices()
 
-    private val nearby = mapOf(
+    private val nearby: Map<Char, Map<Char, Int>> = mapOf(
       // Values are QWERTY keys sorted by physical proximity to the map key
       'j' to "jikmnhuolbgypvftcdrxsezawq8796054321",
       'f' to "ftgvcdryhbxseujnzawqikmolp5463728190",

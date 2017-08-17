@@ -12,6 +12,7 @@ import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.markup
+import kotlin.system.measureTimeMillis
 import kotlin.text.RegexOption.MULTILINE
 
 /**
@@ -84,14 +85,6 @@ object Finder {
       viewHighlights = textHighlights.filter { it.startOffset in editor.getView() }
     }
 
-  fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =
-    filter {
-      if (cond(it)) {
-        markup.removeHighlighter(it)
-        false
-      } else true
-    }
-
   private fun createTextHighlighter(it: Int) =
     markup.addRangeHighlighter(it,
       if (model.isRegularExpressions) it + 1 else it + query.length,
@@ -99,11 +92,18 @@ object Finder {
       customRenderer = Marker(query, null, this.startOffset)
     }
 
-  private fun tag(results: Set<Int>) =
-    runLater {
+  private fun tag(results: Set<Int>) {
       Tagger.markOrJump(model, results)
-      viewHighlights.narrowBy { Tagger canDiscard startOffset }
+      viewHighlights = viewHighlights.narrowBy { Tagger canDiscard startOffset }
       Handler.paintTagMarkers()
+    }
+
+  fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =
+    filter {
+      if (cond(it)) {
+        markup.removeHighlighter(it)
+        false
+      } else true
     }
 
   /**
