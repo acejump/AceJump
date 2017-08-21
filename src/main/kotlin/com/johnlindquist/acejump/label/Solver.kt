@@ -13,7 +13,7 @@ import kotlin.system.measureTimeMillis
  * Solves the tag assignment problem. The tag assignment problem can be stated
  * thusly: Given a set of indices I in document D, and a set of two-character
  * tags T, find a mapping of T->I such that D[i_n..i_(n+1)] + t_n[0] is not in
- * {D[i_j..(i_(j+1) + 1)]}. Maximize |T->I|.
+ * {D[i_j..(i_(j+1) + 1)]}. Maximize |T->I|. (TODO: improve notation here)
  */
 
 object Solver {
@@ -58,7 +58,8 @@ object Solver {
     // Sites in immediate view should come first
     { it !in Finder.viewRange },
     // Ensure that the first letter of a word is prioritized for tagging
-    { editorText[max(0, it - 1)].isLetterOrDigit() })
+    { editorText[max(0, it - 1)].isLetterOrDigit() },
+    { it })
 
   /**
    * Enforces tag conservation precedence. Tags have certain restrictions during
@@ -104,26 +105,19 @@ object Solver {
     availableTagsPerSite.clear()
 
     strings = HashSet(results.map { getWordFragments(it) }.flatten())
+    val tagsByFirstLetter = bigrams.groupBy { it[0] }
 
     val timeElapsed = measureTimeMillis {
       results.parallelStream().forEach { site ->
-        val firstLetters = bigrams.groupBy { it[0] }
-        val tagsForSite = firstLetters.keys.filter { letter ->
-          val compat  = site isCompatibleWithTag letter
-          if(!compat) println("Site $site rejected $letter")
-          compat
-        }
-
-        tagsForSite.forEach { letter ->
-          firstLetters[letter]!!.forEach { tag ->
-            availableTagsPerSite.put(tag, site)
-          }
+        tagsByFirstLetter.entries.forEach { (firstLetter, tags) ->
+          if (site isCompatibleWithTagChar firstLetter)
+            tags.forEach { tag -> availableTagsPerSite.put(tag, site) }
         }
       }
 
       // Tag conservation precedence is in effect. Scarce tags come first!
       availableTagsPerSite.asMap().entries.sortedBy { it.value.size }
-        .map { it.key }.forEach { tryToAssignTag(it) }
+        .map { it.key }.parallelStream().forEach { tryToAssignTag(it) }
     }
 
     if (availableTagsPerSite.asMap().any { it.value.isEmpty() }) Tagger.full = false
@@ -145,20 +139,10 @@ object Solver {
    * use a tag which can be partly completed by typing plaintext, where the tag
    * is the receiver, the tag index is the leftIndex, and rightIndex is the last
    * character we care about (this is usually the last letter of the same word).
-   *
-   * @param leftIndex index where a tag is to be used
-   * @param rightIndex index of last character (ie. end of the word)
    */
 
-  private infix fun Int.isCompatibleWithTag(tag: Char) =
-    getWordFragments(this).map { it + tag }.none {
-
-      val inS = it in strings
-
-      if(inS) println(it)
-
-      inS
-    }
+  private infix fun Int.isCompatibleWithTagChar(char: Char) =
+    getWordFragments(this).map { it + char }.none { it in strings }
 
   private fun getWordFragments(site: Int): List<String> {
     val left = site + Tagger.query.length - 1

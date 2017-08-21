@@ -124,9 +124,8 @@ object Handler {
 
   fun toggleTargetMode(status: Boolean? = null) =
     editor.colorsScheme.run {
-      if (Jumper.toggleTargetMode(status)) {
+      if (Jumper.toggleTargetMode(status))
         setColor(CARET_COLOR, settings.targetModeColor)
-      }
       else
         setColor(CARET_COLOR, settings.jumpModeColor)
 

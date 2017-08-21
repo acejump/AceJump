@@ -91,9 +91,8 @@ object Finder {
   private fun createTextHighlighter(it: Int) =
     markup.addRangeHighlighter(it,
       if (model.isRegularExpressions) it + 1 else it + query.length,
-      TEXT_HIGHLIGHT_LAYER, null, EXACT_RANGE).apply {
-      customRenderer = Marker(query, null, this.startOffset)
-    }
+      TEXT_HIGHLIGHT_LAYER, null, EXACT_RANGE)
+      .apply { customRenderer = Marker(query, null, this.startOffset) }
 
   private fun tag(results: Set<Int>) {
     Tagger.markOrJump(model, results)
