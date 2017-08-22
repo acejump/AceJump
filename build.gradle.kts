@@ -6,7 +6,7 @@ tasks.withType<KotlinCompile> {
 
 plugins {
   id("org.jetbrains.intellij") version "0.2.15"
-  id("org.jetbrains.kotlin.jvm") version "1.1.3"
+  id("org.jetbrains.kotlin.jvm") version "1.1.3-2"
 }
 
 intellij {
