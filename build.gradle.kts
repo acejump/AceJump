@@ -4,9 +4,13 @@ tasks.withType<KotlinCompile> {
   kotlinOptions.jvmTarget = "1.8"
 }
 
+val compileKotlin: KotlinCompile by tasks
+val compileJava: JavaCompile by tasks
+compileKotlin.destinationDir = compileJava.destinationDir
+
 plugins {
-  id("org.jetbrains.intellij") version "0.2.15"
-  id("org.jetbrains.kotlin.jvm") version "1.1.3-2"
+  kotlin("jvm")
+  id("org.jetbrains.intellij") version "0.2.16"
 }
 
 intellij {
