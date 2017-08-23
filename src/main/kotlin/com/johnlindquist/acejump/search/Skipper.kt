@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.search
 
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType.CENTER
@@ -17,6 +18,7 @@ import com.johnlindquist.acejump.view.Model.viewBounds
  */
 
 object Skipper {
+  private val logger = Logger.getInstance(Skipper::class.java)
   private var scrollX = 0
   private var scrollY = 0
 
@@ -72,5 +74,14 @@ object Skipper {
 
   fun Editor.restoreScroll() {
     if (caretModel.offset !in getView()) scrollingModel.scroll(scrollX, scrollY)
+  }
+
+  fun Editor.storeBounds() {
+    viewBounds = getView()
+    this::offsetToLogicalPosition.let {
+      logger.info("View bounds: $viewBounds (lines " +
+        "${it(viewBounds.first).line}.." +
+        "${it(viewBounds.last).line})")
+    }
   }
 }

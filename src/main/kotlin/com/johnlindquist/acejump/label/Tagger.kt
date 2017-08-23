@@ -7,6 +7,7 @@ import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Skipper
 import com.johnlindquist.acejump.view.Marker
+import com.johnlindquist.acejump.view.Model.viewBounds
 
 /**
  * Singleton that works with Finder to tag text search results in the editor.
@@ -27,7 +28,7 @@ object Tagger {
   private val logger = Logger.getInstance(Tagger::class.java)
 
   private val Iterable<Int>.allInView
-    get() = all { it in Finder.viewRange }
+    get() = all { it in viewBounds }
 
   fun markOrJump(model: FindModel, results: Set<Int>) {
     textMatches = results
@@ -61,9 +62,8 @@ object Tagger {
 
   private fun scan(): Map<String, Int> {
     full = true
-    val resultsToTag = textMatches
     if (query.isEmpty()) return emptyMap()
-    return assignTags(resultsToTag).let { compact(it) }
+    return assignTags(textMatches).let { compact(it) }
   }
 
   /**
@@ -83,17 +83,21 @@ object Tagger {
     }
 
   private fun assignTags(results: Set<Int>): Map<String, Int> {
+    var timeElapsed = System.currentTimeMillis()
     val newTags = transferExistingTagsCompatibleWithQuery()
     newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
-    if(hasTagSuffixInView(query)) return newTags
+    if (hasTagSuffixInView(query)) return newTags
 
     val vacantResults = results.filter { it !in newTags.values }.toSet()
-    println("Vacant Res: $vacantResults")
+    logger.info("Vacant Results: ${vacantResults.size}")
     val availableTags = sortTags(query).filter { it !in tagMap }.toSet()
-    println("Avail Tags: ${availableTags.take(vacantResults.size)}")
+    logger.info("Available Tags: ${availableTags.size}")
     if (availableTags.size < vacantResults.size) full = false
 
     if (regex) return availableTags.zip(vacantResults).toMap()
+
+    timeElapsed = System.currentTimeMillis() - timeElapsed
+    logger.info("Time elapsed: $timeElapsed")
 
     newTags.putAll(Solver.solve(vacantResults, availableTags))
     return newTags
@@ -133,7 +137,7 @@ object Tagger {
       textMatches.firstOrNull { it > old.last } ?: new.last < new.last
 
   fun hasTagSuffixInView(query: String) =
-    tagMap.any { query overlaps it.key && it.value in Finder.viewRange }
+    tagMap.any { query overlaps it.key && it.value in viewBounds }
 
   infix fun String.overlaps(xx: String) = endsWith(xx.first()) || endsWith(xx)
   infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i))

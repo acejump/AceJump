@@ -6,6 +6,7 @@ import com.intellij.openapi.application.ModalityState.defaultModalityState
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.VisualPosition
+import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.ProjectManager
@@ -34,6 +35,9 @@ fun Editor.offsetCenter(first: Int, second: Int): LogicalPosition {
   val center = (firstIndexLine + lastIndexLine) / 2
   return offsetToLogicalPosition(getLineStartOffset(center))
 }
+
+fun Editor.getNameOfFileInEditor() =
+  FileDocumentManager.getInstance().getFile(document)?.presentableName
 
 fun Editor.isVisible(offset: Int) = !foldingModel.isOffsetCollapsed(offset)
 
@@ -87,7 +91,7 @@ fun Editor.getView(): IntRange {
   return startOffset..endOffset
 }
 
-fun Editor.selectFromToOffset(fromOffset: Int, toOffset: Int) {
+fun Editor.selectFromCursorPositionToOffset(fromOffset: Int, toOffset: Int) {
   selectionModel.removeSelection()
   selectionModel.setSelection(fromOffset, toOffset)
   caretModel.moveToOffset(toOffset)

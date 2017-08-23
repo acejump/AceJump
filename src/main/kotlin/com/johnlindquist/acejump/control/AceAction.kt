@@ -2,9 +2,11 @@ package com.johnlindquist.acejump.control
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.DumbAwareAction
-import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.label.Pattern.LINE_MARK
+import com.johnlindquist.acejump.search.Finder
+import com.johnlindquist.acejump.search.getNameOfFileInEditor
 import com.johnlindquist.acejump.view.Model.editor
 import java.awt.event.KeyEvent
 
@@ -13,12 +15,14 @@ import java.awt.event.KeyEvent
  */
 
 open class AceAction : DumbAwareAction() {
+  val logger = Logger.getInstance(AceAction::class.java)
   override fun update(action: AnActionEvent) {
     action.presentation.isEnabled = action.getData(EDITOR) != null
   }
 
   override fun actionPerformed(e: AnActionEvent) {
     editor = e.getData(EDITOR) ?: editor
+    logger.info("Invoked on ${editor.getNameOfFileInEditor()}")
     Handler.activate()
   }
 }
@@ -40,6 +44,7 @@ class AceLineAction : AceAction() {
 object AceKeyAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) {
     val inputEvent = e.inputEvent as? KeyEvent ?: return
+    logger.info("Registered key: ${KeyEvent.getKeyText(inputEvent.keyCode)}")
     Handler.processCommand(inputEvent.keyCode)
   }
 }

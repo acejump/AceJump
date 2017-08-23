@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.control
 
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.colors.EditorColorsListener
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.event.VisibleAreaEvent
@@ -18,6 +19,7 @@ import kotlin.system.measureTimeMillis
 
 internal object Listener : FocusListener, AncestorListener,
   EditorColorsListener, VisibleAreaListener {
+  private val logger = Logger.getInstance(Listener::class.java)
   fun enable() =
     synchronized(this) {
       editor.run {
@@ -43,8 +45,12 @@ internal object Listener : FocusListener, AncestorListener,
    * @see Trigger
    */
   override fun visibleAreaChanged(e: VisibleAreaEvent?) {
-    val elapsed = measureTimeMillis { if (canTagsSurviveViewResize()) return }
-    Trigger(withDelay = (750L - elapsed).coerceAtLeast(0L)) { redoFind() }
+    var elapsed = measureTimeMillis { if (canTagsSurviveViewResize()) return }
+    elapsed = (750L - elapsed).coerceAtLeast(0L)
+    Trigger(withDelay = elapsed) {
+      logger.info("Visible area changed")
+      redoFind()
+    }
   }
 
   private fun canTagsSurviveViewResize() =
@@ -57,14 +63,28 @@ internal object Listener : FocusListener, AncestorListener,
 
   override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoFind()
 
-  override fun ancestorAdded(event: AncestorEvent?) = reset()
+  override fun ancestorAdded(ancestorEvent: AncestorEvent?) {
+    logger.info("Ancestor added: $ancestorEvent")
+    reset()
+  }
 
-  override fun ancestorMoved(event: AncestorEvent?) =
+  override fun ancestorMoved(ancestorEvent: AncestorEvent?) {
+    logger.info("Ancestor moved: $ancestorEvent")
     if (canTagsSurviveViewResize()) Unit else reset()
+  }
 
-  override fun ancestorRemoved(event: AncestorEvent?) = reset()
+  override fun ancestorRemoved(ancestorEvent: AncestorEvent?) {
+    logger.info("Ancestor removed: $ancestorEvent")
+    reset()
+  }
 
-  override fun focusLost(e: FocusEvent?) = reset()
+  override fun focusLost(focusEvent: FocusEvent?) {
+    logger.info("Focus lost: $focusEvent")
+    reset()
+  }
 
-  override fun focusGained(e: FocusEvent?) = reset()
+  override fun focusGained(focusEvent: FocusEvent?) {
+    logger.info("Focus gained: $focusEvent")
+    reset()
+  }
 }

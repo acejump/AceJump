@@ -1,9 +1,13 @@
 package com.johnlindquist.acejump.label
 
-import com.google.common.collect.*
-import com.johnlindquist.acejump.search.Finder
+import com.google.common.collect.HashBiMap
+import com.google.common.collect.Multimaps
+import com.google.common.collect.Ordering
+import com.google.common.collect.TreeMultimap
+import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.search.wordBoundsPlus
 import com.johnlindquist.acejump.view.Model.editorText
+import com.johnlindquist.acejump.view.Model.viewBounds
 import java.lang.Math.max
 import java.lang.Math.min
 import kotlin.collections.set
@@ -17,8 +21,9 @@ import kotlin.system.measureTimeMillis
  */
 
 object Solver {
-  private var bigrams: MutableSet<String> = LinkedHashSet(Pattern.NUM_TAGS)
-  private var newTags: MutableMap<String, Int> = HashMap(Pattern.NUM_TAGS)
+  private val logger = Logger.getInstance(Solver::class.java)
+  private var bigrams: MutableSet<String> = LinkedHashSet()
+  private var newTags: MutableMap<String, Int> = HashBiMap.create()
   private var strings: Set<String> = hashSetOf()
 
   /**
@@ -27,24 +32,33 @@ object Solver {
    * plaintext string. To have the desired behavior, this has a surprising
    * number of edge cases that must explicitly prevented.
    *
-   * @param idx the index which a tag is to be assigned
+   * @param tag the tag string which is to be assigned
+   * @param sites potential indices where a tag may be assigned
    */
 
-  private fun tryToAssignTag(tag: String): Boolean {
-    if (availableTagsPerSite[tag]!!.isEmpty()) return false
-    val index = availableTagsPerSite[tag]!!.firstOrNull { index ->
+  private fun tryToAssignTag(tag: String, sites: Collection<Int>): Boolean {
+    if (newTags.containsKey(tag)) return false
+    val index = sites.firstOrNull { index ->
       val (left, right) = editorText.wordBoundsPlus(index)
 
+      //TODO: do this check in the tagger to simplify contract
       fun hasNearbyTag(index: Int) =
         Pair(max(left, index - 2), min(right, index + 2))
           .run { (first..second).any { newTags.containsValue(it) } }
 
-      !hasNearbyTag(index) && !newTags.containsValue(index)
-    } ?: return true
+      !hasNearbyTag(index)
+    } ?: return false
 
     newTags[tag] = index
     return true
   }
+
+  private val tagOrder: Comparator<String> = compareBy(
+    { it[0].isDigit() || it[1].isDigit() },
+    { eligibleSitesByTag[it].size },
+    { Pattern.distance(it[0], it.last()) },
+    { Pattern.priority(it.first()) }
+  )
 
   /**
    * Sorts jump targets to determine which positions get first choice for tags,
@@ -54,9 +68,9 @@ object Solver {
    * more likely to target words by their leading character than not.
    */
 
-  val siteOrder: Comparator<Int> = compareBy(
+  private val siteOrder: Comparator<Int> = compareBy(
     // Sites in immediate view should come first
-    { it !in Finder.viewRange },
+    { it !in viewBounds },
     // Ensure that the first letter of a word is prioritized for tagging
     { editorText[max(0, it - 1)].isLetterOrDigit() },
     { it })
@@ -76,10 +90,10 @@ object Solver {
    * @see isCompatibleWithSite This defines how tags may be assigned to sites.
    */
 
-  val tagOrder: Comparator<String> = Ordering.natural()
 
-  private val availableTagsPerSite = Multimaps.synchronizedSetMultimap(
-    TreeMultimap.create<String, Int>(tagOrder, siteOrder))
+  private val eligibleSitesByTag = Multimaps.synchronizedSetMultimap(
+    TreeMultimap.create<String, Int>(Ordering.natural(), siteOrder))
+
 
   /**
    * Maps tags to search results. Tags *must* have the following properties:
@@ -100,9 +114,9 @@ object Solver {
    */
 
   fun solve(results: Set<Int>, tags: Set<String>): Map<String, Int> {
-    newTags = HashMap(Pattern.NUM_TAGS)
+    newTags = HashBiMap.create(Pattern.NUM_TAGS)
     bigrams = tags.toMutableSet()
-    availableTagsPerSite.clear()
+    eligibleSitesByTag.clear()
 
     strings = HashSet(results.map { getWordFragments(it) }.flatten())
     val tagsByFirstLetter = bigrams.groupBy { it[0] }
@@ -111,20 +125,24 @@ object Solver {
       results.parallelStream().forEach { site ->
         tagsByFirstLetter.entries.forEach { (firstLetter, tags) ->
           if (site isCompatibleWithTagChar firstLetter)
-            tags.forEach { tag -> availableTagsPerSite.put(tag, site) }
+            tags.forEach { tag -> eligibleSitesByTag.put(tag, site) }
         }
       }
 
-      // Tag conservation precedence is in effect. Scarce tags come first!
-      availableTagsPerSite.asMap().entries.sortedBy { it.value.size }
-        .map { it.key }.parallelStream().forEach { tryToAssignTag(it) }
+      val sortedTags = eligibleSitesByTag.keySet().toList().sortedWith(tagOrder)
+
+      var totalAssigned = 0
+      for (tagString in sortedTags) {
+        val eligibleSites = eligibleSitesByTag[tagString]
+        if (totalAssigned == results.size) break
+        else if (eligibleSites.isEmpty()) Tagger.full = false
+        else if (tryToAssignTag(tagString, eligibleSites)) totalAssigned++
+      }
     }
 
-    if (availableTagsPerSite.asMap().any { it.value.isEmpty() }) Tagger.full = false
-
-    println("results size: ${results.size}")
-    println("newTags size: ${newTags.size}")
-    println("Time elapsed: $timeElapsed")
+    logger.info("results size: ${results.size}")
+    logger.info("newTags size: ${newTags.size}")
+    logger.info("Time elapsed: $timeElapsed ms")
 
     return newTags
   }
@@ -136,9 +154,7 @@ object Solver {
   /**
    * Returns true IFF the tag, when inserted at any position in the word, could
    * match an existing substring elsewhere in the editor text. We should never
-   * use a tag which can be partly completed by typing plaintext, where the tag
-   * is the receiver, the tag index is the leftIndex, and rightIndex is the last
-   * character we care about (this is usually the last letter of the same word).
+   * use a tag which can be partly completed by typing plaintext.
    */
 
   private infix fun Int.isCompatibleWithTagChar(char: Char) =

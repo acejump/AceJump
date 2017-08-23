@@ -1,6 +1,7 @@
 package com.johnlindquist.acejump.search
 
 import com.intellij.find.FindModel
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea.EXACT_RANGE
 import com.intellij.openapi.editor.markup.RangeHighlighter
@@ -12,6 +13,7 @@ import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.markup
+import com.johnlindquist.acejump.view.Model.viewBounds
 import kotlin.system.measureTimeMillis
 import kotlin.text.RegexOption.MULTILINE
 
@@ -27,18 +29,18 @@ object Finder {
   private var viewHighlights = listOf<RangeHighlighter>()
   private var model = FindModel()
   private var TEXT_HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
+  private val logger = Logger.getInstance(Finder::class.java)
 
   val isShiftSelectEnabled
     get() = model.stringToFind.last().isUpperCase()
 
-  var viewRange = 0..0
 
   var skim = false
 
   var query: String = ""
     set(value) {
+      logger.info("Searching for locations matching: \"$value\"")
       field = value.toLowerCase()
-      viewRange = editor.getView()
 
       when {
         value.isEmpty() -> return
@@ -50,6 +52,7 @@ object Finder {
     }
 
   private fun skim() {
+    logger.info("Skimming document for matches...")
     skim = true
     search(FindModel().apply { stringToFind = query })
     Trigger(400L) { if (skim) runLater { skim = false; search() } }
@@ -70,7 +73,12 @@ object Finder {
   fun search(findModel: FindModel) {
     model = findModel
 
-    results = editorText.findMatchingSites().toHashSet()
+    val timeElapsed = measureTimeMillis {
+      results = editorText.findMatchingSites().toHashSet()
+    }
+
+    logger.info("Discovered ${results.size} matches in $timeElapsed ms")
+
     if (!Tagger.hasTagSuffixInView(query)) highlightResults()
     if (!skim) tag(results)
   }
@@ -85,7 +93,7 @@ object Finder {
     val tempHighlights = results.map { createTextHighlighter(it) }
     textHighlights.forEach { markup.removeHighlighter(it) }
     textHighlights = tempHighlights
-    viewHighlights = textHighlights.filter { it.startOffset in viewRange }
+    viewHighlights = textHighlights.filter { it.startOffset in viewBounds }
   }
 
   private fun createTextHighlighter(it: Int) =
@@ -97,6 +105,11 @@ object Finder {
   private fun tag(results: Set<Int>) {
     Tagger.markOrJump(model, results)
     viewHighlights = viewHighlights.narrowBy { Tagger canDiscard startOffset }
+      .also { newHighlights ->
+        val numDiscarded = viewHighlights.size - newHighlights.size
+        if (numDiscarded != 0) logger.info("Discarded $numDiscarded highlights")
+      }
+
     Handler.paintTagMarkers()
   }
 
@@ -120,7 +133,7 @@ object Finder {
     else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
 
   private fun Set<Int>.isCacheValidForRange() =
-    viewRange.let { view ->
+    viewBounds.let { view ->
       first() < view.first && last() > view.last
     }
 

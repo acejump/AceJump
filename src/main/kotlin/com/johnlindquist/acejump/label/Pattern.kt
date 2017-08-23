@@ -15,9 +15,9 @@ enum class Pattern(val string: String) {
     CODE_INDENTS.string);
 
   companion object {
-    private fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]
+    fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]
 
-    private fun priority(char: Char) = priority[char]
+    fun priority(char: Char) = priority[char]
 
     private var _allowedChars = settings.allowedChars
     private var allBigrams = emptyList<String>()
@@ -30,8 +30,8 @@ enum class Pattern(val string: String) {
         return field
       }
 
-    var NUM_TAGS: Int = 1296
-      get() = settings.allowedChars.size.let { it * it }
+    val NUM_TAGS: Int
+      get() = NUM_CHARS * NUM_CHARS
 
     var NUM_CHARS: Int = 36
       get() = settings.allowedChars.size
@@ -43,12 +43,7 @@ enum class Pattern(val string: String) {
      * keys (ex. 12, 21) to keys that are located further apart on the keyboard.
      */
 
-    fun sortTags(query: String) =
-      allBigrams.filter { it[0] != query[0] }.sortedWith(compareBy(
-        { it[0].isDigit() || it[1].isDigit() },
-        { distance(it[0], it.last()) },
-        { priority(it.first()) }
-      ))
+    fun sortTags(query: String) = allBigrams.filter { it[0] != query[0] }
 
     private val defaultKeyboardLayout = arrayOf(
       "1234567890",

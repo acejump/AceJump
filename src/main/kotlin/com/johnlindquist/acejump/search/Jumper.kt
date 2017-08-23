@@ -30,7 +30,7 @@ object Jumper {
 
   fun jump(index: Int) = editor.run {
     if (Finder.isShiftSelectEnabled)
-      selectFromToOffset(caretModel.offset, index)
+      selectFromCursorPositionToOffset(caretModel.offset, index)
     else if (targetModeEnabled) {
       // Moving the caret will trigger a reset, flipping targetModeEnabled, so
       // we need to move the caret and select the word in one single transaction
@@ -69,7 +69,7 @@ object Jumper {
     val startOfWordOffset = max(0, firstRange.startOffset)
     val endOfWordOffset = min(firstRange.endOffset, editorText.length)
 
-    selectFromToOffset(startOfWordOffset, endOfWordOffset)
+    selectFromCursorPositionToOffset(startOfWordOffset, endOfWordOffset)
   }
 
   fun reset() {

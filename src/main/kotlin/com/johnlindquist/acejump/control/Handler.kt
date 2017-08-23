@@ -2,8 +2,11 @@ package com.johnlindquist.acejump.control
 
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
+import com.intellij.openapi.actionSystem.DataContext
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
+import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.util.SmartList
@@ -13,13 +16,13 @@ import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Finder.search
 import com.johnlindquist.acejump.search.Skipper.restoreScroll
+import com.johnlindquist.acejump.search.Skipper.storeBounds
 import com.johnlindquist.acejump.search.Skipper.storeScroll
 import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Canvas.bindCanvas
 import com.johnlindquist.acejump.view.Model
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.setupCursor
-import com.johnlindquist.acejump.view.Model.viewBounds
 import java.awt.event.KeyEvent.*
 import javax.swing.JComponent
 
@@ -27,7 +30,8 @@ import javax.swing.JComponent
  * Handles all incoming keystrokes, IDE notifications, and UI updates.
  */
 
-object Handler {
+object Handler : TypedActionHandler {
+  private val logger = Logger.getInstance(Trigger::class.java)
   private var enabled = false
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
@@ -55,17 +59,22 @@ object Handler {
     paintTagMarkers()
   }
 
-  private fun interceptPrintableKeystrokes() =
-    editorTypeAction.setupRawHandler { _, key, _ -> Finder.query += key }
+  private fun installSearchKeyHandler() = editorTypeAction.setupRawHandler(this)
+
+  override fun execute(editor: Editor, key: Char, dataContext: DataContext) {
+    logger.info("Intercepted keystroke: $key")
+    Finder.query += key
+  }
 
   private fun configureEditor() =
     editor.run {
       storeScroll()
       setupCursor()
-      viewBounds = getView()
+      storeBounds()
       bindCanvas()
-      interceptPrintableKeystrokes()
+      installSearchKeyHandler()
       Listener.enable()
+      component.installCustomShortcutHandler()
     }
 
   private var backup: List<*>? = null
@@ -78,6 +87,7 @@ object Handler {
 
   // Investigate replacing this with `IDEEventQueue.*Dispatcher(...)`
   private fun JComponent.installCustomShortcutHandler() {
+    logger.info("Installing custom shortcuts...")
     backup = getClientProperty(ACTIONS_KEY) as List<*>?
     putClientProperty(ACTIONS_KEY, SmartList<AnAction>(AceKeyAction))
     val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
@@ -87,12 +97,12 @@ object Handler {
   private fun JComponent.uninstallCustomShortCutHandler() {
     putClientProperty(ACTIONS_KEY, backup)
     AceKeyAction.unregisterCustomShortcutSet(this)
+    editorTypeAction.setupRawHandler(handler)
   }
 
   private fun start() {
     enabled = true
     configureEditor()
-    editor.component.installCustomShortcutHandler()
   }
 
   fun paintTagMarkers() =
@@ -114,7 +124,6 @@ object Handler {
   fun reset() {
     if (enabled) Listener.disable()
     editor.component.uninstallCustomShortCutHandler()
-    editorTypeAction.setupRawHandler(handler)
     enabled = false
     Tagger.reset()
     Jumper.reset()

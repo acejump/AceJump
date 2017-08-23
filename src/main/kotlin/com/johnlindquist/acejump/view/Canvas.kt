@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.view
 
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import com.johnlindquist.acejump.view.Model.fontWidth
 import java.awt.Graphics
@@ -7,6 +8,7 @@ import java.awt.Graphics2D
 import java.awt.Point
 import javax.swing.JComponent
 import javax.swing.SwingUtilities.convertPoint
+import kotlin.system.measureTimeMillis
 
 /**
  * Overlay composed of all graphical tags. Maintains a registry of tags' visual
@@ -16,6 +18,7 @@ import javax.swing.SwingUtilities.convertPoint
  */
 
 object Canvas : JComponent() {
+  private val logger = Logger.getInstance(Canvas::class.java)
   private val tags = hashSetOf<Point>()
   var jumpLocations: Collection<Marker> = emptyList()
     set(value) {
