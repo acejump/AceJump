@@ -9,7 +9,6 @@ import com.johnlindquist.acejump.search.wordBoundsPlus
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.viewBounds
 import java.lang.Math.max
-import java.lang.Math.min
 import kotlin.collections.set
 import kotlin.system.measureTimeMillis
 
@@ -38,17 +37,7 @@ object Solver {
 
   private fun tryToAssignTag(tag: String, sites: Collection<Int>): Boolean {
     if (newTags.containsKey(tag)) return false
-    val index = sites.firstOrNull { index ->
-      val (left, right) = editorText.wordBoundsPlus(index)
-
-      //TODO: do this check in the tagger to simplify contract
-      fun hasNearbyTag(index: Int) =
-        Pair(max(left, index - 2), min(right, index + 2))
-          .run { (first..second).any { newTags.containsValue(it) } }
-
-      !hasNearbyTag(index)
-    } ?: return false
-
+    val index = sites.firstOrNull { !newTags.containsValue(it) } ?: return false
     newTags[tag] = index
     return true
   }
@@ -90,10 +79,8 @@ object Solver {
    * @see isCompatibleWithSite This defines how tags may be assigned to sites.
    */
 
-
   private val eligibleSitesByTag = Multimaps.synchronizedSetMultimap(
     TreeMultimap.create<String, Int>(Ordering.natural(), siteOrder))
-
 
   /**
    * Maps tags to search results. Tags *must* have the following properties:
@@ -146,10 +133,6 @@ object Solver {
 
     return newTags
   }
-
-  // Provides a way to short-circuit the full text search if a match is found
-  private operator fun String.contains(key: String) =
-    Tagger.textMatches.any { regionMatches(it, key, 0, key.length) }
 
   /**
    * Returns true IFF the tag, when inserted at any position in the word, could

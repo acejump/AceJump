@@ -7,6 +7,7 @@ import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
 import com.johnlindquist.acejump.search.Skipper
 import com.johnlindquist.acejump.view.Marker
+import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.viewBounds
 
 /**
@@ -31,7 +32,8 @@ object Tagger {
     get() = all { it in viewBounds }
 
   fun markOrJump(model: FindModel, results: Set<Int>) {
-    textMatches = results
+    textMatches = results.cull()
+    logger.info("Culled ${results.size - textMatches.size} sites for tagging")
 
     model.run {
       if (!regex) regex = isRegularExpressions
@@ -42,6 +44,32 @@ object Tagger {
     giveJumpOpportunity()
     markTags()
   }
+
+  private fun Set<Int>.cull() = filter { editorText.standsAlone(it) }.toSet()
+
+  /**
+   * Returns whether a given index inside a String can be tagged with a two-
+   * character tag (either to the left or right) without visually overlapping
+   * any nearby tags.
+   */
+
+  private fun String.standsAlone(it: Int) = when {
+    it - 1 < 0 -> true
+    it + 1 >= length -> true
+    this[it] isUnlike this[it - 1] -> true
+    this[it] isUnlike this[it + 1] -> true
+    this[it] != this[it - 1] -> true
+    this[it] != this[it + 1] -> true
+    this[it + 1] == '\r' || this[it + 1] == '\n' -> true
+    this[it - 1] == this[it] && this[it] == this[it + 1] -> false
+    this[it + 1].isWhitespace() && this[(it + 2)
+      .coerceAtMost(length - 1)].isWhitespace() -> true
+    else -> false
+  }
+
+  private infix fun Char.isUnlike(other: Char) =
+    this.isLetterOrDigit() xor other.isLetterOrDigit() ||
+      this.isWhitespace() xor other.isWhitespace()
 
   fun maybeJumpIfJustOneTagRemains() =
     tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
