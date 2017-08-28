@@ -108,31 +108,36 @@ object Solver {
     strings = HashSet(results.map { getWordFragments(it) }.flatten())
     val tagsByFirstLetter = bigrams.groupBy { it[0] }
 
+    var totalAssigned = 0
     val timeElapsed = measureTimeMillis {
       results.parallelStream().forEach { site ->
-        tagsByFirstLetter.entries.forEach { (firstLetter, tags) ->
-          if (site isCompatibleWithTagChar firstLetter)
-            tags.forEach { tag -> eligibleSitesByTag.put(tag, site) }
-        }
+        val compatibleTags = tagsByFirstLetter.getTagsCompatibleWith(site)
+        compatibleTags.forEach { tag -> eligibleSitesByTag.put(tag, site) }
       }
 
-      val sortedTags = eligibleSitesByTag.keySet().toList().sortedWith(tagOrder)
+      val sortedTags = eligibleSitesByTag.keySet().sortedWith(tagOrder)
 
-      var totalAssigned = 0
       for (tagString in sortedTags) {
         val eligibleSites = eligibleSitesByTag[tagString]
         if (totalAssigned == results.size) break
-        else if (eligibleSites.isEmpty()) Tagger.full = false
         else if (tryToAssignTag(tagString, eligibleSites)) totalAssigned++
       }
     }
 
-    logger.info("results size: ${results.size}")
-    logger.info("newTags size: ${newTags.size}")
-    logger.info("Time elapsed: $timeElapsed ms")
+    logger.run {
+      info("results size: ${results.size}")
+      info("newTags size: ${newTags.size}")
+      info("Time elapsed: $timeElapsed ms")
+      info("Total assign: $totalAssigned")
+    }
 
     return newTags
   }
+
+  private fun Map<Char, List<String>>.getTagsCompatibleWith(site: Int) =
+    entries.mapNotNull { (firstLetter, tags) ->
+      if (site isCompatibleWithTagChar firstLetter) tags else null
+    }.flatten()
 
   /**
    * Returns true IFF the tag, when inserted at any position in the word, could

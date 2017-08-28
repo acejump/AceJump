@@ -111,6 +111,7 @@ object Tagger {
     }
 
   private fun assignTags(results: Set<Int>): Map<String, Int> {
+    logger.info("Tags on screen: ${results.filter { it in viewBounds }}")
     var timeElapsed = System.currentTimeMillis()
     val newTags = transferExistingTagsCompatibleWithQuery()
     newTags.run { if (regex && isNotEmpty() && values.allInView) return this }

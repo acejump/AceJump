@@ -78,7 +78,8 @@ object Model {
   var viewBounds = 0..0
   val SEARCH_BUFFER = 10000
 
-  data class Settings(var allowedChars: List<Char> = ('a'..'z').toList(),
+  data class Settings(var allowedChars: List<Char> =
+                      ('a'..'z').plus('0'..'9').toList(),
                       var jumpModeColor: Color = blue,
                       var targetModeColor: Color = red,
                       var textHighlightColor: Color = green,
