@@ -73,7 +73,10 @@ object Skipper {
   }
 
   fun Editor.restoreScroll() {
-    if (caretModel.offset !in getView()) scrollingModel.scroll(scrollX, scrollY)
+    if (caretModel.offset !in getView()) {
+      scrollingModel.scrollVertically(scrollY)
+      scrollingModel.scrollHorizontally(scrollX)
+    }
   }
 
   fun Editor.storeBounds() {
