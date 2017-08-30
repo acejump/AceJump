@@ -44,6 +44,7 @@ internal object Listener : FocusListener, AncestorListener,
    *
    * @see Trigger
    */
+
   override fun visibleAreaChanged(e: VisibleAreaEvent?) {
     var elapsed = measureTimeMillis { if (canTagsSurviveViewResize()) return }
     elapsed = (750L - elapsed).coerceAtLeast(0L)
@@ -69,8 +70,10 @@ internal object Listener : FocusListener, AncestorListener,
   }
 
   override fun ancestorMoved(ancestorEvent: AncestorEvent?) {
-    logger.info("Ancestor moved: $ancestorEvent")
-    if (canTagsSurviveViewResize()) Unit else reset()
+    if (!canTagsSurviveViewResize()) {
+      logger.info("Ancestor moved: $ancestorEvent")
+      reset()
+    }
   }
 
   override fun ancestorRemoved(ancestorEvent: AncestorEvent?) {

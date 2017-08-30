@@ -47,7 +47,7 @@ object Handler : TypedActionHandler {
     VK_ENTER to { Tagger.maybeJumpIfJustOneTagRemains() },
     // TODO: recycle tags during tab search, push scanner as far as possible
     VK_TAB to { Skipper.ifQueryExistsSkipAhead(!isShiftDown) },
-    VK_SPACE to { search(ALL_WORDS)}
+    VK_SPACE to { search(ALL_WORDS) }
   )
 
   fun activate() = runAndWait { if (!enabled) start() else toggleTargetMode() }

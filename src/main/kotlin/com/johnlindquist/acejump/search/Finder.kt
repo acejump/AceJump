@@ -39,11 +39,9 @@ object Finder {
 
   var query: String = ""
     set(value) {
-      logger.info("Searching for locations matching: \"$value\"")
-      field = value.toLowerCase()
+      if (value.isNotEmpty()) field = value.toLowerCase() else return
 
       when {
-        value.isEmpty() -> return
         Tagger.regex -> search()
         value.length == 1 -> skim()
         value.isValidQuery() -> skim()
@@ -52,16 +50,19 @@ object Finder {
     }
 
   private fun skim() {
-    logger.info("Skimming document for matches...")
+    logger.info("Skimming document for matches of: $query")
     skim = true
     search(FindModel().apply { stringToFind = query })
     Trigger(400L) { if (skim) runLater { skim = false; search() } }
   }
 
-  fun search(string: String = query) =
+  fun search(string: String = query) {
+    logger.info("Searching for locations matching: $string")
     search(model.apply { stringToFind = string })
+  }
 
   fun search(pattern: Pattern) {
+    logger.info("Searching for regular expression: ${pattern.name}")
     reset()
     search(FindModel().apply {
       stringToFind = pattern.string
