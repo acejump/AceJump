@@ -42,7 +42,7 @@ object Tagger {
     }
 
     giveJumpOpportunity()
-    markTags()
+    markOrSkip()
   }
 
   private fun Set<Int>.cull() = filter { editorText.standsAlone(it) }.toSet()
@@ -77,15 +77,10 @@ object Tagger {
   private fun giveJumpOpportunity() =
     tagMap.forEach { if (query.endsWith(it.key)) return Jumper.jump(it.value) }
 
-  private fun markTags() {
-    computeMarkers()
+  private fun markOrSkip() {
+    scan().apply { if (this.isNotEmpty()) tagMap = this }
 
     if (markers.isEmpty() && query.length > 1) Skipper.ifQueryExistsSkipAhead()
-  }
-
-  private fun computeMarkers() {
-    markers = scan().apply { if (this.isNotEmpty()) tagMap = this }
-      .map { (tag, index) -> Marker(query, tag, index) }
   }
 
   private fun scan(): Map<String, Int> {
@@ -114,9 +109,12 @@ object Tagger {
     logger.info("Tags on screen: ${results.filter { it in viewBounds }}")
     var timeElapsed = System.currentTimeMillis()
     val newTags = transferExistingTagsCompatibleWithQuery()
+
+    // Ongoing queries with results in view do not need further tag assignment
     newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
     if (hasTagSuffixInView(query)) return newTags
 
+    // Some results are untagged. Let's assign some tags!
     val vacantResults = results.filter { it !in newTags.values }.toSet()
     logger.info("Vacant Results: ${vacantResults.size}")
     val availableTags = sortTags(query).filter { it !in tagMap }.toSet()
@@ -129,12 +127,14 @@ object Tagger {
     logger.info("Time elapsed: $timeElapsed")
 
     newTags.putAll(Solver.solve(vacantResults, availableTags))
+    markers = newTags.map { (tag, index) -> Marker(query, tag, index) }
     return newTags
   }
 
   /**
    * Adds pre-existing tags where search string and tag overlap. For example,
-   * tags starting with the last character of the query should be considered.
+   * tags starting with the last character of the query will be included. Tags
+   * that no longer match the query will be discarded.
    */
 
   private fun transferExistingTagsCompatibleWithQuery() =
