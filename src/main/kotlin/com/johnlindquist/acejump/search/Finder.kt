@@ -39,15 +39,35 @@ object Finder {
 
   var query: String = ""
     set(value) {
-      if (value.isNotEmpty()) field = value.toLowerCase() else return
+      logger.info("Searching for locations matching: \"$value\"")
+      field = value.toLowerCase()
 
       when {
+        value.isEmpty() -> return
         Tagger.regex -> search()
         value.length == 1 -> skim()
         value.isValidQuery() -> skim()
         else -> field = field.dropLast(1)
       }
     }
+
+  /**
+   * A user has two possible goals when triggering an AceJump search.
+   *
+   * 1. To locate the position of a known string in the document (ie. Find)
+   * 2. To move the cursor to a fixed location (ie. eyeball staring at location)
+   *
+   * Since we cannot know why the user initiated any query a priori, here we
+   * attempt to satisfy both goals. First, we highlight all matches on (or off)
+   * the screen. This operation has very low latency. As soon as the user types
+   * a single character, we highlight all matches immediately. If we should
+   * receive no further characters after a short delay (indicating a pause in
+   * typing cadence), then apply tags.
+   *
+   * Typically when a user searches for a known string, they will type several
+   * characters in rapid succession. We can avoid unnecessary work by only
+   * applying tags once we have received a "chunk" of search text.
+   */
 
   private fun skim() {
     logger.info("Skimming document for matches of: $query")
@@ -130,7 +150,7 @@ object Finder {
   private fun String.findMatchingSites(key: String = query.toLowerCase(),
                                        cache: Set<Int> = results) =
     // If the cache is populated, filter it instead of redoing extra work
-    if (cache.isEmpty()) findAll(Regex.escape(model.stringToFind))
+    if (cache.isEmpty()) findAll(model.stringToFind))
     else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
 
   private fun Set<Int>.isCacheValidForRange() =
