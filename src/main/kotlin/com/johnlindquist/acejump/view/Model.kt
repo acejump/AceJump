@@ -29,8 +29,8 @@ object Model {
       editorText = value.document.text.toLowerCase()
       if (value == field) return
 
-      // When the editor is updated, we must update some properties
-      Handler.reset()
+//      // When the editor is updated, we must update some properties
+//      Handler.reset()
 
       field = value
 

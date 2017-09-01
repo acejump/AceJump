@@ -31,7 +31,7 @@ import javax.swing.JComponent
  */
 
 object Handler : TypedActionHandler {
-  private val logger = Logger.getInstance(Trigger::class.java)
+  private val logger = Logger.getInstance(Handler::class.java)
   private var enabled = false
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
   private val handler = editorTypeAction.rawHandler
@@ -47,12 +47,15 @@ object Handler : TypedActionHandler {
     VK_ENTER to { Tagger.maybeJumpIfJustOneTagRemains() },
     // TODO: recycle tags during tab search, push scanner as far as possible
     VK_TAB to { Skipper.ifQueryExistsSkipAhead(!isShiftDown) },
-    VK_SPACE to { search(ALL_WORDS) }
+    VK_SPACE to { processSpacebar() }
   )
 
   fun activate() = runAndWait { if (!enabled) start() else toggleTargetMode() }
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
+
+  fun processSpacebar() =
+    if(Finder.query.isEmpty()) search(ALL_WORDS) else Finder.query += " "
 
   private fun processBackspaceCommand() {
     Tagger.reset()

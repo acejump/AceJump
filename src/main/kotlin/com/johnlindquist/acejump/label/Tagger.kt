@@ -41,6 +41,8 @@ object Tagger {
       if (regex) query += model.stringToFind
     }
 
+    logger.info("Received query: \"$query\"")
+
     giveJumpOpportunity()
     markOrSkip()
   }
@@ -87,6 +89,7 @@ object Tagger {
     full = true
     if (query.isEmpty()) return emptyMap()
     return assignTags(textMatches).let { compact(it) }
+      .apply { markers = map { (tag, index) -> Marker(query, tag, index) } }
   }
 
   /**
@@ -129,7 +132,7 @@ object Tagger {
     timeElapsed = System.currentTimeMillis() - timeElapsed
     logger.info("Time elapsed: $timeElapsed")
 
-    markers = newTags.map { (tag, index) -> Marker(query, tag, index) }
+
     return newTags
   }
 
