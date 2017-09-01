@@ -121,12 +121,14 @@ object Tagger {
     logger.info("Available Tags: ${availableTags.size}")
     if (availableTags.size < vacantResults.size) full = false
 
-    if (regex) return availableTags.zip(vacantResults).toMap()
+    newTags.putAll(
+      if (regex) availableTags.zip(vacantResults).toMap()
+      else Solver.solve(vacantResults, availableTags)
+    )
 
     timeElapsed = System.currentTimeMillis() - timeElapsed
     logger.info("Time elapsed: $timeElapsed")
 
-    newTags.putAll(Solver.solve(vacantResults, availableTags))
     markers = newTags.map { (tag, index) -> Marker(query, tag, index) }
     return newTags
   }

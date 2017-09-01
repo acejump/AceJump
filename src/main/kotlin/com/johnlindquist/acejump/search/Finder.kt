@@ -72,13 +72,13 @@ object Finder {
   private fun skim() {
     logger.info("Skimming document for matches of: $query")
     skim = true
-    search(FindModel().apply { stringToFind = query })
+    search(FindModel().apply { stringToFind = Regex.escape(query) })
     Trigger(400L) { if (skim) runLater { skim = false; search() } }
   }
 
   fun search(string: String = query) {
     logger.info("Searching for locations matching: $string")
-    search(model.apply { stringToFind = string })
+    search(model.apply { stringToFind = Regex.escape(string) })
   }
 
   fun search(pattern: Pattern) {
@@ -150,7 +150,7 @@ object Finder {
   private fun String.findMatchingSites(key: String = query.toLowerCase(),
                                        cache: Set<Int> = results) =
     // If the cache is populated, filter it instead of redoing extra work
-    if (cache.isEmpty()) findAll(model.stringToFind))
+    if (cache.isEmpty()) findAll(model.stringToFind)
     else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
 
   private fun Set<Int>.isCacheValidForRange() =
