@@ -77,6 +77,9 @@ fun Editor.getPointRelative(index: Int, relativeToComponent: JComponent) =
 fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)
 
+fun FindModel.sanitizedString() =
+  if (isRegularExpressions) stringToFind else Regex.escape(stringToFind)
+
 fun Editor.getView(): IntRange {
   val firstVisibleLine = max(0, getVisualLineAtTopOfScreen() - 1)
   val firstLine = visualLineToLogicalLine(firstVisibleLine)

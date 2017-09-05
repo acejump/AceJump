@@ -14,6 +14,8 @@ import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.markup
 import com.johnlindquist.acejump.view.Model.viewBounds
+import org.jetbrains.concurrency.runAsync
+import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
 import kotlin.text.RegexOption.MULTILINE
 
@@ -101,7 +103,7 @@ object Finder {
     logger.info("Discovered ${results.size} matches in $timeElapsed ms")
 
     if (!Tagger.hasTagSuffixInView(query)) highlightResults()
-    if (!skim) tag(results)
+    if (!skim) runAsync { tag(results) }
   }
 
   private fun highlightResults() {
@@ -124,7 +126,7 @@ object Finder {
       .apply { customRenderer = Marker(query, null, this.startOffset) }
 
   private fun tag(results: Set<Int>) {
-    Tagger.markOrJump(model, results)
+    synchronized(this) { Tagger.markOrJump(model, results) }
     viewHighlights = viewHighlights.narrowBy { Tagger canDiscard startOffset }
       .also { newHighlights ->
         val numDiscarded = viewHighlights.size - newHighlights.size
@@ -137,7 +139,7 @@ object Finder {
   fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =
     filter {
       if (cond(it)) {
-        markup.removeHighlighter(it)
+        runLater { markup.removeHighlighter(it) }
         false
       } else true
     }
@@ -150,7 +152,7 @@ object Finder {
   private fun String.findMatchingSites(key: String = query.toLowerCase(),
                                        cache: Set<Int> = results) =
     // If the cache is populated, filter it instead of redoing extra work
-    if (cache.isEmpty()) findAll(if(model.isRegularExpressions) model.stringToFind else Regex.escape(model.stringToFind))
+    if (cache.isEmpty()) findAll(model.sanitizedString())
     else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
 
   private fun Set<Int>.isCacheValidForRange() =
@@ -174,7 +176,7 @@ object Finder {
       Tagger.hasTagSuffixInView(query)
 
   fun reset() {
-    markup.removeAllHighlighters()
+    runLater { markup.removeAllHighlighters() }
     query = ""
     model = FindModel()
     results = hashSetOf()
@@ -182,4 +184,3 @@ object Finder {
     viewHighlights = listOf()
   }
 }
-

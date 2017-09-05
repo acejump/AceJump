@@ -8,7 +8,6 @@ import java.awt.Graphics2D
 import java.awt.Point
 import javax.swing.JComponent
 import javax.swing.SwingUtilities.convertPoint
-import kotlin.system.measureTimeMillis
 
 /**
  * Overlay composed of all graphical tags. Maintains a registry of tags' visual
@@ -19,7 +18,7 @@ import kotlin.system.measureTimeMillis
 
 object Canvas : JComponent() {
   private val logger = Logger.getInstance(Canvas::class.java)
-  private val tags = hashSetOf<Point>()
+  private val occupied = hashSetOf<Point>()
   var jumpLocations: Collection<Marker> = emptyList()
     set(value) {
       field = value
@@ -28,8 +27,7 @@ object Canvas : JComponent() {
 
   fun Editor.bindCanvas() {
     contentComponent.add(Canvas)
-    val viewport = scrollingModel.visibleArea
-    Canvas.setBounds(0, 0, viewport.width + 1000, viewport.height + 1000)
+    Canvas.setBounds(0, 0, contentComponent.width, contentComponent.height)
     val loc = convertPoint(Canvas, location, component.rootPane)
     Canvas.setLocation(-loc.x, -loc.y)
   }
@@ -38,17 +36,17 @@ object Canvas : JComponent() {
     if (jumpLocations.isEmpty()) return
 
     super.paint(graphics)
-    tags.clear()
+    occupied.clear()
     jumpLocations.forEach { it.paintMe(graphics as Graphics2D) }
   }
 
-  fun registerTag(pt: Point, tag: String) =
-    (-1..tag.length).forEach { tags.add(Point(pt.x + it * fontWidth, pt.y)) }
+  fun registerTag(p: Point, tag: String) =
+    (-1..tag.length).forEach { occupied.add(Point(p.x + it * fontWidth, p.y)) }
 
-  fun isFree(point: Point) = point !in tags
+  fun isFree(point: Point) = point !in occupied
 
   fun reset() {
     jumpLocations = emptyList()
-    tags.clear()
+    occupied.clear()
   }
 }

@@ -3,9 +3,7 @@ package com.johnlindquist.acejump.label
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.label.Pattern.Companion.sortTags
-import com.johnlindquist.acejump.search.Finder
-import com.johnlindquist.acejump.search.Jumper
-import com.johnlindquist.acejump.search.Skipper
+import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.viewBounds
@@ -37,8 +35,7 @@ object Tagger {
 
     model.run {
       if (!regex) regex = isRegularExpressions
-      query = if (isRegularExpressions) " " else stringToFind.toLowerCase()
-      if (regex) query += model.stringToFind
+      query = if (regex) " " + stringToFind else stringToFind.toLowerCase()
     }
 
     logger.info("Received query: \"$query\"")
@@ -89,7 +86,11 @@ object Tagger {
     full = true
     if (query.isEmpty()) return emptyMap()
     return assignTags(textMatches).let { compact(it) }
-      .apply { markers = map { (tag, index) -> Marker(query, tag, index) } }
+      .apply {
+        runAndWait {
+          markers = map { (tag, index) -> Marker(query, tag, index) }
+        }
+      }
   }
 
   /**
@@ -124,14 +125,13 @@ object Tagger {
     logger.info("Available Tags: ${availableTags.size}")
     if (availableTags.size < vacantResults.size) full = false
 
+    timeElapsed = System.currentTimeMillis() - timeElapsed
+    logger.info("Time elapsed: $timeElapsed")
+
     newTags.putAll(
       if (regex) availableTags.zip(vacantResults).toMap()
       else Solver.solve(vacantResults, availableTags)
     )
-
-    timeElapsed = System.currentTimeMillis() - timeElapsed
-    logger.info("Time elapsed: $timeElapsed")
-
 
     return newTags
   }

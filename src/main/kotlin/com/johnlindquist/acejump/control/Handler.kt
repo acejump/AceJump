@@ -55,7 +55,7 @@ object Handler : TypedActionHandler {
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
   fun processSpacebar() =
-    if(Finder.query.isEmpty()) search(ALL_WORDS) else Finder.query += " "
+    if (Finder.query.isEmpty()) search(ALL_WORDS) else Finder.query += " "
 
   private fun processBackspaceCommand() {
     Tagger.reset()
@@ -146,7 +146,7 @@ object Handler : TypedActionHandler {
       Canvas.repaint()
     }
 
-  private fun Editor.restoreSettings() {
+  private fun Editor.restoreSettings() = runAndWait {
     restoreScroll()
     restoreCanvas()
     restoreCursor()

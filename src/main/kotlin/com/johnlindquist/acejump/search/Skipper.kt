@@ -66,7 +66,6 @@ object Skipper {
     return maximizeCoverageOfNextOccurrence()
   }
 
-
   fun Editor.storeScroll() {
     scrollX = scrollingModel.horizontalScrollOffset
     scrollY = scrollingModel.verticalScrollOffset

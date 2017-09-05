@@ -28,17 +28,19 @@ object Jumper {
     return targetModeEnabled
   }
 
-  fun jump(index: Int) = editor.run {
-    if (Finder.isShiftSelectEnabled)
-      selectFromCursorPositionToOffset(caretModel.offset, index)
-    else if (targetModeEnabled) {
-      // Moving the caret will trigger a reset, flipping targetModeEnabled, so
-      // we need to move the caret and select the word in one single transaction
-      moveCaret(index)
-      selectWordAtOffset(index)
-    } else moveCaret(index)
+  fun jump(index: Int) = runAndWait {
+    editor.run {
+      if (Finder.isShiftSelectEnabled)
+        selectFromCursorPositionToOffset(caretModel.offset, index)
+      else if (targetModeEnabled) {
+        // Moving the caret will trigger a reset, flipping targetModeEnabled,
+        // so we need to move the caret and select the word at the same time
+        moveCaret(index)
+        selectWordAtOffset(index)
+      } else moveCaret(index)
 
-    hasJumped = true
+      hasJumped = true
+    }
   }
 
   private fun moveCaret(offset: Int) = editor.run {
