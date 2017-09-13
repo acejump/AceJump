@@ -2,11 +2,13 @@ package com.johnlindquist.acejump.search
 
 import com.intellij.codeInsight.editorActions.SelectWordUtil.addWordSelection
 import com.intellij.openapi.command.CommandProcessor
+import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.util.TextRange
+import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.project
@@ -22,14 +24,19 @@ object Jumper {
   @Volatile
   var hasJumped = false
   var targetModeEnabled = false
+  private val logger = Logger.getInstance(Jumper::class.java)
 
   fun toggleTargetMode(status: Boolean? = null): Boolean {
+    logger.info("Setting target mode to $status")
     targetModeEnabled = status ?: !targetModeEnabled
     return targetModeEnabled
   }
 
   fun jump(index: Int) = runAndWait {
     editor.run {
+      val logPos = editor.offsetToLogicalPosition(index)
+      logger.info("Jumping to line ${logPos.line}, column ${logPos.column}...")
+
       if (Finder.isShiftSelectEnabled)
         selectFromCursorPositionToOffset(caretModel.offset, index)
       else if (targetModeEnabled) {

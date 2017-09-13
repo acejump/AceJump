@@ -74,7 +74,10 @@ object Tagger {
     tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
 
   private fun giveJumpOpportunity() =
-    tagMap.forEach { if (query.endsWith(it.key)) return Jumper.jump(it.value) }
+    tagMap.entries.firstOrNull { query.endsWith(it.key) }?.let {
+      logger.info("User selected tag: ${it.key.toUpperCase()}")
+      Jumper.jump(it.value)
+    }
 
   private fun markOrSkip() {
     scan().apply { if (this.isNotEmpty()) tagMap = this }
@@ -110,7 +113,7 @@ object Tagger {
     }
 
   private fun assignTags(results: Set<Int>): Map<String, Int> {
-    logger.info("Tags on screen: ${results.filter { it in viewBounds }}")
+    logger.info("Tags on screen: ${results.filter { it in viewBounds }.size}")
     var timeElapsed = System.currentTimeMillis()
     val newTags = transferExistingTagsCompatibleWithQuery()
 
