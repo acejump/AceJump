@@ -16,7 +16,6 @@ import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Finder.search
 import com.johnlindquist.acejump.search.Skipper.restoreScroll
-import com.johnlindquist.acejump.search.Skipper.storeBounds
 import com.johnlindquist.acejump.search.Skipper.storeScroll
 import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Canvas.bindCanvas
@@ -74,7 +73,6 @@ object Handler : TypedActionHandler {
     editor.run {
       storeScroll()
       setupCursor()
-      storeBounds()
       bindCanvas()
       installSearchKeyHandler()
       Listener.enable()
@@ -115,8 +113,10 @@ object Handler : TypedActionHandler {
 
   fun redoFind() {
     runAndWait {
-      editor.restoreCanvas()
-      editor.bindCanvas()
+      editor.run {
+        restoreCanvas()
+        bindCanvas()
+      }
     }
 
     if (Finder.query.isNotEmpty() || Tagger.regex)

@@ -74,13 +74,16 @@ object Tagger {
     tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
 
   private fun giveJumpOpportunity() =
-    tagMap.entries.firstOrNull { query.endsWith(it.key) }?.let {
+    tagMap.entries.firstOrNull { it.isCompatibleWithQuery(query) }?.let {
       logger.info("User selected tag: ${it.key.toUpperCase()}")
       Jumper.jump(it.value)
     }
 
+  private fun Map.Entry<String, Int>.isCompatibleWithQuery(query: String) =
+    query.endsWith(key) && (regex || editorText.regionMatches(value, query, 0, query.length - key.length, true))
+
   private fun markOrSkip() {
-    scan().apply { if (this.isNotEmpty()) tagMap = this }
+    scan().apply { if (isNotEmpty()) tagMap = this }
 
     if (markers.isEmpty() && query.length > 1) Skipper.ifQueryExistsSkipAhead()
   }
@@ -179,3 +182,4 @@ object Tagger {
   infix fun String.overlaps(xx: String) = endsWith(xx.first()) || endsWith(xx)
   infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i))
 }
+

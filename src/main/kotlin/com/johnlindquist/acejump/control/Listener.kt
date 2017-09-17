@@ -49,7 +49,12 @@ internal object Listener : FocusListener, AncestorListener,
    */
 
   override fun visibleAreaChanged(e: VisibleAreaEvent?) {
-    var elapsed = measureTimeMillis { if (canTagsSurviveViewResize()) return }
+    var elapsed = measureTimeMillis {
+      if (canTagsSurviveViewResize()) {
+        viewBounds = editor.getView()
+        return
+      }
+    }
     elapsed = (750L - elapsed).coerceAtLeast(0L)
     Trigger(withDelay = elapsed) {
       logger.info("Visible area changed")

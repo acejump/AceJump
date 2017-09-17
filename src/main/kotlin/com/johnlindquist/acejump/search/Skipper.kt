@@ -32,6 +32,8 @@ object Skipper {
     return true
   }
 
+  fun indexInView(index: Int) = index in viewBounds
+
   private fun findPreviousPosition(): LogicalPosition? {
     val prevIndex = textMatches.toList().dropLastWhile { it < viewBounds.first }
       .lastOrNull() ?: textMatches.lastOrNull() ?: return null
@@ -75,15 +77,6 @@ object Skipper {
     if (caretModel.offset !in getView()) {
       scrollingModel.scrollVertically(scrollY)
       scrollingModel.scrollHorizontally(scrollX)
-    }
-  }
-
-  fun Editor.storeBounds() {
-    viewBounds = getView()
-    this::offsetToLogicalPosition.let {
-      logger.info("View bounds: $viewBounds (lines " +
-        "${it(viewBounds.first).line}.." +
-        "${it(viewBounds.last).line})")
     }
   }
 }

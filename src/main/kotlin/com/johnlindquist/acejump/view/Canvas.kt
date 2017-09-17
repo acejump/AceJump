@@ -2,7 +2,9 @@ package com.johnlindquist.acejump.view
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
+import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.view.Model.fontWidth
+import com.johnlindquist.acejump.view.Model.viewBounds
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Point
@@ -26,10 +28,19 @@ object Canvas : JComponent() {
     }
 
   fun Editor.bindCanvas() {
+    storeBounds()
     contentComponent.add(Canvas)
     Canvas.setBounds(0, 0, contentComponent.width, contentComponent.height)
     val loc = convertPoint(Canvas, location, component.rootPane)
     Canvas.setLocation(-loc.x, -loc.y)
+  }
+
+  fun Editor.storeBounds() {
+    viewBounds = getView()
+    this::offsetToLogicalPosition.let {
+      logger.info("View bounds: $viewBounds (lines " +
+        "${it(viewBounds.first).line}..${it(viewBounds.last).line})")
+    }
   }
 
   override fun paint(graphics: Graphics) {
