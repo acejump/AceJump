@@ -15,7 +15,7 @@ import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.markup
 import com.johnlindquist.acejump.view.Model.viewBounds
 import org.jetbrains.concurrency.runAsync
-import kotlin.concurrent.thread
+import java.util.*
 import kotlin.system.measureTimeMillis
 import kotlin.text.RegexOption.MULTILINE
 
@@ -26,7 +26,7 @@ import kotlin.text.RegexOption.MULTILINE
  */
 
 object Finder {
-  private var results = hashSetOf<Int>()
+  private var results: SortedSet<Int> = sortedSetOf<Int>()
   private var textHighlights = listOf<RangeHighlighter>()
   private var viewHighlights = listOf<RangeHighlighter>()
   private var model = FindModel()
@@ -35,7 +35,6 @@ object Finder {
 
   val isShiftSelectEnabled
     get() = model.stringToFind.last().isUpperCase()
-
 
   var skim = false
 
@@ -97,7 +96,7 @@ object Finder {
     model = findModel
 
     val timeElapsed = measureTimeMillis {
-      results = editorText.findMatchingSites().toHashSet()
+      results = editorText.findMatchingSites().toSortedSet()
     }
 
     logger.info("Discovered ${results.size} matches in $timeElapsed ms")
@@ -179,7 +178,7 @@ object Finder {
     runLater { markup.removeAllHighlighters() }
     query = ""
     model = FindModel()
-    results = hashSetOf()
+    results = sortedSetOf()
     textHighlights = listOf()
     viewHighlights = listOf()
   }

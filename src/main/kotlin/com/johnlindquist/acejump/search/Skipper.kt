@@ -51,6 +51,12 @@ object Skipper {
     return maximizeCoverageOfPreviousOccurrence()
   }
 
+  /**
+   * Returns the center of the next set of results that will fit in the editor.
+   * If textMatches have not previous been sorted, the results of calling this
+   * method are undefined.
+   */
+
   private fun findNextPosition(): LogicalPosition? {
     val nextIndex = textMatches.dropWhile { it <= viewBounds.last }
       .firstOrNull() ?: textMatches.firstOrNull() ?: return null
