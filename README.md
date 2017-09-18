@@ -12,7 +12,7 @@ Press the AceJump shortcut for line mode (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>
 
 ![](https://cloud.githubusercontent.com/assets/175716/20533565/f7d04d1e-b0ab-11e6-8b89-f7b10a98752d.png)
 
-Press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, <kbd>↑</kbd>, or <kbd>↑</kbd>, to target the last, first, or first non-whitespace characters of every visible line in the editor.
+Press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, or <kbd>↑</kbd>, to target the last, first, or first non-whitespace characters of every visible line in the editor.
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
 
