@@ -28,15 +28,11 @@ open class AceAction : DumbAwareAction() {
 }
 
 class AceTargetAction : AceAction() {
-  override fun update(action: AnActionEvent) = super.update(action)
-
   override fun actionPerformed(e: AnActionEvent) =
     super.actionPerformed(e).also { Handler.toggleTargetMode(true) }
 }
 
 class AceLineAction : AceAction() {
-  override fun update(action: AnActionEvent) = super.update(action)
-
   override fun actionPerformed(e: AnActionEvent) =
     super.actionPerformed(e).also { Finder.search(LINE_MARK) }
 }

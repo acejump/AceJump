@@ -53,7 +53,7 @@ object Handler : TypedActionHandler {
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
-  fun processSpacebar() =
+  private fun processSpacebar() =
     if (Finder.query.isEmpty()) search(ALL_WORDS) else Finder.query += " "
 
   private fun processBackspaceCommand() {
@@ -79,7 +79,7 @@ object Handler : TypedActionHandler {
       component.installCustomShortcutHandler()
     }
 
-  private var backup: List<*>? = null
+  private var defaultAction: List<*>? = null
 
   // TODO: Replace this with `BuildInfo.api`, check: idea/146.1211+ ref.:
   // https://github.com/JetBrains/intellij-community/commit/10f16fcd919e4f846930eaa65943e373267f2039#diff-83ee176e2a4882290ced6a65443866cbL70
@@ -90,7 +90,7 @@ object Handler : TypedActionHandler {
   // Investigate replacing this with `IDEEventQueue.*Dispatcher(...)`
   private fun JComponent.installCustomShortcutHandler() {
     logger.info("Installing custom shortcuts")
-    backup = getClientProperty(ACTIONS_KEY) as List<*>?
+    defaultAction = getClientProperty(ACTIONS_KEY) as List<*>?
     putClientProperty(ACTIONS_KEY, SmartList<AnAction>(AceKeyAction))
     val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
     AceKeyAction.registerCustomShortcutSet(css, this)
@@ -98,7 +98,7 @@ object Handler : TypedActionHandler {
 
   private fun JComponent.uninstallCustomShortCutHandler() {
     logger.info("Uninstalling custom shortcuts")
-    putClientProperty(ACTIONS_KEY, backup)
+    putClientProperty(ACTIONS_KEY, defaultAction)
     AceKeyAction.unregisterCustomShortcutSet(this)
     editorTypeAction.setupRawHandler(handler)
   }

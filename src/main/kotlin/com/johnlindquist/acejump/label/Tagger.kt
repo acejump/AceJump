@@ -3,10 +3,15 @@ package com.johnlindquist.acejump.label
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.label.Pattern.Companion.sortTags
-import com.johnlindquist.acejump.search.*
+import com.johnlindquist.acejump.search.Finder
+import com.johnlindquist.acejump.search.Jumper
+import com.johnlindquist.acejump.search.Skipper
+import com.johnlindquist.acejump.search.runAndWait
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.viewBounds
+import kotlin.collections.component1
+import kotlin.collections.component2
 
 /**
  * Singleton that works with Finder to tag text search results in the editor.
@@ -83,12 +88,12 @@ object Tagger {
     query.endsWith(key) && (regex || editorText.regionMatches(value, query, 0, query.length - key.length, true))
 
   private fun markOrSkip() {
-    scan().apply { if (isNotEmpty()) tagMap = this }
+    markAndMapTags().apply { if (isNotEmpty()) tagMap = this }
 
     if (markers.isEmpty() && query.length > 1) Skipper.ifQueryExistsSkipAhead()
   }
 
-  private fun scan(): Map<String, Int> {
+  private fun markAndMapTags(): Map<String, Int> {
     full = true
     if (query.isEmpty()) return emptyMap()
     return assignTags(textMatches).let { compact(it) }

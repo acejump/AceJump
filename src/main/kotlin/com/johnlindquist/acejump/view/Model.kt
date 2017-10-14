@@ -11,7 +11,6 @@ import com.intellij.openapi.editor.markup.EffectType.ROUNDED_BOX
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.johnlindquist.acejump.config.AceConfig
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
-import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.search.getDefaultEditor
 import java.awt.Color
 import java.awt.Color.*

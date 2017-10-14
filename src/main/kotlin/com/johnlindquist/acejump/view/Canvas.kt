@@ -9,11 +9,10 @@ import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Point
 import javax.swing.JComponent
-import javax.swing.SwingUtilities.convertPoint
 
 /**
  * Overlay composed of all graphical tags. Maintains a registry of tags' visual
- * positions once assigned. We should avoid painting two tags to the same space.
+ * positions once assigned. We must avoid painting two tags to the same space.
  *
  * @see Marker
  */
@@ -31,8 +30,6 @@ object Canvas : JComponent() {
     storeBounds()
     contentComponent.add(Canvas)
     Canvas.setBounds(0, 0, contentComponent.width, contentComponent.height)
-    val loc = convertPoint(Canvas, location, component.rootPane)
-    Canvas.setLocation(-loc.x, -loc.y)
   }
 
   fun Editor.storeBounds() {
