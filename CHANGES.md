@@ -2,7 +2,7 @@
 
 ### 3.4.1
 
-Fixes a regression affecting tag alignment when line spacing is greater than 1.0.
+Fixes a regression affecting tag alignment when line spacing is greater than 1.0. Minor speed improvements.
 
 ### 3.4.0
 
