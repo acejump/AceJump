@@ -1,5 +1,6 @@
 package com.johnlindquist.acejump.view
 
+import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import com.johnlindquist.acejump.search.getView
@@ -30,6 +31,11 @@ object Canvas : JComponent() {
     storeBounds()
     contentComponent.add(Canvas)
     Canvas.setBounds(0, 0, contentComponent.width, contentComponent.height)
+
+    if(ApplicationInfo.getInstance().build.components.first() < 173) {
+      contentComponent.add(Canvas)
+      Canvas.setBounds(0, 0, contentComponent.width, contentComponent.height)
+    }
   }
 
   fun Editor.storeBounds() {
