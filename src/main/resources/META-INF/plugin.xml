@@ -9,7 +9,7 @@
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
   <change-notes>
-    Restores original scroll position if tab search cancelled. Minor improvements to latency and tag painting.
+    <![CDATA[ <a href="https://github.com/johnlindquist/AceJump/blob/master/CHANGES.md">Changelog</a> ]]>
   </change-notes>
 
   <depends>com.intellij.modules.platform</depends>

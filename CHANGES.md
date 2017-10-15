@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.4.2
+
+Fixes a regression affecting older versions of the IntelliJ Platform.
+
 ### 3.4.1
 
 Fixes a regression affecting tag alignment when line spacing is greater than 1.0. Minor speed improvements.
