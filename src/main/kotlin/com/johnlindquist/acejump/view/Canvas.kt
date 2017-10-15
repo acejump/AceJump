@@ -10,6 +10,7 @@ import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Point
 import javax.swing.JComponent
+import javax.swing.SwingUtilities.convertPoint
 
 /**
  * Overlay composed of all graphical tags. Maintains a registry of tags' visual
