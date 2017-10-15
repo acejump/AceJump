@@ -9,7 +9,7 @@
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
   <change-notes>
-    <![CDATA[ <a href="https://github.com/johnlindquist/AceJump/blob/master/CHANGES.md">Changelog</a> ]]>
+    <![CDATA[ <a href="https://github.com/johnlindquist/AceJump/blob/master/CHANGES.md">Release Notes</a> ]]>
   </change-notes>
 
   <depends>com.intellij.modules.platform</depends>

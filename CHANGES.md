@@ -2,7 +2,7 @@
 
 ### 3.4.2
 
-Fixes a regression affecting older versions of the IntelliJ Platform.
+Fixes [a regression](https://github.com/johnlindquist/AceJump/issues/197) affecting older platform versions.
 
 ### 3.4.1
 
