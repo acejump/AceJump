@@ -5,6 +5,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.label.Pattern.Companion.sortTags
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.Jumper
+import com.johnlindquist.acejump.search.Jumper.hasJumped
 import com.johnlindquist.acejump.search.Skipper
 import com.johnlindquist.acejump.search.runAndWait
 import com.johnlindquist.acejump.view.Marker
@@ -46,7 +47,7 @@ object Tagger {
     logger.info("Received query: \"$query\"")
 
     giveJumpOpportunity()
-    markOrSkip()
+    if (!hasJumped) markOrSkip()
   }
 
   private fun Set<Int>.cull() = filter { editorText.standsAlone(it) }.toSet()

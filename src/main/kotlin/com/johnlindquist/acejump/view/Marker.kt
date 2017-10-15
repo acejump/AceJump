@@ -23,10 +23,11 @@ import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 import com.johnlindquist.acejump.view.Model.editorText as text
 
 /**
- * All functionality related to tag highlighting (ie. the visual overlay which
- * AceJump paints when displaying search results). Tags are "captioned" with two
+ * Represents the visual component of a tag, which gets painted to the screen.
+ * All functionality related to tag highlighting including the visual appearance,
+ * alignment and painting should be handled here. Tags are "captioned" with two
  * or fewer characters. To select a tag, a user will type the tag's assigned
- * caption, which will move the cursor to a known index in the document.
+ * "caption", which will move the cursor to a known index in the document.
  */
 
 class Marker(val query: String, val tag: String?, val index: Int)
@@ -55,6 +56,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
 
   enum class Alignment { /*TOP, BOTTOM,*/ LEFT, RIGHT, NONE }
 
+  // Called by AceJump (as a renderable element of Canvas)
   fun paintMe(graphics2D: Graphics2D) = graphics2D.run {
     setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
@@ -64,6 +66,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
         ?.let { highlightTag(it); drawTagForeground(it) }
   }
 
+  // Called by IntelliJ Platform (as a CustomHighlightRenderer)
   override fun paint(editor: Editor, highlight: RangeHighlighter, g: Graphics) =
     (g as Graphics2D).run {
       setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)

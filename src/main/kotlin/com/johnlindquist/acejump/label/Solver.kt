@@ -109,6 +109,7 @@ object Solver {
     val tagsByFirstLetter = bigrams.groupBy { it[0] }
 
     var totalAssigned = 0
+    var timeAssigned = 0L
     val timeElapsed = measureTimeMillis {
       results.parallelStream().forEach { site ->
         val compatibleTags = tagsByFirstLetter.getTagsCompatibleWith(site)
@@ -117,10 +118,12 @@ object Solver {
 
       val sortedTags = eligibleSitesByTag.keySet().sortedWith(tagOrder)
 
-      for (tagString in sortedTags) {
-        val eligibleSites = eligibleSitesByTag[tagString]
-        if (totalAssigned == results.size) break
-        else if (tryToAssignTag(tagString, eligibleSites)) totalAssigned++
+      timeAssigned = measureTimeMillis {
+        for (tagString in sortedTags) {
+          val eligibleSites = eligibleSitesByTag[tagString]
+          if (totalAssigned == results.size) break
+          else if (tryToAssignTag(tagString, eligibleSites)) totalAssigned++
+        }
       }
     }
 
@@ -129,6 +132,7 @@ object Solver {
       info("newTags size: ${newTags.size}")
       info("Time elapsed: $timeElapsed ms")
       info("Total assign: $totalAssigned")
+      info("Completed in: $timeAssigned ms")
     }
 
     return newTags
