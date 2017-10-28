@@ -24,6 +24,7 @@ import java.awt.Font.PLAIN
 
 object Model {
   var editor = getDefaultEditor()
+    get() = if(field.isDisposed) getDefaultEditor() else field
     set(value) {
       editorText = value.document.text.toLowerCase()
       if (value == field) return
