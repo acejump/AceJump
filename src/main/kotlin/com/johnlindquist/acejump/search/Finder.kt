@@ -33,8 +33,7 @@ object Finder {
   private var TEXT_HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
   private val logger = Logger.getInstance(Finder::class.java)
 
-  val isShiftSelectEnabled
-    get() = model.stringToFind.last().isUpperCase()
+  var isShiftSelectEnabled = false
 
   var skim = false
 
@@ -42,6 +41,7 @@ object Finder {
     set(value) {
       logger.info("Received query: \"$value\"")
       field = value.toLowerCase()
+      isShiftSelectEnabled = value.isNotEmpty() && value.last().isUpperCase()
 
       when {
         value.isEmpty() -> return
