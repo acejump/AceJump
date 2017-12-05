@@ -35,6 +35,9 @@ object Tagger {
   private val Iterable<Int>.allInView
     get() = all { it in viewBounds }
 
+  private val Iterable<Marker>.noneInView
+    get() = none { it.index in viewBounds }
+
   fun markOrJump(model: FindModel, results: Set<Int>) {
     textMatches = results.cull()
     logger.info("Culled ${results.size - textMatches.size} sites for tagging")
@@ -91,7 +94,7 @@ object Tagger {
   private fun markOrSkip() {
     markAndMapTags().apply { if (isNotEmpty()) tagMap = this }
 
-    if (markers.isEmpty() && query.length > 1) Skipper.ifQueryExistsSkipAhead()
+    if (!markers.isEmpty() && markers.noneInView && query.length > 1) Skipper.ifQueryExistsSkipAhead()
   }
 
   private fun markAndMapTags(): Map<String, Int> {

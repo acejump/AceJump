@@ -54,7 +54,7 @@ object Solver {
    * by taking into account the structure of the surrounding text. For example,
    * if the jump target is the first letter in a word, it is advantageous to
    * prioritize this location (in case we run out of tags), since the user is
-   * more likely to target words by their leading character than not.
+   * more likely to target words by their leading character.
    */
 
   private val siteOrder: Comparator<Int> = compareBy(
@@ -76,14 +76,14 @@ object Solver {
    * first assignment. Here we ensure that scarce tags are prioritized for their
    * subsequent binding to available sites.
    *
-   * @see isCompatibleWithSite This defines how tags may be assigned to sites.
+   * @see isCompatibleWithTagChar This defines how tags may be assigned to sites.
    */
 
   private val eligibleSitesByTag = Multimaps.synchronizedSetMultimap(
     TreeMultimap.create<String, Int>(Ordering.natural(), siteOrder))
 
   /**
-   * Maps tags to search results. Tags *must* have the following properties:
+   * Maps tags to search results according to the following constraints.
    *
    * 1. A tag must not match *any* bigrams on the screen.
    * 2. A tag's 1st letter must not match any letters of the covered word.
