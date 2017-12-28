@@ -6,7 +6,6 @@ import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import com.johnlindquist.acejump.control.Handler.redoFind
-import com.johnlindquist.acejump.control.Handler.reset
 import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.view.Model.editor
@@ -69,30 +68,22 @@ internal object Listener : FocusListener, AncestorListener,
 
   override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoFind()
 
-  override fun ancestorAdded(ancestorEvent: AncestorEvent?) {
-    logger.info("Ancestor added: $ancestorEvent")
-    reset()
-  }
-
   override fun ancestorMoved(ancestorEvent: AncestorEvent?) {
     if (!canTagsSurviveViewResize()) {
       logger.info("Ancestor moved: $ancestorEvent")
-      reset()
+      Handler.reset()
     }
   }
 
-  override fun ancestorRemoved(ancestorEvent: AncestorEvent?) {
-    logger.info("Ancestor removed: $ancestorEvent")
-    reset()
-  }
+  override fun ancestorAdded(ancestorEvent: AncestorEvent?) =
+    logger.info("Ancestor added: $ancestorEvent").also { Handler.reset() }
 
-  override fun focusLost(focusEvent: FocusEvent?) {
-    logger.info("Focus lost: $focusEvent")
-    reset()
-  }
+  override fun ancestorRemoved(ancestorEvent: AncestorEvent?) =
+    logger.info("Ancestor removed: $ancestorEvent").also { Handler.reset() }
 
-  override fun focusGained(focusEvent: FocusEvent?) {
-    logger.info("Focus gained: $focusEvent")
-    reset()
-  }
+  override fun focusLost(focusEvent: FocusEvent?) =
+    logger.info("Focus lost: $focusEvent").also { Handler.reset() }
+
+  override fun focusGained(focusEvent: FocusEvent?) =
+    logger.info("Focus gained: $focusEvent").also { Handler.reset() }
 }

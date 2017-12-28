@@ -25,7 +25,7 @@ import kotlin.text.RegexOption.MULTILINE
  * @see Tagger
  */
 
-object Finder {
+object Finder : Resettable {
   private var results: SortedSet<Int> = sortedSetOf<Int>()
   private var textHighlights = listOf<RangeHighlighter>()
   private var viewHighlights = listOf<RangeHighlighter>()
@@ -174,7 +174,7 @@ object Finder {
     results.any { editorText.regionMatches(it, this, 0, length) } ||
       Tagger.hasTagSuffixInView(query)
 
-  fun reset() {
+  override fun reset() {
     runLater { markup.removeAllHighlighters() }
     query = ""
     model = FindModel()

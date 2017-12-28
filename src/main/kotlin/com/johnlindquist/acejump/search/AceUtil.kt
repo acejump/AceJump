@@ -16,6 +16,9 @@ import java.lang.Math.max
 import java.lang.Math.min
 import javax.swing.JComponent
 
+interface Resettable { fun reset() }
+fun <P> applyTo(vararg ps: P, fx: (P) -> Unit) = ps.forEach { fx(it) }
+
 operator fun Point.component1() = x
 operator fun Point.component2() = y
 

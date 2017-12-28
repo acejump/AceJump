@@ -29,7 +29,7 @@ import javax.swing.JComponent
  * Handles all incoming keystrokes, IDE notifications, and UI updates.
  */
 
-object Handler : TypedActionHandler {
+object Handler : TypedActionHandler, Resettable {
   private val logger = Logger.getInstance(Handler::class.java)
   private var enabled = false
   private val editorTypeAction = EditorActionManager.getInstance().typedAction
@@ -126,13 +126,11 @@ object Handler : TypedActionHandler {
       }
   }
 
-  fun reset() {
+  override fun reset() {
     if (enabled) Listener.disable()
     editor.component.uninstallCustomShortCutHandler()
     enabled = false
-    Tagger.reset()
-    Jumper.reset()
-    Finder.reset()
+    applyTo(Tagger, Jumper, Finder) { it.reset() }
     editor.restoreSettings()
   }
 

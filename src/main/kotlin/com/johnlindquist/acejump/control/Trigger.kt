@@ -36,7 +36,7 @@ object Trigger : () -> Unit {
   }
 
   operator fun invoke(withDelay: Long = 750, event: () -> Unit = {}) {
-    this.delay = withDelay
+    delay = withDelay
     invokable = event
     runAsync(this)
   }

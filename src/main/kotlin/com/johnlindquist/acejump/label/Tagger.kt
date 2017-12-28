@@ -3,11 +3,8 @@ package com.johnlindquist.acejump.label
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.label.Pattern.Companion.sortTags
-import com.johnlindquist.acejump.search.Finder
-import com.johnlindquist.acejump.search.Jumper
+import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Jumper.hasJumped
-import com.johnlindquist.acejump.search.Skipper
-import com.johnlindquist.acejump.search.runAndWait
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.viewBounds
@@ -20,7 +17,7 @@ import kotlin.collections.component2
  * @see Finder
  */
 
-object Tagger {
+object Tagger: Resettable {
   var markers: List<Marker> = emptyList()
     private set
 
@@ -162,7 +159,7 @@ object Tagger {
       query overlaps tag || index in textMatches
     })
 
-  fun reset() {
+  override fun reset() {
     regex = false
     full = false
     textMatches = emptySet()

@@ -19,7 +19,7 @@ import java.util.*
  * Caret controller. Responsible for moving the caret once a tag is selected.
  */
 
-object Jumper {
+object Jumper : Resettable {
   @Volatile
   var hasJumped = false
   var targetModeEnabled = false
@@ -80,7 +80,7 @@ object Jumper {
     selectFromCursorPositionToOffset(startOfWordOffset, endOfWordOffset)
   }
 
-  fun reset() {
+  override fun reset() {
     targetModeEnabled = false
     hasJumped = false
   }

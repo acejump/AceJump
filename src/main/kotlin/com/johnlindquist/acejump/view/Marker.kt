@@ -51,7 +51,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
   private val start = editor.getPoint(index)
   private val startY = start.y + rectVOffset
   private var tagPoint = editor.getPointRelative(tgIdx, editor.contentComponent)
-  private var yPosition = tagPoint.y + rectVOffset
+  private var yPos = tagPoint.y + rectVOffset
   private var alignment = RIGHT
 
   enum class Alignment { /*TOP, BOTTOM,*/ LEFT, RIGHT, NONE }
@@ -81,11 +81,11 @@ class Marker(val query: String, val tag: String?, val index: Int)
     color = settings.targetModeColor
     val (wordStart, wordEnd) = text.wordBounds(index)
 
-    val xPosition = editor.getPoint(wordStart).x
+    val xPos = editor.getPoint(wordStart).x
     val wordWidth = (wordEnd - wordStart) * fontWidth
 
     if (text[index].isLetterOrDigit())
-      drawRoundRect(xPosition, startY, wordWidth, rectHeight, arcD, arcD)
+      drawRoundRect(xPos, startY, wordWidth, rectHeight, arcD, arcD)
   }
 
   private fun Graphics2D.drawTagForeground(tagPosition: Point?) {
@@ -100,8 +100,8 @@ class Marker(val query: String, val tag: String?, val index: Int)
     val x = tagPoint.x + fontWidth
 //    val top = Point(x - fontWidth, y - fontHeight)
 //    val bottom = Point(x - fontWidth, y + fontHeight)
-    val left = Point(srcPoint.x - fontWidth * length, yPosition)
-    val right = Point(x, yPosition)
+    val left = Point(srcPoint.x - fontWidth * length, yPos)
+    val right = Point(x, yPos)
 
     val nextCharIsWhiteSpace = text.length <= index + 1 ||
       text[index + 1].isWhitespace()
@@ -130,7 +130,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
   private fun Graphics2D.highlightTag(point: Point?) {
     if (query.isEmpty() || alignment == NONE) return
 
-    var tagX = point?.x
+    var tagX = point!!.x
     val lastQueryChar = query.last()
     var tagWidth = tag?.length?.times(fontWidth) ?: 0
     val charIndex = index + query.length - 1
@@ -143,10 +143,8 @@ class Marker(val query: String, val tag: String?, val index: Int)
       color = settings.textHighlightColor
       composite = getInstance(SRC_OVER, 0.40.toFloat())
 
-      if (alignment == RIGHT)
-        fillRoundRect(tagX!! - fontWidth, yPosition, fontWidth, rectHeight, arcD, arcD)
-      else
-        fillRoundRect(tagX!! + tagWidth, yPosition, fontWidth, rectHeight, arcD, arcD)
+      val xPos = if (alignment == RIGHT) tagX - fontWidth else tagX + tagWidth
+      fillRoundRect(xPos, yPos, fontWidth, rectHeight, arcD, arcD)
     }
 
     fun highlightFirst() {
@@ -154,7 +152,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
       color = settings.textHighlightColor
 
       if (tag != null && lastQueryChar == tag.first() && lastQueryChar != textChar) {
-        fillRoundRect(tagX!!, yPosition, fontWidth, rectHeight, arcD, arcD)
+        fillRoundRect(tagX, yPos, fontWidth, rectHeight, arcD, arcD)
         tagX += fontWidth
         tagWidth -= fontWidth
       }
@@ -165,7 +163,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
       if (alignment != RIGHT || text.hasSpaceRight(index) || regex)
         composite = getInstance(SRC_OVER, 1.toFloat())
 
-      fillRoundRect(tagX!!, yPosition, tagWidth, rectHeight, arcD, arcD)
+      fillRoundRect(tagX, yPos, tagWidth, rectHeight, arcD, arcD)
     }
 
     highlightRegex()
