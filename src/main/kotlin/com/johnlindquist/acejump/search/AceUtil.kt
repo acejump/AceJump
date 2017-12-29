@@ -17,7 +17,7 @@ import java.lang.Math.min
 import javax.swing.JComponent
 
 interface Resettable { fun reset() }
-fun <P> applyTo(vararg ps: P, fx: (P) -> Unit) = ps.forEach { fx(it) }
+fun <P> applyTo(vararg ps: P, fx: P.() -> Unit) = ps.forEach { it.fx() }
 
 operator fun Point.component1() = x
 operator fun Point.component2() = y
@@ -240,6 +240,5 @@ fun Editor.normalizeLine(line: Int) = max(0, min(line, getLineCount() - 1))
  */
 
 fun Editor.normalizeOffset(line: Int, offset: Int, allowEnd: Boolean) =
-  if (getFileSize(allowEnd) == 0) 0
-  else max(min(offset, getLineEndOffset(line, allowEnd)),
-    getLineStartOffset(line))
+  if (getFileSize(allowEnd) == 0) 0 else
+    max(min(offset, getLineEndOffset(line, allowEnd)), getLineStartOffset(line))

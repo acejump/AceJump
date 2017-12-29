@@ -130,7 +130,7 @@ object Handler : TypedActionHandler, Resettable {
     if (enabled) Listener.disable()
     editor.component.uninstallCustomShortCutHandler()
     enabled = false
-    applyTo(Tagger, Jumper, Finder) { it.reset() }
+    applyTo(Tagger, Jumper, Finder) { reset() }
     editor.restoreSettings()
   }
 
@@ -153,8 +153,7 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   private fun Editor.restoreCanvas() =
-    component.run {
-      Canvas.reset()
+    contentComponent.run {
       remove(Canvas)
       repaint()
     }

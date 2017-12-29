@@ -3,6 +3,7 @@ package com.johnlindquist.acejump.view
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
+import com.johnlindquist.acejump.search.Resettable
 import com.johnlindquist.acejump.search.getView
 import com.johnlindquist.acejump.view.Model.fontWidth
 import com.johnlindquist.acejump.view.Model.viewBounds
@@ -19,7 +20,7 @@ import javax.swing.SwingUtilities.convertPoint
  * @see Marker
  */
 
-object Canvas : JComponent() {
+object Canvas : JComponent(), Resettable {
   private val logger = Logger.getInstance(Canvas::class.java)
   private val occupied = hashSetOf<Point>()
   var jumpLocations: Collection<Marker> = emptyList()
@@ -30,6 +31,7 @@ object Canvas : JComponent() {
 
   fun Editor.bindCanvas() {
     storeBounds()
+    Canvas.reset()
     contentComponent.add(Canvas)
     Canvas.setBounds(0, 0, contentComponent.width, contentComponent.height)
 
@@ -60,7 +62,7 @@ object Canvas : JComponent() {
 
   fun isFree(point: Point) = point !in occupied
 
-  fun reset() {
+  override fun reset() {
     jumpLocations = emptyList()
     occupied.clear()
   }

@@ -72,7 +72,7 @@ object Finder : Resettable {
 
   private fun skim() {
     logger.info("Skimming document for matches of: $query")
-    skim = true
+    if(2e4 < editorText.length) skim = true
     search(FindModel().apply { stringToFind = query })
     Trigger(400L) { if (skim) runLater { skim = false; search() } }
   }
@@ -178,6 +178,7 @@ object Finder : Resettable {
     runLater { markup.removeAllHighlighters() }
     query = ""
     model = FindModel()
+    skim = false
     results = sortedSetOf()
     textHighlights = listOf()
     viewHighlights = listOf()
