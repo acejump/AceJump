@@ -36,14 +36,13 @@ object Jumper : Resettable {
       val logPos = editor.offsetToLogicalPosition(index)
       logger.info("Jumping to line ${logPos.line}, column ${logPos.column}...")
 
-      if (Finder.isShiftSelectEnabled)
-        selectFromCursorPositionToOffset(caretModel.offset, index)
-      else if (targetModeEnabled) {
+      when {
+        Finder.isShiftSelectEnabled -> selectRange(caretModel.offset, index)
         // Moving the caret will trigger a reset, flipping targetModeEnabled,
         // so we need to move the caret and select the word at the same time
-        moveCaret(index)
-        selectWordAtOffset(index)
-      } else moveCaret(index)
+        targetModeEnabled -> moveCaret(index).also { selectWordAtOffset(index) }
+        else -> moveCaret(index)
+      }
 
       hasJumped = true
     }
@@ -77,7 +76,7 @@ object Jumper : Resettable {
     val startOfWordOffset = max(0, firstRange.startOffset)
     val endOfWordOffset = min(firstRange.endOffset, editorText.length)
 
-    selectFromCursorPositionToOffset(startOfWordOffset, endOfWordOffset)
+    selectRange(startOfWordOffset, endOfWordOffset)
   }
 
   override fun reset() {

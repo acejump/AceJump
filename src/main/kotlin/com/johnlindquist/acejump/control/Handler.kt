@@ -59,7 +59,7 @@ object Handler : TypedActionHandler, Resettable {
   private fun processBackspaceCommand() {
     Tagger.reset()
     Finder.reset()
-    paintTagMarkers()
+    repaintTagMarkers()
   }
 
   private fun installSearchKeyHandler() = editorTypeAction.setupRawHandler(this)
@@ -108,8 +108,11 @@ object Handler : TypedActionHandler, Resettable {
     configureEditor()
   }
 
-  fun paintTagMarkers() =
-    if (Jumper.hasJumped) reset() else Canvas.jumpLocations = Tagger.markers
+  fun repaintTagMarkers() {
+    if(Canvas.jumpLocations.isEmpty() || Tagger.markers.size <= Canvas.jumpLocations.size) {
+      if (Jumper.hasJumped) reset() else Canvas.jumpLocations = Tagger.markers
+    }
+  }
 
   fun redoFind() {
     runAndWait {
@@ -122,7 +125,7 @@ object Handler : TypedActionHandler, Resettable {
     if (Finder.query.isNotEmpty() || Tagger.regex)
       runLater {
         Finder.search()
-        paintTagMarkers()
+        repaintTagMarkers()
       }
   }
 

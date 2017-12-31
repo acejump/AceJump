@@ -24,7 +24,7 @@ import com.johnlindquist.acejump.view.Model.editorText as text
 
 /**
  * Represents the visual component of a tag, which gets painted to the screen.
- * All functionality related to tag highlighting including the visual appearance,
+ * All functionality related to tag highlighting including visual appearance,
  * alignment and painting should be handled here. Tags are "captioned" with two
  * or fewer characters. To select a tag, a user will type the tag's assigned
  * "caption", which will move the cursor to a known index in the document.

@@ -97,7 +97,7 @@ fun Editor.getView(): IntRange {
   return startOffset..endOffset
 }
 
-fun Editor.selectFromCursorPositionToOffset(fromOffset: Int, toOffset: Int) {
+fun Editor.selectRange(fromOffset: Int, toOffset: Int) {
   selectionModel.removeSelection()
   selectionModel.setSelection(fromOffset, toOffset)
   caretModel.moveToOffset(toOffset)

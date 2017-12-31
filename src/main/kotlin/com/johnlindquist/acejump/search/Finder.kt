@@ -46,8 +46,8 @@ object Finder : Resettable {
       when {
         value.isEmpty() -> return
         Tagger.regex -> search()
-        value.length == 1 -> skim()
-        value.isValidQuery() -> skim()
+        value.length == 1 -> skimThenSearch()
+        value.isValidQuery() -> skimThenSearch()
         else -> field = field.dropLast(1)
       }
     }
@@ -70,7 +70,7 @@ object Finder : Resettable {
    * applying tags once we have received a "chunk" of search text.
    */
 
-  private fun skim() {
+  private fun skimThenSearch() {
     logger.info("Skimming document for matches of: $query")
     if(2e4 < editorText.length) skim = true
     search(FindModel().apply { stringToFind = query })
@@ -132,7 +132,7 @@ object Finder : Resettable {
         if (numDiscarded != 0) logger.info("Discarded $numDiscarded highlights")
       }
 
-    Handler.paintTagMarkers()
+    Handler.repaintTagMarkers()
   }
 
   fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =

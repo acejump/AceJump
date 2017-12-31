@@ -17,7 +17,7 @@ import kotlin.collections.component2
  * @see Finder
  */
 
-object Tagger: Resettable {
+object Tagger : Resettable {
   var markers: List<Marker> = emptyList()
     private set
 
@@ -91,7 +91,8 @@ object Tagger: Resettable {
   private fun markOrSkip() {
     markAndMapTags().apply { if (isNotEmpty()) tagMap = this }
 
-    if (!markers.isEmpty() && markers.noneInView && query.length > 1) Skipper.ifQueryExistsSkipAhead()
+    if (!markers.isEmpty() && markers.noneInView && query.length > 1)
+      runAndWait { Skipper.ifQueryExistsSkipAhead() }
   }
 
   private fun markAndMapTags(): Map<String, Int> {
