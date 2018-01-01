@@ -69,12 +69,23 @@ class Marker(val query: String, val tag: String?, val index: Int)
   // Called by IntelliJ Platform (as a CustomHighlightRenderer)
   override fun paint(editor: Editor, highlight: RangeHighlighter, g: Graphics) =
     (g as Graphics2D).run {
+      var tagX = start.x
+      var tagWidth = tag?.length?.times(fontWidth) ?: 0
+
+      fun highlightRegex() {
+        composite = getInstance(SRC_OVER, 0.40.toFloat())
+        val xPos = if (alignment == RIGHT) tagX - fontWidth else tagX + tagWidth
+        fillRoundRect(xPos, yPos, fontWidth, rectHeight, arcD, arcD)
+      }
+
       setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
       color = settings.textHighlightColor
-      fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
-
-      if (Jumper.targetModeEnabled) surroundTargetWord()
+      if (regex) highlightRegex()
+      else {
+        fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
+        if (Jumper.targetModeEnabled) surroundTargetWord()
+      }
     }
 
   private fun Graphics2D.surroundTargetWord() {
@@ -137,16 +148,6 @@ class Marker(val query: String, val tag: String?, val index: Int)
     val beforeEnd = charIndex < text.length
     val textChar = if (beforeEnd) text[charIndex].toLowerCase() else 0.toChar()
 
-    //TODO use the IDE highlighter
-    fun highlightRegex() {
-      if (!regex) return
-      color = settings.textHighlightColor
-      composite = getInstance(SRC_OVER, 0.40.toFloat())
-
-      val xPos = if (alignment == RIGHT) tagX - fontWidth else tagX + tagWidth
-      fillRoundRect(xPos, yPos, fontWidth, rectHeight, arcD, arcD)
-    }
-
     fun highlightFirst() {
       composite = getInstance(SRC_OVER, 0.40.toFloat())
       color = settings.textHighlightColor
@@ -166,7 +167,6 @@ class Marker(val query: String, val tag: String?, val index: Int)
       fillRoundRect(tagX, yPos, tagWidth, rectHeight, arcD, arcD)
     }
 
-    highlightRegex()
     highlightFirst()
     highlightLast()
   }

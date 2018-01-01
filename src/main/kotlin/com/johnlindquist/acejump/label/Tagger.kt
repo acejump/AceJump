@@ -20,8 +20,8 @@ import kotlin.collections.component2
 object Tagger : Resettable {
   var markers: List<Marker> = emptyList()
     private set
-
   var regex = false
+    private set
   var query = ""
     private set
   var full = false // Tracks whether all search results were successfully tagged
@@ -37,7 +37,9 @@ object Tagger : Resettable {
 
   fun markOrJump(model: FindModel, results: Set<Int>) {
     textMatches = results.cull()
-    logger.info("Culled ${results.size - textMatches.size} sites for tagging")
+    (results.size - textMatches.size).let {
+      if (it > 0) logger.info("Culled $it unsuitable sites")
+    }
 
     model.run {
       if (!regex) regex = isRegularExpressions
@@ -47,8 +49,12 @@ object Tagger : Resettable {
     logger.info("Received query: \"$query\"")
 
     giveJumpOpportunity()
-    if (!hasJumped) markOrSkip()
+    if (!hasJumped) markOrScrollToNextOccurrence()
   }
+
+  /**
+   * Thins out dense results, ex. "eee" should not be tagged three times.
+   */
 
   private fun Set<Int>.cull() = filter { editorText.standsAlone(it) }.toSet()
 
@@ -76,23 +82,35 @@ object Tagger : Resettable {
     this.isLetterOrDigit() xor other.isLetterOrDigit() ||
       this.isWhitespace() xor other.isWhitespace()
 
+  // TODO: Fix this method (broken)
   fun maybeJumpIfJustOneTagRemains() =
     tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
 
   private fun giveJumpOpportunity() =
-    tagMap.entries.firstOrNull { it.isCompatibleWithQuery(query) }?.let {
-      logger.info("User selected tag: ${it.key.toUpperCase()}")
-      Jumper.jump(it.value)
-    }
+    tagMap.entries.firstOrNull { it.solves(query) }?.let {
+        logger.info("User selected tag: ${it.key.toUpperCase()}")
+        Jumper.jump(it.value)
+      }
+
+  /**
+   * Returns true if and only if a tag location is unambiguously completed by a
+   * given query. This can only happen if the query matches the underlying text,
+   * AND ends with the tag in question.
+   */
+
+  private fun Map.Entry<String, Int>.solves(query: String) =
+    query.endsWith(key) && isCompatibleWithQuery(query)
 
   private fun Map.Entry<String, Int>.isCompatibleWithQuery(query: String) =
-    query.endsWith(key) && (regex || editorText.regionMatches(value, query, 0, query.length - key.length, true))
+    getTextPortionOfQuery(key, query).let { text ->
+      regex || editorText.regionMatches(value, text, 0, text.length, true)
+    }
 
-  private fun markOrSkip() {
+  private fun markOrScrollToNextOccurrence() {
     markAndMapTags().apply { if (isNotEmpty()) tagMap = this }
 
     if (!markers.isEmpty() && markers.noneInView && query.length > 1)
-      runAndWait { Skipper.ifQueryExistsSkipAhead() }
+      runAndWait { Scroller.ifQueryExistsScrollToNextOccurrence() }
   }
 
   private fun markAndMapTags(): Map<String, Int> {
@@ -107,8 +125,8 @@ object Tagger : Resettable {
   }
 
   /**
-   * Shortens assigned tags. Effectively, this will only shorten two-character
-   * tags to one-character tags. This will happen if and only if:
+   * Shortens previously assigned tags. Two-character tags may be shortened to
+   * one-character tags if and only if:
    *
    * 1. The shortened tag is unique among the set of existing tags.
    * 3. The query does not end with the shortened tag, in whole or part.
@@ -141,12 +159,8 @@ object Tagger : Resettable {
     timeElapsed = System.currentTimeMillis() - timeElapsed
     logger.info("Time elapsed: $timeElapsed")
 
-    newTags.putAll(
-      if (regex) availableTags.zip(vacantResults).toMap()
-      else Solver.solve(vacantResults, availableTags)
-    )
-
-    return newTags
+    return if (regex) availableTags.zip(vacantResults).toMap()
+    else Solver.solve(vacantResults, availableTags)
   }
 
   /**
@@ -156,9 +170,7 @@ object Tagger : Resettable {
    */
 
   private fun transferExistingTagsCompatibleWithQuery() =
-    tagMap.filterTo(HashMap(), { (tag, index) ->
-      query overlaps tag || index in textMatches
-    })
+    tagMap.filter { it.isCompatibleWithQuery(query) || it.value in textMatches }
 
   override fun reset() {
     regex = false
@@ -168,6 +180,11 @@ object Tagger : Resettable {
     query = ""
     markers = emptyList()
   }
+
+  private fun getTextPortionOfQuery(tag: String, query: String) =
+    if (query.endsWith(tag)) query.substring(0, query.length - tag.length)
+    else if (query.endsWith(tag.first())) query.substring(0, query.length - 1)
+    else query
 
   /**
    * Returns true if the Tagger contains a match in the new view, that is not
@@ -184,9 +201,8 @@ object Tagger : Resettable {
       textMatches.firstOrNull { it > old.last } ?: new.last < new.last
 
   fun hasTagSuffixInView(query: String) =
-    tagMap.any { query overlaps it.key && it.value in viewBounds }
+    tagMap.any { it.isCompatibleWithQuery(query) && it.value in viewBounds }
 
-  infix fun String.overlaps(xx: String) = endsWith(xx.first()) || endsWith(xx)
-  infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i))
+  infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i) || i == -1)
 }
 

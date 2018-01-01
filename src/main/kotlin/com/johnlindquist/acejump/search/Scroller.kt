@@ -17,12 +17,12 @@ import com.johnlindquist.acejump.view.Model.viewBounds
  * @see com.johnlindquist.acejump.control.Listener
  */
 
-object Skipper {
-  private val logger = Logger.getInstance(Skipper::class.java)
+object Scroller {
+  private val logger = Logger.getInstance(Scroller::class.java)
   private var scrollX = 0
   private var scrollY = 0
 
-  fun ifQueryExistsSkipAhead(isNext: Boolean = true): Boolean {
+  fun ifQueryExistsScrollToNextOccurrence(isNext: Boolean = true): Boolean {
     val position = if (isNext) findNextPosition() ?: return false
     else findPreviousPosition() ?: return false
     editor.scrollingModel.disableAnimation()
@@ -53,7 +53,7 @@ object Skipper {
 
   /**
    * Returns the center of the next set of results that will fit in the editor.
-   * textMatches must be sorted prior to using Skipper. If textMatches have not
+   * textMatches must be sorted prior to using Scroller. If textMatches have not
    * previously been sorted, the result of calling this method is undefined.
    */
 

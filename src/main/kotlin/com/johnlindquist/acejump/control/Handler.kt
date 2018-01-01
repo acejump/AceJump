@@ -15,8 +15,8 @@ import com.johnlindquist.acejump.label.Pattern.*
 import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Finder.search
-import com.johnlindquist.acejump.search.Skipper.restoreScroll
-import com.johnlindquist.acejump.search.Skipper.storeScroll
+import com.johnlindquist.acejump.search.Scroller.restoreScroll
+import com.johnlindquist.acejump.search.Scroller.storeScroll
 import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Canvas.bindCanvas
 import com.johnlindquist.acejump.view.Model
@@ -36,16 +36,16 @@ object Handler : TypedActionHandler, Resettable {
   private val handler = editorTypeAction.rawHandler
   private var isShiftDown = false
   private val keyMap = mapOf(
-    VK_HOME to { search(START_OF_LINE) },
-    VK_LEFT to { search(START_OF_LINE) },
-    VK_RIGHT to { search(END_OF_LINE) },
-    VK_END to { search(END_OF_LINE) },
-    VK_UP to { search(CODE_INDENTS) },
+    VK_HOME to { Canvas.reset(); search(START_OF_LINE) },
+    VK_LEFT to { Canvas.reset(); search(START_OF_LINE) },
+    VK_RIGHT to { Canvas.reset(); search(END_OF_LINE) },
+    VK_END to { Canvas.reset(); search(END_OF_LINE) },
+    VK_UP to { Canvas.reset(); search(CODE_INDENTS) },
     VK_ESCAPE to { reset() },
-    VK_BACK_SPACE to { processBackspaceCommand() },
+    VK_BACK_SPACE to { clear() },
     VK_ENTER to { Tagger.maybeJumpIfJustOneTagRemains() },
     // TODO: recycle tags during tab search, push scanner as far as possible
-    VK_TAB to { Skipper.ifQueryExistsSkipAhead(!isShiftDown) },
+    VK_TAB to { Scroller.ifQueryExistsScrollToNextOccurrence(!isShiftDown) },
     VK_SPACE to { processSpacebar() }
   )
 
@@ -56,9 +56,8 @@ object Handler : TypedActionHandler, Resettable {
   private fun processSpacebar() =
     if (Finder.query.isEmpty()) search(ALL_WORDS) else Finder.query += " "
 
-  private fun processBackspaceCommand() {
-    Tagger.reset()
-    Finder.reset()
+  private fun clear() {
+    applyTo(Tagger, Jumper, Finder, Canvas) { reset() }
     repaintTagMarkers()
   }
 
@@ -66,7 +65,7 @@ object Handler : TypedActionHandler, Resettable {
 
   override fun execute(editor: Editor, key: Char, dataContext: DataContext) {
     logger.info("Intercepted keystroke: $key")
-    Finder.query += key
+    Finder.query += key // This will trigger an update
   }
 
   private fun configureEditor() =
@@ -133,7 +132,7 @@ object Handler : TypedActionHandler, Resettable {
     if (enabled) Listener.disable()
     editor.component.uninstallCustomShortCutHandler()
     enabled = false
-    applyTo(Tagger, Jumper, Finder) { reset() }
+    clear()
     editor.restoreSettings()
   }
 
