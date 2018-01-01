@@ -74,8 +74,6 @@ To start IntelliJ IDEA CE with AceJump installed, run `./gradlew runIdea`.
 
 For documentation on plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
 
-AceJump is written in [Kotlin](https://kotlinlang.org/).
-
 ## Release notes
 
 Please [see here](/CHANGES.md) for a detailed list of changes.
