@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.4.3
+
+Stability improvements and tagging optimizations. Fixes #206, #202.
+
 ### 3.4.2
 
 Fixes [a regression](https://github.com/johnlindquist/AceJump/issues/197) affecting older platform versions.
@@ -14,7 +18,7 @@ Restores original scroll position if tab search cancelled. Minor improvements to
 
 ### 3.3.6
 
-Fix for https://github.com/johnlindquist/AceJump/issues/129.
+Fix for #129.
 
 ### 3.3.5
 
@@ -147,7 +151,7 @@ Fix a regression affecting *Target Mode* and line-based navigation: https://gith
 
 ### 2.0.12
 
-Fix ClassCastException when input letter not present: https://github.com/johnlindquist/AceJump/issues/73
+Fix ClassCastException when input letter not present: #73
 
 ### 2.0.11
 
@@ -159,11 +163,11 @@ Support 2016.2, remove upper version limit, update internal Kotlin version
 
 ### 2.0.9
 
-Compile on Java 7 to address: https://github.com/johnlindquist/AceJump/issues/61
+Compile on Java 7 to address: #61
 
 ### 2.0.8
 
-Compile on Java 6 to address: https://github.com/johnlindquist/AceJump/issues/59
+Compile on Java 6 to address: #59
 
 ### 2.0.7
 
@@ -171,15 +175,15 @@ Language update for Kotlin 1.0 release.
 
 ### 2.0.6
 
-Fixing "lost focus" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/41
+Fixing "lost focus" bugs mentioned here: #41
 
 ### 2.0.5
 
-Fixing "backspace" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/20
+Fixing "backspace" bugs mentioned here: #20
 
 ### 2.0.4
 
-Fixing "code folding" bugs mentioned here: https://github.com/johnlindquist/AceJump/issues/24
+Fixing "code folding" bugs mentioned here: #24
 
 ### 2.0.3
 
@@ -203,7 +207,7 @@ Switching to Kotlin for the code base
 
 ### 1.0.4
 
-Fixing https://github.com/johnlindquist/AceJump/issues/9 and https://github.com/johnlindquist/AceJump/issues/6
+Fixing #9 and #6
 
 ### 1.0.3
 

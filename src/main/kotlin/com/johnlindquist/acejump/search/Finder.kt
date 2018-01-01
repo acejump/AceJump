@@ -10,11 +10,14 @@ import com.johnlindquist.acejump.control.Trigger
 import com.johnlindquist.acejump.label.Pattern
 import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.view.Marker
+import com.johnlindquist.acejump.view.Model.LONG_DOCUMENT
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.markup
 import com.johnlindquist.acejump.view.Model.viewBounds
 import org.jetbrains.concurrency.runAsync
+import java.lang.Math.max
+import java.lang.Math.min
 import java.util.*
 import kotlin.system.measureTimeMillis
 import kotlin.text.RegexOption.MULTILINE
@@ -27,20 +30,22 @@ import kotlin.text.RegexOption.MULTILINE
 
 object Finder : Resettable {
   private var results: SortedSet<Int> = sortedSetOf<Int>()
+  @Volatile
   private var textHighlights = listOf<RangeHighlighter>()
+  @Volatile
   private var viewHighlights = listOf<RangeHighlighter>()
-  private var model = FindModel()
-  private var TEXT_HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
+  private var HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
   private val logger = Logger.getInstance(Finder::class.java)
-
   var isShiftSelectEnabled = false
 
   var skim = false
+    private set
 
+  @Volatile
   var query: String = ""
     set(value) {
-      logger.info("Received query: \"$value\"")
       field = value.toLowerCase()
+      if(query.isNotEmpty()) logger.info("Received query: \"$value\"")
       isShiftSelectEnabled = value.isNotEmpty() && value.last().isUpperCase()
 
       when {
@@ -48,7 +53,10 @@ object Finder : Resettable {
         Tagger.regex -> search()
         value.length == 1 -> skimThenSearch()
         value.isValidQuery() -> skimThenSearch()
-        else -> field = field.dropLast(1)
+        else -> {
+          logger.info("Invalid query, dropping: ${field.last()}")
+          field = field.dropLast(1)
+        }
       }
     }
 
@@ -70,17 +78,13 @@ object Finder : Resettable {
    * applying tags once we have received a "chunk" of search text.
    */
 
-  private fun skimThenSearch() {
-    logger.info("Skimming document for matches of: $query")
-    if(2e4 < editorText.length) skim = true
-    search(FindModel().apply { stringToFind = query })
-    Trigger(400L) { if (skim) runLater { skim = false; search() } }
-  }
-
-  fun search(string: String = query) {
-    logger.info("Searching for locations matching: $string")
-    search(model.apply { stringToFind = string })
-  }
+  private fun skimThenSearch() =
+    if (results.size == 0 && LONG_DOCUMENT) {
+      skim = true
+      logger.info("Skimming document for matches of: $query")
+      search()
+      Trigger(400L) { runLater { skim = false; search() } }
+    } else search()
 
   fun search(pattern: Pattern) {
     logger.info("Searching for regular expression: ${pattern.name}")
@@ -92,39 +96,33 @@ object Finder : Resettable {
     })
   }
 
-  fun search(findModel: FindModel) {
-    model = findModel
-
+  fun search(model: FindModel = FindModel().apply { stringToFind = query }) {
     val timeElapsed = measureTimeMillis {
-      results = editorText.findMatchingSites().toSortedSet()
+      results = editorText.findMatchingSites(model).toSortedSet()
     }
 
     logger.info("Discovered ${results.size} matches in $timeElapsed ms")
 
-    if (!Tagger.hasTagSuffixInView(query)) highlightResults()
-    if (!skim) runAsync { tag(results) }
+    if(!results.isEmpty()) paintTextHighlights(model)
+    if (!skim) runAsync { tag(model, results) }
   }
 
-  private fun highlightResults() {
-    if (results.size < 26) skim = false
-    if (Tagger.regex) return
-    paintTextHighlights()
-  }
-
-  fun paintTextHighlights() {
-    val tempHighlights = results.map { createTextHighlighter(it) }
+  fun paintTextHighlights(model: FindModel = FindModel().apply { stringToFind = query }) {
+    val newHighlights = results.map { createTextHighlight(it, model) }
     textHighlights.forEach { markup.removeHighlighter(it) }
-    textHighlights = tempHighlights
+    textHighlights = newHighlights
     viewHighlights = textHighlights.filter { it.startOffset in viewBounds }
   }
 
-  private fun createTextHighlighter(it: Int) =
-    markup.addRangeHighlighter(it,
-      if (model.isRegularExpressions) it + 1 else it + query.length,
-      TEXT_HIGHLIGHT_LAYER, null, EXACT_RANGE)
-      .apply { customRenderer = Marker(query, null, this.startOffset) }
+  private fun createTextHighlight(index: Int, model: FindModel): RangeHighlighter {
+    val s = if (index == editorText.length) index - 1 else index
+    val e = if (model.isRegularExpressions) s + 1 else s + query.length
 
-  private fun tag(results: Set<Int>) {
+    return markup.addRangeHighlighter(s, e, HIGHLIGHT_LAYER, null, EXACT_RANGE)
+      .apply { customRenderer = Marker(query, null, this.startOffset) }
+  }
+
+  private fun tag(model: FindModel, results: Set<Int>) {
     synchronized(this) { Tagger.markOrJump(model, results) }
     viewHighlights = viewHighlights.narrowBy { Tagger canDiscard startOffset }
       .also { newHighlights ->
@@ -132,7 +130,7 @@ object Finder : Resettable {
         if (numDiscarded != 0) logger.info("Discarded $numDiscarded highlights")
       }
 
-    Handler.repaintTagMarkers()
+    if(model.stringToFind == query) Handler.repaintTagMarkers()
   }
 
   fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =
@@ -148,7 +146,8 @@ object Finder : Resettable {
    * These are full indices, ie. are not offset to the beginning of the range.
    */
 
-  private fun String.findMatchingSites(key: String = query.toLowerCase(),
+  private fun String.findMatchingSites(model: FindModel,
+                                       key: String = model.stringToFind.toLowerCase(),
                                        cache: Set<Int> = results) =
     // If the cache is populated, filter it instead of redoing extra work
     if (cache.isEmpty()) findAll(model.sanitizedString())
@@ -159,13 +158,17 @@ object Finder : Resettable {
       first() < view.first && last() > view.last
     }
 
-  private fun CharSequence.findAll(key: String, startingFrom: Int = 0) =
-    generateSequence({ Regex(key, MULTILINE).find(this, startingFrom) },
+  private fun CharSequence.findAll(key: String, start: Int = getStartBound()) =
+    generateSequence({ Regex(key, MULTILINE).find(this, start) },
       Finder::filterNextResult).map { it.range.first }
+
+  private fun getStartBound() = max(0, viewBounds.first - 20000)
+  private fun getEndBound() = min(viewBounds.last + 20000, editorText.length)
 
   private tailrec fun filterNextResult(result: MatchResult): MatchResult? {
     val next = result.next()
     return if (next == null) null
+    else if (getEndBound() <= next.range.first) null
     else if (editor.isVisible(next.range.first)) next
     else filterNextResult(next)
   }
@@ -177,7 +180,6 @@ object Finder : Resettable {
   override fun reset() {
     runLater { markup.removeAllHighlighters() }
     query = ""
-    model = FindModel()
     skim = false
     results = sortedSetOf()
     textHighlights = listOf()

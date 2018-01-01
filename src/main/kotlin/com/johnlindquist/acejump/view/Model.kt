@@ -77,6 +77,8 @@ object Model {
   val arcD = rectHeight - 6
   var viewBounds = 0..0
   val SEARCH_BUFFER = 10000
+  val LONG_DOCUMENT
+    get() = 2e4 < editorText.length
 
   data class Settings(var allowedChars: List<Char> =
                       ('a'..'z').plus('0'..'9').toList(),

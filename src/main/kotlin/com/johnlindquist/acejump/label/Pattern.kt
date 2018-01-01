@@ -7,7 +7,7 @@ import com.johnlindquist.acejump.config.AceConfig.Companion.settings
  */
 
 enum class Pattern(val string: String) {
-  END_OF_LINE("\\n"),
+  END_OF_LINE("\\n|\\Z"),
   START_OF_LINE("^.|^\\n"),
   CODE_INDENTS("(?<=^\\s*)\\S|^\\n"),
   LINE_MARK(END_OF_LINE.string + "|" +

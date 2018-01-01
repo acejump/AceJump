@@ -23,6 +23,7 @@ import javax.swing.SwingUtilities.convertPoint
 object Canvas : JComponent(), Resettable {
   private val logger = Logger.getInstance(Canvas::class.java)
   private val occupied = hashSetOf<Point>()
+  @Volatile
   var jumpLocations: Collection<Marker> = emptyList()
     set(value) {
       field = value
@@ -31,7 +32,6 @@ object Canvas : JComponent(), Resettable {
 
   fun Editor.bindCanvas() {
     storeBounds()
-    Canvas.reset()
     contentComponent.add(Canvas)
     Canvas.setBounds(0, 0, contentComponent.width, contentComponent.height)
 
