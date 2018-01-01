@@ -95,6 +95,7 @@ The following plugins have a similar UI for navigation.
 | [SurfingKeys](https://github.com/brookhong/Surfingkeys)               |     [Chrome](https://www.google.com/chrome)                |✓|[JavaScript](https://www.javascript.com/)|
 | [VimFx](https://github.com/akhodakivskiy/VimFx)                       |     [Firefox](https://www.mozilla.org/firefox)               |✓|[CoffeeScript](http://coffeescript.org/)|
 | [Vimperator](https://github.com/vimperator/vimperator-labs/)          |     [Firefox](https://www.mozilla.org/firefox)               |✓|[JavaScript](https://www.javascript.com/)|
+| [Pentadactyl](https://github.com/5digits/dactyl)          |     [Firefox](https://www.mozilla.org/firefox)               |✓|[JavaScript](https://www.javascript.com/)|
 | [EasyMotion](https://github.com/easymotion/vim-easymotion)            |     [Vim](http://www.vim.org/)                   |✕|[Vimscript](http://learnvimscriptthehardway.stevelosh.com/)|
 | [Sublime EasyMotion](https://github.com/tednaleid/sublime-EasyMotion) |     [Sublime](https://www.sublimetext.com/)               |✓|[Python](https://www.python.org/)|
 | [Jumpy](https://github.com/DavidLGoldberg/jumpy)                      |     [Atom](https://atom.io/)                  |✓|[CoffeeScript](http://coffeescript.org/)|
