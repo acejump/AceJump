@@ -82,13 +82,13 @@ Please [see here](/CHANGES.md) for a detailed list of changes.
 
 AceJump is inspired by prior work, but adds several improvements, including:
 
-* Target mode: Jump and select an entire word at the destination in one rapid motion.
-* Real-time search: Type any string in the editor, and AceJump highlight and tag matches as you type.
-* Full text search: If a string is not visible on screen, AceJump will scroll to the next occurrence.
-* Smart tag rendering: Tags will occupy nearby whitespace if available, rather than block text.
-* Keyboard-friendly tags: AceJump tries to minimize finger travel distance on QWERTY keyboards.
+* **Target mode**: Jump and select an entire word at the destination in one rapid motion.
+* **Real-time** search: Type any string in the editor, and AceJump highlight and tag matches as you type.
+* **Full text** search: If a string is not visible on screen, AceJump will scroll to the next occurrence.
+* **Smart tag** rendering: Tags will occupy nearby whitespace if available, rather than block text.
+* **Keyboard-friendly tags**: AceJump tries to minimize finger travel distance on QWERTY keyboards.
 
-The following plugins have a similar UI for navigating text and web browsing. 
+The following plugins have a similar UI for navigating text and web browsing: 
 
 | Plugin                                                                |   Application                           |  Actively Maintained  | Language | 
 | :---                                                                  |     :---:                               |     :---:             |   :---:  |
