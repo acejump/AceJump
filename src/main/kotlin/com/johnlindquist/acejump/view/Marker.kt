@@ -27,7 +27,7 @@ import com.johnlindquist.acejump.view.Model.editorText as text
  * All functionality related to tag highlighting including visual appearance,
  * alignment and painting should be handled here. Tags are "captioned" with two
  * or fewer characters. To select a tag, a user will type the tag's assigned
- * "caption", which will move the cursor to a known index in the document.
+ * "caption", which will move the caret to a known index in the document.
  */
 
 class Marker(val query: String, val tag: String?, val index: Int)

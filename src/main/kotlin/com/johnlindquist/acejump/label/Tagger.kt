@@ -12,9 +12,20 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 
 /**
- * Singleton that works with Finder to tag text search results in the editor.
+ * Singleton that works with Finder to assign selectable tags to search results
+ * in the editor. These tags may be selected by typing their label at any point
+ * during the search. Since there is no explicit signal to begin selecting a tag
+ * when AceJump is active, we must infer when a tag is being selected. We do so
+ * by carefully assigning tags to search results so that every search result can
+ * be expanded indefinitely and selected unambiguously any time the user wishes.
+ *
+ * To do so, we must solve a tag assignment problem, where each search result is
+ * assigned an available tag. The Tagger (1) identifies available tags (2) uses
+ * the Solver to assign them, and (3) determines when a previously assigned tag
+ * has been selected unambiguously, to reposition the caret.
  *
  * @see Finder
+ * @see Solver
  */
 
 object Tagger : Resettable {
@@ -53,7 +64,7 @@ object Tagger : Resettable {
   }
 
   /**
-   * Thins out dense results, ex. "eee" should not be tagged three times.
+   * Thin out dense results. For example, "eee" need not be tagged three times.
    */
 
   private fun Set<Int>.cull() = filter { editorText.standsAlone(it) }.toSet()
@@ -151,13 +162,15 @@ object Tagger : Resettable {
 
     // Some results are untagged. Let's assign some tags!
     val vacantResults = results.filter { it !in newTags.values }.toSet()
-    logger.info("Vacant Results: ${vacantResults.size}")
     val availableTags = sortTags(query).filter { it !in tagMap }.toSet()
-    logger.info("Available Tags: ${availableTags.size}")
     if (availableTags.size < vacantResults.size) full = false
 
-    timeElapsed = System.currentTimeMillis() - timeElapsed
-    logger.info("Time elapsed: $timeElapsed")
+    logger.run {
+      timeElapsed = System.currentTimeMillis() - timeElapsed
+      info("Vacant Results: ${vacantResults.size}")
+      info("Available Tags: ${availableTags.size}")
+      info("Time elapsed: $timeElapsed ms")
+    }
 
     return if (regex) availableTags.zip(vacantResults).toMap()
     else Solver.solve(vacantResults, availableTags)
@@ -205,4 +218,3 @@ object Tagger : Resettable {
 
   infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i) || i == -1)
 }
-

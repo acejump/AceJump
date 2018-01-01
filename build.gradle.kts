@@ -2,7 +2,11 @@ import org.gradle.api.internal.initialization.ClassLoaderIds.buildScript
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 tasks.withType<KotlinCompile> {
-  kotlinOptions.jvmTarget = "1.8"
+  kotlinOptions {
+    jvmTarget = "1.8"
+    apiVersion = "1.2"
+    languageVersion = "1.2"
+  }
 }
 
 plugins {

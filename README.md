@@ -1,6 +1,6 @@
 # AceJump
 
-[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate a tooltip overlay. Type any visible string in the editor, followed by one of illustrated tags, to jump its position:
+[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate a tooltip overlay. Type any string in the editor, followed by one of illustrated tags, to jump its position:
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177444/124fb534-a74d-11e6-8912-1d220ae27091.png)
 
@@ -8,11 +8,11 @@ Press the AceJump shortcut a second time before completing a tag to activate *Ta
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177362/a9976398-a74c-11e6-955d-df029c7b329b.png)
 
-Press the AceJump shortcut for line mode (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), to target the beginning, first non-whitespace characters, and end of every visible line in the editor). Then jump to one by completing the tag.
+Press the AceJump shortcut for line mode (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), to target the beginning, first non-whitespace characters, and end of every line in the editor). Then jump to one by completing the tag.
 
 ![](https://cloud.githubusercontent.com/assets/175716/20533565/f7d04d1e-b0ab-11e6-8b89-f7b10a98752d.png)
 
-Press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, or <kbd>↑</kbd>, to target the last, first, or first non-whitespace characters of every visible line in the editor.
+Press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, or <kbd>↑</kbd>, to target the last, first, or first non-whitespace characters of every line in the editor.
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
 
@@ -20,13 +20,15 @@ AceJump tags are *not* case sensitive. Holding down <kbd>Shift</kbd> when typing
 
 ## Tips
 
-Press <kbd>Tab</kbd> when searching to jump to the next group of matches in the editor.
+- Press <kbd>Tab</kbd> when searching to jump to the next group of matches in the editor.
 
-If you mis-type a character, just press <kbd>Backspace</kbd> to restart from scratch.
+- If you make a mistake searching, just press <kbd>Backspace</kbd> to restart from scratch.
 
-If no matches can be found on screen, AceJump will scroll to the next match it can find.
+- If no matches can be found on screen, AceJump will scroll to the next match it can find.
 
-If there is only one tagged result, pressing <kbd>Enter</kbd> will jump to that result.
+- If there is only one tagged result, pressing <kbd>Enter</kbd> will jump to that result.
+
+- Keep typing! AceJump will accept multiple sequential characters before tag selection.
 
 ## Installing
 
@@ -78,10 +80,18 @@ AceJump is written in [Kotlin](https://kotlinlang.org/).
 
 Please [see here](/CHANGES.md) for a detailed list of changes.
 
-## Acknowledgements
+## Comparison
 
-- [Vimium](https://vimium.github.io/) - A Chrome plugin with a similar UI.
-- [Vimperator](http://www.vimperator.org/) - A Firefox plugin with a similar UI.
-- [ace-jump-mode](https://www.emacswiki.org/emacs/AceJump) - An emacs plugin with a similar UI.
-- [EasyMotion](https://github.com/easymotion/vim-easymotion) - A Vim plugin with a similar UI.
-- [Jumpy](https://github.com/DavidLGoldberg/jumpy) - An Atom plugin with a similar UI.
+The following plugins have a similar UI for navigation.
+
+| Plugin                                                              |   Application             |
+| :---                                                                |     :---:                 |
+| [ace-jump-mode](https://www.emacswiki.org/emacs/AceJump)            |     emacs                 |
+| [cVim](https://github.com/1995eaton/chromium-vim)                   |     Chrome                |
+| [Vimium](https://vimium.github.io/)                                 |     Chrome                |
+| [VimFx](https://github.com/akhodakivskiy/VimFx)                     |     FireFox               |
+| [Vimperator](http://www.vimperator.org/)                            |     FireFox               |
+| [EasyMotion](https://github.com/easymotion/vim-easymotion)          |     Vim                   |
+| [Sublime EasyMotion](https://github.com/easymotion/vim-easymotion)  |     Sublime               |
+| [Jumpy](https://github.com/DavidLGoldberg/jumpy)                    |     Atom                  |
+| [VSCodeVim](https://github.com/VSCodeVim/Vim)                       |     Visual Studio Code    |

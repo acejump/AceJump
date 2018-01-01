@@ -45,7 +45,7 @@ object Finder : Resettable {
   var query: String = ""
     set(value) {
       field = value.toLowerCase()
-      if(query.isNotEmpty()) logger.info("Received query: \"$value\"")
+      if (query.isNotEmpty()) logger.info("Received query: \"$value\"")
       isShiftSelectEnabled = value.isNotEmpty() && value.last().isUpperCase()
 
       when {
@@ -61,17 +61,17 @@ object Finder : Resettable {
     }
 
   /**
-   * A user has two possible goals when triggering an AceJump search.
+   * A user has two possible goals when launching an AceJump search.
    *
-   * 1. To locate the position of a known string in the document (ie. Find)
-   * 2. To move the cursor to a fixed location (ie. eyeball staring at location)
+   * 1. To locate the position of a known string in the document (a.k.a. Find)
+   * 2. To reposition the caret to a known location (i.e. staring at location)
    *
    * Since we cannot know why the user initiated any query a priori, here we
    * attempt to satisfy both goals. First, we highlight all matches on (or off)
    * the screen. This operation has very low latency. As soon as the user types
    * a single character, we highlight all matches immediately. If we should
    * receive no further characters after a short delay (indicating a pause in
-   * typing cadence), then apply tags.
+   * typing cadence), then we apply tags.
    *
    * Typically when a user searches for a known string, they will type several
    * characters in rapid succession. We can avoid unnecessary work by only
@@ -97,30 +97,35 @@ object Finder : Resettable {
   }
 
   fun search(model: FindModel = FindModel().apply { stringToFind = query }) {
-    val timeElapsed = measureTimeMillis {
+    measureTimeMillis {
       results = editorText.findMatchingSites(model).toSortedSet()
-    }
+    }.let { ms -> logger.info("Found ${results.size} matches in $ms ms") }
 
-    logger.info("Discovered ${results.size} matches in $timeElapsed ms")
-
-    if(!results.isEmpty()) paintTextHighlights(model)
+    if (!results.isEmpty()) paintTextHighlights(model)
     if (!skim) runAsync { tag(model, results) }
   }
 
+  /**
+   * Paints text highlights to the editor using the MarkupModel API.
+   *
+   * @see com.intellij.openapi.editor.markup.MarkupModel
+   */
+
   fun paintTextHighlights(model: FindModel = FindModel().apply { stringToFind = query }) {
-    val newHighlights = results.map { createTextHighlight(it, model) }
+    val newHighlights = results.map { index ->
+      val s = if (index == editorText.length) index - 1 else index
+      val e = if (model.isRegularExpressions) s + 1 else s + query.length
+      createTextHighlight(s, e)
+    }
+
     textHighlights.forEach { markup.removeHighlighter(it) }
     textHighlights = newHighlights
     viewHighlights = textHighlights.filter { it.startOffset in viewBounds }
   }
 
-  private fun createTextHighlight(index: Int, model: FindModel): RangeHighlighter {
-    val s = if (index == editorText.length) index - 1 else index
-    val e = if (model.isRegularExpressions) s + 1 else s + query.length
-
-    return markup.addRangeHighlighter(s, e, HIGHLIGHT_LAYER, null, EXACT_RANGE)
+  private fun createTextHighlight(s: Int, e: Int) =
+    markup.addRangeHighlighter(s, e, HIGHLIGHT_LAYER, null, EXACT_RANGE)
       .apply { customRenderer = Marker(query, null, this.startOffset) }
-  }
 
   private fun tag(model: FindModel, results: Set<Int>) {
     synchronized(this) { Tagger.markOrJump(model, results) }
@@ -130,7 +135,7 @@ object Finder : Resettable {
         if (numDiscarded != 0) logger.info("Discarded $numDiscarded highlights")
       }
 
-    if(model.stringToFind == query) Handler.repaintTagMarkers()
+    if (model.stringToFind == query) Handler.repaintTagMarkers()
   }
 
   fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =

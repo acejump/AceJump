@@ -88,7 +88,7 @@ object Model {
                       var tagForegroundColor: Color = black,
                       var tagBackgroundColor: Color = yellow)
 
-  fun Editor.setupCursor() {
+  fun Editor.setupCaret() {
     naturalBlock = settings.isBlockCursor
     settings.isBlockCursor = true
 

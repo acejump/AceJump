@@ -21,7 +21,7 @@ import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Canvas.bindCanvas
 import com.johnlindquist.acejump.view.Model
 import com.johnlindquist.acejump.view.Model.editor
-import com.johnlindquist.acejump.view.Model.setupCursor
+import com.johnlindquist.acejump.view.Model.setupCaret
 import java.awt.event.KeyEvent.*
 import javax.swing.JComponent
 
@@ -71,7 +71,7 @@ object Handler : TypedActionHandler, Resettable {
   private fun configureEditor() =
     editor.run {
       storeScroll()
-      setupCursor()
+      setupCaret()
       bindCanvas()
       installSearchKeyHandler()
       Listener.enable()
@@ -150,7 +150,7 @@ object Handler : TypedActionHandler, Resettable {
   private fun Editor.restoreSettings() = runAndWait {
     restoreScroll()
     restoreCanvas()
-    restoreCursor()
+    restoreCaret()
     restoreColors()
   }
 
@@ -160,7 +160,7 @@ object Handler : TypedActionHandler, Resettable {
       repaint()
     }
 
-  private fun Editor.restoreCursor() = runAndWait {
+  private fun Editor.restoreCaret() = runAndWait {
     settings.isBlinkCaret = Model.naturalBlink
     settings.isBlockCursor = Model.naturalBlock
   }
