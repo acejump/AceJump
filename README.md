@@ -84,14 +84,17 @@ Please [see here](/CHANGES.md) for a detailed list of changes.
 
 The following plugins have a similar UI for navigation.
 
-| Plugin                                                              |   Application             |
-| :---                                                                |     :---:                 |
-| [ace-jump-mode](https://www.emacswiki.org/emacs/AceJump)            |     emacs                 |
-| [cVim](https://github.com/1995eaton/chromium-vim)                   |     Chrome                |
-| [Vimium](https://vimium.github.io/)                                 |     Chrome                |
-| [VimFx](https://github.com/akhodakivskiy/VimFx)                     |     FireFox               |
-| [Vimperator](http://www.vimperator.org/)                            |     FireFox               |
-| [EasyMotion](https://github.com/easymotion/vim-easymotion)          |     Vim                   |
-| [Sublime EasyMotion](https://github.com/easymotion/vim-easymotion)  |     Sublime               |
-| [Jumpy](https://github.com/DavidLGoldberg/jumpy)                    |     Atom                  |
-| [VSCodeVim](https://github.com/VSCodeVim/Vim)                       |     Visual Studio Code    |
+| Plugin                                                              |   Application             |  Actively Maintained  |
+| :---                                                                |     :---:                 |     :---:             |
+| **AceJump**                                                         |     IntelliJ Platform     |✓|
+| [ace-jump-mode](https://github.com/winterTTr/ace-jump-mode)         |     emacs                 |✕|
+| [cVim](https://github.com/1995eaton/chromium-vim)                   |     Chrome                |✓|
+| [Vimium](https://github.com/philc/vimium)                           |     Chrome                |✓|
+| [Vrome](https://github.com/jinzhu/vrome)                            |     Chrome                |✕|
+| [ViChrome](https://github.com/k2nr/ViChrome)                        |     Chrome                |✕|
+| [VimFx](https://github.com/akhodakivskiy/VimFx)                     |     Firefox               |✓|
+| [Vimperator](https://github.com/vimperator/vimperator-labs/)        |     Firefox               |✓|
+| [EasyMotion](https://github.com/easymotion/vim-easymotion)          |     Vim                   |✕|
+| [Sublime EasyMotion](https://github.com/easymotion/vim-easymotion)  |     Sublime               |✓|
+| [Jumpy](https://github.com/DavidLGoldberg/jumpy)                    |     Atom                  |✓|
+| [VSCodeVim](https://github.com/VSCodeVim/Vim)                       |     Visual Studio Code    |✓|
