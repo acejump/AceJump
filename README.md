@@ -92,6 +92,7 @@ The following plugins have a similar UI for navigation.
 | [Vimium](https://github.com/philc/vimium)                             |     [Chrome](https://www.google.com/chrome)                |✓|[CoffeeScript](http://coffeescript.org/)|
 | [Vrome](https://github.com/jinzhu/vrome)                              |     [Chrome](https://www.google.com/chrome)                |✕|[CoffeeScript](http://coffeescript.org/)|
 | [ViChrome](https://github.com/k2nr/ViChrome)                          |     [Chrome](https://www.google.com/chrome)                |✕|[CoffeeScript](http://coffeescript.org/)|
+| [SurfingKeys](https://github.com/brookhong/Surfingkeys)               |     [Chrome](https://www.google.com/chrome)                |✓|[JavaScript](https://www.javascript.com/)|
 | [VimFx](https://github.com/akhodakivskiy/VimFx)                       |     [Firefox](https://www.mozilla.org/firefox)               |✓|[CoffeeScript](http://coffeescript.org/)|
 | [Vimperator](https://github.com/vimperator/vimperator-labs/)          |     [Firefox](https://www.mozilla.org/firefox)               |✓|[JavaScript](https://www.javascript.com/)|
 | [EasyMotion](https://github.com/easymotion/vim-easymotion)            |     [Vim](http://www.vim.org/)                   |✕|[Vimscript](http://learnvimscriptthehardway.stevelosh.com/)|
