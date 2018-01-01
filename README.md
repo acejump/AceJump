@@ -80,21 +80,30 @@ Please [see here](/CHANGES.md) for a detailed list of changes.
 
 ## Comparison
 
-The following plugins have a similar UI for navigation.
+AceJump is inspired by prior work, but adds several improvements, including:
 
-| Plugin                                                                |   Application             |  Actively Maintained  | Language | 
-| :---                                                                  |     :---:                 |     :---:             |     :---:             |
-| AceJump                                                               |     [IntelliJ Platform](https://jetbrains.com)     |✅|[Kotlin](http://kotlinlang.org/)|
-| [ace-jump-mode](https://github.com/winterTTr/ace-jump-mode)           |     [emacs](https://www.gnu.org/software/emacs/)                 |❌|[Emacs Lisp](https://www.gnu.org/software/emacs/manual/eintr.html)|
-| [EasyMotion](https://github.com/easymotion/vim-easymotion)            |     [Vim](http://www.vim.org/)                   |❌|[Vimscript](http://learnvimscriptthehardway.stevelosh.com/)|
-| [Sublime EasyMotion](https://github.com/tednaleid/sublime-EasyMotion) |     [Sublime](https://www.sublimetext.com/)               |✅|[Python](https://www.python.org/)|
-| [Jumpy](https://github.com/DavidLGoldberg/jumpy)                      |     [Atom](https://atom.io/)                  |✅|[CoffeeScript](http://coffeescript.org/)|
-| [VSCodeVim](https://github.com/VSCodeVim/Vim)                         |     [Visual Studio Code](https://code.visualstudio.com/)    |✅|[TypeScript](https://www.typescriptlang.org/)|
-| [cVim](https://github.com/1995eaton/chromium-vim)                     |     [Chrome](https://www.google.com/chrome)                |✅|[JavaScript](https://www.javascript.com/)|
-| [SurfingKeys](https://github.com/brookhong/Surfingkeys)               |     [Chrome](https://www.google.com/chrome)                |✅|[JavaScript](https://www.javascript.com/)|
-| [Vimium](https://github.com/philc/vimium)                             |     [Chrome](https://www.google.com/chrome)                |✅|[CoffeeScript](http://coffeescript.org/)|
-| [Vrome](https://github.com/jinzhu/vrome)                              |     [Chrome](https://www.google.com/chrome)                |❌|[CoffeeScript](http://coffeescript.org/)|
-| [ViChrome](https://github.com/k2nr/ViChrome)                          |     [Chrome](https://www.google.com/chrome)                |❌|[CoffeeScript](http://coffeescript.org/)|
+* Target mode: Jump and select an entire word at the destination in one rapid motion.
+* Real-time search: Type any string in the editor, and AceJump highlight and tag matches as you type.
+* Full text search: If a string is not visible on screen, AceJump will scroll to the next occurrence.
+* Smart tag rendering: Tags will occupy nearby whitespace if available, rather than block text.
+* Keyboard-friendly tags: AceJump tries to minimize finger travel distance on QWERTY keyboards.
+
+The following plugins have a similar UI for navigating text and web browsing. 
+
+| Plugin                                                                |   Application                           |  Actively Maintained  | Language | 
+| :---                                                                  |     :---:                               |     :---:             |   :---:  |
+| AceJump                                                               |     [IntelliJ Platform](https://jetbrains.com)               |✅|[Kotlin](http://kotlinlang.org/)|
+| [ace-jump-mode](https://github.com/winterTTr/ace-jump-mode)           |     [emacs](https://www.gnu.org/software/emacs/)             |❌|[Emacs Lisp](https://www.gnu.org/software/emacs/manual/eintr.html)|
+| [EasyMotion](https://github.com/easymotion/vim-easymotion)            |     [Vim](http://www.vim.org/)                               |❌|[Vimscript](http://learnvimscriptthehardway.stevelosh.com/)|
+| [Sublime EasyMotion](https://github.com/tednaleid/sublime-EasyMotion) |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
+| [AceJump Sublime](https://github.com/ice9js/ace-jump-sublime)         |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
+| [Jumpy](https://github.com/DavidLGoldberg/jumpy)                      |     [Atom](https://atom.io/)                                 |✅|[CoffeeScript](http://coffeescript.org/)|
+| [VSCodeVim](https://github.com/VSCodeVim/Vim)                         |     [Visual Studio Code](https://code.visualstudio.com/)     |✅|[TypeScript](https://www.typescriptlang.org/)|
+| [cVim](https://github.com/1995eaton/chromium-vim)                     |     [Chrome](https://www.google.com/chrome)                  |✅|[JavaScript](https://www.javascript.com/)|
+| [SurfingKeys](https://github.com/brookhong/Surfingkeys)               |     [Chrome](https://www.google.com/chrome)                  |✅|[JavaScript](https://www.javascript.com/)|
+| [Vimium](https://github.com/philc/vimium)                             |     [Chrome](https://www.google.com/chrome)                  |✅|[CoffeeScript](http://coffeescript.org/)|
+| [Vrome](https://github.com/jinzhu/vrome)                              |     [Chrome](https://www.google.com/chrome)                  |❌|[CoffeeScript](http://coffeescript.org/)|
+| [ViChrome](https://github.com/k2nr/ViChrome)                          |     [Chrome](https://www.google.com/chrome)                  |❌|[CoffeeScript](http://coffeescript.org/)|
 | [VimFx](https://github.com/akhodakivskiy/VimFx)                       |     [Firefox](https://www.mozilla.org/firefox)               |✅|[CoffeeScript](http://coffeescript.org/)|
 | [Vimperator](https://github.com/vimperator/vimperator-labs/)          |     [Firefox](https://www.mozilla.org/firefox)               |✅|[JavaScript](https://www.javascript.com/)|
-| [Pentadactyl](https://github.com/5digits/dactyl)          |     [Firefox](https://www.mozilla.org/firefox)               |✅|[JavaScript](https://www.javascript.com/)|
+| [Pentadactyl](https://github.com/5digits/dactyl)                      |     [Firefox](https://www.mozilla.org/firefox)               |✅|[JavaScript](https://www.javascript.com/)|
