@@ -84,17 +84,17 @@ Please [see here](/CHANGES.md) for a detailed list of changes.
 
 The following plugins have a similar UI for navigation.
 
-| Plugin                                                              |   Application             |  Actively Maintained  |
-| :---                                                                |     :---:                 |     :---:             |
-| **AceJump**                                                         |     IntelliJ Platform     |✓|
-| [ace-jump-mode](https://github.com/winterTTr/ace-jump-mode)         |     emacs                 |✕|
-| [cVim](https://github.com/1995eaton/chromium-vim)                   |     Chrome                |✓|
-| [Vimium](https://github.com/philc/vimium)                           |     Chrome                |✓|
-| [Vrome](https://github.com/jinzhu/vrome)                            |     Chrome                |✕|
-| [ViChrome](https://github.com/k2nr/ViChrome)                        |     Chrome                |✕|
-| [VimFx](https://github.com/akhodakivskiy/VimFx)                     |     Firefox               |✓|
-| [Vimperator](https://github.com/vimperator/vimperator-labs/)        |     Firefox               |✓|
-| [EasyMotion](https://github.com/easymotion/vim-easymotion)          |     Vim                   |✕|
-| [Sublime EasyMotion](https://github.com/easymotion/vim-easymotion)  |     Sublime               |✓|
-| [Jumpy](https://github.com/DavidLGoldberg/jumpy)                    |     Atom                  |✓|
-| [VSCodeVim](https://github.com/VSCodeVim/Vim)                       |     Visual Studio Code    |✓|
+| Plugin                                                                |   Application             |  Actively Maintained  | Language | 
+| :---                                                                  |     :---:                 |     :---:             |     :---:             |
+| AceJump                                                               |     [IntelliJ Platform](https://jetbrains.com)     |✓|[Kotlin](http://kotlinlang.org/)|
+| [ace-jump-mode](https://github.com/winterTTr/ace-jump-mode)           |     [emacs](https://www.gnu.org/software/emacs/)                 |✕|[Emacs Lisp](https://www.gnu.org/software/emacs/manual/eintr.html)|
+| [cVim](https://github.com/1995eaton/chromium-vim)                     |     [Chrome](https://www.google.com/chrome)                |✓|[JavaScript](https://www.javascript.com/)|
+| [Vimium](https://github.com/philc/vimium)                             |     [Chrome](https://www.google.com/chrome)                |✓|[CoffeeScript](http://coffeescript.org/)|
+| [Vrome](https://github.com/jinzhu/vrome)                              |     [Chrome](https://www.google.com/chrome)                |✕|[CoffeeScript](http://coffeescript.org/)|
+| [ViChrome](https://github.com/k2nr/ViChrome)                          |     [Chrome](https://www.google.com/chrome)                |✕|[CoffeeScript](http://coffeescript.org/)|
+| [VimFx](https://github.com/akhodakivskiy/VimFx)                       |     [Firefox](https://www.mozilla.org/firefox)               |✓|[CoffeeScript](http://coffeescript.org/)|
+| [Vimperator](https://github.com/vimperator/vimperator-labs/)          |     [Firefox](https://www.mozilla.org/firefox)               |✓|[JavaScript](https://www.javascript.com/)|
+| [EasyMotion](https://github.com/easymotion/vim-easymotion)            |     [Vim](http://www.vim.org/)                   |✕|[Vimscript](http://learnvimscriptthehardway.stevelosh.com/)|
+| [Sublime EasyMotion](https://github.com/tednaleid/sublime-EasyMotion) |     [Sublime](https://www.sublimetext.com/)               |✓|[Python](https://www.python.org/)|
+| [Jumpy](https://github.com/DavidLGoldberg/jumpy)                      |     [Atom](https://atom.io/)                  |✓|[CoffeeScript](http://coffeescript.org/)|
+| [VSCodeVim](https://github.com/VSCodeVim/Vim)                         |     [Visual Studio Code](https://code.visualstudio.com/)    |✓|[TypeScript](https://www.typescriptlang.org/)|
