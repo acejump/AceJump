@@ -70,6 +70,13 @@ The build artifact will be located in `build/distributions/`.
 
 AceJump is supported by community members like you. Contributions are highly welcome!
 
+If you would like to contribute, here are a few ways you can help:
+
+* [Improve test coverage](https://github.com/johnlindquist/AceJump/issues/139)
+* [Multi-monitor support](https://github.com/johnlindquist/AceJump/issues/144)
+* [Animated documentation](https://github.com/johnlindquist/AceJump/issues/145)
+* [Speed up tagging on large files](https://github.com/johnlindquist/AceJump/issues/161)
+
 To start IntelliJ IDEA CE with AceJump installed, run `./gradlew runIdea`. 
 
 For documentation on plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
@@ -98,7 +105,7 @@ The following plugins have a similar UI for navigating text and web browsing:
 | [ace-jump-mode](https://github.com/winterTTr/ace-jump-mode)           |     [emacs](https://www.gnu.org/software/emacs/)             |❌|[Emacs Lisp](https://www.gnu.org/software/emacs/manual/eintr.html)|
 | [EasyMotion](https://github.com/easymotion/vim-easymotion)            |     [Vim](http://www.vim.org/)                               |❌|[Vimscript](http://learnvimscriptthehardway.stevelosh.com/)|
 | [Sublime EasyMotion](https://github.com/tednaleid/sublime-EasyMotion) |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
-| [AceJump Sublime](https://github.com/ice9js/ace-jump-sublime)         |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
+| [AceJump](https://github.com/ice9js/ace-jump-sublime)                 |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
 | [Jumpy](https://github.com/DavidLGoldberg/jumpy)                      |     [Atom](https://atom.io/)                                 |✅|[CoffeeScript](http://coffeescript.org/)|
 | [VSCodeVim](https://github.com/VSCodeVim/Vim)                         |     [Visual Studio Code](https://code.visualstudio.com/)     |✅|[TypeScript](https://www.typescriptlang.org/)|
 | [AceJump](https://github.com/jsturtevant/ace-jump)                    |     [Visual Studio](https://www.visualstudio.com/)           |✅|[C#](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/)|
