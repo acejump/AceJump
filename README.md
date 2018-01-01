@@ -74,6 +74,8 @@ To start IntelliJ IDEA CE with AceJump installed, run `./gradlew runIdea`.
 
 For documentation on plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
 
+If you enjoy using AceJump, you might also enjoy reading [the code](https://github.com/johnlindquist/AceJump/blob/master/src/main/kotlin/com/johnlindquist/acejump/label/Solver.kt).
+
 ## Release notes
 
 Please [see here](/CHANGES.md) for a detailed list of changes.
@@ -82,9 +84,9 @@ Please [see here](/CHANGES.md) for a detailed list of changes.
 
 AceJump is inspired by prior work, but adds several improvements, including:
 
-* **Target mode**: Jump and select an entire word at the destination in one rapid motion.
-* **Real-time** search: Type any string in the editor, and AceJump highlight and tag matches as you type.
-* **Full text** search: If a string is not visible on screen, AceJump will scroll to the next occurrence.
+* **Target mode**: Jump and select an full word in one rapid motion.
+* **Real-time** search: Type any string in the editor, and AceJump will highlight and tag matches as you type.
+* **Full text** search: If a string is not visible on the screen, AceJump will scroll to the next occurrence.
 * **Smart tag** rendering: Tags will occupy nearby whitespace if available, rather than block text.
 * **Keyboard-friendly tags**: AceJump tries to minimize finger travel distance on QWERTY keyboards.
 
@@ -99,6 +101,7 @@ The following plugins have a similar UI for navigating text and web browsing:
 | [AceJump Sublime](https://github.com/ice9js/ace-jump-sublime)         |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
 | [Jumpy](https://github.com/DavidLGoldberg/jumpy)                      |     [Atom](https://atom.io/)                                 |✅|[CoffeeScript](http://coffeescript.org/)|
 | [VSCodeVim](https://github.com/VSCodeVim/Vim)                         |     [Visual Studio Code](https://code.visualstudio.com/)     |✅|[TypeScript](https://www.typescriptlang.org/)|
+| [AceJump](https://github.com/jsturtevant/ace-jump)                    |     [Visual Studio](https://www.visualstudio.com/)           |✅|[C#](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/)|
 | [cVim](https://github.com/1995eaton/chromium-vim)                     |     [Chrome](https://www.google.com/chrome)                  |✅|[JavaScript](https://www.javascript.com/)|
 | [SurfingKeys](https://github.com/brookhong/Surfingkeys)               |     [Chrome](https://www.google.com/chrome)                  |✅|[JavaScript](https://www.javascript.com/)|
 | [Vimium](https://github.com/philc/vimium)                             |     [Chrome](https://www.google.com/chrome)                  |✅|[CoffeeScript](http://coffeescript.org/)|
