@@ -70,14 +70,14 @@ The build artifact will be located in `build/distributions/`.
 
 AceJump is supported by community members like you. Contributions are highly welcome!
 
-If you would like to contribute, here are a few ways you can help:
+If you would like to contribute, here are a few of the ways you can help AceJump:
 
 * [Improve test coverage](https://github.com/johnlindquist/AceJump/issues/139)
 * [Multi-monitor support](https://github.com/johnlindquist/AceJump/issues/144)
 * [Animated documentation](https://github.com/johnlindquist/AceJump/issues/145)
 * [Speed up tagging on large files](https://github.com/johnlindquist/AceJump/issues/161)
 
-To start IntelliJ IDEA CE with AceJump installed, run `./gradlew runIdea`. 
+To start IntelliJ IDEA CE with AceJump installed, run `./gradlew runIde -Project=$(pwd)`. 
 
 For documentation on plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
 
