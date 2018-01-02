@@ -3,6 +3,7 @@
 
 ## Directory-based project format:
 .idea/*
+*.iml
 
 ## Plugin-specific files:
 # IntelliJ
