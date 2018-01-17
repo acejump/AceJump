@@ -1,6 +1,6 @@
 # AceJump
 
-[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate a tooltip overlay. Type any string in the editor, followed by one of illustrated tags, to jump its position:
+[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate AceJump. Type any string in the editor, followed by one of illustrated tags, to jump its position:
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177444/124fb534-a74d-11e6-8912-1d220ae27091.png)
 
@@ -12,7 +12,7 @@ Press the AceJump shortcut for line mode (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>
 
 ![](https://cloud.githubusercontent.com/assets/175716/20533565/f7d04d1e-b0ab-11e6-8b89-f7b10a98752d.png)
 
-Press the AceJump shortcut, followed by <kbd>→</kbd>, <kbd>←</kbd>, or <kbd>↑</kbd>, to target the last, first, or first non-whitespace characters of every line in the editor.
+Press the AceJump shortcut, followed by <kbd>→</kbd> to target the last, <kbd>←</kbd> to target the first, or <kbd>↑</kbd>, to target the first non-whitespace characters of every line in the editor.
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
 
@@ -70,7 +70,7 @@ The build artifact will be located in `build/distributions/`.
 
 AceJump is supported by community members like you. Contributions are highly welcome!
 
-If you would like to contribute, here are a few of the ways you can help AceJump:
+If you would like to contribute, here are a few of the ways you can help improve AceJump:
 
 * [Improve test coverage](https://github.com/johnlindquist/AceJump/issues/139)
 * [Multi-monitor support](https://github.com/johnlindquist/AceJump/issues/144)
