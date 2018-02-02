@@ -5,6 +5,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea.EXACT_RANGE
 import com.intellij.openapi.editor.markup.RangeHighlighter
+import com.intellij.openapi.editor.Editor
 import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.control.Trigger
 import com.johnlindquist.acejump.label.Pattern
@@ -22,6 +23,41 @@ import java.util.*
 import kotlin.system.measureTimeMillis
 import kotlin.text.RegexOption.MULTILINE
 
+interface FinderBoundry {
+	fun getStart() : Int;
+	fun getEnd() : Int;
+}
+
+class FullFileBoundry : FinderBoundry {
+  override fun getStart() : Int = max(0, viewBounds.first - 20000)
+  override fun getEnd() : Int = min(viewBounds.last + 20000, editorText.length)
+}
+
+class ScreenBoundry : FinderBoundry {
+  override fun getStart() : Int = max(0, viewBounds.first)
+  override fun getEnd() : Int = min(viewBounds.last, editorText.length)
+}
+
+class BeforeCurserBoundry : FinderBoundry {
+  override fun getStart() : Int = max(0, viewBounds.first)
+  override fun getEnd() : Int {
+
+	  var offset = editor.getCaretModel().getOffset()
+
+	  return min( offset - 1, min(viewBounds.last, editorText.length) )
+  }
+}
+
+class AfterCurserBoundry : FinderBoundry {
+  override fun getStart() : Int {
+	  var offset = editor.getCaretModel().getOffset()
+
+	  return max(offset + 1, max(0, viewBounds.first))
+  }
+  override fun getEnd() : Int = min(viewBounds.last, editorText.length)
+}
+
+
 /**
  * Singleton that searches for text in editor and highlights matching results.
  *
@@ -37,6 +73,8 @@ object Finder : Resettable {
   private var HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
   private val logger = Logger.getInstance(Finder::class.java)
   var isShiftSelectEnabled = false
+  
+  private var boundries : FinderBoundry = FullFileBoundry()
 
   var skim = false
     private set
@@ -94,6 +132,18 @@ object Finder : Resettable {
       isRegularExpressions = true
       Tagger.reset()
     })
+  }
+
+  fun backwardsMode() {
+	  boundries = BeforeCurserBoundry()
+  }
+
+  fun forwardMode() {
+	  boundries = AfterCurserBoundry()
+  }
+
+  fun fullFileMode() {
+	  boundries = FullFileBoundry()
   }
 
   fun search(model: FindModel = FindModel().apply { stringToFind = query }) {
@@ -167,8 +217,8 @@ object Finder : Resettable {
     generateSequence({ Regex(key, MULTILINE).find(this, start) },
       Finder::filterNextResult).map { it.range.first }
 
-  private fun getStartBound() = max(0, viewBounds.first - 20000)
-  private fun getEndBound() = min(viewBounds.last + 20000, editorText.length)
+  private fun getStartBound() = boundries.getStart()
+  private fun getEndBound() = boundries.getEnd()
 
   private tailrec fun filterNextResult(result: MatchResult): MatchResult? {
     val next = result.next()
