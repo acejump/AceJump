@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="runIde" type="GradleRunConfiguration" factoryName="Gradle">
-    <log_file path="$PROJECT_DIR$/build/idea-sandbox/system/log/idea.log" checked="true" skipped="true" show_all="false" alias="$PROJECT_DIR$/build/idea-sandbox/system/log/idea.log" />
+    <log_file alias="$PROJECT_DIR$/build/idea-sandbox/system/log/idea.log" path="$PROJECT_DIR$/build/idea-sandbox/system/log/idea.log" />
     <ExternalSystemSettings>
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
-      <option name="scriptParameters" value="" />
+      <option name="scriptParameters" value="--build-cache" />
       <option name="taskDescriptions">
         <list />
       </option>

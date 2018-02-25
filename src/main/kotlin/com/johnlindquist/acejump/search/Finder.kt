@@ -46,7 +46,7 @@ object Finder : Resettable {
     set(value) {
       field = value.toLowerCase()
       if (query.isNotEmpty()) logger.info("Received query: \"$value\"")
-      isShiftSelectEnabled = value.isNotEmpty() && value.last().isUpperCase()
+      isShiftSelectEnabled = value.lastOrNull()?.isUpperCase() == true
 
       when {
         value.isEmpty() -> return
@@ -135,7 +135,7 @@ object Finder : Resettable {
         if (numDiscarded != 0) logger.info("Discarded $numDiscarded highlights")
       }
 
-    if (model.stringToFind == query) Handler.repaintTagMarkers()
+    Handler.repaintTagMarkers()
   }
 
   fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =

@@ -22,7 +22,8 @@ open class AceAction : DumbAwareAction() {
 
   override fun actionPerformed(e: AnActionEvent) {
     editor = e.getData(EDITOR) ?: editor
-    logger.info("Invoked on ${editor.getNameOfFileInEditor()}")
+    val textLength = editor.document.textLength
+    logger.info("Invoked on ${editor.getNameOfFileInEditor()} ($textLength)")
     Handler.activate()
   }
 }

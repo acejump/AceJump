@@ -1,13 +1,12 @@
 package com.johnlindquist.acejump.label
 
-import com.google.common.collect.HashBiMap
-import com.google.common.collect.Multimaps
-import com.google.common.collect.Ordering
-import com.google.common.collect.TreeMultimap
 import com.intellij.openapi.diagnostic.Logger
 import com.johnlindquist.acejump.search.wordBoundsPlus
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.viewBounds
+import org.eclipse.collections.impl.bimap.mutable.HashBiMap
+import org.eclipse.collections.impl.multimap.set.sorted.SynchronizedSortedSetMultimap
+import org.eclipse.collections.impl.multimap.set.sorted.TreeSortedSetMultimap
 import java.lang.Math.max
 import kotlin.collections.set
 import kotlin.system.measureTimeMillis
@@ -22,7 +21,7 @@ import kotlin.system.measureTimeMillis
 object Solver {
   private val logger = Logger.getInstance(Solver::class.java)
   private var bigrams: MutableSet<String> = LinkedHashSet()
-  private var newTags: MutableMap<String, Int> = HashBiMap.create()
+  private var newTags: MutableMap<String, Int> = HashBiMap<String, Int>()
   private var strings: Set<String> = hashSetOf()
 
   /**
@@ -44,9 +43,9 @@ object Solver {
 
   private val tagOrder: Comparator<String> = compareBy(
     { it[0].isDigit() || it[1].isDigit() },
-    { eligibleSitesByTag[it].size },
     { Pattern.distance(it[0], it.last()) },
-    { Pattern.priority(it.first()) }
+    { eligibleSitesByTag[it].size },
+    { Pattern.priority(it.last()) }
   )
 
   /**
@@ -79,8 +78,9 @@ object Solver {
    * @see isCompatibleWithTagChar This defines how tags may be assigned to sites.
    */
 
-  private val eligibleSitesByTag = Multimaps.synchronizedSetMultimap(
-    TreeMultimap.create<String, Int>(Ordering.natural(), siteOrder))
+
+  private val eligibleSitesByTag = SynchronizedSortedSetMultimap<String, Int>(
+    TreeSortedSetMultimap<String, Int>(siteOrder))
 
   /**
    * Maps tags to search results according to the following constraints.
@@ -101,7 +101,7 @@ object Solver {
    */
 
   fun solve(results: Set<Int>, tags: Set<String>): Map<String, Int> {
-    newTags = HashBiMap.create(Pattern.NUM_TAGS)
+    newTags = HashBiMap(Pattern.NUM_TAGS)
     bigrams = tags.toMutableSet()
     eligibleSitesByTag.clear()
 
@@ -111,12 +111,13 @@ object Solver {
     var totalAssigned = 0
     var timeAssigned = 0L
     val timeElapsed = measureTimeMillis {
+
       results.parallelStream().forEach { site ->
         val compatibleTags = tagsByFirstLetter.getTagsCompatibleWith(site)
         compatibleTags.forEach { tag -> eligibleSitesByTag.put(tag, site) }
       }
 
-      val sortedTags = eligibleSitesByTag.keySet().sortedWith(tagOrder)
+      val sortedTags = eligibleSitesByTag.keysView().toSortedList(tagOrder)
 
       timeAssigned = measureTimeMillis {
         for (tagString in sortedTags) {
@@ -139,9 +140,9 @@ object Solver {
   }
 
   private fun Map<Char, List<String>>.getTagsCompatibleWith(site: Int) =
-    entries.mapNotNull { (firstLetter, tags) ->
-      if (site isCompatibleWithTagChar firstLetter) tags else null
-    }.flatten()
+    entries.flatMap { (firstLetter, tags) ->
+      if (site isCompatibleWithTagChar firstLetter) tags else emptyList()
+    }
 
   /**
    * Returns true IFF the tag, when inserted at any position in the word, could

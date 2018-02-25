@@ -69,13 +69,13 @@ class Marker(val query: String, val tag: String?, val index: Int)
   // Called by IntelliJ Platform (as a CustomHighlightRenderer)
   override fun paint(editor: Editor, highlight: RangeHighlighter, g: Graphics) =
     (g as Graphics2D).run {
-      var tagX = start.x
-      var tagWidth = tag?.length?.times(fontWidth) ?: 0
+      val tagX = start.x
+      val tagWidth = tag?.length?.times(fontWidth) ?: 0
 
       fun highlightRegex() {
         composite = getInstance(SRC_OVER, 0.40.toFloat())
-        val xPos = if (alignment == RIGHT) tagX - fontWidth else tagX + tagWidth
-        fillRoundRect(xPos, yPos, fontWidth, rectHeight, arcD, arcD)
+        val xPos = if (alignment == RIGHT) tagX - fontWidth else start.x
+        fillRoundRect(xPos, startY, fontWidth, rectHeight, arcD, arcD)
       }
 
       setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
