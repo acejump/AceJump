@@ -111,7 +111,6 @@ object Solver {
     var totalAssigned = 0
     var timeAssigned = 0L
     val timeElapsed = measureTimeMillis {
-
       results.parallelStream().forEach { site ->
         val compatibleTags = tagsByFirstLetter.getTagsCompatibleWith(site)
         compatibleTags.forEach { tag -> eligibleSitesByTag.put(tag, site) }
@@ -154,7 +153,7 @@ object Solver {
     getWordFragments(this).map { it + char }.none { it in strings }
 
   private fun getWordFragments(site: Int): List<String> {
-    val left = site + Tagger.query.length - 1
+    val left = max(0, site + Tagger.query.length - 1)
     val right = editorText.wordBoundsPlus(site).second
 
     return (left..right).map { editorText.substring(left, it) }
