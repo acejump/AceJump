@@ -86,7 +86,7 @@ object Finder : Resettable {
   fun search(pattern: Pattern) {
     logger.info("Searching for regular expression: ${pattern.name}")
     // TODO: Fix this broken reset
-//    reset()
+    reset()
     search(FindModel().apply {
       stringToFind = pattern.string
       isRegularExpressions = true
