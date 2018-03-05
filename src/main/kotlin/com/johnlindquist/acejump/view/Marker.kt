@@ -63,13 +63,18 @@ class Marker(val query: String, val tag: String?, val index: Int)
     if (!Finder.skim)
       tag?.alignTag(Canvas)
         ?.apply { Canvas.registerTag(this, tag) }
-        ?.let { highlightTag(it); drawTagForeground(it) }
+        ?.let {
+          if(it == NONE) return
+          highlightTag(it); drawTagForeground(it)
+        }
   }
 
   // Called by IntelliJ Platform (as a CustomHighlightRenderer)
   override fun paint(editor: Editor, highlight: RangeHighlighter, g: Graphics) =
-    (g as Graphics2D).run {
-      val tagX = start.x
+    (g as Graphics2D).highlightEditorText()
+
+  private fun Graphics2D.highlightEditorText() = run {
+      val tagX = start.x + fontWidth
       val tagWidth = tag?.length?.times(fontWidth) ?: 0
 
       fun highlightRegex() {
@@ -134,7 +139,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
       LEFT -> left
       RIGHT -> right
 //      BOTTOM -> bottom
-      NONE -> Point(0, 0)
+      NONE -> Point(-1, -1)
     }
   }
 

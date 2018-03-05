@@ -2,14 +2,18 @@ package com.johnlindquist.acejump.label
 
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
-import com.johnlindquist.acejump.label.Pattern.Companion.sortTags
+import com.johnlindquist.acejump.label.Pattern.Companion.defaultOrder
+import com.johnlindquist.acejump.label.Pattern.Companion.filterTags
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Jumper.hasJumped
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.viewBounds
+import java.util.SortedSet
+import kotlin.collections.HashMap
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.system.measureTimeMillis
 
 /**
  * Singleton that works with Finder to assign selectable tags to search results
@@ -36,38 +40,50 @@ object Tagger : Resettable {
   var query = ""
     private set
   var full = false // Tracks whether all search results were successfully tagged
-  var textMatches: Set<Int> = emptySet()
+  var textMatches: SortedSet<Int> = sortedSetOf<Int>()
   private var tagMap: Map<String, Int> = emptyMap()
   private val logger = Logger.getInstance(Tagger::class.java)
-
-  private val Iterable<Int>.allInView
-    get() = all { it in viewBounds }
 
   private val Iterable<Marker>.noneInView
     get() = none { it.index in viewBounds }
 
-  fun markOrJump(model: FindModel, results: Set<Int>) {
-    textMatches = results.cull()
-    (results.size - textMatches.size).let {
-      if (it > 0) logger.info("Culled $it unsuitable sites")
-    }
-
+  fun markOrJump(model: FindModel, results: SortedSet<Int>) {
     model.run {
       if (!regex) regex = isRegularExpressions
       query = if (regex) " " + stringToFind else stringToFind.toLowerCase()
+      logger.info("Received query: \"$query\"")
     }
 
-    logger.info("Received query: \"$query\"")
+    measureTimeMillis {
+      textMatches = refineSearchResults(results)
+    }.let { if(!regex) logger.info("Refined search results in $it ms") }
 
     giveJumpOpportunity()
     if (!hasJumped) markOrScrollToNextOccurrence()
   }
 
   /**
-   * Thin out dense results. For example, "eee" need not be tagged three times.
+   * Narrows down results that need to be tagged. For example, "eee" need not be
+   * tagged three times. Furthermore, we will not be able to tag every location
+   * in a very large document.
    */
 
-  private fun Set<Int>.cull() = filter { editorText.standsAlone(it) }.toSet()
+  private fun refineSearchResults(results: SortedSet<Int>): SortedSet<Int> {
+    if (regex) return results
+    val availableTags = filterTags(query).filter { it !in tagMap }.toSet()
+
+    val sites = results.filter { editorText.admitsTagAtLocation(it) }
+    val discards = results.size - sites.size
+    discards.let { if (it > 0) logger.info("Discarded $it contiguous results") }
+
+    val hasAmpleTags = availableTags.size >= sites.size
+
+    val fesiableRegion = getFesiableRegion(sites) ?: return sites.toSortedSet()
+    val remainder = sites.partition { hasAmpleTags || it in fesiableRegion }
+    remainder.second.size.let { if (it > 0) logger.info("Discarded $it OOBs") }
+
+    return remainder.first.toSortedSet()
+  }
 
   /**
    * Returns whether a given index inside a String can be tagged with a two-
@@ -75,16 +91,17 @@ object Tagger : Resettable {
    * any nearby tags.
    */
 
-  private fun String.standsAlone(it: Int) = when {
-    it - 1 < 0 -> true
-    it + 1 >= length -> true
-    this[it] isUnlike this[it - 1] -> true
-    this[it] isUnlike this[it + 1] -> true
-    this[it] != this[it - 1] -> true
-    this[it] != this[it + 1] -> true
-    this[it + 1] == '\r' || this[it + 1] == '\n' -> true
-    this[it - 1] == this[it] && this[it] == this[it + 1] -> false
-    this[it + 1].isWhitespace() && this[(it + 2)
+  private fun String.admitsTagAtLocation(loc: Int) = when {
+    1 < query.length -> true
+    loc - 1 < 0 -> true
+    loc + 1 >= length -> true
+    this[loc] isUnlike this[loc - 1] -> true
+    this[loc] isUnlike this[loc + 1] -> true
+    this[loc] != this[loc - 1] -> true
+    this[loc] != this[loc + 1] -> true
+    this[loc + 1] == '\r' || this[loc + 1] == '\n' -> true
+    this[loc - 1] == this[loc] && this[loc] == this[loc + 1] -> false
+    this[loc + 1].isWhitespace() && this[(loc + 2)
       .coerceAtMost(length - 1)].isWhitespace() -> true
     else -> false
   }
@@ -93,15 +110,17 @@ object Tagger : Resettable {
     this.isLetterOrDigit() xor other.isLetterOrDigit() ||
       this.isWhitespace() xor other.isWhitespace()
 
-  // TODO: Fix this method (broken)
   fun maybeJumpIfJustOneTagRemains() =
-    tagMap.entries.firstOrNull()?.run { Jumper.jump(value) }
+    tagMap.values.filter { it in viewBounds }.sorted().firstOrNull()?.run {
+      logger.info("User selected first tag on screen")
+      Jumper.jump(this)
+    }
 
   private fun giveJumpOpportunity() =
-    tagMap.entries.firstOrNull { it.solves(query) }?.let {
-        logger.info("User selected tag: ${it.key.toUpperCase()}")
-        Jumper.jump(it.value)
-      }
+    tagMap.entries.firstOrNull { it.solves(query) }?.run {
+      logger.info("User selected tag: ${key.toUpperCase()}")
+      Jumper.jump(value)
+    }
 
   /**
    * Returns true if and only if a tag location is unambiguously completed by a
@@ -152,29 +171,35 @@ object Tagger : Resettable {
     }
 
   private fun assignTags(results: Set<Int>): Map<String, Int> {
-    logger.info("Tags on screen: ${results.filter { it in viewBounds }.size}")
     var timeElapsed = System.currentTimeMillis()
     val newTags = transferExistingTagsCompatibleWithQuery()
-
     // Ongoing queries with results in view do not need further tag assignment
-    newTags.run { if (regex && isNotEmpty() && values.allInView) return this }
-    if (hasTagSuffixInView(query)) return newTags
+    newTags.run {
+      if (regex && isNotEmpty() && values.all { it in viewBounds }) return this
+      else if (hasTagSuffixInView(query)) return this
+    }
 
+    val (onScreen, offScreen) = results.partition { it in viewBounds }
+    val completeResultSet = onScreen + offScreen
     // Some results are untagged. Let's assign some tags!
-    val vacantResults = results.filter { it !in newTags.values }.toSet()
-    val availableTags = sortTags(query).filter { it !in tagMap }.toSet()
+    val vacantResults = completeResultSet.filter { it !in newTags.values }
+    val availableTags = filterTags(query).filter { it !in tagMap }.toSet()
     if (availableTags.size < vacantResults.size) full = false
 
     logger.run {
       timeElapsed = System.currentTimeMillis() - timeElapsed
+      info("Results on screen: ${onScreen.size}, off screen: ${offScreen.size}")
       info("Vacant Results: ${vacantResults.size}")
       info("Available Tags: ${availableTags.size}")
       info("Time elapsed: $timeElapsed ms")
     }
 
-    return if (regex) availableTags.zip(vacantResults).toMap()
+    return if (regex) solveRegex(vacantResults, availableTags)
     else Solver.solve(vacantResults, availableTags)
   }
+
+  private fun solveRegex(vacantResults: List<Int>, availableTags: Set<String>) =
+    availableTags.sortedWith(defaultOrder).zip(vacantResults).toMap()
 
   /**
    * Adds pre-existing tags where search string and tag overlap. For example,
@@ -188,7 +213,7 @@ object Tagger : Resettable {
   override fun reset() {
     regex = false
     full = false
-    textMatches = emptySet()
+    textMatches = sortedSetOf()
     tagMap = emptyMap()
     query = ""
     markers = emptyList()

@@ -11,12 +11,18 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
+import com.johnlindquist.acejump.view.Model.MAX_TAG_RESULTS
+import com.johnlindquist.acejump.view.Model.viewBounds
 import java.awt.Point
-import java.lang.Math.max
-import java.lang.Math.min
 import javax.swing.JComponent
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
-interface Resettable { fun reset() }
+interface Resettable {
+  fun reset()
+}
+
 fun <P> applyTo(vararg ps: P, fx: P.() -> Unit) = ps.forEach { it.fx() }
 
 operator fun Point.component1() = x
@@ -82,6 +88,20 @@ fun Editor.isFirstCharacterOfLine(index: Int) =
 
 fun FindModel.sanitizedString() =
   if (isRegularExpressions) stringToFind else Regex.escape(stringToFind)
+
+/**
+ * Returns up to MAX_TAG_RESULTS by accumulating results before and after the
+ * view boundaries, (approximately centered around the middle of the screen).
+ *
+ * @see MAX_TAG_RESULTS
+ * @return
+ */
+
+fun getFesiableRegion(results: List<Int>, takeAtMost: Int = MAX_TAG_RESULTS) =
+  ((viewBounds.first + viewBounds.last) / 2).let { middleOfScreen ->
+    results.sortedBy { abs(middleOfScreen - it) }
+      .take(min(results.size, takeAtMost))
+  }.sorted().let { if(it.isNotEmpty()) it.first()..it.last() else null }
 
 fun Editor.getView(): IntRange {
   val firstVisibleLine = max(0, getVisualLineAtTopOfScreen() - 1)

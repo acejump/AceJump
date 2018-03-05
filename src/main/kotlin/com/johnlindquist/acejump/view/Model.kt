@@ -76,9 +76,10 @@ object Model {
     get() = lineHeight - (editor as EditorImpl).descent - fontHeight
   val arcD = rectHeight - 6
   var viewBounds = 0..0
-  val SEARCH_BUFFER = 10000
+  const val DEFAULT_BUFFER = 40000
   val LONG_DOCUMENT
-    get() = 2e4 < editorText.length
+    get() = DEFAULT_BUFFER < editorText.length
+  const val MAX_TAG_RESULTS = 300
 
   data class Settings(var allowedChars: List<Char> =
                       ('a'..'z').plus('0'..'9').toList(),

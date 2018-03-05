@@ -37,6 +37,10 @@ enum class Pattern(val string: String) {
     var NUM_CHARS: Int = 36
       get() = settings.allowedChars.size
 
+    val defaultOrder: Comparator<String> = compareBy(
+      { it[0].isDigit() || it[1].isDigit() },
+      { Pattern.distance(it[0], it.last()) })
+
     /**
      * Sorts available tags by key distance. Tags which are ergonomically easier
      * to reach will be assigned first. We would prefer to use tags that contain
@@ -44,7 +48,7 @@ enum class Pattern(val string: String) {
      * keys (ex. 12, 21) to keys that are located further apart on the keyboard.
      */
 
-    fun sortTags(query: String) = allBigrams.filter { !query.endsWith(it[0]) }
+    fun filterTags(query: String) = allBigrams.filter { !query.endsWith(it[0]) }
 
     private val defaultKeyboardLayout = arrayOf(
       "1234567890",

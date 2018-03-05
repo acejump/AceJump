@@ -1,12 +1,14 @@
 package com.johnlindquist.acejump.label
 
+import com.google.common.collect.HashBiMap
+import com.google.common.collect.Multimaps
+import com.google.common.collect.Ordering
+import com.google.common.collect.TreeMultimap
 import com.intellij.openapi.diagnostic.Logger
+import com.johnlindquist.acejump.label.Pattern.Companion.defaultOrder
 import com.johnlindquist.acejump.search.wordBoundsPlus
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.viewBounds
-import org.eclipse.collections.impl.bimap.mutable.HashBiMap
-import org.eclipse.collections.impl.multimap.set.sorted.SynchronizedSortedSetMultimap
-import org.eclipse.collections.impl.multimap.set.sorted.TreeSortedSetMultimap
 import java.lang.Math.max
 import kotlin.collections.set
 import kotlin.system.measureTimeMillis
@@ -20,8 +22,7 @@ import kotlin.system.measureTimeMillis
 
 object Solver {
   private val logger = Logger.getInstance(Solver::class.java)
-  private var bigrams: MutableSet<String> = LinkedHashSet()
-  private var newTags: MutableMap<String, Int> = HashBiMap<String, Int>()
+  private var newTags: MutableMap<String, Int> = HashBiMap.create()
   private var strings: Set<String> = hashSetOf()
 
   /**
@@ -41,12 +42,9 @@ object Solver {
     return true
   }
 
-  private val tagOrder: Comparator<String> = compareBy(
-    { it[0].isDigit() || it[1].isDigit() },
-    { Pattern.distance(it[0], it.last()) },
-    { eligibleSitesByTag[it].size },
-    { Pattern.priority(it.last()) }
-  )
+  private val tagOrder = defaultOrder
+    .thenBy { eligibleSitesByTag[it].size }
+    .thenBy { Pattern.priority(it.last()) }
 
   /**
    * Sorts jump targets to determine which positions get first choice for tags,
@@ -78,9 +76,8 @@ object Solver {
    * @see isCompatibleWithTagChar This defines how tags may be assigned to sites.
    */
 
-
-  private val eligibleSitesByTag = SynchronizedSortedSetMultimap<String, Int>(
-    TreeSortedSetMultimap<String, Int>(siteOrder))
+  private val eligibleSitesByTag = Multimaps.synchronizedSetMultimap(
+    TreeMultimap.create<String, Int>(Ordering.natural(), siteOrder))
 
   /**
    * Maps tags to search results according to the following constraints.
@@ -100,23 +97,21 @@ object Solver {
    * @return A list of all tags and their corresponding indices
    */
 
-  fun solve(results: Set<Int>, tags: Set<String>): Map<String, Int> {
-    newTags = HashBiMap(Pattern.NUM_TAGS)
-    bigrams = tags.toMutableSet()
+  fun solve(results: Collection<Int>, tags: Set<String>): Map<String, Int> {
     eligibleSitesByTag.clear()
-
+    newTags = HashMap(Pattern.NUM_TAGS)
     strings = HashSet(results.map { getWordFragments(it) }.flatten())
-    val tagsByFirstLetter = bigrams.groupBy { it[0] }
 
     var totalAssigned = 0
     var timeAssigned = 0L
     val timeElapsed = measureTimeMillis {
+      val tagsByFirstLetter = tags.groupBy { it[0] }
       results.parallelStream().forEach { site ->
         val compatibleTags = tagsByFirstLetter.getTagsCompatibleWith(site)
         compatibleTags.forEach { tag -> eligibleSitesByTag.put(tag, site) }
       }
 
-      val sortedTags = eligibleSitesByTag.keysView().toSortedList(tagOrder)
+      val sortedTags = eligibleSitesByTag.keySet().sortedWith(tagOrder)
 
       timeAssigned = measureTimeMillis {
         for (tagString in sortedTags) {

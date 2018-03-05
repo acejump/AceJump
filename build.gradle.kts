@@ -32,10 +32,5 @@ repositories {
   mavenCentral()
 }
 
-dependencies {
-  compile("org.eclipse.collections:eclipse-collections-api:9.1.0")
-  compile("org.eclipse.collections:eclipse-collections:9.1.0")
-}
-
 group = "com.johnlindquist"
 version = "3.4.3"
