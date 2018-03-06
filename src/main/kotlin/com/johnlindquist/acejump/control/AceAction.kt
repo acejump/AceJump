@@ -59,7 +59,7 @@ class AceWordAction : AceAction() {
 }
 
 /**
- * Search for words from the start of the screen to the cursor
+ * Search for words from the start of the screen to the caret
  */
 object AceWordForwardAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
@@ -70,7 +70,7 @@ object AceWordForwardAction : AceAction() {
 }
 
 /**
- * Search for words from the cursor position to the start of the screen
+ * Search for words from the caret position to the start of the screen
  */
 object AceWordBackwardsAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
