@@ -5,6 +5,7 @@ import com.google.common.collect.Multimaps
 import com.google.common.collect.Ordering
 import com.google.common.collect.TreeMultimap
 import com.intellij.openapi.diagnostic.Logger
+import com.johnlindquist.acejump.label.Pattern.Companion.defaultOrder
 import com.johnlindquist.acejump.search.wordBoundsPlus
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.viewBounds
@@ -21,7 +22,6 @@ import kotlin.system.measureTimeMillis
 
 object Solver {
   private val logger = Logger.getInstance(Solver::class.java)
-  private var bigrams: MutableSet<String> = LinkedHashSet()
   private var newTags: MutableMap<String, Int> = HashBiMap.create()
   private var strings: Set<String> = hashSetOf()
 
@@ -42,12 +42,9 @@ object Solver {
     return true
   }
 
-  private val tagOrder: Comparator<String> = compareBy(
-    { it[0].isDigit() || it[1].isDigit() },
-    { eligibleSitesByTag[it].size },
-    { Pattern.distance(it[0], it.last()) },
-    { Pattern.priority(it.first()) }
-  )
+  private val tagOrder = defaultOrder
+    .thenBy { eligibleSitesByTag[it].size }
+    .thenBy { Pattern.priority(it.last()) }
 
   /**
    * Sorts jump targets to determine which positions get first choice for tags,
@@ -100,17 +97,15 @@ object Solver {
    * @return A list of all tags and their corresponding indices
    */
 
-  fun solve(results: Set<Int>, tags: Set<String>): Map<String, Int> {
-    newTags = HashBiMap.create(Pattern.NUM_TAGS)
-    bigrams = tags.toMutableSet()
+  fun solve(results: Collection<Int>, tags: Set<String>): Map<String, Int> {
     eligibleSitesByTag.clear()
-
+    newTags = HashMap(Pattern.NUM_TAGS)
     strings = HashSet(results.map { getWordFragments(it) }.flatten())
-    val tagsByFirstLetter = bigrams.groupBy { it[0] }
 
     var totalAssigned = 0
     var timeAssigned = 0L
     val timeElapsed = measureTimeMillis {
+      val tagsByFirstLetter = tags.groupBy { it[0] }
       results.parallelStream().forEach { site ->
         val compatibleTags = tagsByFirstLetter.getTagsCompatibleWith(site)
         compatibleTags.forEach { tag -> eligibleSitesByTag.put(tag, site) }
@@ -139,9 +134,9 @@ object Solver {
   }
 
   private fun Map<Char, List<String>>.getTagsCompatibleWith(site: Int) =
-    entries.mapNotNull { (firstLetter, tags) ->
-      if (site isCompatibleWithTagChar firstLetter) tags else null
-    }.flatten()
+    entries.flatMap { (firstLetter, tags) ->
+      if (site isCompatibleWithTagChar firstLetter) tags else emptyList()
+    }
 
   /**
    * Returns true IFF the tag, when inserted at any position in the word, could
@@ -153,7 +148,7 @@ object Solver {
     getWordFragments(this).map { it + char }.none { it in strings }
 
   private fun getWordFragments(site: Int): List<String> {
-    val left = site + Tagger.query.length - 1
+    val left = max(0, site + Tagger.query.length - 1)
     val right = editorText.wordBoundsPlus(site).second
 
     return (left..right).map { editorText.substring(left, it) }

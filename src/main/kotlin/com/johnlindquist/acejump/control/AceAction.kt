@@ -22,9 +22,9 @@ open class AceAction : DumbAwareAction() {
   }
 
   override fun actionPerformed(e: AnActionEvent) {
-    Finder.fullFileMode()
-    editor = e.getData(EDITOR) ?: editor
-    logger.info("Invoked on ${editor.getNameOfFileInEditor()}")
+    editor = e.getData(EDITOR) ?: return
+    val textLength = editor.document.textLength
+    logger.info("Invoked on ${editor.getNameOfFileInEditor()} ($textLength)")
     Handler.activate()
   }
 }

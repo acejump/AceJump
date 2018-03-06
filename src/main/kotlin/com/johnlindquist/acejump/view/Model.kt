@@ -9,9 +9,10 @@ import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.editor.markup.EffectType.BOXED
 import com.intellij.openapi.editor.markup.EffectType.ROUNDED_BOX
 import com.intellij.openapi.editor.markup.TextAttributes
+import com.intellij.openapi.project.ProjectManager
 import com.johnlindquist.acejump.config.AceConfig
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
-import com.johnlindquist.acejump.search.getDefaultEditor
+import com.johnlindquist.acejump.search.defaultEditor
 import java.awt.Color
 import java.awt.Color.*
 import java.awt.Font
@@ -23,8 +24,8 @@ import java.awt.Font.PLAIN
  */
 
 object Model {
-  var editor = getDefaultEditor()
-    get() = if(field.isDisposed) getDefaultEditor() else field
+  var editor = defaultEditor()
+    get() = if(field.isDisposed) defaultEditor() else field
     set(value) {
       editorText = value.document.text.toLowerCase()
       if (value == field) return
@@ -45,7 +46,7 @@ object Model {
   val markup
     get() = editor.markupModel
   val project
-    get() = editor.project
+    get() = editor.project ?: ProjectManager.getInstance().defaultProject
   var editorText = editor.document.text.toLowerCase()
 
   var globalScheme = getInstance().globalScheme
@@ -53,7 +54,8 @@ object Model {
   var naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
   var naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
   var naturalColor = globalScheme.getColor(CARET_COLOR) ?: BLACK
-  var naturalHighlight = globalScheme.getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES).backgroundColor
+  var naturalHighlight = globalScheme
+    .getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)?.backgroundColor ?: YELLOW
 
   val targetModeHighlightStyle =
     TextAttributes(null, null, settings.targetModeColor, ROUNDED_BOX, PLAIN)
@@ -76,17 +78,18 @@ object Model {
     get() = lineHeight - (editor as EditorImpl).descent - fontHeight
   val arcD = rectHeight - 6
   var viewBounds = 0..0
-  val SEARCH_BUFFER = 10000
+  const val DEFAULT_BUFFER = 40000
   val LONG_DOCUMENT
-    get() = 2e4 < editorText.length
+    get() = DEFAULT_BUFFER < editorText.length
+  const val MAX_TAG_RESULTS = 300
 
   data class Settings(var allowedChars: List<Char> =
                       ('a'..'z').plus('0'..'9').toList(),
-                      var jumpModeColor: Color = blue,
-                      var targetModeColor: Color = red,
-                      var textHighlightColor: Color = green,
-                      var tagForegroundColor: Color = black,
-                      var tagBackgroundColor: Color = yellow)
+                      var jumpModeColor: Color = BLUE,
+                      var targetModeColor: Color = RED,
+                      var textHighlightColor: Color = GREEN,
+                      var tagForegroundColor: Color = BLACK,
+                      var tagBackgroundColor: Color = YELLOW)
 
   fun Editor.setupCaret() {
     naturalBlock = settings.isBlockCursor

@@ -2,6 +2,12 @@ import org.gradle.api.internal.initialization.ClassLoaderIds.buildScript
 import org.jetbrains.intellij.tasks.RunIdeaTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+buildscript {
+  dependencies {
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.30")
+  }
+}
+
 tasks {
   withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
@@ -13,13 +19,17 @@ tasks {
 }
 
 plugins {
-  kotlin("jvm") version "1.2.20"
+  kotlin("jvm") version "1.2.30"
   id("org.jetbrains.intellij") version "0.2.17"
 }
 
 intellij {
   pluginName = "AceJump"
   updateSinceUntilBuild = false
+}
+
+repositories {
+  mavenCentral()
 }
 
 group = "com.johnlindquist"

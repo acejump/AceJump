@@ -9,7 +9,7 @@ import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 enum class Pattern(val string: String) {
   END_OF_LINE("\\n|\\Z"),
   START_OF_LINE("^.|^\\n"),
-  CODE_INDENTS("(?<=^\\s*)\\S|^\\n"),
+  CODE_INDENTS("[^\\s].*|^\\n"),
   LINE_MARK(END_OF_LINE.string + "|" +
     START_OF_LINE.string + "|" +
     CODE_INDENTS.string),
@@ -37,14 +37,18 @@ enum class Pattern(val string: String) {
     var NUM_CHARS: Int = 36
       get() = settings.allowedChars.size
 
+    val defaultOrder: Comparator<String> = compareBy(
+      { it[0].isDigit() || it[1].isDigit() },
+      { Pattern.distance(it[0], it.last()) })
+
     /**
      * Sorts available tags by key distance. Tags which are ergonomically easier
-     * to type will be assigned first. We should prefer to use tags that contain
+     * to reach will be assigned first. We would prefer to use tags that contain
      * repeated keys (ex. FF, JJ), and use tags that contain physically adjacent
      * keys (ex. 12, 21) to keys that are located further apart on the keyboard.
      */
 
-    fun sortTags(query: String) = allBigrams.filter { it[0] != query[0] }
+    fun filterTags(query: String) = allBigrams.filter { !query.endsWith(it[0]) }
 
     private val defaultKeyboardLayout = arrayOf(
       "1234567890",

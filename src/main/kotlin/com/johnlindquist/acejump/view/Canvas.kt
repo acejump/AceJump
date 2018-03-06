@@ -31,6 +31,7 @@ object Canvas : JComponent(), Resettable {
     }
 
   fun Editor.bindCanvas() {
+    reset()
     storeBounds()
     contentComponent.add(Canvas)
     Canvas.setBounds(0, 0, contentComponent.width, contentComponent.height)
@@ -41,7 +42,7 @@ object Canvas : JComponent(), Resettable {
     }
   }
 
-  fun Editor.storeBounds() {
+  private fun Editor.storeBounds() {
     viewBounds = getView()
     this::offsetToLogicalPosition.let {
       logger.info("View bounds: $viewBounds (lines " +

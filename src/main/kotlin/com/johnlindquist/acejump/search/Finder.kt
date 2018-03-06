@@ -12,16 +12,13 @@ import com.johnlindquist.acejump.label.Pattern
 import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.LONG_DOCUMENT
-import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.markup
 import com.johnlindquist.acejump.view.Model.viewBounds
 import org.jetbrains.concurrency.runAsync
-import java.lang.Math.max
-import java.lang.Math.min
 import java.util.*
+import kotlin.math.min
 import kotlin.system.measureTimeMillis
-import kotlin.text.RegexOption.MULTILINE
 
 /**
  * Interface which defines the boundry inside the file which is searched by the
@@ -83,7 +80,7 @@ class AfterCurserBoundry : FinderBoundry {
  */
 
 object Finder : Resettable {
-  private var results: SortedSet<Int> = sortedSetOf<Int>()
+  private var results: SortedSet<Int> = sortedSetOf()
   @Volatile
   private var textHighlights = listOf<RangeHighlighter>()
   @Volatile
@@ -102,7 +99,7 @@ object Finder : Resettable {
     set(value) {
       field = value.toLowerCase()
       if (query.isNotEmpty()) logger.info("Received query: \"$value\"")
-      isShiftSelectEnabled = value.isNotEmpty() && value.last().isUpperCase()
+      isShiftSelectEnabled = value.lastOrNull()?.isUpperCase() == true
 
       when {
         value.isEmpty() -> return
@@ -144,6 +141,7 @@ object Finder : Resettable {
 
   fun search(pattern: Pattern) {
     logger.info("Searching for regular expression: ${pattern.name}")
+    // TODO: Fix this broken reset
     reset()
     search(FindModel().apply {
       stringToFind = pattern.string
@@ -170,10 +168,10 @@ object Finder : Resettable {
 
   fun search(model: FindModel = FindModel().apply { stringToFind = query }) {
     measureTimeMillis {
-      results = editorText.findMatchingSites(model).toSortedSet()
-    }.let { ms -> logger.info("Found ${results.size} matches in $ms ms") }
+      results = Scanner.findMatchingSites(editorText, model, results)
+    }.let { logger.info("Found ${results.size} matching sites in $it ms") }
 
-    if (!results.isEmpty()) paintTextHighlights(model)
+    paintTextHighlights(model)
     if (!skim) runAsync { tag(model, results) }
   }
 
@@ -190,16 +188,19 @@ object Finder : Resettable {
       createTextHighlight(s, e)
     }
 
-    textHighlights.forEach { markup.removeHighlighter(it) }
-    textHighlights = newHighlights
+    if (!results.isEmpty()) {
+      textHighlights.forEach { markup.removeHighlighter(it) }
+      textHighlights = newHighlights
+    }
+
     viewHighlights = textHighlights.filter { it.startOffset in viewBounds }
   }
 
-  private fun createTextHighlight(s: Int, e: Int) =
-    markup.addRangeHighlighter(s, e, HIGHLIGHT_LAYER, null, EXACT_RANGE)
+  private fun createTextHighlight(start: Int, end: Int) =
+    markup.addRangeHighlighter(start, end, HIGHLIGHT_LAYER, null, EXACT_RANGE)
       .apply { customRenderer = Marker(query, null, this.startOffset) }
 
-  private fun tag(model: FindModel, results: Set<Int>) {
+  private fun tag(model: FindModel, results: SortedSet<Int>) {
     synchronized(this) { Tagger.markOrJump(model, results) }
     viewHighlights = viewHighlights.narrowBy { Tagger canDiscard startOffset }
       .also { newHighlights ->
@@ -207,7 +208,7 @@ object Finder : Resettable {
         if (numDiscarded != 0) logger.info("Discarded $numDiscarded highlights")
       }
 
-    if (model.stringToFind == query) Handler.repaintTagMarkers()
+    if (model.stringToFind == query || model.isRegularExpressions) Handler.repaintTagMarkers()
   }
 
   fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =
@@ -217,38 +218,6 @@ object Finder : Resettable {
         false
       } else true
     }
-
-  /**
-   * Returns a list of indices where the query begins, within the given range.
-   * These are full indices, ie. are not offset to the beginning of the range.
-   */
-
-  private fun String.findMatchingSites(model: FindModel,
-                                       key: String = model.stringToFind.toLowerCase(),
-                                       cache: Set<Int> = results) =
-    // If the cache is populated, filter it instead of redoing extra work
-    if (cache.isEmpty()) findAll(model.sanitizedString())
-    else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
-
-  private fun Set<Int>.isCacheValidForRange() =
-    viewBounds.let { view ->
-      first() < view.first && last() > view.last
-    }
-
-  private fun CharSequence.findAll(key: String, start: Int = getStartBound()) =
-    generateSequence({ Regex(key, MULTILINE).find(this, start) },
-      Finder::filterNextResult).map { it.range.first }
-
-  private fun getStartBound() = boundries.getStart()
-  private fun getEndBound() = boundries.getEnd()
-
-  private tailrec fun filterNextResult(result: MatchResult): MatchResult? {
-    val next = result.next()
-    return if (next == null) null
-    else if (getEndBound() <= next.range.first) null
-    else if (editor.isVisible(next.range.first)) next
-    else filterNextResult(next)
-  }
 
   private fun String.isValidQuery() =
     results.any { editorText.regionMatches(it, this, 0, length) } ||

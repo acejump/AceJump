@@ -7,7 +7,7 @@ import com.intellij.openapi.options.Configurable
 import com.johnlindquist.acejump.view.Model.Settings
 import javax.swing.JComponent
 
-@State(name = "AceConfig", storages = arrayOf(Storage("AceJump.xml")))
+@State(name = "AceConfig", storages = [(Storage("AceJump.xml"))])
 class AceConfig : Configurable, PersistentStateComponent<Settings> {
   companion object {
     var settings = Settings()
