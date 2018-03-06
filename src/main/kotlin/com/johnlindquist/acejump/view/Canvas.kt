@@ -42,7 +42,7 @@ object Canvas : JComponent(), Resettable {
     }
   }
 
-  fun Editor.storeBounds() {
+  private fun Editor.storeBounds() {
     viewBounds = getView()
     this::offsetToLogicalPosition.let {
       logger.info("View bounds: $viewBounds (lines " +
