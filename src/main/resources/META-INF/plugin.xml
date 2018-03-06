@@ -3,7 +3,7 @@
   <id>AceJump</id>
 
   <description><![CDATA[
-    AceJump allows you to quickly navigate the cursor to any position visible in the editor.
+    AceJump allows you to quickly navigate the caret to any position visible in the editor.
     See a demo of <a href="https://www.youtube.com/watch?v=8cgy8ITtsJE">AceJump in action</a>!
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
@@ -61,13 +61,13 @@
     </action>
    <action id="AceWordForwardAction"
             class="com.johnlindquist.acejump.control.AceWordForwardAction"
-            text="Start in Word Mode only searching after the cursor"
-            description="Searches for all words after the cursor in AceJump">
+            text="Start in Word Mode only searching after the caret"
+            description="Searches for all words after the caret in AceJump">
     </action>
    <action id="AceWordBackwardsAction"
             class="com.johnlindquist.acejump.control.AceWordBackwardsAction"
-            text="Start in Word Mode only searching before the cursor"
-            description="Searches for all words before the cursor in AceJump">
+            text="Start in Word Mode only searching before the caret"
+            description="Searches for all words before the caret in AceJump">
     </action>
   </actions>
 </idea-plugin>
