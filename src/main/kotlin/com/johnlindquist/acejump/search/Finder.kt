@@ -23,21 +23,35 @@ import java.util.*
 import kotlin.system.measureTimeMillis
 import kotlin.text.RegexOption.MULTILINE
 
+/**
+ * Interface which defines the boundry inside the file which is searched by the
+ * Finder
+ */
 interface FinderBoundry {
 	fun getStart() : Int;
 	fun getEnd() : Int;
 }
 
+/**
+ * Implementation of the FinderBoundry - search the complete file
+ */
 class FullFileBoundry : FinderBoundry {
   override fun getStart() : Int = max(0, viewBounds.first - 20000)
   override fun getEnd() : Int = min(viewBounds.last + 20000, editorText.length)
 }
 
+/**
+ * Implementation of the FinderBoundry - search only on the screen
+ */
 class ScreenBoundry : FinderBoundry {
   override fun getStart() : Int = max(0, viewBounds.first)
   override fun getEnd() : Int = min(viewBounds.last, editorText.length)
 }
 
+/**
+ * Implementation of the FinderBoundry - search from the start of the screen to
+ * the cursor
+ */
 class BeforeCurserBoundry : FinderBoundry {
   override fun getStart() : Int = max(0, viewBounds.first)
   override fun getEnd() : Int {
@@ -48,6 +62,10 @@ class BeforeCurserBoundry : FinderBoundry {
   }
 }
 
+/**
+ * Implementation of the FinderBoundry - search from the cursor to the end of
+ * the screen
+ */
 class AfterCurserBoundry : FinderBoundry {
   override fun getStart() : Int {
 	  var offset = editor.getCaretModel().getOffset()
@@ -144,6 +162,10 @@ object Finder : Resettable {
 
   fun fullFileMode() {
 	  boundries = FullFileBoundry()
+  }
+  
+  fun screenMode() {
+	  boundries = ScreenBoundry()
   }
 
   fun search(model: FindModel = FindModel().apply { stringToFind = query }) {

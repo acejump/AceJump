@@ -47,11 +47,20 @@ object AceKeyAction : AceAction() {
   }
 }
 
+/**
+ * Search for words in the complete file
+ */
 class AceWordAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also { Finder.search(ALL_WORDS) }
+    super.actionPerformed(e).also { 
+		 Finder.screenMode()
+		 Finder.search(ALL_WORDS) 
+	 }
 }
 
+/**
+ * Search for words from the start of the screen to the cursor
+ */
 object AceWordForwardAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
     super.actionPerformed(e).also { 
@@ -60,6 +69,9 @@ object AceWordForwardAction : AceAction() {
    }
 }
 
+/**
+ * Search for words from the cursor position to the start of the screen
+ */
 object AceWordBackwardsAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
     super.actionPerformed(e).also { 
