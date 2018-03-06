@@ -24,32 +24,32 @@ import kotlin.system.measureTimeMillis
  * Interface which defines the boundry inside the file which is searched by the
  * Finder
  */
-interface FinderBoundry {
+interface FinderBoundary {
 	fun getStart() : Int;
 	fun getEnd() : Int;
 }
 
 /**
- * Implementation of the FinderBoundry - search the complete file
+ * Implementation of the FinderBoundary - search the complete file
  */
-class FullFileBoundry : FinderBoundry {
+class FullFileBoundary : FinderBoundary {
   override fun getStart() : Int = max(0, viewBounds.first - 20000)
   override fun getEnd() : Int = min(viewBounds.last + 20000, editorText.length)
 }
 
 /**
- * Implementation of the FinderBoundry - search only on the screen
+ * Implementation of the FinderBoundary - search only on the screen
  */
-class ScreenBoundry : FinderBoundry {
+class ScreenBoundary : FinderBoundary {
   override fun getStart() : Int = max(0, viewBounds.first)
   override fun getEnd() : Int = min(viewBounds.last, editorText.length)
 }
 
 /**
- * Implementation of the FinderBoundry - search from the start of the screen to
- * the cursor
+ * Implementation of the FinderBoundary - search from the start of the screen to
+ * the caret
  */
-class BeforeCurserBoundry : FinderBoundry {
+class BeforeCaretBoundary : FinderBoundary {
   override fun getStart() : Int = max(0, viewBounds.first)
   override fun getEnd() : Int {
 
@@ -60,10 +60,10 @@ class BeforeCurserBoundry : FinderBoundry {
 }
 
 /**
- * Implementation of the FinderBoundry - search from the cursor to the end of
+ * Implementation of the FinderBoundary - search from the caret to the end of
  * the screen
  */
-class AfterCurserBoundry : FinderBoundry {
+class AfterCaretBoundary : FinderBoundary {
   override fun getStart() : Int {
 	  var offset = editor.getCaretModel().getOffset()
 
@@ -89,7 +89,7 @@ object Finder : Resettable {
   private val logger = Logger.getInstance(Finder::class.java)
   var isShiftSelectEnabled = false
   
-  private var boundries : FinderBoundry = FullFileBoundry()
+  private var boundries : FinderBoundary = FullFileBoundary()
 
   var skim = false
     private set
@@ -151,19 +151,19 @@ object Finder : Resettable {
   }
 
   fun backwardsMode() {
-	  boundries = BeforeCurserBoundry()
+	  boundries = BeforeCaretBoundary()
   }
 
   fun forwardMode() {
-	  boundries = AfterCurserBoundry()
+	  boundries = AfterCaretBoundary()
   }
 
   fun fullFileMode() {
-	  boundries = FullFileBoundry()
+	  boundries = FullFileBoundary()
   }
   
   fun screenMode() {
-	  boundries = ScreenBoundry()
+	  boundries = ScreenBoundary()
   }
 
   fun search(model: FindModel = FindModel().apply { stringToFind = query }) {
