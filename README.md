@@ -112,10 +112,13 @@ The following plugins have a similar UI for navigating text and web browsing:
 | [VSCodeVim](https://github.com/VSCodeVim/Vim)                         |     [Visual Studio Code](https://code.visualstudio.com/)     |✅|[TypeScript](https://www.typescriptlang.org/)|
 | [AceJump](https://github.com/jsturtevant/ace-jump)                    |     [Visual Studio](https://www.visualstudio.com/)           |✅|[C#](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/)|
 | [cVim](https://github.com/1995eaton/chromium-vim)                     |     [Chrome](https://www.google.com/chrome)                  |✅|[JavaScript](https://www.javascript.com/)|
-| [SurfingKeys](https://github.com/brookhong/Surfingkeys)               |     [Chrome](https://www.google.com/chrome)                  |✅|[JavaScript](https://www.javascript.com/)|
+| [SurfingKeys](https://github.com/brookhong/Surfingkeys)               |     [Chrome](https://www.google.com/chrome) / [Firefox](https://www.mozilla.org/firefox)                 |✅|[JavaScript](https://www.javascript.com/)|
 | [Vimium](https://github.com/philc/vimium)                             |     [Chrome](https://www.google.com/chrome)                  |✅|[CoffeeScript](http://coffeescript.org/)|
 | [Vrome](https://github.com/jinzhu/vrome)                              |     [Chrome](https://www.google.com/chrome)                  |❌|[CoffeeScript](http://coffeescript.org/)|
 | [ViChrome](https://github.com/k2nr/ViChrome)                          |     [Chrome](https://www.google.com/chrome)                  |❌|[CoffeeScript](http://coffeescript.org/)|
 | [VimFx](https://github.com/akhodakivskiy/VimFx)                       |     [Firefox](https://www.mozilla.org/firefox)               |✅|[CoffeeScript](http://coffeescript.org/)|
 | [Vimperator](https://github.com/vimperator/vimperator-labs/)          |     [Firefox](https://www.mozilla.org/firefox)               |✅|[JavaScript](https://www.javascript.com/)|
 | [Pentadactyl](https://github.com/5digits/dactyl)                      |     [Firefox](https://www.mozilla.org/firefox)               |✅|[JavaScript](https://www.javascript.com/)|
+| [Vim Vixen](https://github.com/ueokande/vim-vixen)                      |     [Firefox 57+](https://blog.mozilla.org/addons/2017/09/28/webextensions-in-firefox-57/)               |✅|[JavaScript](https://www.javascript.com/)|
+| [Tridactyl](https://github.com/ueokande/vim-vixen)                      |     [Firefox 57+](https://blog.mozilla.org/addons/2017/09/28/webextensions-in-firefox-57/)               |✅|[TypeScript](https://www.typescriptlang.org/)|
+| [Vimari](https://github.com/guyht/vimari)                      |     [Safari](https://www.apple.com/safari/)               |✅|[JavaScript](https://www.javascript.com/)|
