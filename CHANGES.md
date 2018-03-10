@@ -2,9 +2,9 @@
 
 ### 3.5.0
 
-Adds two new features. "Word-Mode" and quick tag selection.
+Adds two new features. "**Word-Mode**" and quick tag selection.
 
-Word-Mode removes search and addresses latency issues raised in #161.
+**Word Mode** removes search and addresses latency issues raised in #161. To learn more about **Word Mode**, see the [readme](https://github.com/johnlindquist/AceJump#tips).
 
 Pressing <kbd>Enter</kbd> during a search will jump to the next visible match (or closest match, if next is not visible), as per #133.
 
