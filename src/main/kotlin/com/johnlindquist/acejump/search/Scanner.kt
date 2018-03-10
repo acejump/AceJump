@@ -1,6 +1,7 @@
 package com.johnlindquist.acejump.search
 
 import com.intellij.find.FindModel
+import com.johnlindquist.acejump.view.Model.boundaries
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.viewBounds
 import kotlin.text.RegexOption.MULTILINE
@@ -29,9 +30,10 @@ object Scanner {
       ::filterNextResult).map { it.range.first }
 
   private tailrec fun filterNextResult(result: MatchResult): MatchResult? {
-    val next = result.next()
-    return if (next == null) null
-    else if (editor.isVisible(next.range.first)) next
+    val next = result.next() ?: return null
+    val offset = next.range.first
+    return if (offset >= boundaries.endInclusive) null
+    else if (editor.isNotFolded(offset) && offset in boundaries) next
     else filterNextResult(next)
   }
 }

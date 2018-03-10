@@ -4,9 +4,11 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.DumbAwareAction
+import com.johnlindquist.acejump.label.Pattern.ALL_WORDS
 import com.johnlindquist.acejump.label.Pattern.LINE_MARK
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.getNameOfFileInEditor
+import com.johnlindquist.acejump.view.Boundary.*
 import com.johnlindquist.acejump.view.Model.editor
 import java.awt.event.KeyEvent
 
@@ -44,4 +46,37 @@ object AceKeyAction : AceAction() {
     logger.info("Registered key: ${KeyEvent.getKeyText(inputEvent.keyCode)}")
     Handler.processCommand(inputEvent.keyCode)
   }
+}
+
+/**
+ * Search for words in the complete file
+ */
+
+class AceWordAction : AceAction() {
+  override fun actionPerformed(e: AnActionEvent) =
+    super.actionPerformed(e).also { 
+		 Finder.search(ALL_WORDS, ScreenBoundary)
+	 }
+}
+
+/**
+ * Search for words from the start of the screen to the caret
+ */
+
+object AceWordForwardAction : AceAction() {
+  override fun actionPerformed(e: AnActionEvent) =
+    super.actionPerformed(e).also { 
+      Finder.search(ALL_WORDS, AfterCaretBoundary)
+   }
+}
+
+/**
+ * Search for words from the caret position to the start of the screen
+ */
+
+object AceWordBackwardsAction : AceAction() {
+  override fun actionPerformed(e: AnActionEvent) =
+    super.actionPerformed(e).also {
+       Finder.search(ALL_WORDS, BeforeCaretBoundary)
+    }
 }

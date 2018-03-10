@@ -9,14 +9,16 @@ import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.control.Trigger
 import com.johnlindquist.acejump.label.Pattern
 import com.johnlindquist.acejump.label.Tagger
+import com.johnlindquist.acejump.view.Boundary
+import com.johnlindquist.acejump.view.Boundary.FullFileBoundary
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.LONG_DOCUMENT
+import com.johnlindquist.acejump.view.Model.boundaries
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.markup
 import com.johnlindquist.acejump.view.Model.viewBounds
 import org.jetbrains.concurrency.runAsync
 import java.util.*
-import kotlin.math.min
 import kotlin.system.measureTimeMillis
 
 /**
@@ -83,8 +85,9 @@ object Finder : Resettable {
       Trigger(400L) { runLater { skim = false; search() } }
     } else search()
 
-  fun search(pattern: Pattern) {
-    logger.info("Searching for regular expression: ${pattern.name}")
+  fun search(pattern: Pattern, bounds: Boundary = FullFileBoundary) {
+    logger.info("Searching for regular expression: ${pattern.name} in $bounds")
+    boundaries = bounds
     // TODO: Fix this broken reset
     reset()
     search(FindModel().apply {

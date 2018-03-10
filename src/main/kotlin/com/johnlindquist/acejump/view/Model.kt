@@ -13,6 +13,7 @@ import com.intellij.openapi.project.ProjectManager
 import com.johnlindquist.acejump.config.AceConfig
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
 import com.johnlindquist.acejump.search.defaultEditor
+import com.johnlindquist.acejump.view.Boundary.FullFileBoundary
 import java.awt.Color
 import java.awt.Color.*
 import java.awt.Font
@@ -25,7 +26,7 @@ import java.awt.Font.PLAIN
 
 object Model {
   var editor = defaultEditor()
-    get() = if(field.isDisposed) defaultEditor() else field
+    get() = if (field.isDisposed) defaultEditor() else field
     set(value) {
       editorText = value.document.text.toLowerCase()
       if (value == field) return
@@ -85,8 +86,10 @@ object Model {
     get() = DEFAULT_BUFFER < editorText.length
   const val MAX_TAG_RESULTS = 300
 
+  var boundaries: Boundary = FullFileBoundary
+
   data class Settings(var allowedChars: List<Char> =
-                      ('a'..'z').plus('0'..'9').toList(),
+                        ('a'..'z').plus('0'..'9').toList(),
                       var jumpModeColor: Color = BLUE,
                       var targetModeColor: Color = RED,
                       var textHighlightColor: Color = GREEN,
