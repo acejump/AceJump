@@ -97,7 +97,7 @@ AceJump is inspired by prior work, but adds several improvements, including:
 
 * **Target mode**: Jump and select an full word in one rapid motion.
 * **Line Mode**: Jump to the first, last, or first non-whitespace character of a line.
-* **Word Mode**: Jump to the first character of any visible word on the editor screen. 
+* **Word Mode**: Jump to the first character of any visible word on-screen in two keystrokes or less.
 * **Real-time** search: Type any string in the editor, and AceJump will highlight and tag matches instantly.
 * **Full text** search: If a string is not visible on the screen, AceJump will scroll to the next occurrence.
 * **Smart tag** rendering: Tags will occupy nearby whitespace if available, rather than block text.
