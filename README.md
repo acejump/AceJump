@@ -80,6 +80,7 @@ If you would like to contribute, here are a few of the ways you can help improve
 * [Multi-monitor support](https://github.com/johnlindquist/AceJump/issues/144)
 * [Animated documentation](https://github.com/johnlindquist/AceJump/issues/145)
 * [Speed up tagging on large files](https://github.com/johnlindquist/AceJump/issues/161)
+* [Support user-configurable keyboard layouts](https://github.com/johnlindquist/AceJump/issues/172)
 
 To start IntelliJ IDEA CE with AceJump installed, run `./gradlew runIde -Project=$(pwd)`. 
 
