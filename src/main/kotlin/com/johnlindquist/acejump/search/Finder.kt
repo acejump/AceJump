@@ -5,73 +5,21 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea.EXACT_RANGE
 import com.intellij.openapi.editor.markup.RangeHighlighter
-import com.intellij.openapi.editor.Editor
 import com.johnlindquist.acejump.control.Handler
 import com.johnlindquist.acejump.control.Trigger
 import com.johnlindquist.acejump.label.Pattern
 import com.johnlindquist.acejump.label.Tagger
+import com.johnlindquist.acejump.view.Boundary
+import com.johnlindquist.acejump.view.Boundary.FullFileBoundary
 import com.johnlindquist.acejump.view.Marker
 import com.johnlindquist.acejump.view.Model.LONG_DOCUMENT
+import com.johnlindquist.acejump.view.Model.boundaries
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.markup
 import com.johnlindquist.acejump.view.Model.viewBounds
 import org.jetbrains.concurrency.runAsync
 import java.util.*
-import kotlin.math.min
 import kotlin.system.measureTimeMillis
-
-/**
- * Interface which defines the boundry inside the file which is searched by the
- * Finder
- */
-interface FinderBoundary {
-	fun getStart() : Int;
-	fun getEnd() : Int;
-}
-
-/**
- * Implementation of the FinderBoundary - search the complete file
- */
-class FullFileBoundary : FinderBoundary {
-  override fun getStart() : Int = max(0, viewBounds.first - 20000)
-  override fun getEnd() : Int = min(viewBounds.last + 20000, editorText.length)
-}
-
-/**
- * Implementation of the FinderBoundary - search only on the screen
- */
-class ScreenBoundary : FinderBoundary {
-  override fun getStart() : Int = max(0, viewBounds.first)
-  override fun getEnd() : Int = min(viewBounds.last, editorText.length)
-}
-
-/**
- * Implementation of the FinderBoundary - search from the start of the screen to
- * the caret
- */
-class BeforeCaretBoundary : FinderBoundary {
-  override fun getStart() : Int = max(0, viewBounds.first)
-  override fun getEnd() : Int {
-
-	  var offset = editor.getCaretModel().getOffset()
-
-	  return min( offset - 1, min(viewBounds.last, editorText.length) )
-  }
-}
-
-/**
- * Implementation of the FinderBoundary - search from the caret to the end of
- * the screen
- */
-class AfterCaretBoundary : FinderBoundary {
-  override fun getStart() : Int {
-	  var offset = editor.getCaretModel().getOffset()
-
-	  return max(offset + 1, max(0, viewBounds.first))
-  }
-  override fun getEnd() : Int = min(viewBounds.last, editorText.length)
-}
-
 
 /**
  * Singleton that searches for text in editor and highlights matching results.
@@ -88,8 +36,6 @@ object Finder : Resettable {
   private var HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
   private val logger = Logger.getInstance(Finder::class.java)
   var isShiftSelectEnabled = false
-  
-  private var boundries : FinderBoundary = FullFileBoundary()
 
   var skim = false
     private set
@@ -139,8 +85,9 @@ object Finder : Resettable {
       Trigger(400L) { runLater { skim = false; search() } }
     } else search()
 
-  fun search(pattern: Pattern) {
-    logger.info("Searching for regular expression: ${pattern.name}")
+  fun search(pattern: Pattern, bounds: Boundary = FullFileBoundary) {
+    logger.info("Searching for regular expression: ${pattern.name} in $bounds")
+    boundaries = bounds
     // TODO: Fix this broken reset
     reset()
     search(FindModel().apply {
@@ -148,22 +95,6 @@ object Finder : Resettable {
       isRegularExpressions = true
       Tagger.reset()
     })
-  }
-
-  fun backwardsMode() {
-	  boundries = BeforeCaretBoundary()
-  }
-
-  fun forwardMode() {
-	  boundries = AfterCaretBoundary()
-  }
-
-  fun fullFileMode() {
-	  boundries = FullFileBoundary()
-  }
-  
-  fun screenMode() {
-	  boundries = ScreenBoundary()
   }
 
   fun search(model: FindModel = FindModel().apply { stringToFind = query }) {

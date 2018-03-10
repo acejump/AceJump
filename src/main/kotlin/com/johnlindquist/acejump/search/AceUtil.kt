@@ -48,7 +48,7 @@ fun Editor.offsetCenter(first: Int, second: Int): LogicalPosition {
 fun Editor.getNameOfFileInEditor() =
   FileDocumentManager.getInstance().getFile(document)?.presentableName
 
-fun Editor.isVisible(offset: Int) = !foldingModel.isOffsetCollapsed(offset)
+fun Editor.isNotFolded(offset: Int) = !foldingModel.isOffsetCollapsed(offset)
 
 /**
  * Identifies the bounds of a word, defined as a contiguous group of letters
