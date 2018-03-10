@@ -162,6 +162,5 @@ object Finder : Resettable {
     results = sortedSetOf()
     textHighlights = listOf()
     viewHighlights = listOf()
-    boundaries = DEFAULT_BOUNDARY
   }
 }

@@ -9,6 +9,8 @@ import com.johnlindquist.acejump.label.Pattern.LINE_MARK
 import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.getNameOfFileInEditor
 import com.johnlindquist.acejump.view.Boundary.*
+import com.johnlindquist.acejump.view.Model.DEFAULT_BOUNDARY
+import com.johnlindquist.acejump.view.Model.boundaries
 import com.johnlindquist.acejump.view.Model.editor
 import java.awt.event.KeyEvent
 
@@ -23,6 +25,7 @@ open class AceAction : DumbAwareAction() {
   }
 
   override fun actionPerformed(e: AnActionEvent) {
+    boundaries = DEFAULT_BOUNDARY
     editor = e.getData(EDITOR) ?: return
     val textLength = editor.document.textLength
     logger.info("Invoked on ${editor.getNameOfFileInEditor()} ($textLength)")
