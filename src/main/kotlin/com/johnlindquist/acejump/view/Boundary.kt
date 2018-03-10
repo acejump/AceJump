@@ -15,9 +15,9 @@ interface Boundary : ClosedRange<Int> {
    */
   object FullFileBoundary : Boundary {
     override val start: Int
-      get() = editorText.length
-    override val endInclusive: Int
       get() = 0
+    override val endInclusive: Int
+      get() = editorText.length
   }
 
   /**
