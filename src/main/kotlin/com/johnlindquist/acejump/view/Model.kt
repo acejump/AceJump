@@ -86,7 +86,8 @@ object Model {
     get() = DEFAULT_BUFFER < editorText.length
   const val MAX_TAG_RESULTS = 300
 
-  var boundaries: Boundary = FullFileBoundary
+  val DEFAULT_BOUNDARY = FullFileBoundary
+  var boundaries: Boundary = DEFAULT_BOUNDARY
 
   data class Settings(var allowedChars: List<Char> =
                         ('a'..'z').plus('0'..'9').toList(),

@@ -12,6 +12,7 @@ import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.view.Boundary
 import com.johnlindquist.acejump.view.Boundary.FullFileBoundary
 import com.johnlindquist.acejump.view.Marker
+import com.johnlindquist.acejump.view.Model.DEFAULT_BOUNDARY
 import com.johnlindquist.acejump.view.Model.LONG_DOCUMENT
 import com.johnlindquist.acejump.view.Model.boundaries
 import com.johnlindquist.acejump.view.Model.editorText
@@ -161,5 +162,6 @@ object Finder : Resettable {
     results = sortedSetOf()
     textHighlights = listOf()
     viewHighlights = listOf()
+    boundaries = DEFAULT_BOUNDARY
   }
 }

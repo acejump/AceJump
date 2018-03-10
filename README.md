@@ -4,11 +4,11 @@
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177444/124fb534-a74d-11e6-8912-1d220ae27091.png)
 
-Press the AceJump shortcut a second time before completing a tag to activate *Target Mode*. Once *Target Mode* is activated, jumping to a tag will select an entire word. *Target Mode* can also be activated directly by pressing the shortcut for `AceTargetAction` (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd> by default).
+Press the AceJump shortcut a second time before completing a tag to activate **Target Mode**. Once **Target Mode** is activated, jumping to a tag will select an entire word. **Target Mode** can also be activated directly by pressing the shortcut for `AceTargetAction` (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd> by default).
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177362/a9976398-a74c-11e6-955d-df029c7b329b.png)
 
-Press the AceJump shortcut for line mode (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), to target the beginning, first non-whitespace characters, and end of every line in the editor). Then jump to one by completing the tag.
+Press the AceJump shortcut for **Line Mode**(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), to target the beginning, first non-whitespace characters, and end of every line in the editor). Then jump to one by completing the tag.
 
 ![](https://cloud.githubusercontent.com/assets/175716/20533565/f7d04d1e-b0ab-11e6-8b89-f7b10a98752d.png)
 
@@ -26,9 +26,13 @@ AceJump tags are *not* case sensitive. Holding down <kbd>Shift</kbd> when typing
 
 - If no matches can be found on screen, AceJump will scroll to the next match it can find.
 
-- If there is only one tagged result, pressing <kbd>Enter</kbd> will jump to that result.
+- Pressing <kbd>Enter</kbd> during a search will jump to the next (or nearest) result.
 
 - Keep typing! AceJump will accept multiple sequential characters before tag selection.
+
+- **Word Mode** is a new action that will tag all visible words as soon as it is activated.
+
+  - To bind a shortcut key to Word Mode, open **Settings | Keymap | Plugins | AceJump** 
 
 ## Installing
 
@@ -92,12 +96,12 @@ Please [see here](/CHANGES.md) for a detailed list of changes.
 AceJump is inspired by prior work, but adds several improvements, including:
 
 * **Target mode**: Jump and select an full word in one rapid motion.
+* **Line Mode**: Jump to the first, last, or first non-whitespace character of a line.
+* **Word Mode**: Jump to the first character of any visible word on the editor screen. 
 * **Real-time** search: Type any string in the editor, and AceJump will highlight and tag matches instantly.
 * **Full text** search: If a string is not visible on the screen, AceJump will scroll to the next occurrence.
 * **Smart tag** rendering: Tags will occupy nearby whitespace if available, rather than block text.
 * **Keyboard-friendly** tagging: AceJump tries to minimize finger travel distance on QWERTY keyboards.
-* **Line-mode**: Jump to the first, last, or first non-whitespace character of a line.
-* [Coming soon](#214): **Word-mode**: Jump to any word on screen.
 
 The following plugins have a similar UI for navigating text and web browsing: 
 

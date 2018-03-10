@@ -8,7 +8,12 @@
     Simply hit "ctrl+;", type a character, then type the matching character to Ace Jump. ]]>
   </description>
   <change-notes>
-    <![CDATA[ <a href="https://github.com/johnlindquist/AceJump/blob/master/CHANGES.md">Release Notes</a> ]]>
+    <![CDATA[
+Adds two new features: "Word-Mode" and quick tag selection. Word-Mode removes search and addresses latency issues.
+
+Pressing [Enter] during a search will now jump to the next visible match (or closest match, if next is not visible).
+
+<a href="https://github.com/johnlindquist/AceJump/blob/master/CHANGES.md">Release Notes</a> ]]>
   </change-notes>
 
   <depends>com.intellij.modules.platform</depends>
