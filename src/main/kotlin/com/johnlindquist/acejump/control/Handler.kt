@@ -43,7 +43,7 @@ object Handler : TypedActionHandler, Resettable {
     VK_UP to { Canvas.reset(); search(CODE_INDENTS) },
     VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { clear() },
-    VK_ENTER to { Tagger.maybeJumpIfJustOneTagRemains() },
+    VK_ENTER to { Tagger.jumpToNextOrNearestVisible(); repaintTagMarkers() },
     // TODO: recycle tags during tab search, push scanner as far as possible
     VK_TAB to { Scroller.ifQueryExistsScrollToNextOccurrence(!isShiftDown) },
     VK_SPACE to { processSpacebar() }

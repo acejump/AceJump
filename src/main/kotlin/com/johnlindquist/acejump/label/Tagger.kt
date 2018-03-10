@@ -7,6 +7,7 @@ import com.johnlindquist.acejump.label.Pattern.Companion.filterTags
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Jumper.hasJumped
 import com.johnlindquist.acejump.view.Marker
+import com.johnlindquist.acejump.view.Model.caretOffset
 import com.johnlindquist.acejump.view.Model.editorText
 import com.johnlindquist.acejump.view.Model.viewBounds
 import java.util.SortedSet
@@ -56,7 +57,7 @@ object Tagger : Resettable {
 
     measureTimeMillis {
       textMatches = refineSearchResults(results)
-    }.let { if(!regex) logger.info("Refined search results in $it ms") }
+    }.let { if (!regex) logger.info("Refined search results in $it ms") }
 
     giveJumpOpportunity()
     if (!hasJumped) markOrScrollToNextOccurrence()
@@ -110,10 +111,14 @@ object Tagger : Resettable {
     this.isLetterOrDigit() xor other.isLetterOrDigit() ||
       this.isWhitespace() xor other.isWhitespace()
 
-  fun maybeJumpIfJustOneTagRemains() =
-    tagMap.values.filter { it in viewBounds }.sorted().firstOrNull()?.run {
-      logger.info("User selected first tag on screen")
-      Jumper.jump(this)
+  fun jumpToNextOrNearestVisible() =
+    tagMap.values.filter { it in viewBounds }.sorted().let { tags ->
+      if (caretOffset in viewBounds) {
+        tags.firstOrNull { it > caretOffset }?.let { return Jumper.jump(it) }
+        tags.lastOrNull { it < caretOffset }?.let { return Jumper.jump(it) }
+      } else {
+        tags.firstOrNull()?.let { Jumper.jump(it) }
+      }
     }
 
   private fun giveJumpOpportunity() =

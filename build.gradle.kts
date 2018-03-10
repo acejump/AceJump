@@ -28,9 +28,5 @@ intellij {
   updateSinceUntilBuild = false
 }
 
-repositories {
-  mavenCentral()
-}
-
 group = "com.johnlindquist"
-version = "3.4.3"
+version = "3.5.0"

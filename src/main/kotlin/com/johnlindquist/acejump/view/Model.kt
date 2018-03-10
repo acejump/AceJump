@@ -47,6 +47,8 @@ object Model {
     get() = editor.markupModel
   val project
     get() = editor.project ?: ProjectManager.getInstance().defaultProject
+  val caretOffset
+    get() = editor.caretModel.offset
   var editorText = editor.document.text.toLowerCase()
 
   var globalScheme = getInstance().globalScheme
