@@ -32,11 +32,11 @@ AceJump tags are *not* case sensitive. Holding down <kbd>Shift</kbd> when typing
 
 - **Word Mode** is a new action that will tag all visible words as soon as it is activated.
 
-  - To bind a shortcut key to Word Mode, open **Settings | Keymap | Plugins | AceJump** 
+  - To bind a keyboard shortcut to **Word Mode**, open **Settings | Keymap | 🔍 "AceJump"** 
 
 ## Installing
 
-Install directly from the IDE, via **File \| Settings \| Plugins \| Browse Repositories... \| 🔍 "AceJump"**.
+Install directly from the IDE, via **File | Settings | Plugins | Browse Repositories... | 🔍 "AceJump"**.
 
 ![Install](https://cloud.githubusercontent.com/assets/175716/11760310/cb4657e6-a064-11e5-8e07-837c2c0c40eb.png)
 
