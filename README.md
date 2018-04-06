@@ -32,7 +32,7 @@ AceJump tags are *not* case sensitive. Holding down <kbd>Shift</kbd> when typing
 
 - **Word Mode** is a new action that will tag all visible words as soon as it is activated.
 
-  - To bind a keyboard shortcut to **Word Mode**, open **Settings | Keymap | 🔍 "AceJump"** 
+  - To bind a keyboard shortcut to **Word Mode**, open **Settings | Keymap | 🔍 "AceJump"**
 
 ## Installing
 
@@ -82,7 +82,7 @@ If you would like to contribute, here are a few of the ways you can help improve
 * [Speed up tagging on large files](https://github.com/johnlindquist/AceJump/issues/161)
 * [Support user-configurable keyboard layouts](https://github.com/johnlindquist/AceJump/issues/172)
 
-To start IntelliJ IDEA CE with AceJump installed, run `./gradlew runIde -Project=$(pwd)`. 
+To start IntelliJ IDEA CE with AceJump installed, run `./gradlew runIde -Project=$(pwd)`.
 
 For documentation on plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
 
@@ -105,12 +105,13 @@ AceJump is inspired by prior work, but adds several improvements, including:
 * **Smart tag** rendering: Tags will occupy nearby whitespace if available, rather than block text.
 * **Keyboard-friendly** tagging: AceJump tries to minimize finger travel distance on QWERTY keyboards.
 
-The following plugins have a similar UI for navigating text and web browsing: 
+The following plugins have a similar UI for navigating text and web browsing:
 
-| Plugin                                                                |   Application                           |  Actively Maintained  | Language | 
+| Plugin                                                                |   Application                           |  Actively Maintained  | Language |
 | :---                                                                  |     :---:                               |     :---:             |   :---:  |
 | AceJump                                                               |     [IntelliJ Platform](https://jetbrains.com)               |✅|[Kotlin](http://kotlinlang.org/)|
 | [ace-jump-mode](https://github.com/winterTTr/ace-jump-mode)           |     [emacs](https://www.gnu.org/software/emacs/)             |❌|[Emacs Lisp](https://www.gnu.org/software/emacs/manual/eintr.html)|
+| [avy](https://github.com/abo-abo/avy)                                 |     [emacs](https://www.gnu.org/software/emacs/)             |✅|[Emacs Lisp](https://www.gnu.org/software/emacs/manual/eintr.html)|
 | [EasyMotion](https://github.com/easymotion/vim-easymotion)            |     [Vim](http://www.vim.org/)                               |❌|[Vimscript](http://learnvimscriptthehardway.stevelosh.com/)|
 | [Sublime EasyMotion](https://github.com/tednaleid/sublime-EasyMotion) |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
 | [AceJump](https://github.com/ice9js/ace-jump-sublime)                 |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
