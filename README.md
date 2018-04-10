@@ -66,7 +66,8 @@ To change the default keyboard shortcuts, open **File \| Settings \| Keymap \| ð
 To build AceJump, clone then run the Gradle task `buildPlugin`:
 
 * `git clone https://github.com/johnlindquist/AceJump && cd AceJump`
-* `./gradlew buildPlugin`
+* For Linux and Mac OS: `./gradlew buildPlugin`
+* For Windows: `gradlew.bat buildPlugin`
 
 The build artifact will be located in `build/distributions/`.
 
