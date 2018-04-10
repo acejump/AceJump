@@ -63,13 +63,19 @@ To change the default keyboard shortcuts, open **File \| Settings \| Keymap \| ð
 
 ## Building
 
+*Prerequisites: [JDK 8 or higher](http://openjdk.java.net/install/).*
+
 To build AceJump, clone and run the Gradle task [`buildPlugin`](https://github.com/JetBrains/gradle-intellij-plugin#tasks) like so:
 
 * `git clone https://github.com/johnlindquist/AceJump && cd AceJump`
 * For Linux and Mac OS: `./gradlew buildPlugin`
 * For Windows: `gradlew.bat buildPlugin`
 
-The build artifact will be located in `build/distributions/`.
+The build artifact will be placed in `build/distributions/`.
+
+*Miscellaneous: AceJump uses the [Gradle Kotlin DSL](https://github.com/gradle/kotlin-dsl) with the [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-plugin).*
+
+*For more information, please refer to the [Gradle Kotlin DSL Docs](https://gradle.github.io/kotlin-dsl-docs/) (currently alpha).*
 
 ## Contributing
 
