@@ -1,5 +1,5 @@
 import org.gradle.api.internal.initialization.ClassLoaderIds.buildScript
-import org.jetbrains.intellij.tasks.RunIdeaTask
+import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
@@ -13,7 +13,7 @@ tasks {
     kotlinOptions.jvmTarget = "1.8"
   }
 
-  withType<RunIdeaTask> {
+  withType<RunIdeTask> {
     findProperty("roject")?.let { args = listOf(it as String) }
   }
 }
