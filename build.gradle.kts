@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 buildscript {
   dependencies {
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.30")
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.41")
   }
 }
 
@@ -19,7 +19,7 @@ tasks {
 }
 
 plugins {
-  kotlin("jvm") version "1.2.30"
+  kotlin("jvm") version "1.2.41"
   id("org.jetbrains.intellij") version "0.3.1"
 }
 
