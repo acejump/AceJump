@@ -17,7 +17,7 @@ import kotlin.system.measureTimeMillis
  * Solves the Tag Assignment Problem. The tag assignment problem can be stated
  * thusly: Given a set of indices I in document d, and a set of tags T, find a
  * bijection f: T*⊂T → I*⊂I s.t. d[i..k] + t ∉ d[i'..(k + |t|)], ∀ i' ∈ I\{i},
- * ∀ k ∈ [i, |d|], where t ∈ T, i ∈ I. Maximize |T*|. Can be relaxed to t=t[0]
+ * ∀ k ∈ [i, |d|], where t ∈ T, i ∈ I. Maximize |I*|. Can be relaxed to t=t[0]
  * and ∀ k ∈ [i, i+K] for some fixed K, in most naturally appearing documents.
  * 
  * More concretely, tags are typically two-character strings containing alpha-
