@@ -15,9 +15,10 @@ import kotlin.system.measureTimeMillis
 
 /**
  * Solves the tag assignment problem. The tag assignment problem can be stated
- * thusly: Given a set of indices I in document D, and a set of two-character
- * tags T, find a mapping of T->I such that D[i_n..i_(n+1)] + t_n[0] is not in
- * {D[i_j..(i_(j+1) + 1)]}. Maximize |T->I|. (TODO: improve notation here)
+ * thusly: Given a set of indices I in document D, and a set of tags T, find a 
+ * bijection f: T* ⊂ T → I* ⊂ I such that D[i..p] + t ∉ D[i'..p], ∀ i' ∈ I\{i}
+ * ∀ p ∈ [i, |D|-i], where t ∈ T. Maximize |T*→I*|. Can be relaxed to t = t[0]
+ * and ∀ p ∈ [i, i+K] for some fixed K, in most naturally occurring documents.
  */
 
 object Solver {
