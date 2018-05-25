@@ -14,11 +14,20 @@ import kotlin.collections.set
 import kotlin.system.measureTimeMillis
 
 /**
- * Solves the tag assignment problem. The tag assignment problem can be stated
- * thusly: Given a set of indices I in document D, and a set of tags T, find a 
- * bijection f: T* ⊂ T → I* ⊂ I such that D[i..p] + t ∉ D[i'..p], ∀ i' ∈ I\{i}
- * ∀ p ∈ [i, |D|-i], where t ∈ T. Maximize |T*→I*|. Can be relaxed to t = t[0]
- * and ∀ p ∈ [i, i+K] for some fixed K, in most naturally occurring documents.
+ * Solves the Tag Assignment Problem. The tag assignment problem can be stated
+ * thusly: Given a set of indices I in document d, and a set of tags T, find a
+ * bijection f: T*⊂T → I*⊂I s.t. d[i..k] + t ∉ d[i'..(k + |t|)], ∀ i' ∈ I\{i}
+ * ∀ k ∈ [i, |d|], where t ∈ T, i ∈ I. Maximize |T*|. Can be relaxed to t=t[0]
+ * and ∀ k ∈ [i, i+K] for some fixed K, in most naturally appearing documents.
+ * 
+ * More concretely, tags are typically two-character strings containing alpha-
+ * numeric symbols. Documents are plaintext documents. Indices are produced by
+ * a search query, so the preceeding N characters of every index i in document
+ * d are identical. For characters proceeding d[i], all bets are off. We might
+ * assume that P(d[i]|d[i-1]) has some stucture for d~D. At the end of the day
+ * we would like to have an efficient TAP algorithm. (Certain approximations 
+ * may be considered, however no string d[i..k] + t may ever be contained in 
+ * the set of strings d[i'..j] or there will be tag collisions in practice.)
  */
 
 object Solver {
