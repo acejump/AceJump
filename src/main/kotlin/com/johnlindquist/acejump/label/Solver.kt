@@ -25,9 +25,10 @@ import kotlin.system.measureTimeMillis
  * a search query, so the preceeding N characters of every index i in document
  * d are identical. For characters proceeding d[i], all bets are off. We might
  * assume that P(d[i]|d[i-1]) has some stucture for d~D. At the end of the day
- * we would like to have an efficient TAP algorithm. (Certain approximations 
- * may be considered, however no string d[i..k] + t may ever be contained in 
- * the set of strings d[i'..j] or there will be tag collisions in practice.)
+ * we would like to have an efficient algorithm which maximizes the number of 
+ * document indices covered by tags. (Further approximations may be considered
+ * however no string d[i..k] + t may ever be contained in the set of strings 
+ * d[i'..j] or else there will be tag collisions in practice.)
  */
 
 object Solver {
