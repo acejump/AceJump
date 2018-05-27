@@ -37,10 +37,8 @@ object Solver {
   private var strings: Set<String> = hashSetOf()
 
   /**
-   * Iterates through the remaining available tags, until we find one that
-   * matches our criteria, i.e. does not collide with an existing tag or
-   * plaintext string. To have the desired behavior, this has a surprising
-   * number of edge cases that must explicitly prevented.
+   * Iterates through remaining available tags, until we find one matching our
+   * criteria, i.e. does not collide with an existing tag or plaintext string.
    *
    * @param tag the tag string which is to be assigned
    * @param sites potential indices where a tag may be assigned
@@ -93,15 +91,13 @@ object Solver {
   /**
    * Maps tags to search results according to the following constraints.
    *
-   * 1. A tag must not match *any* bigrams on the screen.
-   * 2. A tag's 1st letter must not match any letters of the covered word.
-   * 3. Tag must not match any combination of any plaintext and tag. "e(a[B)X]"
-   * 4. Once assigned, a tag must never change until it has been selected. *A.
+   * 1. A tag's first letter must not match any letters of the covered word.
+   * 2. Once assigned, a tag must never change until it has been selected. *A.
    *
    * Tags *should* have the following properties:
    *
    * A. Should be as short as possible. A tag may be "compacted" later.
-   * B. Should prefer keys that are physically closer to the last key pressed.
+   * B. Should prefer keys that are physically closer on a QWERTY keyboard.
    *
    * @param results All indices to be tagged
    *

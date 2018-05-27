@@ -1,4 +1,3 @@
-import org.gradle.api.internal.initialization.ClassLoaderIds.buildScript
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
