@@ -13,7 +13,7 @@ import java.lang.Math.max
 import kotlin.collections.set
 import kotlin.system.measureTimeMillis
 
-/**
+/*
  * Solves the Tag Assignment Problem. The tag assignment problem can be stated
  * thusly: Given a set of indices I in document d, and a set of tags T, find a
  * bijection f: T*⊂T → I*⊂I s.t. d[i..k] + t ∉ d[i'..(k + |t|)], ∀ i' ∈ I\{i},
@@ -27,7 +27,7 @@ import kotlin.system.measureTimeMillis
  * assume that P(d[i]|d[i-1]) has some stucture for d~D. At the end of the day
  * we would like to have an efficient algorithm which maximizes the number of 
  * document indices covered by tags. (Further approximations may be considered
- * however no string d[i..k] + t may ever be contained in the set of strings 
+ * however no string d[i..k] + t may ever be contained in the set of strings
  * d[i'..j], otherwise there will be ambiguous key sequences in practice.)
  */
 
