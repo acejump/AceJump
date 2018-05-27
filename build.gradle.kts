@@ -2,12 +2,6 @@ import org.gradle.api.internal.initialization.ClassLoaderIds.buildScript
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-buildscript {
-  dependencies {
-    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.41")
-  }
-}
-
 tasks {
   withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
@@ -20,7 +14,7 @@ tasks {
 
 plugins {
   kotlin("jvm") version "1.2.41"
-  id("org.jetbrains.intellij") version "0.3.1"
+  id("org.jetbrains.intellij") version "0.3.2"
 }
 
 intellij {
