@@ -147,6 +147,17 @@ object Handler : TypedActionHandler, Resettable {
       Canvas.repaint()
     }
 
+  fun toggleDefinitionMode(status: Boolean? = null) =
+    editor.colorsScheme.run {
+      if (Jumper.toggleDefinitionMode(status))
+        setColor(CARET_COLOR, settings.definitionModeColor)
+      else
+        setColor(CARET_COLOR, settings.jumpModeColor)
+
+      Finder.paintTextHighlights()
+      Canvas.repaint()
+    }
+
   private fun Editor.restoreSettings() = runAndWait {
     restoreScroll()
     restoreCanvas()

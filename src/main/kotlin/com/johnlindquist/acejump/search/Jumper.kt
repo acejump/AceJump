@@ -1,12 +1,16 @@
 package com.johnlindquist.acejump.search
 
 import com.intellij.codeInsight.editorActions.SelectWordUtil.addWordSelection
+import com.intellij.codeInsight.navigation.actions.GotoDeclarationAction
+import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
+import com.intellij.openapi.ui.playback.commands.ActionCommand
+import com.intellij.openapi.util.ActionCallback
 import com.intellij.openapi.util.TextRange
 import com.johnlindquist.acejump.view.Model.editor
 import com.johnlindquist.acejump.view.Model.editorText
@@ -23,12 +27,21 @@ object Jumper : Resettable {
   @Volatile
   var hasJumped = false
   var targetModeEnabled = false
+  var definitionModeEnabled = false
   private val logger = Logger.getInstance(Jumper::class.java)
 
   fun toggleTargetMode(status: Boolean? = null): Boolean {
+    if (definitionModeEnabled) definitionModeEnabled = false
     logger.info("Setting target mode to $status")
     targetModeEnabled = status ?: !targetModeEnabled
     return targetModeEnabled
+  }
+
+  fun toggleDefinitionMode(status: Boolean? = null): Boolean {
+    if (targetModeEnabled) targetModeEnabled = false
+    logger.info("Setting definition mode to $status")
+    definitionModeEnabled = status ?: !definitionModeEnabled
+    return definitionModeEnabled
   }
 
   fun jump(index: Int) = runAndWait {
@@ -38,9 +51,13 @@ object Jumper : Resettable {
 
       when {
         Finder.isShiftSelectEnabled -> selectRange(caretModel.offset, index)
-        // Moving the caret will trigger a reset, flipping targetModeEnabled,
-        // so we need to move the caret and select the word at the same time
+      // Moving the caret will trigger a reset, flipping targetModeEnabled,
+      // so we need to move the caret and select the word at the same time
         targetModeEnabled -> moveCaret(index).also { selectWordAtOffset(index) }
+        definitionModeEnabled -> moveCaret(index).also {
+          gotoSymbolAction()
+          appendToHistory()
+        }
         else -> moveCaret(index)
       }
 
@@ -48,12 +65,15 @@ object Jumper : Resettable {
     }
   }
 
-  private fun moveCaret(offset: Int) = editor.run {
-    // Add current caret position to navigation history
+  // Add current caret position to navigation history
+  private fun Editor.appendToHistory() =
     CommandProcessor.getInstance().executeCommand(project,
       aceJumpHistoryAppender, "AceJumpHistoryAppender",
       DocCommandGroupId.noneGroupId(document), document)
 
+
+  private fun moveCaret(offset: Int) = editor.run {
+    appendToHistory()
     selectionModel.removeSelection()
     caretModel.moveToOffset(offset)
   }
@@ -79,7 +99,12 @@ object Jumper : Resettable {
     selectRange(startOfWordOffset, endOfWordOffset)
   }
 
+  fun gotoSymbolAction(): ActionCallback =
+    ActionManager.getInstance().tryToExecute(GotoDeclarationAction(), ActionCommand.getInputEvent("NewFromTemplate"), null, null, true)
+
+
   override fun reset() {
+    definitionModeEnabled = false
     targetModeEnabled = false
     hasJumped = false
   }

@@ -43,6 +43,11 @@ class AceLineAction : AceAction() {
     super.actionPerformed(e).also { Finder.search(LINE_MARK) }
 }
 
+object AceNavigationAction : AceAction() {
+  override fun actionPerformed(e: AnActionEvent) =
+    super.actionPerformed(e).also { Handler.toggleDefinitionMode(true) }
+}
+
 object AceKeyAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) {
     val inputEvent = e.inputEvent as? KeyEvent ?: return
@@ -83,3 +88,4 @@ object AceWordBackwardsAction : AceAction() {
        Finder.search(ALL_WORDS, BeforeCaretBoundary)
     }
 }
+
