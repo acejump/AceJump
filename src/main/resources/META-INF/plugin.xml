@@ -72,8 +72,8 @@ Pressing [Enter] during a search will now jump to the next visible match (or clo
             text="Start in Word Mode only searching before the caret"
             description="Searches for all words before the caret in AceJump"/>
     <action id="AceDefinitionAction"
-            class="com.johnlindquist.acejump.control.AceNavigationAction"
-            text="Start in definition mode"
-            description="Go to the declaration of a symbol"/>
+            class="com.johnlindquist.acejump.control.AceNavigateAction"
+            text="Start in Declaration Mode"
+            description="Go to the declaration of a token in the editor"/>
   </actions>
 </idea-plugin>

@@ -43,7 +43,7 @@ class AceLineAction : AceAction() {
     super.actionPerformed(e).also { Finder.search(LINE_MARK) }
 }
 
-object AceNavigationAction : AceAction() {
+object AceNavigateAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
     super.actionPerformed(e).also { Handler.toggleDefinitionMode(true) }
 }

@@ -51,13 +51,10 @@ object Jumper : Resettable {
 
       when {
         Finder.isShiftSelectEnabled -> selectRange(caretModel.offset, index)
-      // Moving the caret will trigger a reset, flipping targetModeEnabled,
-      // so we need to move the caret and select the word at the same time
+        // Moving the caret will trigger a reset, flipping targetModeEnabled,
+        // so we need to move the caret and select the word at the same time
         targetModeEnabled -> moveCaret(index).also { selectWordAtOffset(index) }
-        definitionModeEnabled -> moveCaret(index).also {
-          gotoSymbolAction()
-          appendToHistory()
-        }
+        definitionModeEnabled -> moveCaret(index).also { gotoSymbolAction() }
         else -> moveCaret(index)
       }
 
@@ -99,7 +96,7 @@ object Jumper : Resettable {
     selectRange(startOfWordOffset, endOfWordOffset)
   }
 
-  fun gotoSymbolAction(): ActionCallback =
+  private fun gotoSymbolAction(): ActionCallback =
     ActionManager.getInstance().tryToExecute(GotoDeclarationAction(), ActionCommand.getInputEvent("NewFromTemplate"), null, null, true)
 
 
