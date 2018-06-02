@@ -4,9 +4,9 @@ import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.DumbAwareAction
+import com.johnlindquist.acejump.control.Handler.regexSearch
 import com.johnlindquist.acejump.label.Pattern.ALL_WORDS
 import com.johnlindquist.acejump.label.Pattern.LINE_MARK
-import com.johnlindquist.acejump.search.Finder
 import com.johnlindquist.acejump.search.getNameOfFileInEditor
 import com.johnlindquist.acejump.view.Boundary.*
 import com.johnlindquist.acejump.view.Model.DEFAULT_BOUNDARY
@@ -40,7 +40,7 @@ class AceTargetAction : AceAction() {
 
 class AceLineAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also { Finder.search(LINE_MARK) }
+    super.actionPerformed(e).also { regexSearch(LINE_MARK) }
 }
 
 object AceNavigateAction : AceAction() {
@@ -63,7 +63,7 @@ object AceKeyAction : AceAction() {
 class AceWordAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
     super.actionPerformed(e).also { 
-		 Finder.search(ALL_WORDS, ScreenBoundary)
+		 regexSearch(ALL_WORDS, ScreenBoundary)
 	 }
 }
 
@@ -74,7 +74,7 @@ class AceWordAction : AceAction() {
 object AceWordForwardAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
     super.actionPerformed(e).also { 
-      Finder.search(ALL_WORDS, AfterCaretBoundary)
+      regexSearch(ALL_WORDS, AfterCaretBoundary)
    }
 }
 
@@ -85,7 +85,7 @@ object AceWordForwardAction : AceAction() {
 object AceWordBackwardsAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
     super.actionPerformed(e).also {
-       Finder.search(ALL_WORDS, BeforeCaretBoundary)
+       regexSearch(ALL_WORDS, BeforeCaretBoundary)
     }
 }
 

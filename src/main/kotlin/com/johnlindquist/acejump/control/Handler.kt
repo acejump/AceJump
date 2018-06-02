@@ -11,12 +11,15 @@ import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.util.SmartList
 import com.johnlindquist.acejump.config.AceConfig.Companion.settings
+import com.johnlindquist.acejump.label.Pattern
 import com.johnlindquist.acejump.label.Pattern.*
 import com.johnlindquist.acejump.label.Tagger
 import com.johnlindquist.acejump.search.*
 import com.johnlindquist.acejump.search.Finder.search
 import com.johnlindquist.acejump.search.Scroller.restoreScroll
 import com.johnlindquist.acejump.search.Scroller.storeScroll
+import com.johnlindquist.acejump.view.Boundary
+import com.johnlindquist.acejump.view.Boundary.FullFileBoundary
 import com.johnlindquist.acejump.view.Canvas
 import com.johnlindquist.acejump.view.Canvas.bindCanvas
 import com.johnlindquist.acejump.view.Model
@@ -36,11 +39,11 @@ object Handler : TypedActionHandler, Resettable {
   private val handler = editorTypeAction.rawHandler
   private var isShiftDown = false
   private val keyMap = mapOf(
-    VK_HOME to { Canvas.reset(); search(START_OF_LINE) },
-    VK_LEFT to { Canvas.reset(); search(START_OF_LINE) },
-    VK_RIGHT to { Canvas.reset(); search(END_OF_LINE) },
-    VK_END to { Canvas.reset(); search(END_OF_LINE) },
-    VK_UP to { Canvas.reset(); search(CODE_INDENTS) },
+    VK_HOME to { regexSearch(START_OF_LINE) },
+    VK_LEFT to { regexSearch(START_OF_LINE) },
+    VK_RIGHT to { regexSearch(END_OF_LINE) },
+    VK_END to { regexSearch(END_OF_LINE) },
+    VK_UP to { regexSearch(CODE_INDENTS) },
     VK_ESCAPE to { reset() },
     VK_BACK_SPACE to { clear() },
     VK_ENTER to { Tagger.jumpToNextOrNearestVisible(); repaintTagMarkers() },
@@ -49,12 +52,14 @@ object Handler : TypedActionHandler, Resettable {
     VK_SPACE to { processSpacebar() }
   )
 
+  fun regexSearch(regex: Pattern, bounds: Boundary = FullFileBoundary) = Canvas.reset().also { search(regex, bounds) }
+
   fun activate() = runAndWait { if (!enabled) start() else toggleTargetMode() }
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
   private fun processSpacebar() =
-    if (Finder.query.isEmpty()) search(ALL_WORDS) else Finder.query += " "
+    if (Finder.query.isEmpty()) regexSearch(ALL_WORDS) else Finder.query += " "
 
   private fun clear() {
     applyTo(Tagger, Jumper, Finder, Canvas) { reset() }
