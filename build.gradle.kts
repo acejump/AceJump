@@ -24,10 +24,5 @@ intellij {
 group = "com.johnlindquist"
 version = "3.5.0"
 
-repositories {
-  mavenCentral()
-}
-
-dependencies {
-  testCompile("io.reactivex.rxjava2:rxkotlin:2.2.0")
-}
+repositories.mavenCentral()
+dependencies.testCompile("io.reactivex.rxjava2:rxkotlin:2.2.0")
