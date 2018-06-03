@@ -51,7 +51,7 @@ object Tagger : Resettable {
   fun markOrJump(model: FindModel, results: SortedSet<Int>) {
     model.run {
       if (!regex) regex = isRegularExpressions
-      query = if (regex) " " + stringToFind else stringToFind.toLowerCase()
+      query = if (regex) " $stringToFind" else stringToFind.toLowerCase()
       logger.info("Received query: \"$query\"")
     }
 
