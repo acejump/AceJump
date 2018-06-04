@@ -3,8 +3,11 @@ package com.johnlindquist.acejump.control
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.CustomShortcutSet
 import com.intellij.openapi.actionSystem.DataContext
+import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
@@ -51,6 +54,7 @@ object Handler : TypedActionHandler, Resettable {
     VK_TAB to { Scroller.ifQueryExistsScrollToNextOccurrence(!isShiftDown) },
     VK_SPACE to { processSpacebar() }
   )
+  private var mOldEscActionHandler: EditorActionHandler? = null
 
   fun regexSearch(regex: Pattern, bounds: Boundary = FullFileBoundary) = Canvas.reset().also { search(regex, bounds) }
 
@@ -107,8 +111,20 @@ object Handler : TypedActionHandler, Resettable {
     editorTypeAction.setupRawHandler(handler)
   }
 
+  private val escActionHandler = object : EditorActionHandler() {
+    override fun doExecute(editor: Editor, caret: Caret?, dataContext: DataContext?) {
+      reset()
+    }
+  }
+
   private fun start() {
     enabled = true
+
+    if (mOldEscActionHandler == null) {
+      val manager = EditorActionManager.getInstance()
+      mOldEscActionHandler = manager.getActionHandler(IdeActions.ACTION_EDITOR_ESCAPE)
+      manager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, escActionHandler)
+    }
     configureEditor()
   }
 
@@ -135,6 +151,13 @@ object Handler : TypedActionHandler, Resettable {
 
   override fun reset() {
     if (enabled) Listener.disable()
+
+    mOldEscActionHandler?.let {
+      val manager = EditorActionManager.getInstance()
+      manager.setActionHandler(IdeActions.ACTION_EDITOR_ESCAPE, it)
+      mOldEscActionHandler = null
+    }
+
     editor.component.uninstallCustomShortCutHandler()
     enabled = false
     clear()
