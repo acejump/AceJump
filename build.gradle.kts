@@ -12,7 +12,7 @@ tasks {
 }
 
 plugins {
-  kotlin("jvm") version "1.2.50"
+  kotlin("jvm") version "1.2.51"
   id("org.jetbrains.intellij") version "0.3.4"
 }
 
