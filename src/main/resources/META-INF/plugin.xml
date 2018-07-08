@@ -1,4 +1,4 @@
-<idea-plugin url="https://github.com/johnlindquist/AceJump">
+<idea-plugin url="https://github.com/acejump/AceJump">
   <name>AceJump</name>
   <id>AceJump</id>
 
@@ -13,13 +13,13 @@ Adds two new features: "Word-Mode" and quick tag selection. Word-Mode removes se
 
 Pressing [Enter] during a search will now jump to the next visible match (or closest match, if next is not visible).
 
-<a href="https://github.com/johnlindquist/AceJump/blob/master/CHANGES.md">Release Notes</a> ]]>
+<a href="https://github.com/acejump/AceJump/blob/master/CHANGES.md">Release Notes</a> ]]>
   </change-notes>
 
   <depends>com.intellij.modules.platform</depends>
 
   <category>Navigation</category>
-  <vendor url="https://github.com/johnlindquist/AceJump">AceJump</vendor>
+  <vendor url="https://github.com/acejump/AceJump">AceJump</vendor>
   <idea-version since-build="143.379"/>
 
   <!--<application-components>-->
