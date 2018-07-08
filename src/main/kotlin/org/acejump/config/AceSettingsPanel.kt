@@ -1,10 +1,10 @@
-package com.johnlindquist.acejump.config
+package org.acejump.config
 
 import com.intellij.ui.ColorPanel
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.intellij.uiDesigner.core.Spacer
-import com.johnlindquist.acejump.view.Model.Settings
+import org.acejump.view.Model.Settings
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Insets

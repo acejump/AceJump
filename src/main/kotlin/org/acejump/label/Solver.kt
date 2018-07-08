@@ -1,14 +1,14 @@
-package com.johnlindquist.acejump.label
+package org.acejump.label
 
 import com.google.common.collect.HashBiMap
 import com.google.common.collect.Multimaps
 import com.google.common.collect.Ordering
 import com.google.common.collect.TreeMultimap
 import com.intellij.openapi.diagnostic.Logger
-import com.johnlindquist.acejump.label.Pattern.Companion.defaultOrder
-import com.johnlindquist.acejump.search.wordBoundsPlus
-import com.johnlindquist.acejump.view.Model.editorText
-import com.johnlindquist.acejump.view.Model.viewBounds
+import org.acejump.label.Pattern.Companion.defaultOrder
+import org.acejump.search.wordBoundsPlus
+import org.acejump.view.Model.editorText
+import org.acejump.view.Model.viewBounds
 import java.lang.Math.max
 import kotlin.collections.set
 import kotlin.system.measureTimeMillis

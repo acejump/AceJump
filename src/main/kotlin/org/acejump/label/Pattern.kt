@@ -1,6 +1,6 @@
-package com.johnlindquist.acejump.label
+package org.acejump.label
 
-import com.johnlindquist.acejump.config.AceConfig.Companion.settings
+import org.acejump.config.AceConfig.Companion.settings
 
 /**
  * Patterns related to key priority, separation, and regexps for line mode.

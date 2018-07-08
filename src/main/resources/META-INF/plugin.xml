@@ -24,19 +24,19 @@ Pressing [Enter] during a search will now jump to the next visible match (or clo
 
   <!--<application-components>-->
   <!--<component>-->
-  <!--<implementation-class>com.johnlindquist.acejump.config.AceConfig</implementation-class>-->
+  <!--<implementation-class>org.acejump.config.AceConfig</implementation-class>-->
   <!--</component>-->
   <!--</application-components>-->
 
   <extensions defaultExtensionNs="com.intellij">
-    <applicationService serviceInterface="com.johnlindquist.acejump.config.AceConfig" serviceImplementation="com.johnlindquist.acejump.config.AceConfig"/>
-    <applicationConfigurable groupId="tools" displayName="AceJump" id="preferences.AceConfigurable" instance="com.johnlindquist.acejump.config.AceConfig"/>
+    <applicationService serviceInterface="org.acejump.config.AceConfig" serviceImplementation="org.acejump.config.AceConfig"/>
+    <applicationConfigurable groupId="tools" displayName="AceJump" id="preferences.AceConfigurable" instance="org.acejump.config.AceConfig"/>
   </extensions>
 
   <actions>
     <!-- Add your actions here -->
     <action id="AceAction"
-            class="com.johnlindquist.acejump.control.AceAction"
+            class="org.acejump.control.AceAction"
             text="Activate AceJump mode"
             description="Targets a character in AceJump">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
@@ -44,7 +44,7 @@ Pressing [Enter] during a search will now jump to the next visible match (or clo
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
     </action>
     <action id="AceLineAction"
-            class="com.johnlindquist.acejump.control.AceLineAction"
+            class="org.acejump.control.AceLineAction"
             text="Display Line Markers"
             description="Targets line markers in AceJump">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl shift SEMICOLON"/>
@@ -52,7 +52,7 @@ Pressing [Enter] during a search will now jump to the next visible match (or clo
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift SEMICOLON"/>
     </action>
     <action id="AceTargetAction"
-            class="com.johnlindquist.acejump.control.AceTargetAction"
+            class="org.acejump.control.AceTargetAction"
             text="Start in Target Mode"
             description="Targets a whole word in AceJump">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl alt SEMICOLON"/>
@@ -60,19 +60,19 @@ Pressing [Enter] during a search will now jump to the next visible match (or clo
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt SEMICOLON"/>
     </action>
     <action id="AceWordAction"
-            class="com.johnlindquist.acejump.control.AceWordAction"
+            class="org.acejump.control.AceWordAction"
             text="Start in Word Mode"
             description="Searches for all words on the screen in AceJump"/>
     <action id="AceWordForwardAction"
-            class="com.johnlindquist.acejump.control.AceWordForwardAction"
+            class="org.acejump.control.AceWordForwardAction"
             text="Start in Word Mode only searching after the caret"
             description="Searches for all words after the caret in AceJump"/>
     <action id="AceWordBackwardsAction"
-            class="com.johnlindquist.acejump.control.AceWordBackwardsAction"
+            class="org.acejump.control.AceWordBackwardsAction"
             text="Start in Word Mode only searching before the caret"
             description="Searches for all words before the caret in AceJump"/>
     <action id="AceDefinitionAction"
-            class="com.johnlindquist.acejump.control.AceNavigateAction"
+            class="org.acejump.control.AceNavigateAction"
             text="Start in Declaration Mode"
             description="Go to the declaration of a token in the editor"/>
   </actions>

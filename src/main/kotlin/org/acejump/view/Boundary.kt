@@ -1,8 +1,8 @@
-package com.johnlindquist.acejump.view
+package org.acejump.view
 
-import com.johnlindquist.acejump.view.Model.editor
-import com.johnlindquist.acejump.view.Model.editorText
-import com.johnlindquist.acejump.view.Model.viewBounds
+import org.acejump.view.Model.editor
+import org.acejump.view.Model.editorText
+import org.acejump.view.Model.viewBounds
 import kotlin.math.max
 import kotlin.math.min
 

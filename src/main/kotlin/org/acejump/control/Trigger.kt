@@ -1,4 +1,4 @@
-package com.johnlindquist.acejump.control
+package org.acejump.control
 
 import com.intellij.openapi.diagnostic.Logger
 import org.jetbrains.concurrency.runAsync

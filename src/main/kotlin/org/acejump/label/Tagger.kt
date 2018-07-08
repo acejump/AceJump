@@ -1,15 +1,15 @@
-package com.johnlindquist.acejump.label
+package org.acejump.label
 
 import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
-import com.johnlindquist.acejump.label.Pattern.Companion.defaultOrder
-import com.johnlindquist.acejump.label.Pattern.Companion.filterTags
-import com.johnlindquist.acejump.search.*
-import com.johnlindquist.acejump.search.Jumper.hasJumped
-import com.johnlindquist.acejump.view.Marker
-import com.johnlindquist.acejump.view.Model.caretOffset
-import com.johnlindquist.acejump.view.Model.editorText
-import com.johnlindquist.acejump.view.Model.viewBounds
+import org.acejump.label.Pattern.Companion.defaultOrder
+import org.acejump.label.Pattern.Companion.filterTags
+import org.acejump.search.*
+import org.acejump.search.Jumper.hasJumped
+import org.acejump.view.Marker
+import org.acejump.view.Model.caretOffset
+import org.acejump.view.Model.editorText
+import org.acejump.view.Model.viewBounds
 import java.util.SortedSet
 import kotlin.collections.HashMap
 import kotlin.collections.component1

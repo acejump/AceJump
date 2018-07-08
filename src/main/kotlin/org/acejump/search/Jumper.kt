@@ -1,4 +1,4 @@
-package com.johnlindquist.acejump.search
+package org.acejump.search
 
 import com.intellij.codeInsight.editorActions.SelectWordUtil.addWordSelection
 import com.intellij.codeInsight.navigation.actions.GotoDeclarationAction
@@ -12,9 +12,9 @@ import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.ui.playback.commands.ActionCommand
 import com.intellij.openapi.util.ActionCallback
 import com.intellij.openapi.util.TextRange
-import com.johnlindquist.acejump.view.Model.editor
-import com.johnlindquist.acejump.view.Model.editorText
-import com.johnlindquist.acejump.view.Model.project
+import org.acejump.view.Model.editor
+import org.acejump.view.Model.editorText
+import org.acejump.view.Model.project
 import java.lang.Math.max
 import java.lang.Math.min
 import java.util.*

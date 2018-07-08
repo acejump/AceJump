@@ -1,12 +1,12 @@
-package com.johnlindquist.acejump.search
+package org.acejump.search
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType.CENTER
-import com.johnlindquist.acejump.label.Tagger.textMatches
-import com.johnlindquist.acejump.view.Model.editor
-import com.johnlindquist.acejump.view.Model.viewBounds
+import org.acejump.label.Tagger.textMatches
+import org.acejump.view.Model.editor
+import org.acejump.view.Model.viewBounds
 
 /**
  * Updates the editor's vertical scroll position to make search results visible.
@@ -14,7 +14,7 @@ import com.johnlindquist.acejump.view.Model.viewBounds
  * currently appear on the screen. Once scrolling is complete, the Listener will
  * trigger an update that re-paint tags to the screen.
  *
- * @see com.johnlindquist.acejump.control.Listener
+ * @see org.acejump.control.Listener
  */
 
 object Scroller {

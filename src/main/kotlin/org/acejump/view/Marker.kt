@@ -1,18 +1,18 @@
-package com.johnlindquist.acejump.view
+package org.acejump.view
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.CustomHighlighterRenderer
 import com.intellij.openapi.editor.markup.RangeHighlighter
-import com.johnlindquist.acejump.config.AceConfig.Companion.settings
-import com.johnlindquist.acejump.label.Tagger.regex
-import com.johnlindquist.acejump.search.*
-import com.johnlindquist.acejump.view.Marker.Alignment.*
-import com.johnlindquist.acejump.view.Model.arcD
-import com.johnlindquist.acejump.view.Model.editor
-import com.johnlindquist.acejump.view.Model.fontHeight
-import com.johnlindquist.acejump.view.Model.fontWidth
-import com.johnlindquist.acejump.view.Model.rectHeight
-import com.johnlindquist.acejump.view.Model.rectVOffset
+import org.acejump.config.AceConfig.Companion.settings
+import org.acejump.label.Tagger.regex
+import org.acejump.search.*
+import org.acejump.view.Marker.Alignment.*
+import org.acejump.view.Model.arcD
+import org.acejump.view.Model.editor
+import org.acejump.view.Model.fontHeight
+import org.acejump.view.Model.fontWidth
+import org.acejump.view.Model.rectHeight
+import org.acejump.view.Model.rectVOffset
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
 import java.awt.Graphics
@@ -20,7 +20,7 @@ import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
-import com.johnlindquist.acejump.view.Model.editorText as text
+import org.acejump.view.Model.editorText as text
 
 /**
  * Represents the visual component of a tag, which gets painted to the screen.

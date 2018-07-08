@@ -1,12 +1,12 @@
-package com.johnlindquist.acejump.view
+package org.acejump.view
 
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
-import com.johnlindquist.acejump.search.Resettable
-import com.johnlindquist.acejump.search.getView
-import com.johnlindquist.acejump.view.Model.fontWidth
-import com.johnlindquist.acejump.view.Model.viewBounds
+import org.acejump.search.Resettable
+import org.acejump.search.getView
+import org.acejump.view.Model.fontWidth
+import org.acejump.view.Model.viewBounds
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Point

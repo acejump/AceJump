@@ -1,17 +1,17 @@
-package com.johnlindquist.acejump.control
+package org.acejump.control
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.DumbAwareAction
-import com.johnlindquist.acejump.control.Handler.regexSearch
-import com.johnlindquist.acejump.label.Pattern.ALL_WORDS
-import com.johnlindquist.acejump.label.Pattern.LINE_MARK
-import com.johnlindquist.acejump.search.getNameOfFileInEditor
-import com.johnlindquist.acejump.view.Boundary.*
-import com.johnlindquist.acejump.view.Model.DEFAULT_BOUNDARY
-import com.johnlindquist.acejump.view.Model.boundaries
-import com.johnlindquist.acejump.view.Model.editor
+import org.acejump.control.Handler.regexSearch
+import org.acejump.label.Pattern.ALL_WORDS
+import org.acejump.label.Pattern.LINE_MARK
+import org.acejump.search.getNameOfFileInEditor
+import org.acejump.view.Boundary.*
+import org.acejump.view.Model.DEFAULT_BOUNDARY
+import org.acejump.view.Model.boundaries
+import org.acejump.view.Model.editor
 import java.awt.event.KeyEvent
 
 /**

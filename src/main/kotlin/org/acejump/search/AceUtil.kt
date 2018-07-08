@@ -1,4 +1,4 @@
-package com.johnlindquist.acejump.search
+package org.acejump.search
 
 import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager
@@ -11,8 +11,8 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
-import com.johnlindquist.acejump.view.Model.MAX_TAG_RESULTS
-import com.johnlindquist.acejump.view.Model.viewBounds
+import org.acejump.view.Model.MAX_TAG_RESULTS
+import org.acejump.view.Model.viewBounds
 import java.awt.Point
 import javax.swing.JComponent
 import kotlin.math.abs

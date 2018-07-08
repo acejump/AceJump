@@ -1,9 +1,9 @@
-package com.johnlindquist.acejump.search
+package org.acejump.search
 
 import com.intellij.find.FindModel
-import com.johnlindquist.acejump.view.Model.boundaries
-import com.johnlindquist.acejump.view.Model.editor
-import com.johnlindquist.acejump.view.Model.viewBounds
+import org.acejump.view.Model.boundaries
+import org.acejump.view.Model.editor
+import org.acejump.view.Model.viewBounds
 import kotlin.text.RegexOption.MULTILINE
 
 /**

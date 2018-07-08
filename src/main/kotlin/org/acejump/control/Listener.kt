@@ -1,15 +1,15 @@
-package com.johnlindquist.acejump.control
+package org.acejump.control
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.colors.EditorColorsListener
 import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
-import com.johnlindquist.acejump.control.Handler.redoFind
-import com.johnlindquist.acejump.label.Tagger
-import com.johnlindquist.acejump.search.getView
-import com.johnlindquist.acejump.view.Model.editor
-import com.johnlindquist.acejump.view.Model.viewBounds
+import org.acejump.control.Handler.redoFind
+import org.acejump.label.Tagger
+import org.acejump.search.getView
+import org.acejump.view.Model.editor
+import org.acejump.view.Model.viewBounds
 import java.awt.event.FocusEvent
 import java.awt.event.FocusListener
 import javax.swing.event.AncestorEvent

@@ -1,4 +1,4 @@
-package com.johnlindquist.acejump.view
+package org.acejump.view
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
@@ -10,10 +10,10 @@ import com.intellij.openapi.editor.markup.EffectType.BOXED
 import com.intellij.openapi.editor.markup.EffectType.ROUNDED_BOX
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.ProjectManager
-import com.johnlindquist.acejump.config.AceConfig
-import com.johnlindquist.acejump.config.AceConfig.Companion.settings
-import com.johnlindquist.acejump.search.defaultEditor
-import com.johnlindquist.acejump.view.Boundary.FullFileBoundary
+import org.acejump.config.AceConfig
+import org.acejump.config.AceConfig.Companion.settings
+import org.acejump.search.defaultEditor
+import org.acejump.view.Boundary.FullFileBoundary
 import java.awt.Color
 import java.awt.Color.*
 import java.awt.Font
