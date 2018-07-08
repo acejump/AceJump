@@ -67,7 +67,7 @@ To change the default keyboard shortcuts, open **File \| Settings \| Keymap \| ð
 
 To build AceJump, clone and run the Gradle task [`buildPlugin`](https://github.com/JetBrains/gradle-intellij-plugin#tasks) like so:
 
-* `git clone https://github.com/johnlindquist/AceJump && cd AceJump`
+* `git clone https://github.com/acejump/AceJump && cd AceJump`
 * For Linux and Mac OS: `./gradlew buildPlugin`
 * For Windows: `gradlew.bat buildPlugin`
 
@@ -81,19 +81,19 @@ The build artifact will be placed in `build/distributions/`.
 
 AceJump is supported by community members like you. Contributions are highly welcome!
 
-If you would like to [contribute](https://github.com/johnlindquist/AceJump/pulls), here are a few of the ways you can help improve AceJump:
+If you would like to [contribute](https://github.com/acejump/AceJump/pulls), here are a few of the ways you can help improve AceJump:
 
-* [Improve test coverage](https://github.com/johnlindquist/AceJump/issues/139)
-* [Multi-monitor support](https://github.com/johnlindquist/AceJump/issues/144)
-* [Animated documentation](https://github.com/johnlindquist/AceJump/issues/145)
-* [Speed up tagging on large files](https://github.com/johnlindquist/AceJump/issues/161)
-* [Support user-configurable keyboard layouts](https://github.com/johnlindquist/AceJump/issues/172)
+* [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
+* [Multi-monitor support](https://github.com/acejump/AceJump/issues/144)
+* [Animated documentation](https://github.com/acejump/AceJump/issues/145)
+* [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/161)
+* [Support user-configurable keyboard layouts](https://github.com/acejump/AceJump/issues/172)
 
 To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -Project=$(pwd)`.
 
 For documentation on plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
 
-If you enjoy using AceJump, you might also enjoy reading [the code](https://github.com/johnlindquist/AceJump/blob/master/src/main/kotlin/com/johnlindquist/acejump/label/Solver.kt).
+If you enjoy using AceJump, you might also enjoy reading [the code](https://github.com/acejump/AceJump/blob/master/src/main/kotlin/com/johnlindquist/acejump/label/Solver.kt).
 
 ## Release notes
 
