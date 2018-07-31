@@ -93,7 +93,7 @@ If you would like to [contribute](https://github.com/acejump/AceJump/pulls), her
 * [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/161)
 * [Support user-configurable keyboard layouts](https://github.com/acejump/AceJump/issues/172)
 
-To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -Project=$(pwd)`.
+To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -PluginDev`.
 
 For documentation on plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
 
