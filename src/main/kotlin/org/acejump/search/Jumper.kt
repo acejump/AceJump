@@ -12,6 +12,8 @@ import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.ui.playback.commands.ActionCommand
 import com.intellij.openapi.util.ActionCallback
 import com.intellij.openapi.util.TextRange
+import org.acejump.search.JumpMode.DEFINE
+import org.acejump.search.JumpMode.TARGET
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.project
@@ -24,24 +26,21 @@ import java.util.*
  */
 
 object Jumper : Resettable {
+
   @Volatile
   var hasJumped = false
-  var targetModeEnabled = false
-  var definitionModeEnabled = false
   private val logger = Logger.getInstance(Jumper::class.java)
 
-  fun toggleTargetMode(status: Boolean? = null): Boolean {
-    if (definitionModeEnabled) definitionModeEnabled = false
-    logger.info("Setting target mode to $status")
-    targetModeEnabled = status ?: !targetModeEnabled
-    return targetModeEnabled
+  fun toggleMode() {
+    logger.info("Setting jump mode to ${JumpMode.toggle()}")
   }
 
-  fun toggleDefinitionMode(status: Boolean? = null): Boolean {
-    if (targetModeEnabled) targetModeEnabled = false
-    logger.info("Setting definition mode to $status")
-    definitionModeEnabled = status ?: !definitionModeEnabled
-    return definitionModeEnabled
+  fun toggleTargetMode() {
+    logger.info("Setting jump mode to ${JumpMode.toggle(TARGET)}")
+  }
+
+  fun toggleDeclarationMode() {
+    logger.info("Setting jump mode to ${JumpMode.toggle(DEFINE)}")
   }
 
   fun jump(index: Int) = runAndWait {
@@ -53,8 +52,8 @@ object Jumper : Resettable {
         Finder.isShiftSelectEnabled -> selectRange(caretModel.offset, index)
         // Moving the caret will trigger a reset, flipping targetModeEnabled,
         // so we need to move the caret and select the word at the same time
-        targetModeEnabled -> moveCaret(index).also { selectWordAtOffset(index) }
-        definitionModeEnabled -> moveCaret(index).also { gotoSymbolAction() }
+        JumpMode.equals(TARGET) -> moveCaret(index).also { selectWordAtOffset(index) }
+        JumpMode.equals(DEFINE) -> moveCaret(index).also { gotoSymbolAction() }
         else -> moveCaret(index)
       }
 
@@ -101,8 +100,7 @@ object Jumper : Resettable {
 
 
   override fun reset() {
-    definitionModeEnabled = false
-    targetModeEnabled = false
+    JumpMode.reset()
     hasJumped = false
   }
 }

@@ -7,6 +7,7 @@ import com.intellij.openapi.project.DumbAwareAction
 import org.acejump.control.Handler.regexSearch
 import org.acejump.label.Pattern.ALL_WORDS
 import org.acejump.label.Pattern.LINE_MARK
+import org.acejump.search.Jumper
 import org.acejump.search.getNameOfFileInEditor
 import org.acejump.view.Boundary.*
 import org.acejump.view.Model.DEFAULT_BOUNDARY
@@ -35,7 +36,7 @@ open class AceAction : DumbAwareAction() {
 
 class AceTargetAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also { Handler.toggleTargetMode(true) }
+    super.actionPerformed(e).also { Jumper.toggleTargetMode() }
 }
 
 class AceLineAction : AceAction() {
@@ -43,9 +44,9 @@ class AceLineAction : AceAction() {
     super.actionPerformed(e).also { regexSearch(LINE_MARK) }
 }
 
-object AceNavigateAction : AceAction() {
+object AceDefinitionAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also { Handler.toggleDefinitionMode(true) }
+    super.actionPerformed(e).also { Jumper.toggleDeclarationMode() }
 }
 
 object AceKeyAction : AceAction() {
@@ -62,9 +63,9 @@ object AceKeyAction : AceAction() {
 
 class AceWordAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also { 
-		 regexSearch(ALL_WORDS, ScreenBoundary)
-	 }
+    super.actionPerformed(e).also {
+      regexSearch(ALL_WORDS, ScreenBoundary)
+    }
 }
 
 /**
@@ -73,9 +74,9 @@ class AceWordAction : AceAction() {
 
 object AceWordForwardAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also { 
+    super.actionPerformed(e).also {
       regexSearch(ALL_WORDS, AfterCaretBoundary)
-   }
+    }
 }
 
 /**
@@ -85,7 +86,6 @@ object AceWordForwardAction : AceAction() {
 object AceWordBackwardsAction : AceAction() {
   override fun actionPerformed(e: AnActionEvent) =
     super.actionPerformed(e).also {
-       regexSearch(ALL_WORDS, BeforeCaretBoundary)
+      regexSearch(ALL_WORDS, BeforeCaretBoundary)
     }
 }
-

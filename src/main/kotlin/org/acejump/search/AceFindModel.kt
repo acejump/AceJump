@@ -20,6 +20,4 @@ class AceFindModel : FindModel {
     if (!isRegularExpressions) regex = Regex.escape(stringToFind)
     return Regex(regex, options)
   }
-
-  operator fun invoke(t: FindModel.() -> Unit) = clone().apply(t)
 }

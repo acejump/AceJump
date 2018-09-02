@@ -13,7 +13,6 @@ import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.util.SmartList
-import org.acejump.config.AceConfig.Companion.settings
 import org.acejump.label.Pattern
 import org.acejump.label.Pattern.*
 import org.acejump.label.Tagger
@@ -56,9 +55,10 @@ object Handler : TypedActionHandler, Resettable {
   )
   private var mOldEscActionHandler: EditorActionHandler? = null
 
-  fun regexSearch(regex: Pattern, bounds: Boundary = FullFileBoundary) = Canvas.reset().also { search(regex, bounds) }
+  fun regexSearch(regex: Pattern, bounds: Boundary = FullFileBoundary) =
+    Canvas.reset().also { search(regex, bounds) }
 
-  fun activate() = runAndWait { if (!enabled) start() else toggleTargetMode() }
+  fun activate() = runAndWait { if (!enabled) start() else Jumper.toggleMode() }
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
@@ -129,7 +129,7 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   fun repaintTagMarkers() {
-    if(Canvas.jumpLocations.isEmpty() || Tagger.markers.size <= Canvas.jumpLocations.size) {
+    if (Canvas.jumpLocations.isEmpty() || Tagger.markers.size <= Canvas.jumpLocations.size) {
       if (Jumper.hasJumped) reset() else Canvas.jumpLocations = Tagger.markers
     }
   }
@@ -163,28 +163,6 @@ object Handler : TypedActionHandler, Resettable {
     clear()
     editor.restoreSettings()
   }
-
-  fun toggleTargetMode(status: Boolean? = null) =
-    editor.colorsScheme.run {
-      if (Jumper.toggleTargetMode(status))
-        setColor(CARET_COLOR, settings.targetModeColor)
-      else
-        setColor(CARET_COLOR, settings.jumpModeColor)
-
-      Finder.paintTextHighlights()
-      Canvas.repaint()
-    }
-
-  fun toggleDefinitionMode(status: Boolean? = null) =
-    editor.colorsScheme.run {
-      if (Jumper.toggleDefinitionMode(status))
-        setColor(CARET_COLOR, settings.definitionModeColor)
-      else
-        setColor(CARET_COLOR, settings.jumpModeColor)
-
-      Finder.paintTextHighlights()
-      Canvas.repaint()
-    }
 
   private fun Editor.restoreSettings() = runAndWait {
     restoreScroll()

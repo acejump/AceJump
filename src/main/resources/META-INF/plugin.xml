@@ -71,8 +71,8 @@ Pressing [Enter] during a search will now jump to the next visible match (or clo
             class="org.acejump.control.AceWordBackwardsAction"
             text="Start in Word Mode only searching before the caret"
             description="Searches for all words before the caret in AceJump"/>
-    <action id="AceDefinitionAction"
-            class="org.acejump.control.AceNavigateAction"
+    <action id="AceDeclarationAction"
+            class="org.acejump.control.AceDefinitionAction"
             text="Start in Declaration Mode"
             description="Go to the declaration of a token in the editor"/>
   </actions>

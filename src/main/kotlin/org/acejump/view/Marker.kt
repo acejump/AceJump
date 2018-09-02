@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.markup.RangeHighlighter
 import org.acejump.config.AceConfig.Companion.settings
 import org.acejump.label.Tagger.regex
 import org.acejump.search.*
+import org.acejump.search.JumpMode.TARGET
 import org.acejump.view.Marker.Alignment.*
 import org.acejump.view.Model.arcD
 import org.acejump.view.Model.editor
@@ -89,7 +90,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
       if (regex) highlightRegex()
       else {
         fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
-        if (Jumper.targetModeEnabled) surroundTargetWord()
+        if (JumpMode.equals(TARGET)) surroundTargetWord()
       }
     }
 
