@@ -7,7 +7,7 @@ tasks {
   }
 
   withType<RunIdeTask> {
-    findProperty("roject")?.let { args = listOf(it as String) }
+    findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
   }
 }
 

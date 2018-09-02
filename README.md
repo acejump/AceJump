@@ -1,5 +1,9 @@
 # AceJump
 
+[![][jetbrains-team-svg]][jetbrains-team-page]
+[![][teamcity-status-svg]][teamcity-build-status]
+[![][plugin-repo-svg]][plugin-repo-page]
+
 [AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate AceJump. Type any string in the editor, followed by one of illustrated tags, to jump its position:
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177444/124fb534-a74d-11e6-8912-1d220ae27091.png)
@@ -89,7 +93,7 @@ If you would like to [contribute](https://github.com/acejump/AceJump/pulls), her
 * [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/161)
 * [Support user-configurable keyboard layouts](https://github.com/acejump/AceJump/issues/172)
 
-To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -Project=$(pwd)`.
+To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -PluginDev`.
 
 For documentation on plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
 
@@ -136,3 +140,12 @@ The following plugins have a similar UI for navigating text and web browsing:
 | [Vim Vixen](https://github.com/ueokande/vim-vixen)                      |     [Firefox 57+](https://blog.mozilla.org/addons/2017/09/28/webextensions-in-firefox-57/)               |✅|[JavaScript](https://www.javascript.com/)|
 | [Tridactyl](https://github.com/ueokande/vim-vixen)                      |     [Firefox 57+](https://blog.mozilla.org/addons/2017/09/28/webextensions-in-firefox-57/)               |✅|[TypeScript](https://www.typescriptlang.org/)|
 | [Vimari](https://github.com/guyht/vimari)                      |     [Safari](https://www.apple.com/safari/)               |✅|[JavaScript](https://www.javascript.com/)|
+
+
+<!-- Badges -->
+[jetbrains-team-page]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
+[jetbrains-team-svg]: http://jb.gg/badges/team-flat-square.svg
+[teamcity-build-status]: https://teamcity.jetbrains.com/viewType.html?buildTypeId=acejump_buildplugin&guest=1
+[teamcity-status-svg]: https://teamcity.jetbrains.com/app/rest/builds/buildType:acejump_buildplugin/statusIcon.svg
+[plugin-repo-page]: https://plugins.jetbrains.com/plugin/7086-acejump
+[plugin-repo-svg]: https://img.shields.io/jetbrains/plugin/v/7086-acejump.svg
