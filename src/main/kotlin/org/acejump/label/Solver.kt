@@ -17,15 +17,15 @@ import kotlin.system.measureTimeMillis
  * Solves the Tag Assignment Problem. The tag assignment problem can be stated
  * thusly: Given a set of indices I in document d, and a set of tags T, find a
  * bijection f: T*⊂T → I*⊂I s.t. d[i..k] + t ∉ d[i'..(k + |t|)], ∀ i' ∈ I\{i},
- * ∀ k ∈ (i, |d|-|t|], where t ∈ T, i ∈ I. Maximize |I*|. This can be relaxed 
+ * ∀ k ∈ (i, |d|-|t|], where t ∈ T, i ∈ I. Maximize |I*|. This can be relaxed
  * to t=t[0] and ∀ k ∈ (i, i+K] for some fixed K, in most natural documents.
  * 
  * More concretely, tags are typically two-character strings containing alpha-
  * numeric symbols. Documents are plaintext files. Indices are produced by a
  * search query, i.e. the preceeding N characters of every index i in document
  * d are identical. For characters proceeding d[i], all bets are off. We might
- * assume that P(d[i]|d[i-1]) has some stucture for d~D. At the end of the day
- * we would like to have an efficient algorithm which maximizes the number of 
+ * assume that P(d[i]|d[i-1]) has some structure for d~D. At the end of the day
+ * we would like to have an efficient algorithm which maximizes the number of
  * document indices covered by tags. (Further approximations may be considered
  * however no string d[i..k] + t may ever be contained in the set of strings
  * d[i'..j], otherwise there will be ambiguous key sequences in practice.)
@@ -158,6 +158,6 @@ object Solver {
     val left = max(0, site + Tagger.query.length - 1)
     val right = editorText.wordBoundsPlus(site).second
 
-    return (left..right).map { editorText.substring(left, it) }
+    return (left..right).map { editorText.substring(left, it).toLowerCase() }
   }
 }

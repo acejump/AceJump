@@ -12,8 +12,8 @@ tasks {
 }
 
 plugins {
-  kotlin("jvm") version "1.2.51"
-  id("org.jetbrains.intellij") version "0.3.4"
+  kotlin("jvm") version "1.2.61"
+  id("org.jetbrains.intellij") version "0.3.7"
 }
 
 intellij {
@@ -25,4 +25,4 @@ group = "org.acejump"
 version = "3.5.0"
 
 repositories.mavenCentral()
-dependencies.testCompile("io.reactivex.rxjava2:rxkotlin:2.2.0")
+dependencies.testCompile("io.reactivex.rxjava2:rxkotlin:2.3.0")
