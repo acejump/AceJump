@@ -93,7 +93,7 @@ object Model {
                         ('a'..'z').plus('0'..'9').toList(),
                       var jumpModeColor: Color = BLUE,
                       var targetModeColor: Color = RED,
-                      var definitionModeColor: Color = GREEN,
+                      var definitionModeColor: Color = MAGENTA,
                       var textHighlightColor: Color = GREEN,
                       var tagForegroundColor: Color = BLACK,
                       var tagBackgroundColor: Color = YELLOW)

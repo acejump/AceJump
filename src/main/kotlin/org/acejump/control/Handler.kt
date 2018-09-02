@@ -10,7 +10,6 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
 import com.intellij.openapi.editor.actionSystem.TypedActionHandler
-import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.util.SmartList
 import org.acejump.label.Pattern
@@ -58,7 +57,7 @@ object Handler : TypedActionHandler, Resettable {
   fun regexSearch(regex: Pattern, bounds: Boundary = FullFileBoundary) =
     Canvas.reset().also { search(regex, bounds) }
 
-  fun activate() = runAndWait { if (!enabled) start() else Jumper.toggleMode() }
+  fun activate() = runAndWait { if (!enabled) start() }
 
   fun processCommand(keyCode: Int) = keyMap[keyCode]?.invoke()
 
@@ -184,7 +183,6 @@ object Handler : TypedActionHandler, Resettable {
 
   private fun Editor.restoreColors() = runAndWait {
     colorsScheme.run {
-      setColor(CARET_COLOR, Model.naturalColor)
       setAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES,
         getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
           .apply { backgroundColor = Model.naturalHighlight })

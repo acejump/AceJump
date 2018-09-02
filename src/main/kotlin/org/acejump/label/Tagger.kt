@@ -158,12 +158,11 @@ object Tagger : Resettable {
   private fun markAndMapTags(): Map<String, Int> {
     full = true
     if (query.isEmpty()) return emptyMap()
-    return assignTags(textMatches).let { compact(it) }
-      .apply {
-        runAndWait {
-          markers = map { (tag, index) -> Marker(query, tag, index) }
-        }
+    return compact(assignTags(textMatches)).apply {
+      runAndWait {
+        markers = map { (tag, index) -> Marker(query, tag, index) }
       }
+    }
   }
 
   /**

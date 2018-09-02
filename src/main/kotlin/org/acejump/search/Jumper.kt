@@ -26,7 +26,6 @@ import java.util.*
  */
 
 object Jumper : Resettable {
-
   @Volatile
   var hasJumped = false
   private val logger = Logger.getInstance(Jumper::class.java)
