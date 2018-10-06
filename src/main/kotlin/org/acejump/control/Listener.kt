@@ -44,7 +44,7 @@ internal object Listener : FocusListener, AncestorListener,
    * @see Trigger
    */
 
-  override fun visibleAreaChanged(e: VisibleAreaEvent?) {
+  override fun visibleAreaChanged(e: VisibleAreaEvent) {
     var elapsed = measureTimeMillis {
       if (canTagsSurviveViewResize()) {
         viewBounds = editor.getView()
