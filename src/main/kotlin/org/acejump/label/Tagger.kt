@@ -1,6 +1,5 @@
 package org.acejump.label
 
-import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
 import org.acejump.label.Pattern.Companion.defaultOrder
 import org.acejump.label.Pattern.Companion.filterTags
@@ -48,10 +47,12 @@ object Tagger : Resettable {
   private val Iterable<Marker>.noneInView
     get() = none { it.index in viewBounds }
 
-  fun markOrJump(model: FindModel, results: SortedSet<Int>) {
+  fun markOrJump(model: AceFindModel, results: SortedSet<Int>) {
     model.run {
       if (!regex) regex = isRegularExpressions
-      query = if (regex) " $stringToFind" else stringToFind.toLowerCase()
+      query = if (regex) " $stringToFind" else stringToFind.mapIndexed { index, c ->
+        if (index == 0) c else c.toLowerCase()
+      }.joinToString("")
       logger.info("Received query: \"$query\"")
     }
 
@@ -130,15 +131,21 @@ object Tagger : Resettable {
   /**
    * Returns true if and only if a tag location is unambiguously completed by a
    * given query. This can only happen if the query matches the underlying text,
-   * AND ends with the tag in question.
+   * AND ends with the tag in question. Tags are case-insensitive.
    */
 
   private fun Map.Entry<String, Int>.solves(query: String) =
-    query.endsWith(key) && isCompatibleWithQuery(query)
+    query.endsWith(key, true) && isCompatibleWithQuery(query)
 
   private fun Map.Entry<String, Int>.isCompatibleWithQuery(query: String) =
     getTextPortionOfQuery(key, query).let { text ->
-      regex || editorText.regionMatches(value, text, 0, text.length, true)
+      regex || editorText.regionMatches(
+        thisOffset = value,
+        other = text,
+        otherOffset = 0,
+        length = text.length,
+        ignoreCase = true
+      )
     }
 
   private fun markOrScrollToNextOccurrence() {
@@ -151,12 +158,11 @@ object Tagger : Resettable {
   private fun markAndMapTags(): Map<String, Int> {
     full = true
     if (query.isEmpty()) return emptyMap()
-    return assignTags(textMatches).let { compact(it) }
-      .apply {
-        runAndWait {
-          markers = map { (tag, index) -> Marker(query, tag, index) }
-        }
+    return compact(assignTags(textMatches)).apply {
+      runAndWait {
+        markers = map { (tag, index) -> Marker(query, tag, index) }
       }
+    }
   }
 
   /**
@@ -225,9 +231,11 @@ object Tagger : Resettable {
   }
 
   private fun getTextPortionOfQuery(tag: String, query: String) =
-    if (query.endsWith(tag)) query.substring(0, query.length - tag.length)
-    else if (query.endsWith(tag.first())) query.substring(0, query.length - 1)
-    else query
+    when {
+      query.endsWith(tag, true) -> query.dropLast(tag.length)
+      query.endsWith(tag.first(), true) -> query.dropLast(1)
+      else -> query
+    }
 
   /**
    * Returns true if the Tagger contains a match in the new view, that is not
@@ -244,7 +252,7 @@ object Tagger : Resettable {
       textMatches.firstOrNull { it > old.last } ?: new.last < new.last
 
   fun hasTagSuffixInView(query: String) =
-    tagMap.any { it.isCompatibleWithQuery(query) && it.value in viewBounds }
+    tagMap.any { it.value in viewBounds && it.isCompatibleWithQuery(query) }
 
   infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i) || i == -1)
 }

@@ -1,6 +1,5 @@
 package org.acejump.search
 
-import com.intellij.find.FindModel
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea.EXACT_RANGE
@@ -43,7 +42,7 @@ object Finder : Resettable {
   @Volatile
   var query: String = ""
     set(value) {
-      field = value.toLowerCase()
+      field = value
       if (query.isNotEmpty()) logger.info("Received query: \"$value\"")
       isShiftSelectEnabled = value.lastOrNull()?.isUpperCase() == true
 
@@ -53,7 +52,7 @@ object Finder : Resettable {
         value.length == 1 -> skimThenSearch()
         value.isValidQuery() -> skimThenSearch()
         else -> {
-          logger.info("Invalid query, dropping: ${field.last()}")
+          logger.info("Invalid query \"$field\", dropping: ${field.last()}")
           field = field.dropLast(1)
         }
       }
@@ -90,14 +89,11 @@ object Finder : Resettable {
     boundaries = bounds
     // TODO: Fix this broken reset
     reset()
-    search(FindModel().apply {
-      stringToFind = pattern.string
-      isRegularExpressions = true
-      Tagger.reset()
-    })
+    Tagger.reset()
+    search(AceFindModel(pattern.string, true))
   }
 
-  fun search(model: FindModel = FindModel().apply { stringToFind = query }) {
+  fun search(model: AceFindModel = AceFindModel(query)) {
     measureTimeMillis {
       results = Scanner.findMatchingSites(editorText, model, results)
     }.let { logger.info("Found ${results.size} matching sites in $it ms") }
@@ -112,7 +108,7 @@ object Finder : Resettable {
    * @see com.intellij.openapi.editor.markup.MarkupModel
    */
 
-  fun paintTextHighlights(model: FindModel = FindModel().apply { stringToFind = query }) {
+  fun paintTextHighlights(model: AceFindModel = AceFindModel(query)) {
     val newHighlights = results.map { index ->
       val s = if (index == editorText.length) index - 1 else index
       val e = if (model.isRegularExpressions) s + 1 else s + query.length
@@ -131,7 +127,7 @@ object Finder : Resettable {
     markup.addRangeHighlighter(start, end, HIGHLIGHT_LAYER, null, EXACT_RANGE)
       .apply { customRenderer = Marker(query, null, this.startOffset) }
 
-  private fun tag(model: FindModel, results: SortedSet<Int>) {
+  private fun tag(model: AceFindModel, results: SortedSet<Int>) {
     synchronized(this) { Tagger.markOrJump(model, results) }
     viewHighlights = viewHighlights.narrowBy { Tagger canDiscard startOffset }
       .also { newHighlights ->
@@ -142,7 +138,7 @@ object Finder : Resettable {
     if (model.stringToFind == query || model.isRegularExpressions) Handler.repaintTagMarkers()
   }
 
-  fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =
+  private fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =
     filter {
       if (cond(it)) {
         runLater { markup.removeHighlighter(it) }
@@ -151,8 +147,16 @@ object Finder : Resettable {
     }
 
   private fun String.isValidQuery() =
-    results.any { editorText.regionMatches(it, this, 0, length) } ||
-      Tagger.hasTagSuffixInView(query)
+    Tagger.hasTagSuffixInView(query) ||
+      results.any {
+        editorText.regionMatches(
+          thisOffset = it,
+          other = this,
+          otherOffset = 0,
+          length = length,
+          ignoreCase = true
+        )
+      }
 
   override fun reset() {
     runLater { markup.removeAllHighlighters() }

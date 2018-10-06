@@ -1,0 +1,53 @@
+package org.acejump.search
+
+import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
+import org.acejump.config.AceConfig
+import org.acejump.control.Handler
+import org.acejump.view.Canvas
+import org.acejump.view.Model
+import org.acejump.view.Model.editor
+import java.awt.Color
+
+internal enum class JumpMode {
+  DISABLED, DEFAULT, TARGET, DEFINE, WORD, LINE;
+
+  companion object : Resettable {
+    private var mode: JumpMode = DISABLED
+      set(value) {
+        field = value
+        when (field) {
+          DEFAULT -> setCaretColor(AceConfig.settings.jumpModeColor)
+          DEFINE -> setCaretColor(AceConfig.settings.definitionModeColor)
+          TARGET -> setCaretColor(AceConfig.settings.targetModeColor)
+          DISABLED -> setCaretColor(Model.naturalColor)
+          else -> setCaretColor(AceConfig.settings.jumpModeColor)
+        }
+
+        Finder.paintTextHighlights()
+        Canvas.repaint()
+      }
+
+    private fun setCaretColor(color: Color) =
+      editor.colorsScheme.setColor(CARET_COLOR, color)
+
+    fun toggle(newMode: JumpMode? = null): JumpMode {
+      mode = if (mode == newMode) DISABLED
+      else newMode ?: when (mode) {
+        DISABLED -> DEFAULT
+        DEFAULT -> DEFINE
+        DEFINE -> TARGET
+        TARGET -> DISABLED.also { Handler.reset() }
+        else -> DEFAULT
+      }
+
+      return mode
+    }
+
+    override fun reset() {
+      mode = DISABLED
+    }
+
+    override fun equals(other: Any?) =
+      if (other is JumpMode) mode == other else super.equals(other)
+  }
+}

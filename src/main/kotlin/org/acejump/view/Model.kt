@@ -28,7 +28,7 @@ object Model {
   var editor = defaultEditor()
     get() = if (field.isDisposed) defaultEditor() else field
     set(value) {
-      editorText = value.document.text.toLowerCase()
+      editorText = value.document.text
       if (value == field) return
 
 //      // When the editor is updated, we must update some properties
@@ -50,7 +50,7 @@ object Model {
     get() = editor.project ?: ProjectManager.getInstance().defaultProject
   val caretOffset
     get() = editor.caretModel.offset
-  var editorText = editor.document.text.toLowerCase()
+  var editorText = editor.document.text
 
   var globalScheme = getInstance().globalScheme
 
@@ -93,7 +93,7 @@ object Model {
                         ('a'..'z').plus('0'..'9').toList(),
                       var jumpModeColor: Color = BLUE,
                       var targetModeColor: Color = RED,
-                      var definitionModeColor: Color = GREEN,
+                      var definitionModeColor: Color = MAGENTA,
                       var textHighlightColor: Color = GREEN,
                       var tagForegroundColor: Color = BLACK,
                       var tagBackgroundColor: Color = YELLOW)

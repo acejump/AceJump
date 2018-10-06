@@ -1,10 +1,8 @@
 package org.acejump.search
 
-import com.intellij.find.FindModel
 import org.acejump.view.Model.boundaries
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.viewBounds
-import kotlin.text.RegexOption.MULTILINE
 
 /**
 * Returns a list of indices where the query begins, within the given range.
@@ -12,12 +10,20 @@ import kotlin.text.RegexOption.MULTILINE
 */
 
 object Scanner {
-  fun findMatchingSites(editorText: String, model: FindModel, cache: Set<Int>) =
+  fun findMatchingSites(editorText: String, model: AceFindModel, cache: Set<Int>) =
     editorText.run {
-      val key: String = model.stringToFind.toLowerCase()
+      val query = model.stringToFind
       // If the cache is populated, filter it instead of redoing prior work
-      if (cache.isEmpty()) findAll(model.sanitizedString(), 0)
-      else cache.asSequence().filter { regionMatches(it, key, 0, key.length) }
+      if (cache.isEmpty()) findAll(model.toRegex(), 0)
+      else cache.asSequence().filter {
+        regionMatches(
+          thisOffset = it + query.length - 1,
+          other = query.last().toString(),
+          otherOffset = 0,
+          length = 1,
+          ignoreCase = query.last().isLowerCase()
+        )
+      }
     }.toSortedSet()
 
   private fun Set<Int>.isCacheValidForRange() =
@@ -25,9 +31,11 @@ object Scanner {
       first() < view.first && last() > view.last
     }
 
-  private fun CharSequence.findAll(key: String, startingFrom: Int) =
-    generateSequence({ Regex(key, MULTILINE).find(this, startingFrom) },
-      ::filterNextResult).map { it.range.first }
+  private fun CharSequence.findAll(regex: Regex, startingFromIndex: Int) =
+    generateSequence(
+      seedFunction = { regex.find(this, startingFromIndex) },
+      nextFunction = ::filterNextResult
+    ).map { it.range.first }
 
   private tailrec fun filterNextResult(result: MatchResult): MatchResult? {
     val next = result.next() ?: return null

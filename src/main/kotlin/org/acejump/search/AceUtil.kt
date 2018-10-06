@@ -1,6 +1,5 @@
 package org.acejump.search
 
-import com.intellij.find.FindModel
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ModalityState.defaultModalityState
 import com.intellij.openapi.editor.Editor
@@ -29,7 +28,6 @@ operator fun Point.component1() = x
 operator fun Point.component2() = y
 
 operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
-operator fun FindModel.invoke(t: FindModel.() -> Unit) = clone().apply(t)
 
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 
@@ -85,8 +83,6 @@ fun Editor.getPointRelative(index: Int, relativeToComponent: JComponent) =
 fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)
 
-fun FindModel.sanitizedString() =
-  if (isRegularExpressions) stringToFind else Regex.escape(stringToFind)
 
 /**
  * Returns up to MAX_TAG_RESULTS by accumulating results before and after the

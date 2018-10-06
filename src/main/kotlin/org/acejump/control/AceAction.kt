@@ -5,10 +5,13 @@ import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.project.DumbAwareAction
 import org.acejump.control.Handler.regexSearch
+import org.acejump.label.Pattern
 import org.acejump.label.Pattern.ALL_WORDS
-import org.acejump.label.Pattern.LINE_MARK
+import org.acejump.search.Jumper
 import org.acejump.search.getNameOfFileInEditor
-import org.acejump.view.Boundary.*
+import org.acejump.view.Boundary
+import org.acejump.view.Boundary.AfterCaretBoundary
+import org.acejump.view.Boundary.BeforeCaretBoundary
 import org.acejump.view.Model.DEFAULT_BOUNDARY
 import org.acejump.view.Model.boundaries
 import org.acejump.view.Model.editor
@@ -30,22 +33,22 @@ open class AceAction : DumbAwareAction() {
     val textLength = editor.document.textLength
     logger.info("Invoked on ${editor.getNameOfFileInEditor()} ($textLength)")
     Handler.activate()
+    customize()
   }
+
+  open fun customize() = Jumper.toggleMode()
 }
 
 class AceTargetAction : AceAction() {
-  override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also { Handler.toggleTargetMode(true) }
+  override fun customize() = Jumper.toggleTargetMode()
 }
 
 class AceLineAction : AceAction() {
-  override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also { regexSearch(LINE_MARK) }
+  override fun customize() = regexSearch(Pattern.LINE_MARK)
 }
 
-object AceNavigateAction : AceAction() {
-  override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also { Handler.toggleDefinitionMode(true) }
+object AceDefinitionAction : AceAction() {
+  override fun customize() = Jumper.toggleDeclarationMode()
 }
 
 object AceKeyAction : AceAction() {
@@ -61,10 +64,7 @@ object AceKeyAction : AceAction() {
  */
 
 class AceWordAction : AceAction() {
-  override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also { 
-		 regexSearch(ALL_WORDS, ScreenBoundary)
-	 }
+  override fun customize() = regexSearch(ALL_WORDS, Boundary.ScreenBoundary)
 }
 
 /**
@@ -72,10 +72,7 @@ class AceWordAction : AceAction() {
  */
 
 object AceWordForwardAction : AceAction() {
-  override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also { 
-      regexSearch(ALL_WORDS, AfterCaretBoundary)
-   }
+  override fun customize() = regexSearch(ALL_WORDS, AfterCaretBoundary)
 }
 
 /**
@@ -83,9 +80,5 @@ object AceWordForwardAction : AceAction() {
  */
 
 object AceWordBackwardsAction : AceAction() {
-  override fun actionPerformed(e: AnActionEvent) =
-    super.actionPerformed(e).also {
-       regexSearch(ALL_WORDS, BeforeCaretBoundary)
-    }
+  override fun customize() = regexSearch(ALL_WORDS, BeforeCaretBoundary)
 }
-
