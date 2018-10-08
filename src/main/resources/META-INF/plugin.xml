@@ -13,7 +13,7 @@ Now supports searching for CaPiTaLiZeD letters (typing capital letters in the qu
 
 <b>Declaration Mode</b>: Press the AceJump shortcut a second time to activate Declaration Mode, which will jump to the declaration of a variable in the editor.
 
-Keep hitting the AceJump shortcut to cycle between modes (default, definition, target, disabled).
+Keep hitting the AceJump shortcut to cycle between modes (default, declaration, target, disabled).
 
 Bug fix: AceJump settings should now properly persist after restarting the IDE.
 
