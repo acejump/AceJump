@@ -42,10 +42,6 @@ object AceConfig : Configurable, PersistentStateComponent<AceConfig.Settings> {
 
   private val logger = Logger.getInstance(AceConfig::class.java)
   var settings: Settings = Settings()
-    set(value) {
-      field = value
-      reset()
-    }
 
   override fun getState() = settings
 
@@ -79,8 +75,5 @@ object AceConfig : Configurable, PersistentStateComponent<AceConfig.Settings> {
     logger.info("User applied new settings: $settings")
   }
 
-  override fun reset() {
-    logger.info("Resetting settings to $settings")
-    gui.reset(settings)
-  }
+  override fun reset() = gui.reset(settings)
 }

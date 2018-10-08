@@ -20,6 +20,7 @@ class AceSettingsPanel {
   private var tagBackgroundColorChooser: ColorPanel
   var rootPanel: JPanel = JPanel()
 
+  // TODO: Rewrite this garbage generated code
   init {
     rootPanel.layout = GridLayoutManager(12, 3, Insets(0, 0, 0, 0), -1, -1)
     rootPanel.border = BorderFactory.createTitledBorder("")
