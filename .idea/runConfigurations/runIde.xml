@@ -5,7 +5,7 @@
       <option name="executionName" />
       <option name="externalProjectPath" value="$PROJECT_DIR$" />
       <option name="externalSystemIdString" value="GRADLE" />
-      <option name="scriptParameters" value="--build-cache" />
+      <option name="scriptParameters" value="" />
       <option name="taskDescriptions">
         <list />
       </option>
@@ -16,6 +16,7 @@
       </option>
       <option name="vmOptions" value="" />
     </ExternalSystemSettings>
-    <method />
+    <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
+    <method v="2" />
   </configuration>
 </component>

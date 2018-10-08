@@ -22,7 +22,7 @@ import java.awt.event.KeyEvent
  */
 
 open class AceAction : DumbAwareAction() {
-  val logger = Logger.getInstance(AceAction::class.java)
+  open val logger = Logger.getInstance(javaClass)
   override fun update(action: AnActionEvent) {
     action.presentation.isEnabled = action.getData(EDITOR) != null
   }

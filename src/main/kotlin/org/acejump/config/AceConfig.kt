@@ -5,16 +5,18 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.options.Configurable
 import org.acejump.view.Model.Settings
+import com.intellij.openapi.diagnostic.Logger
 import javax.swing.JComponent
 
 @State(name = "AceConfig", storages = [(Storage("AceJump.xml"))])
-class AceConfig : Configurable, PersistentStateComponent<Settings> {
-  companion object {
-    var settings = Settings()
-  }
+object AceConfig : Configurable, PersistentStateComponent<Settings> {
+  private val logger = Logger.getInstance(AceConfig::class.java)
+  var settings: Settings = Settings()
 
   override fun getState() = settings
+
   override fun loadState(state: Settings) {
+    logger.info("Loaded AceConfig settings: $settings")
     settings = state
   }
 
@@ -23,7 +25,7 @@ class AceConfig : Configurable, PersistentStateComponent<Settings> {
   override fun getDisplayName() = "AceJump"
 
   override fun createComponent(): JComponent =
-     AceSettingsPanel().apply { gui = this }.rootPanel
+    AceSettingsPanel().apply { gui = this }.rootPanel
 
   override fun isModified() =
     gui.allowedChars != settings.allowedChars ||
@@ -40,7 +42,11 @@ class AceConfig : Configurable, PersistentStateComponent<Settings> {
     gui.textHighlightColor?.let { settings.textHighlightColor = it }
     gui.tagForegroundColor?.let { settings.tagForegroundColor = it }
     gui.tagBackgroundColor?.let { settings.tagBackgroundColor = it }
+    logger.info("User applied new settings: $settings")
   }
 
-  override fun reset() = gui.reset(settings)
+  override fun reset() {
+    logger.info("Resetting settings")
+    gui.reset(settings)
+  }
 }

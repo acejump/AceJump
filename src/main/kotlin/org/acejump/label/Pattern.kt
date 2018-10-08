@@ -1,6 +1,6 @@
 package org.acejump.label
 
-import org.acejump.config.AceConfig.Companion.settings
+import org.acejump.config.AceConfig
 
 /**
  * Patterns related to key priority, separation, and regexps for line mode.
@@ -20,11 +20,11 @@ enum class Pattern(val string: String) {
 
     fun priority(char: Char) = priority[char]
 
-    private var _allowedChars = settings.allowedChars
+    private var _allowedChars = AceConfig.settings.allowedChars
     private var allBigrams = emptyList<String>()
       get() {
-        if (settings.allowedChars != _allowedChars || field.isEmpty()) {
-          _allowedChars = settings.allowedChars
+        if (AceConfig.settings.allowedChars != _allowedChars || field.isEmpty()) {
+          _allowedChars = AceConfig.settings.allowedChars
           field = _allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
         }
 
@@ -35,7 +35,7 @@ enum class Pattern(val string: String) {
       get() = NUM_CHARS * NUM_CHARS
 
     var NUM_CHARS: Int = 36
-      get() = settings.allowedChars.size
+      get() = AceConfig.settings.allowedChars.length
 
     val defaultOrder: Comparator<String> = compareBy(
       { it[0].isDigit() || it[1].isDigit() },

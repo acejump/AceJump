@@ -11,7 +11,7 @@ import com.intellij.openapi.editor.markup.EffectType.ROUNDED_BOX
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.ProjectManager
 import org.acejump.config.AceConfig
-import org.acejump.config.AceConfig.Companion.settings
+import org.acejump.config.AceConfig.settings
 import org.acejump.search.defaultEditor
 import org.acejump.view.Boundary.FullFileBoundary
 import java.awt.Color
@@ -61,9 +61,9 @@ object Model {
     .getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)?.backgroundColor ?: YELLOW
 
   val targetModeHighlightStyle =
-    TextAttributes(null, null, settings.targetModeColor, ROUNDED_BOX, PLAIN)
+    TextAttributes(null, null, AceConfig.settings.targetModeColor, ROUNDED_BOX, PLAIN)
   val textHighlightStyle =
-    TextAttributes(null, GREEN, settings.textHighlightColor, BOXED, PLAIN)
+    TextAttributes(null, GREEN, AceConfig.settings.textHighlightColor, BOXED, PLAIN)
 
   val scheme
     get() = editor.colorsScheme
@@ -89,8 +89,8 @@ object Model {
   val DEFAULT_BOUNDARY = FullFileBoundary
   var boundaries: Boundary = DEFAULT_BOUNDARY
 
-  data class Settings(var allowedChars: List<Char> =
-                        ('a'..'z').plus('0'..'9').toList(),
+  data class Settings(var allowedChars: String =
+                        ('a'..'z').plus('0'..'9').joinToString(""),
                       var jumpModeColor: Color = BLUE,
                       var targetModeColor: Color = RED,
                       var definitionModeColor: Color = MAGENTA,

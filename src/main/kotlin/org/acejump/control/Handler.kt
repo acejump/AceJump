@@ -96,7 +96,6 @@ object Handler : TypedActionHandler, Resettable {
 
   // Investigate replacing this with `IDEEventQueue.*Dispatcher(...)`
   private fun JComponent.installCustomShortcutHandler() {
-    logger.info("Installing custom shortcuts")
     defaultAction = getClientProperty(ACTIONS_KEY) as List<*>?
     putClientProperty(ACTIONS_KEY, SmartList<AnAction>(AceKeyAction))
     val css = CustomShortcutSet(*keyMap.keys.toTypedArray())
@@ -104,7 +103,6 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   private fun JComponent.uninstallCustomShortCutHandler() {
-    logger.info("Uninstalling custom shortcuts")
     putClientProperty(ACTIONS_KEY, defaultAction)
     AceKeyAction.unregisterCustomShortcutSet(this)
     editorTypeAction.setupRawHandler(handler)

@@ -22,14 +22,14 @@ Pressing [Enter] during a search will now jump to the next visible match (or clo
   <vendor url="https://github.com/acejump/AceJump">AceJump</vendor>
   <idea-version since-build="143.379"/>
 
-  <!--<application-components>-->
-  <!--<component>-->
-  <!--<implementation-class>org.acejump.config.AceConfig</implementation-class>-->
-  <!--</component>-->
-  <!--</application-components>-->
+  <application-components>
+    <component>
+      <implementation-class>org.acejump.config.AceConfig</implementation-class>
+    </component>
+  </application-components>
 
   <extensions defaultExtensionNs="com.intellij">
-    <applicationService serviceInterface="org.acejump.config.AceConfig" serviceImplementation="org.acejump.config.AceConfig"/>
+    <applicationService serviceInterface="org.acejump.config.AceConfig" serviceImplementation="org.acejump.config.AceConfig" overrides="true"/>
     <applicationConfigurable groupId="tools" displayName="AceJump" id="preferences.AceConfigurable" instance="org.acejump.config.AceConfig"/>
   </extensions>
 

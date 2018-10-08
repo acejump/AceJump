@@ -99,9 +99,9 @@ class AceSettingsPanel {
     }
   }
 
-  var allowedChars: List<Char>
-    get() = tagCharacters.text.toLowerCase().toList().distinct()
-    set(value) = tagCharacters.setText(value.joinToString(""))
+  var allowedChars: String
+    get() = tagCharacters.text.toLowerCase().toList().distinct().joinToString("")
+    set(value) = tagCharacters.setText(value)
 
   var jumpModeColor by jumpModeColorChooser
   var targetModeColor by targetModeColorChooser
@@ -118,7 +118,7 @@ class AceSettingsPanel {
     tagBackgroundColor = settings.tagBackgroundColor
   }
 
-  // Removal pending support for https://youtrack.jetbrains.com/issue/KT-8658
+  // Removal pending support for https://youtrack.jetbrains.com/issue/KT-8575
   private operator fun ColorPanel.getValue(a: AceSettingsPanel, p: KProperty<*>) = selectedColor
 
   private operator fun ColorPanel.setValue(a: AceSettingsPanel, p: KProperty<*>, c: Color?) {

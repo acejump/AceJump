@@ -3,7 +3,7 @@ package org.acejump.view
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.CustomHighlighterRenderer
 import com.intellij.openapi.editor.markup.RangeHighlighter
-import org.acejump.config.AceConfig.Companion.settings
+import org.acejump.config.AceConfig
 import org.acejump.label.Tagger.regex
 import org.acejump.search.*
 import org.acejump.search.JumpMode.TARGET
@@ -86,7 +86,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
 
       setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
-      color = settings.textHighlightColor
+      color = AceConfig.settings.textHighlightColor
       if (regex) highlightRegex()
       else {
         fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
@@ -95,7 +95,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
     }
 
   private fun Graphics2D.surroundTargetWord() {
-    color = settings.targetModeColor
+    color = AceConfig.settings.targetModeColor
     val (wordStart, wordEnd) = text.wordBounds(index)
 
     val xPos = editor.getPoint(wordStart).x
@@ -107,7 +107,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
 
   private fun Graphics2D.drawTagForeground(tagPosition: Point?) {
     font = Model.font
-    color = settings.tagForegroundColor
+    color = AceConfig.settings.tagForegroundColor
     composite = getInstance(SRC_OVER, 1.toFloat())
 
     drawString(tag!!.toUpperCase(), tagPosition!!.x, tagPosition.y + fontHeight)
@@ -156,7 +156,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
 
     fun highlightFirst() {
       composite = getInstance(SRC_OVER, 0.40.toFloat())
-      color = settings.textHighlightColor
+      color = AceConfig.settings.textHighlightColor
 
       if (tag != null && lastQueryChar == tag.first() && lastQueryChar != textChar) {
         fillRoundRect(tagX, yPos, fontWidth, rectHeight, arcD, arcD)
@@ -166,7 +166,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
     }
 
     fun highlightLast() {
-      color = settings.tagBackgroundColor
+      color = AceConfig.settings.tagBackgroundColor
       if (alignment != RIGHT || text.hasSpaceRight(index) || regex)
         composite = getInstance(SRC_OVER, 1.toFloat())
 
