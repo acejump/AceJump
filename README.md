@@ -127,6 +127,7 @@ The following plugins have a similar UI for navigating text and web browsing:
 | [Sublime EasyMotion](https://github.com/tednaleid/sublime-EasyMotion) |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
 | [AceJump](https://github.com/ice9js/ace-jump-sublime)                 |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
 | [Jumpy](https://github.com/DavidLGoldberg/jumpy)                      |     [Atom](https://atom.io/)                                 |✅|[CoffeeScript](http://coffeescript.org/)|
+| [Find-Jump](https://github.com/msafi/xvsc/tree/master/findJump)       |     [Visual Studio Code](https://code.visualstudio.com/)     |❌|[TypeScript](https://www.typescriptlang.org/)|
 | [VSCodeVim](https://github.com/VSCodeVim/Vim)                         |     [Visual Studio Code](https://code.visualstudio.com/)     |✅|[TypeScript](https://www.typescriptlang.org/)|
 | [AceJump](https://github.com/jsturtevant/ace-jump)                    |     [Visual Studio](https://www.visualstudio.com/)           |✅|[C#](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/)|
 | [cVim](https://github.com/1995eaton/chromium-vim)                     |     [Chrome](https://www.google.com/chrome)                  |✅|[JavaScript](https://www.javascript.com/)|
