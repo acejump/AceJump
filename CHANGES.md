@@ -4,7 +4,11 @@
 
 Now supports searching for CaPiTaLiZeD letters (typing capital letters in the query will force a case-sensitive search).
 
-AceJump settings should now properly persist after restarting the IDE.
+**Declaration Mode**: Press the AceJump shortcut a second time to activate Declaration Mode, which will jump to the declaration of a variable in the editor.
+
+Keep hitting the AceJump shortcut to cycle between modes (default, definition, target, disabled).
+
+Bug fix: AceJump settings should now properly persist after restarting the IDE.
 
 ### 3.5.0
 
