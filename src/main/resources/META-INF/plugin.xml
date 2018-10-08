@@ -9,9 +9,9 @@
   </description>
   <change-notes>
     <![CDATA[
-Adds two new features: "Word-Mode" and quick tag selection. Word-Mode removes search and addresses latency issues.
+Now supports searching for CaPiTaLiZeD letters (typing capital letters in the query will force a case-sensitive search).
 
-Pressing [Enter] during a search will now jump to the next visible match (or closest match, if next is not visible).
+AceJump settings should now properly persist after restarting the IDE.
 
 <a href="https://github.com/acejump/AceJump/blob/master/CHANGES.md">Release Notes</a> ]]>
   </change-notes>

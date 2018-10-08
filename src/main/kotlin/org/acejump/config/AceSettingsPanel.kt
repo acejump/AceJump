@@ -4,7 +4,6 @@ import com.intellij.ui.ColorPanel
 import com.intellij.uiDesigner.core.GridConstraints
 import com.intellij.uiDesigner.core.GridLayoutManager
 import com.intellij.uiDesigner.core.Spacer
-import org.acejump.view.Model.Settings
 import java.awt.Color
 import java.awt.Dimension
 import java.awt.Insets
@@ -109,7 +108,7 @@ class AceSettingsPanel {
   var tagForegroundColor by tagForegroundColorChooser
   var tagBackgroundColor by tagBackgroundColorChooser
 
-  fun reset(settings: Settings) {
+  fun reset(settings: AceConfig.Settings) {
     allowedChars = settings.allowedChars
     jumpModeColor = settings.jumpModeColor
     targetModeColor = settings.targetModeColor

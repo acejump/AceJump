@@ -22,7 +22,6 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.5.0"
+version = "3.5.1"
 
 repositories.mavenCentral()
-dependencies.testCompile("io.reactivex.rxjava2:rxkotlin:2.3.0")

@@ -1,5 +1,11 @@
 # Changelog
 
+### 3.5.1
+
+Now supports searching for CaPiTaLiZeD letters (typing capital letters in the query will force a case-sensitive search).
+
+AceJump settings should now properly persist after restarting the IDE.
+
 ### 3.5.0
 
 Adds two new features. "**Word-Mode**" and quick tag selection.

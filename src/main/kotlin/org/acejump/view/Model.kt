@@ -89,15 +89,6 @@ object Model {
   val DEFAULT_BOUNDARY = FullFileBoundary
   var boundaries: Boundary = DEFAULT_BOUNDARY
 
-  data class Settings(var allowedChars: String =
-                        ('a'..'z').plus('0'..'9').joinToString(""),
-                      var jumpModeColor: Color = BLUE,
-                      var targetModeColor: Color = RED,
-                      var definitionModeColor: Color = MAGENTA,
-                      var textHighlightColor: Color = GREEN,
-                      var tagForegroundColor: Color = BLACK,
-                      var tagBackgroundColor: Color = YELLOW)
-
   fun Editor.setupCaret() {
     naturalBlock = settings.isBlockCursor
     settings.isBlockCursor = true
