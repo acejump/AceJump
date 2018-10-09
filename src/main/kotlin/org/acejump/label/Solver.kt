@@ -89,14 +89,14 @@ object Solver {
     { it })
 
   /**
-   * Enforces tag conservation precedence. Tags have certain restrictions during
-   * assignment, ie. not all tags may be assigned to all sites. Therefore, we
+   * Ensures tag conservation. Most tags prefer to occupy certain sites during
+   * assignment, since not all tags may be assigned to all sites. Therefore, we
    * must spend our tag "budget" wisely, in order to cover the most sites with
    * the tags we have at our disposal. We should consider the "most restrictive"
-   * tags first, since they have the least chance of being available as more
+   * tags first, since they have the least chance of being available as further
    * sites are assigned.
    *
-   * Tags which are compatible with the fewest sites should have precedence for
+   * Tags which are compatible with the fewest sites should have preference for
    * first assignment. Here we ensure that scarce tags are prioritized for their
    * subsequent binding to available sites.
    *
