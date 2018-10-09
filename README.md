@@ -97,7 +97,7 @@ To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) wit
 
 For documentation on plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
 
-If you enjoy using AceJump, you might also enjoy reading [the code](https://github.com/acejump/AceJump/blob/master/src/main/kotlin/com/johnlindquist/acejump/label/Solver.kt).
+If you enjoy using AceJump, you might also enjoy reading [the code](src/main/kotlin/org/acejump/label/Solver.kt).
 
 ## Release notes
 
@@ -124,20 +124,20 @@ The following plugins have a similar UI for navigating text and web browsing:
 | [ace-jump-mode](https://github.com/winterTTr/ace-jump-mode)           |     [emacs](https://www.gnu.org/software/emacs/)             |❌|[Emacs Lisp](https://www.gnu.org/software/emacs/manual/eintr.html)|
 | [avy](https://github.com/abo-abo/avy)                                 |     [emacs](https://www.gnu.org/software/emacs/)             |✅|[Emacs Lisp](https://www.gnu.org/software/emacs/manual/eintr.html)|
 | [EasyMotion](https://github.com/easymotion/vim-easymotion)            |     [Vim](http://www.vim.org/)                               |❌|[Vimscript](http://learnvimscriptthehardway.stevelosh.com/)|
-| [Sublime EasyMotion](https://github.com/tednaleid/sublime-EasyMotion) |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
+| [Sublime EasyMotion](https://github.com/tednaleid/sublime-EasyMotion) |     [Sublime](https://www.sublimetext.com/)                  |❌|[Python](https://www.python.org/)|
 | [AceJump](https://github.com/ice9js/ace-jump-sublime)                 |     [Sublime](https://www.sublimetext.com/)                  |✅|[Python](https://www.python.org/)|
 | [Jumpy](https://github.com/DavidLGoldberg/jumpy)                      |     [Atom](https://atom.io/)                                 |✅|[CoffeeScript](http://coffeescript.org/)|
 | [Find-Jump](https://github.com/msafi/xvsc/tree/master/findJump)       |     [Visual Studio Code](https://code.visualstudio.com/)     |❌|[TypeScript](https://www.typescriptlang.org/)|
 | [VSCodeVim](https://github.com/VSCodeVim/Vim)                         |     [Visual Studio Code](https://code.visualstudio.com/)     |✅|[TypeScript](https://www.typescriptlang.org/)|
-| [AceJump](https://github.com/jsturtevant/ace-jump)                    |     [Visual Studio](https://www.visualstudio.com/)           |✅|[C#](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/)|
+| [AceJump](https://github.com/jsturtevant/ace-jump)                    |     [Visual Studio](https://www.visualstudio.com/)           |❌|[C#](https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/)|
 | [cVim](https://github.com/1995eaton/chromium-vim)                     |     [Chrome](https://www.google.com/chrome)                  |✅|[JavaScript](https://www.javascript.com/)|
 | [SurfingKeys](https://github.com/brookhong/Surfingkeys)               |     [Chrome](https://www.google.com/chrome) / [Firefox](https://www.mozilla.org/firefox)                 |✅|[JavaScript](https://www.javascript.com/)|
 | [Vimium](https://github.com/philc/vimium)                             |     [Chrome](https://www.google.com/chrome)                  |✅|[CoffeeScript](http://coffeescript.org/)|
 | [Vrome](https://github.com/jinzhu/vrome)                              |     [Chrome](https://www.google.com/chrome)                  |❌|[CoffeeScript](http://coffeescript.org/)|
 | [ViChrome](https://github.com/k2nr/ViChrome)                          |     [Chrome](https://www.google.com/chrome)                  |❌|[CoffeeScript](http://coffeescript.org/)|
 | [VimFx](https://github.com/akhodakivskiy/VimFx)                       |     [Firefox](https://www.mozilla.org/firefox)               |✅|[CoffeeScript](http://coffeescript.org/)|
-| [Vimperator](https://github.com/vimperator/vimperator-labs/)          |     [Firefox](https://www.mozilla.org/firefox)               |✅|[JavaScript](https://www.javascript.com/)|
-| [Pentadactyl](https://github.com/5digits/dactyl)                      |     [Firefox](https://www.mozilla.org/firefox)               |✅|[JavaScript](https://www.javascript.com/)|
+| [Vimperator](https://github.com/vimperator/vimperator-labs/)          |     [Firefox](https://www.mozilla.org/firefox)               |❌|[JavaScript](https://www.javascript.com/)|
+| [Pentadactyl](https://github.com/5digits/dactyl)                      |     [Firefox](https://www.mozilla.org/firefox)               |❌|[JavaScript](https://www.javascript.com/)|
 | [Vim Vixen](https://github.com/ueokande/vim-vixen)                      |     [Firefox 57+](https://blog.mozilla.org/addons/2017/09/28/webextensions-in-firefox-57/)               |✅|[JavaScript](https://www.javascript.com/)|
 | [Tridactyl](https://github.com/ueokande/vim-vixen)                      |     [Firefox 57+](https://blog.mozilla.org/addons/2017/09/28/webextensions-in-firefox-57/)               |✅|[TypeScript](https://www.typescriptlang.org/)|
 | [Vimari](https://github.com/guyht/vimari)                      |     [Safari](https://www.apple.com/safari/)               |✅|[JavaScript](https://www.javascript.com/)|
