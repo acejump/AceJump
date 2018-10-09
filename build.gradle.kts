@@ -1,6 +1,8 @@
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+repositories.mavenCentral()
+
 tasks {
   withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
@@ -23,5 +25,3 @@ intellij {
 
 group = "org.acejump"
 version = "3.5.1"
-
-repositories.mavenCentral()
