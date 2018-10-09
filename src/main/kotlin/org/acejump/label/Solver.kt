@@ -22,13 +22,31 @@ import kotlin.system.measureTimeMillis
  * 
  * More concretely, tags are typically two-character strings containing alpha-
  * numeric symbols. Documents are plaintext files. Indices are produced by a
- * search query, i.e. the preceeding N characters of every index i in document
+ * search query, i.e. the preceding N characters of every index i in document
  * d are identical. For characters proceeding d[i], all bets are off. We might
- * assume that P(d[i]|d[i-1]) has some structure for d~D. At the end of the day
- * we would like to have an efficient algorithm which maximizes the number of
- * document indices covered by tags. (Further approximations may be considered
- * however no string d[i..k] + t may ever be contained in the set of strings
- * d[i'..j], otherwise there will be ambiguous key sequences in practice.)
+ * assume that P(d[i]|d[i-1]) has some structure for d~D. Ultimately, we want a
+ * fast algorithm which maximizes the number of tagged document indices.
+ *
+ * Tags are used by the typist to select indices within a document. To select an
+ * index, the typist starts by activating AceJump and searching for a character.
+ * As soon as the first character is received, we begin to scan the document for
+ * matching locations and assign as many valid tags as possible. When subsequent
+ * characters are received, we refine the search results to match either:
+ *
+ *    1.) The plaintext query alone, or
+ *    2.) The concatenation of plaintext query and partial tag
+ *
+ * The constraint in paragraph no. 1 tries to impose the following criteria:
+ *
+ *    1.) All valid key sequences will lead to a unique location in the document
+ *    2.) All indices in the document will be reachable by a short key sequence
+ *
+ * If there is an insufficient number of two-character tags to cover every index
+ * (which typically occurs for a common character in a long document), then we
+ * attempt to maximize the number of tags assigned to document indices. The key
+ * is, all tags must be assigned as soon as possible, i.e. as soon as the first
+ * character is received or when the typist ceases typing (at the very latest).
+ * Once assigned, a visible tag must never change during the selection process.
  */
 
 object Solver {
