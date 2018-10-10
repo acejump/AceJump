@@ -27,6 +27,7 @@ import kotlin.system.measureTimeMillis
  */
 
 object Finder : Resettable {
+  @Volatile
   private var results: SortedSet<Int> = sortedSetOf()
   @Volatile
   private var textHighlights = listOf<RangeHighlighter>()
@@ -81,7 +82,7 @@ object Finder : Resettable {
       skim = true
       logger.info("Skimming document for matches of: $query")
       search()
-      Trigger(400L) { runLater { skim = false; search() } }
+      Trigger(400L) { skim = false; search() }
     } else search()
 
   fun search(pattern: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) {
@@ -108,20 +109,21 @@ object Finder : Resettable {
    * @see com.intellij.openapi.editor.markup.MarkupModel
    */
 
-  fun paintTextHighlights(model: AceFindModel = AceFindModel(query)) {
-    val newHighlights = results.map { index ->
-      val s = if (index == editorText.length) index - 1 else index
-      val e = if (model.isRegularExpressions) s + 1 else s + query.length
-      createTextHighlight(s, e)
-    }
+  fun paintTextHighlights(model: AceFindModel = AceFindModel(query)) =
+    runLater {
+      val newHighlights = results.map { index ->
+        val s = if (index == editorText.length) index - 1 else index
+        val e = if (model.isRegularExpressions) s + 1 else s + query.length
+        createTextHighlight(s, e)
+      }
 
-    if (!results.isEmpty()) {
-      textHighlights.forEach { markup.removeHighlighter(it) }
-      textHighlights = newHighlights
-    }
+      if (!results.isEmpty()) {
+        textHighlights.forEach { markup.removeHighlighter(it) }
+        textHighlights = newHighlights
+      }
 
-    viewHighlights = textHighlights.filter { it.startOffset in viewBounds }
-  }
+      viewHighlights = textHighlights.filter { it.startOffset in viewBounds }
+    }
 
   private fun createTextHighlight(start: Int, end: Int) =
     markup.addRangeHighlighter(start, end, HIGHLIGHT_LAYER, null, EXACT_RANGE)
@@ -129,7 +131,7 @@ object Finder : Resettable {
 
   private fun tag(model: AceFindModel, results: SortedSet<Int>) {
     synchronized(this) { Tagger.markOrJump(model, results) }
-    viewHighlights = viewHighlights.narrowBy { Tagger canDiscard startOffset }
+    viewHighlights = viewHighlights.discardIf { Tagger canDiscard startOffset }
       .also { newHighlights ->
         val numDiscarded = viewHighlights.size - newHighlights.size
         if (numDiscarded != 0) logger.info("Discarded $numDiscarded highlights")
@@ -138,7 +140,7 @@ object Finder : Resettable {
     if (model.stringToFind == query || model.isRegularExpressions) Handler.repaintTagMarkers()
   }
 
-  private fun List<RangeHighlighter>.narrowBy(cond: RangeHighlighter.() -> Boolean) =
+  private fun List<RangeHighlighter>.discardIf(cond: RangeHighlighter.() -> Boolean) =
     filter {
       if (cond(it)) {
         runLater { markup.removeHighlighter(it) }

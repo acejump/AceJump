@@ -31,8 +31,7 @@ operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 
-fun runAndWait(t: () -> Unit) =
-  ApplicationManager.getApplication().invokeAndWait(t, defaultModalityState())
+fun runAndWait(t: () -> Unit) = ApplicationManager.getApplication().invokeAndWait(t)
 
 fun runLater(t: () -> Unit) = ApplicationManager.getApplication().invokeLater(t)
 

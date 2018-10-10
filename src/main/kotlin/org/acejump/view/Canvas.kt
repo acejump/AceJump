@@ -5,6 +5,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import org.acejump.search.Resettable
 import org.acejump.search.getView
+import org.acejump.search.runLater
 import org.acejump.view.Model.fontWidth
 import org.acejump.view.Model.viewBounds
 import java.awt.Graphics
@@ -27,7 +28,7 @@ object Canvas : JComponent(), Resettable {
   var jumpLocations: Collection<Marker> = emptyList()
     set(value) {
       field = value
-      repaint()
+      runLater { repaint() }
     }
 
   fun Editor.bindCanvas() {
