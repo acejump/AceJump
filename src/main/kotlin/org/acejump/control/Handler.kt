@@ -20,7 +20,7 @@ import org.acejump.search.Finder.search
 import org.acejump.search.Scroller.restoreScroll
 import org.acejump.search.Scroller.storeScroll
 import org.acejump.view.Boundary
-import org.acejump.view.Boundary.FullFileBoundary
+import org.acejump.view.Boundary.*
 import org.acejump.view.Canvas
 import org.acejump.view.Canvas.bindCanvas
 import org.acejump.view.Model
@@ -54,7 +54,7 @@ object Handler : TypedActionHandler, Resettable {
   )
   private var mOldEscActionHandler: EditorActionHandler? = null
 
-  fun regexSearch(regex: Pattern, bounds: Boundary = FullFileBoundary) =
+  fun regexSearch(regex: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) =
     Canvas.reset().also { search(regex, bounds) }
 
   fun activate() = runAndWait { if (!enabled) start() }

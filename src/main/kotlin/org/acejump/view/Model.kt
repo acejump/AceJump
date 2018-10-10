@@ -13,7 +13,7 @@ import com.intellij.openapi.project.ProjectManager
 import org.acejump.config.AceConfig
 import org.acejump.config.AceConfig.settings
 import org.acejump.search.defaultEditor
-import org.acejump.view.Boundary.FullFileBoundary
+import org.acejump.view.Boundary.*
 import java.awt.Color
 import java.awt.Color.*
 import java.awt.Font
@@ -86,7 +86,7 @@ object Model {
     get() = DEFAULT_BUFFER < editorText.length
   const val MAX_TAG_RESULTS = 300
 
-  val DEFAULT_BOUNDARY = FullFileBoundary
+  val DEFAULT_BOUNDARY = FULL_FILE_BOUNDARY
   var boundaries: Boundary = DEFAULT_BOUNDARY
 
   fun Editor.setupCaret() {

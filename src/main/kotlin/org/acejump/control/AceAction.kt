@@ -10,8 +10,7 @@ import org.acejump.label.Pattern.ALL_WORDS
 import org.acejump.search.Jumper
 import org.acejump.search.getNameOfFileInEditor
 import org.acejump.view.Boundary
-import org.acejump.view.Boundary.AfterCaretBoundary
-import org.acejump.view.Boundary.BeforeCaretBoundary
+import org.acejump.view.Boundary.*
 import org.acejump.view.Model.DEFAULT_BOUNDARY
 import org.acejump.view.Model.boundaries
 import org.acejump.view.Model.editor
@@ -64,7 +63,7 @@ object AceKeyAction : AceAction() {
  */
 
 class AceWordAction : AceAction() {
-  override fun customize() = regexSearch(ALL_WORDS, Boundary.ScreenBoundary)
+  override fun customize() = regexSearch(ALL_WORDS, SCREEN_BOUNDARY)
 }
 
 /**
@@ -72,7 +71,7 @@ class AceWordAction : AceAction() {
  */
 
 object AceWordForwardAction : AceAction() {
-  override fun customize() = regexSearch(ALL_WORDS, AfterCaretBoundary)
+  override fun customize() = regexSearch(ALL_WORDS, AFTER_CARET_BOUNDARY)
 }
 
 /**
@@ -80,5 +79,5 @@ object AceWordForwardAction : AceAction() {
  */
 
 object AceWordBackwardsAction : AceAction() {
-  override fun customize() = regexSearch(ALL_WORDS, BeforeCaretBoundary)
+  override fun customize() = regexSearch(ALL_WORDS, BEFORE_CARET_BOUNDARY)
 }

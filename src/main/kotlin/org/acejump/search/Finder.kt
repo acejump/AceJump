@@ -9,7 +9,7 @@ import org.acejump.control.Trigger
 import org.acejump.label.Pattern
 import org.acejump.label.Tagger
 import org.acejump.view.Boundary
-import org.acejump.view.Boundary.FullFileBoundary
+import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
 import org.acejump.view.Marker
 import org.acejump.view.Model.LONG_DOCUMENT
 import org.acejump.view.Model.boundaries
@@ -84,7 +84,7 @@ object Finder : Resettable {
       Trigger(400L) { runLater { skim = false; search() } }
     } else search()
 
-  fun search(pattern: Pattern, bounds: Boundary = FullFileBoundary) {
+  fun search(pattern: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) {
     logger.info("Searching for regular expression: ${pattern.name} in $bounds")
     boundaries = bounds
     // TODO: Fix this broken reset
