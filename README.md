@@ -147,7 +147,7 @@ The following plugins have a similar UI for navigating text and web browsing:
 
 <!-- Badges -->
 [jetbrains-team-page]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
-[jetbrains-team-svg]: http://jb.gg/badges/team-flat-square.svg
+[jetbrains-team-svg]: http://jb.gg/badges/team.svg
 [teamcity-build-status]: https://teamcity.jetbrains.com/viewType.html?buildTypeId=acejump_buildplugin&guest=1
 [teamcity-status-svg]: https://teamcity.jetbrains.com/app/rest/builds/buildType:acejump_buildplugin/statusIcon.svg
 [plugin-repo-page]: https://plugins.jetbrains.com/plugin/7086-acejump
