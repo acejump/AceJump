@@ -152,6 +152,6 @@ The following plugins have a similar UI for navigating text and web browsing:
 [teamcity-status-svg]: https://teamcity.jetbrains.com/app/rest/builds/buildType:acejump_buildplugin/statusIcon.svg
 [plugin-repo-page]: https://plugins.jetbrains.com/plugin/7086-acejump
 [plugin-repo-svg]: https://img.shields.io/jetbrains/plugin/v/7086-acejump.svg
-[plugin-repo-svg]: https://img.shields.io/jetbrains/plugin/d/7086-acejump.svg
+[plugin-download-svg]: https://img.shields.io/jetbrains/plugin/d/7086-acejump.svg
 [twitter-url]: https://twitter.com/search?f=tweets&q=AceJump
 [twitter-badge]: https://img.shields.io/twitter/url/http/shields.io.svg?style=social
