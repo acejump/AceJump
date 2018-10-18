@@ -154,6 +154,6 @@ The following plugins have a similar UI for navigating text and web browsing:
 [plugin-repo-page]: https://plugins.jetbrains.com/plugin/7086-acejump
 [plugin-repo-svg]: https://img.shields.io/jetbrains/plugin/v/7086-acejump.svg
 [plugin-download-svg]: https://img.shields.io/jetbrains/plugin/d/7086-acejump.svg
-[apache-license-svg]:https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg
+[apache-license-svg]: https://img.shields.io/badge/License-GPL%20v3-blue.svg
 [twitter-url]: https://twitter.com/search?f=tweets&q=AceJump
 [twitter-badge]: https://img.shields.io/twitter/url/http/shields.io.svg?style=social
