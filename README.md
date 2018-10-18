@@ -4,6 +4,7 @@
 [![][teamcity-status-svg]][teamcity-build-status]
 [![][plugin-repo-svg]][plugin-repo-page]
 [![][plugin-download-svg]][plugin-repo-page]
+[![][apache-license-svg](LICENSE)
 [![][twitter-badge]][twitter-url]
 
 [AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate AceJump. Type any string in the editor, followed by one of illustrated tags, to jump its position:
@@ -153,5 +154,6 @@ The following plugins have a similar UI for navigating text and web browsing:
 [plugin-repo-page]: https://plugins.jetbrains.com/plugin/7086-acejump
 [plugin-repo-svg]: https://img.shields.io/jetbrains/plugin/v/7086-acejump.svg
 [plugin-download-svg]: https://img.shields.io/jetbrains/plugin/d/7086-acejump.svg
+[apache-license-svg]:https://img.shields.io/badge/license-Apache%20License%202.0-blue.svg
 [twitter-url]: https://twitter.com/search?f=tweets&q=AceJump
 [twitter-badge]: https://img.shields.io/twitter/url/http/shields.io.svg?style=social
