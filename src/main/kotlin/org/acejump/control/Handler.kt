@@ -18,9 +18,9 @@ import org.acejump.label.Tagger
 import org.acejump.search.*
 import org.acejump.search.Finder.search
 import org.acejump.search.Scroller.restoreScroll
-import org.acejump.search.Scroller.storeScroll
+import org.acejump.search.Scroller.saveScroll
 import org.acejump.view.Boundary
-import org.acejump.view.Boundary.*
+import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
 import org.acejump.view.Canvas
 import org.acejump.view.Canvas.bindCanvas
 import org.acejump.view.Model
@@ -78,7 +78,7 @@ object Handler : TypedActionHandler, Resettable {
 
   private fun configureEditor() =
     editor.run {
-      storeScroll()
+      saveScroll()
       setupCaret()
       bindCanvas()
       installSearchKeyHandler()

@@ -32,8 +32,6 @@ object Scroller {
     return true
   }
 
-  fun indexInView(index: Int) = index in viewBounds
-
   private fun findPreviousPosition(): LogicalPosition? {
     val prevIndex = textMatches.toList().dropLastWhile { it < viewBounds.first }
       .lastOrNull() ?: textMatches.lastOrNull() ?: return null
@@ -74,7 +72,7 @@ object Scroller {
     return maximizeCoverageOfNextOccurrence()
   }
 
-  fun Editor.storeScroll() {
+  fun Editor.saveScroll() {
     scrollX = scrollingModel.horizontalScrollOffset
     scrollY = scrollingModel.verticalScrollOffset
   }

@@ -175,11 +175,15 @@ object Tagger : Resettable {
 
   private fun compact(tagMap: Map<String, Int>): Map<String, Int> =
     tagMap.mapKeysTo(HashMap(tagMap.size)) { e ->
-      val firstChar = e.key[0]
-      val firstCharUnique = tagMap.keys.count { it[0] == firstChar } == 1
-      val queryEndsWith = query.endsWith(firstChar) || query.endsWith(e.key)
-      if (firstCharUnique && !queryEndsWith) firstChar.toString() else e.key
+      val tag = e.key
+      val tagIsQuicklySelectable = tag.canBeSelectedWithOneKey(tagMap)
+      val queryEndsWith = query.endsWith(tag[0]) || query.endsWith(tag)
+      if (tagIsQuicklySelectable && !queryEndsWith) tag[0].toString() else tag
     }
+
+  // TODO: Why doesn't the commented section work as expected?
+  private infix fun String.canBeSelectedWithOneKey(tagMap: Map<String, Int>) =
+    tagMap.count { it.key[0] == this[0] /*&& it.value in viewBounds*/ } == 1
 
   private fun assignTags(results: Set<Int>): Map<String, Int> {
     var timeElapsed = System.currentTimeMillis()
