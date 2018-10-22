@@ -9,7 +9,6 @@ import org.acejump.label.Pattern
 import org.acejump.label.Pattern.ALL_WORDS
 import org.acejump.search.Jumper
 import org.acejump.search.getNameOfFileInEditor
-import org.acejump.view.Boundary
 import org.acejump.view.Boundary.*
 import org.acejump.view.Model.DEFAULT_BOUNDARY
 import org.acejump.view.Model.boundaries

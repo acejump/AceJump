@@ -3,12 +3,11 @@ package org.acejump.config
 import com.intellij.openapi.components.PersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
-import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.diagnostic.Logger
-import javax.swing.JComponent
-
+import com.intellij.openapi.options.Configurable
 import java.awt.Color
 import java.awt.Color.*
+import javax.swing.JComponent
 import kotlin.reflect.KProperty
 
 /* Persists the state of the AceJump IDE settings across IDE restarts.
