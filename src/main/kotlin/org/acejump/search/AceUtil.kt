@@ -30,8 +30,10 @@ operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 
+@Deprecated("This is applied too broadly. Narrow down use sites where necessary.")
 fun runAndWait(t: () -> Unit) = ApplicationManager.getApplication().invokeAndWait(t)
 
+@Deprecated("This is applied too broadly. Narrow down use sites where necessary.")
 fun runLater(t: () -> Unit) = ApplicationManager.getApplication().invokeLater(t)
 
 fun Editor.offsetCenter(first: Int, second: Int): LogicalPosition {
@@ -81,7 +83,6 @@ fun Editor.getPointRelative(index: Int, relativeToComponent: JComponent) =
 fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)
 
-
 /**
  * Returns up to MAX_TAG_RESULTS by accumulating results before and after the
  * view boundaries, (approximately centered around the middle of the screen).
@@ -90,7 +91,7 @@ fun Editor.isFirstCharacterOfLine(index: Int) =
  * @return
  */
 
-fun getFesiableRegion(results: List<Int>, takeAtMost: Int = MAX_TAG_RESULTS) =
+fun getFeasibleRegion(results: List<Int>, takeAtMost: Int = MAX_TAG_RESULTS) =
   ((viewBounds.first + viewBounds.last) / 2).let { middleOfScreen ->
     results.sortedBy { abs(middleOfScreen - it) }
       .take(min(results.size, takeAtMost))

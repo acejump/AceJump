@@ -15,13 +15,13 @@ internal enum class JumpMode {
     private var mode: JumpMode = DISABLED
       set(value) {
         field = value
-        when (field) {
-          DEFAULT -> setCaretColor(AceConfig.settings.jumpModeColor)
-          DEFINE -> setCaretColor(AceConfig.settings.definitionModeColor)
-          TARGET -> setCaretColor(AceConfig.settings.targetModeColor)
-          DISABLED -> setCaretColor(Model.naturalColor)
-          else -> setCaretColor(AceConfig.settings.jumpModeColor)
-        }
+        setCaretColor(when (field) {
+          DEFAULT -> AceConfig.settings.jumpModeColor
+          DEFINE -> AceConfig.settings.definitionModeColor
+          TARGET -> AceConfig.settings.targetModeColor
+          DISABLED -> Model.naturalColor
+          else -> AceConfig.settings.jumpModeColor
+        })
 
         Finder.paintTextHighlights()
         Canvas.repaint()

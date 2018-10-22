@@ -19,7 +19,7 @@ import kotlin.system.measureTimeMillis
  * bijection f: T*⊂T → I*⊂I s.t. d[i..k] + t ∉ d[i'..(k + |t|)], ∀ i' ∈ I\{i},
  * ∀ k ∈ (i, |d|-|t|], where t ∈ T, i ∈ I. Maximize |I*|. This can be relaxed
  * to t=t[0] and ∀ k ∈ (i, i+K] for some fixed K, in most natural documents.
- * 
+ *
  * More concretely, tags are typically two-character strings containing alpha-
  * numeric symbols. Documents are plaintext files. Indices are produced by a
  * search query, i.e. the preceding N characters of every index i in document

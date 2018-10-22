@@ -27,10 +27,11 @@ import kotlin.system.measureTimeMillis
  * To do so, we must solve a tag assignment problem, where each search result is
  * assigned an available tag. The Tagger (1) identifies available tags (2) uses
  * the Solver to assign them, and (3) determines when a previously assigned tag
- * has been selected unambiguously, to reposition the caret.
+ * has been selected, then (4) calls Jumper to reposition the caret.
  *
  * @see Finder
  * @see Solver
+ * @see Jumper
  */
 
 object Tagger : Resettable {
@@ -81,8 +82,8 @@ object Tagger : Resettable {
 
     val hasAmpleTags = availableTags.size >= sites.size
 
-    val fesiableRegion = getFesiableRegion(sites) ?: return sites.toSortedSet()
-    val remainder = sites.partition { hasAmpleTags || it in fesiableRegion }
+    val feasibleRegion = getFeasibleRegion(sites) ?: return sites.toSortedSet()
+    val remainder = sites.partition { hasAmpleTags || it in feasibleRegion }
     remainder.second.size.let { if (it > 0) logger.info("Discarded $it OOBs") }
 
     return remainder.first.toSortedSet()
@@ -197,9 +198,9 @@ object Tagger : Resettable {
 
   private fun String.canAssignShortTag(tagMap: Map<String, Int>): Boolean {
     var i = 0
-    tagMap.forEach {
-      if (it.key[0] == this[0] &&
-        editor.canIndicesBeSimultaneouslyVisible(tagMap[this]!!, it.value)) i++
+    for(tag in tagMap) {
+      if (tag.key[0] == this[0] &&
+        editor.canIndicesBeSimultaneouslyVisible(tagMap[this]!!, tag.value)) i++
       if (1 < i) return false
     }
 
