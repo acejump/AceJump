@@ -124,10 +124,11 @@ object Tagger : Resettable {
     }
 
   private fun giveJumpOpportunity() =
-    tagMap.entries.firstOrNull { it.solves(query) }?.run {
-      logger.info("User selected tag: ${key.toUpperCase()}")
-      Jumper.jump(value)
-    }
+    tagMap.entries.firstOrNull { it.solves(query) && it.value in viewBounds }
+      ?.run {
+        logger.info("User selected tag: ${key.toUpperCase()}")
+        Jumper.jump(value)
+      }
 
   /**
    * Returns true if and only if a tag location is unambiguously completed by a
