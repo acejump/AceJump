@@ -11,10 +11,8 @@ import com.intellij.openapi.editor.markup.EffectType.ROUNDED_BOX
 import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.ProjectManager
 import org.acejump.config.AceConfig
-import org.acejump.config.AceConfig.settings
 import org.acejump.search.defaultEditor
-import org.acejump.view.Boundary.*
-import java.awt.Color
+import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
 import java.awt.Color.*
 import java.awt.Font
 import java.awt.Font.BOLD

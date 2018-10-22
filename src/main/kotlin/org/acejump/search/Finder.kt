@@ -16,7 +16,6 @@ import org.acejump.view.Model.boundaries
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.markup
 import org.acejump.view.Model.viewBounds
-import org.jetbrains.concurrency.runAsync
 import java.util.*
 import kotlin.system.measureTimeMillis
 
@@ -100,7 +99,7 @@ object Finder : Resettable {
     }.let { logger.info("Found ${results.size} matching sites in $it ms") }
 
     paintTextHighlights(model)
-    if (!skim) runAsync { tag(model, results) }
+    if (!skim) runLater { tag(model, results) }
   }
 
   /**

@@ -7,6 +7,7 @@ import org.acejump.search.*
 import org.acejump.search.Jumper.hasJumped
 import org.acejump.view.Marker
 import org.acejump.view.Model.caretOffset
+import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.viewBounds
 import java.util.SortedSet
@@ -169,21 +170,40 @@ object Tagger : Resettable {
    * Shortens previously assigned tags. Two-character tags may be shortened to
    * one-character tags if and only if:
    *
-   * 1. The shortened tag is unique among the set of existing tags.
+   * 1. The shortened tag is unique among the set of visible tags.
    * 3. The query does not end with the shortened tag, in whole or part.
    */
 
-  private fun compact(tagMap: Map<String, Int>): Map<String, Int> =
-    tagMap.mapKeysTo(HashMap(tagMap.size)) { e ->
+  private fun compact(tagMap: Map<String, Int>): Map<String, Int> {
+    var timeElapsed = System.currentTimeMillis()
+    var totalCompacted = 0
+    val compacted = tagMap.mapKeysTo(HashMap(tagMap.size)) { e ->
       val tag = e.key
-      val tagIsQuicklySelectable = tag.canBeSelectedWithOneKey(tagMap)
+      if (e.value !in viewBounds) return@mapKeysTo tag
+      val canBeCompacted = tag.canAssignShortTag(tagMap)
+      // Avoid matching query - will trigger a jump. TODO: lift this constraint.
       val queryEndsWith = query.endsWith(tag[0]) || query.endsWith(tag)
-      if (tagIsQuicklySelectable && !queryEndsWith) tag[0].toString() else tag
+      return@mapKeysTo if (canBeCompacted && !queryEndsWith) {
+        totalCompacted++
+        tag[0].toString()
+      } else tag
     }
 
-  // TODO: Why doesn't the commented section work as expected?
-  private infix fun String.canBeSelectedWithOneKey(tagMap: Map<String, Int>) =
-    tagMap.count { it.key[0] == this[0] /*&& it.value in viewBounds*/ } == 1
+    timeElapsed = System.currentTimeMillis() - timeElapsed
+    logger.info("Compacted $totalCompacted visible tags in $timeElapsed ms")
+    return compacted
+  }
+
+  private fun String.canAssignShortTag(tagMap: Map<String, Int>): Boolean {
+    var i = 0
+    tagMap.forEach {
+      if (it.key[0] == this[0] &&
+        editor.canIndicesBeSimultaneouslyVisible(tagMap[this]!!, it.value)) i++
+      if (1 < i) return false
+    }
+
+    return true
+  }
 
   private fun assignTags(results: Set<Int>): Map<String, Int> {
     var timeElapsed = System.currentTimeMillis()

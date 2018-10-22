@@ -1,7 +1,6 @@
 package org.acejump.search
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.application.ModalityState.defaultModalityState
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.VisualPosition
@@ -115,6 +114,17 @@ fun Editor.selectRange(fromOffset: Int, toOffset: Int) {
   selectionModel.removeSelection()
   selectionModel.setSelection(fromOffset, toOffset)
   caretModel.moveToOffset(toOffset)
+}
+
+/**
+ * Returns whether two indices can be simultaneously visible on screen
+ */
+
+fun Editor.canIndicesBeSimultaneouslyVisible(idx0: Int, idx1: Int): Boolean {
+  val line1 = offsetToLogicalPosition(idx0).line
+  val line2 = offsetToLogicalPosition(idx1).line
+
+  return Math.abs(line1 - line2) < getScreenHeight()
 }
 
 /*
