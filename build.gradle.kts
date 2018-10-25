@@ -30,8 +30,8 @@ idea {
     (this as ExtensionAware)
     configure<ProjectSettings> {
       runConfigurations {
-        create("runIde", org.jetbrains.gradle.ext.Application::class.java) {
-          beforeRun.register("runIdx", GradleTask::class.java) {
+        create<org.jetbrains.gradle.ext.Application>("runIde") {
+          beforeRun.register<GradleTask>("runIde") {
             task = task("runIde")
           }
         }
