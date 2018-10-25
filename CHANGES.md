@@ -1,5 +1,7 @@
 # Changelog
 
+### 3.5.2
+
 ### 3.5.1
 
 Now supports searching for CaPiTaLiZeD letters (typing capital letters in the query will force a case-sensitive search).
