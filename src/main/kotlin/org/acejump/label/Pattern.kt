@@ -39,7 +39,8 @@ enum class Pattern(val string: String) {
 
     val defaultOrder: Comparator<String> = compareBy(
       { it[0].isDigit() || it[1].isDigit() },
-      { Pattern.distance(it[0], it.last()) })
+      { Pattern.distance(it[0], it.last()) },
+      { Pattern.priority(it[0]) })
 
     /**
      * Sorts available tags by key distance. Tags which are ergonomically easier

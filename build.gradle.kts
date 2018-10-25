@@ -6,34 +6,25 @@ import org.jetbrains.gradle.ext.RunConfiguration
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-repositories.mavenCentral()
-
-tasks {
-  withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
-  }
-
-  withType<RunIdeTask> {
-    findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
-  }
+tasks.withType<RunIdeTask> {
+  findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
 }
 
 plugins {
+  `kotlin-dsl`
   idea apply true
   kotlin("jvm") version "1.3.0-rc-190"
-  id("org.jetbrains.intellij") version "0.3.11"
+  id("org.jetbrains.intellij") version "0.3.12"
   id("org.jetbrains.gradle.plugin.idea-ext") version "0.3" apply true
 }
 
-idea {
-  project {
-    (this as ExtensionAware)
-    configure<ProjectSettings> {
-      runConfigurations {
-        create<org.jetbrains.gradle.ext.Application>("runIde") {
-          beforeRun.register<GradleTask>("runIde") {
-            task = task("runIde")
-          }
+idea.project {
+  (this as ExtensionAware)
+  configure<ProjectSettings> {
+    runConfigurations {
+      create<org.jetbrains.gradle.ext.Application>("Run AceJump") {
+        beforeRun.create<GradleTask>("runIde") {
+          task = tasks.getByPath("runIde")
         }
       }
     }
