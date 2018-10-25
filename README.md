@@ -43,9 +43,9 @@ AceJump tags are *not* case sensitive. Holding down <kbd>Shift</kbd> when typing
 
 ## Installing
 
-Install directly from the IDE, via **File | Settings | Plugins | Browse Repositories... | 🔍 "AceJump"**.
+AceJump can be [installed directly from the IDE](https://www.jetbrains.com/help/idea/managing-plugins.html#install), via **Settings | Plugins | Browse Repositories... | 🔍 "AceJump"**.
 
-![Install](https://cloud.githubusercontent.com/assets/175716/11760310/cb4657e6-a064-11e5-8e07-837c2c0c40eb.png)
+[Canary builds](https://teamcity.jetbrains.com/repository/download/acejump_buildplugin/.lastFinished/AceJump.zip?guest=1) are provided courtesy of [TeamCity](https://www.jetbrains.com/teamcity/). These can be downloaded and [installed from disk](https://www.jetbrains.com/help/idea/managing-plugins.html#installing-plugins-from-disk).
 
 ## Configuring
 
