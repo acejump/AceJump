@@ -96,7 +96,7 @@ If you would like to [contribute](https://github.com/acejump/AceJump/pulls), her
 * [Fold text between matches](https://github.com/acejump/AceJump/issues/255)
 * [Display current search text](https://github.com/acejump/AceJump/issues/227)
 * [Multi-platform support](https://github.com/acejump/AceJump/issues/229)
-* [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/161)
+* [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/217)
 * [Support user-configurable keyboard layouts](https://github.com/acejump/AceJump/issues/172)
 
 To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -PluginDev`.
