@@ -12,6 +12,7 @@ import com.intellij.ui.awt.RelativePoint
 import org.acejump.view.Model.MAX_TAG_RESULTS
 import org.acejump.view.Model.viewBounds
 import java.awt.Point
+import java.util.*
 import javax.swing.JComponent
 import kotlin.math.abs
 import kotlin.math.max
@@ -20,6 +21,8 @@ import kotlin.math.min
 interface Resettable {
   fun reset()
 }
+
+fun aceString(s: String) = ResourceBundle.getBundle("AceResources").getString(s)
 
 fun <P> applyTo(vararg ps: P, fx: P.() -> Unit) = ps.forEach { it.fx() }
 

@@ -20,22 +20,18 @@ enum class Pattern(val string: String) {
 
     fun priority(char: Char) = priority[char]
 
-    private var _allowedChars = AceConfig.settings.allowedChars
     private var allBigrams = emptyList<String>()
-      get() {
-        if (AceConfig.settings.allowedChars != _allowedChars || field.isEmpty()) {
-          _allowedChars = AceConfig.settings.allowedChars
-          field = _allowedChars.run { flatMap { e -> map { c -> "$e$c" } } }
-        }
-
-        return field
-      }
+      get() = AceConfig.settings.allowedChars
+        .run { flatMap { e -> map { c -> "$e$c" } } }
+        .also { field = it }
 
     val NUM_TAGS: Int
       get() = NUM_CHARS * NUM_CHARS
 
     var NUM_CHARS: Int = 36
       get() = AceConfig.settings.allowedChars.length
+
+    val defaultChars = ('a'..'z').plus('0'..'9')
 
     val defaultOrder: Comparator<String> = compareBy(
       { it[0].isDigit() || it[1].isDigit() },

@@ -5,46 +5,21 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.Configurable
-import java.awt.Color
-import java.awt.Color.*
+import org.acejump.label.Pattern
 import javax.swing.JComponent
-import kotlin.reflect.KProperty
 
 /* Persists the state of the AceJump IDE settings across IDE restarts.
  * https://www.jetbrains.org/intellij/sdk/docs/basics/persisting_state_of_components.html
  */
 
 @State(name = "AceConfig", storages = [(Storage("AceJump.xml"))])
-object AceConfig : Configurable, PersistentStateComponent<AceConfig.Settings> {
-  data class Settings(var allowedChars: String =
-                        ('a'..'z').plus('0'..'9').joinToString(""),
-                      // These must be primitives in order to be serializable...
-                      internal var jumpModeRGB: Int = BLUE.rgb,
-                      internal var targetModeRGB: Int = RED.rgb,
-                      internal var definitionModeRGB: Int = MAGENTA.rgb,
-                      internal var textHighlightRGB: Int = GREEN.rgb,
-                      internal var tagForegroundRGB: Int = BLACK.rgb,
-                      internal var tagBackgroundRGB: Int = YELLOW.rgb) {
-
-    // ...but we expose them to the world as Color
-    val jumpModeColor: Color by { jumpModeRGB }
-    val targetModeColor: Color by { targetModeRGB }
-    val definitionModeColor: Color by { definitionModeRGB }
-    val textHighlightColor: Color by { textHighlightRGB }
-    val tagForegroundColor: Color by { tagForegroundRGB }
-    val tagBackgroundColor: Color by { tagBackgroundRGB }
-
-    // Force delegate to read the most current value by invoking as a function
-    operator fun (() -> Int).getValue(s: AceConfig.Settings, p: KProperty<*>) =
-      Color(this())
-  }
-
+object AceConfig : Configurable, PersistentStateComponent<AceSettings> {
   private val logger = Logger.getInstance(AceConfig::class.java)
-  var settings: Settings = Settings()
+  var settings: AceSettings = AceSettings()
 
   override fun getState() = settings
 
-  override fun loadState(state: Settings) {
+  override fun loadState(state: AceSettings) {
     logger.info("Loaded AceConfig settings: $settings")
     settings = state
   }
@@ -53,8 +28,7 @@ object AceConfig : Configurable, PersistentStateComponent<AceConfig.Settings> {
 
   override fun getDisplayName() = "AceJump"
 
-  override fun createComponent(): JComponent =
-    AceSettingsPanel().apply { gui = this }.rootPanel
+  override fun createComponent(): JComponent = AceSettingsPanel().apply { gui = this }.rootPanel
 
   override fun isModified() =
     gui.allowedChars != settings.allowedChars ||
@@ -65,7 +39,10 @@ object AceConfig : Configurable, PersistentStateComponent<AceConfig.Settings> {
       gui.tagBackgroundColor != settings.tagBackgroundColor
 
   override fun apply() {
-    settings.allowedChars = gui.allowedChars
+    settings.allowedChars = gui.allowedChars.toList().distinct().run {
+      if (isEmpty()) Pattern.defaultChars else filter { it.isLetterOrDigit() }
+    }.joinToString("")
+
     gui.jumpModeColor?.let { settings.jumpModeRGB = it.rgb }
     gui.targetModeColor?.let { settings.targetModeRGB = it.rgb }
     gui.textHighlightColor?.let { settings.textHighlightRGB = it.rgb }
