@@ -94,6 +94,8 @@ If you would like to [contribute](https://github.com/acejump/AceJump/pulls), her
 * [Support for full screen tagging](https://github.com/acejump/AceJump/issues/144)
 * [Animated documentation](https://github.com/acejump/AceJump/issues/145)
 * [Fold text between matches](https://github.com/acejump/AceJump/issues/255)
+* [Display current search text](https://github.com/acejump/AceJump/issues/227)
+* [Multi-platform support](https://github.com/acejump/AceJump/issues/229)
 * [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/161)
 * [Support user-configurable keyboard layouts](https://github.com/acejump/AceJump/issues/172)
 
