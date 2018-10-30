@@ -31,6 +31,8 @@ idea.project {
   }
 }
 
+repositories.mavenCentral()
+
 intellij {
   pluginName = "AceJump"
   updateSinceUntilBuild = false
