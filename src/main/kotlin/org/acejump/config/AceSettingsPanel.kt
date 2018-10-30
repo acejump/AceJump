@@ -1,43 +1,48 @@
 package org.acejump.config
 
 import com.intellij.ui.ColorPanel
+import com.intellij.ui.layout.Cell
 import com.intellij.ui.layout.GrowPolicy.MEDIUM_TEXT
 import com.intellij.ui.layout.GrowPolicy.SHORT_TEXT
 import com.intellij.ui.layout.panel
 import org.acejump.search.aceString
 import java.awt.Color
+import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JTextField
 import kotlin.reflect.KProperty
 
 class AceSettingsPanel {
-  private var tagCharactersChooser = JTextField()
-  private var jumpModeColorChooser = ColorPanel()
-  private var targetModeColorChooser = ColorPanel()
-  private var textHighlightColorChooser = ColorPanel()
-  private var tagForegroundColorChooser = ColorPanel()
-  private var tagBackgroundColorChooser = ColorPanel()
+  private var tagCharactersField = JTextField()
+  private var jumpModeColorWheel = ColorPanel()
+  private var targetModeColorWheel = ColorPanel()
+  private var textHighlightColorWheel = ColorPanel()
+  private var tagForegroundColorWheel = ColorPanel()
+  private var tagBackgroundColorWheel = ColorPanel()
 
-  val rootPanel: JPanel = panel {
-    noteRow(aceString("charsToBeUsedLabel"))
-    row("Chars to use:") { tagCharactersChooser(growPolicy = MEDIUM_TEXT) }
-    noteRow(aceString("colorsToBeUsedLabel"))
-    row(aceString("jumpModeColorLabel")) { jumpModeColorChooser(growPolicy = SHORT_TEXT) }
-    row(aceString("tagBackgroundColorLabel")) { tagBackgroundColorChooser(growPolicy = SHORT_TEXT) }
-    row(aceString("tagForegroundColorLabel")) { tagForegroundColorChooser(growPolicy = SHORT_TEXT) }
-    row(aceString("targetModeColorLabel")) { targetModeColorChooser(growPolicy = SHORT_TEXT) }
-    row(aceString("textHighlightColorLabel")) { textHighlightColorChooser(growPolicy = SHORT_TEXT) }
+  fun Cell.short(component: JComponent) = component(growPolicy = SHORT_TEXT)
+  fun Cell.medium(component: JComponent) = component(growPolicy = MEDIUM_TEXT)
+
+  internal val rootPanel: JPanel = panel {
+    noteRow(aceString("tagCharsToBeUsedHeading"))
+    row(aceString("tagCharsToBeUsedLabel")) { medium(tagCharactersField) }
+    noteRow(aceString("colorsToBeUsedHeading"))
+    row(aceString("jumpModeColorLabel")) { short(jumpModeColorWheel) }
+    row(aceString("tagBackgroundColorLabel")) { short(tagBackgroundColorWheel) }
+    row(aceString("tagForegroundColorLabel")) { short(tagForegroundColorWheel) }
+    row(aceString("targetModeColorLabel")) { short(targetModeColorWheel) }
+    row(aceString("textHighlightColorLabel")) { short(textHighlightColorWheel) }
   }
 
-  var allowedChars: String
-    get() = tagCharactersChooser.text.toLowerCase()
-    set(value) = tagCharactersChooser.setText(value)
+  internal var allowedChars: String
+    get() = tagCharactersField.text.toLowerCase()
+    set(value) = tagCharactersField.setText(value)
 
-  var jumpModeColor by jumpModeColorChooser
-  var targetModeColor by targetModeColorChooser
-  var textHighlightColor by textHighlightColorChooser
-  var tagForegroundColor by tagForegroundColorChooser
-  var tagBackgroundColor by tagBackgroundColorChooser
+  internal var jumpModeColor by jumpModeColorWheel
+  internal var targetModeColor by targetModeColorWheel
+  internal var textHighlightColor by textHighlightColorWheel
+  internal var tagForegroundColor by tagForegroundColorWheel
+  internal var tagBackgroundColor by tagBackgroundColorWheel
 
   fun reset(settings: AceSettings) {
     allowedChars = settings.allowedChars

@@ -6,7 +6,7 @@ import java.awt.Color.*
 import kotlin.reflect.KProperty
 
 data class AceSettings(var allowedChars: String = Pattern.defaultChars.joinToString(""),
-                       // These must be primitives in order to be serializable
+  // These must be primitives in order to be serializable
                        internal var jumpModeRGB: Int = BLUE.rgb,
                        internal var targetModeRGB: Int = RED.rgb,
                        internal var definitionModeRGB: Int = MAGENTA.rgb,

@@ -6,8 +6,14 @@ import org.jetbrains.gradle.ext.RunConfiguration
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-tasks.withType<RunIdeTask> {
-  findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
+tasks {
+  withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
+  }
+
+  withType<RunIdeTask> {
+    findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
+  }
 }
 
 plugins {
