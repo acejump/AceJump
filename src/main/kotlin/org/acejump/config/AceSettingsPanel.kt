@@ -20,10 +20,10 @@ class AceSettingsPanel {
   private var tagForegroundColorWheel = ColorPanel()
   private var tagBackgroundColorWheel = ColorPanel()
 
-  fun Cell.short(component: JComponent) = component(growPolicy = SHORT_TEXT)
-  fun Cell.medium(component: JComponent) = component(growPolicy = MEDIUM_TEXT)
-
   internal val rootPanel: JPanel = panel {
+    fun Cell.short(component: JComponent) = component(growPolicy = SHORT_TEXT)
+    fun Cell.medium(component: JComponent) = component(growPolicy = MEDIUM_TEXT)
+
     noteRow(aceString("tagCharsToBeUsedHeading"))
     row(aceString("tagCharsToBeUsedLabel")) { medium(tagCharactersField) }
     noteRow(aceString("colorsToBeUsedHeading"))
