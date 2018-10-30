@@ -13,7 +13,7 @@ tasks.withType<RunIdeTask> {
 plugins {
   `kotlin-dsl`
   idea apply true
-  kotlin("jvm") version "1.3.0-rc-190"
+  kotlin("jvm") version "1.3.0"
   id("org.jetbrains.intellij") version "0.3.12"
   id("org.jetbrains.gradle.plugin.idea-ext") version "0.3" apply true
 }
