@@ -24,32 +24,32 @@ object AceConfig : Configurable, PersistentStateComponent<AceSettings> {
     settings = state
   }
 
-  private var gui = AceSettingsPanel()
+  private val panel = AceSettingsPanel()
 
   override fun getDisplayName() = "AceJump"
 
-  override fun createComponent(): JComponent = AceSettingsPanel().apply { gui = this }.rootPanel
+  override fun createComponent(): JComponent = panel.rootPanel
 
   override fun isModified() =
-    gui.allowedChars != settings.allowedChars ||
-      gui.jumpModeColor != settings.jumpModeColor ||
-      gui.targetModeColor != settings.targetModeColor ||
-      gui.textHighlightColor != settings.textHighlightColor ||
-      gui.tagForegroundColor != settings.tagForegroundColor ||
-      gui.tagBackgroundColor != settings.tagBackgroundColor
+    panel.allowedChars != settings.allowedChars ||
+      panel.jumpModeColor != settings.jumpModeColor ||
+      panel.targetModeColor != settings.targetModeColor ||
+      panel.textHighlightColor != settings.textHighlightColor ||
+      panel.tagForegroundColor != settings.tagForegroundColor ||
+      panel.tagBackgroundColor != settings.tagBackgroundColor
 
   override fun apply() {
-    settings.allowedChars = gui.allowedChars.toList().distinct().run {
+    settings.allowedChars = panel.allowedChars.toList().distinct().run {
       if (isEmpty()) Pattern.defaultChars else filter { it.isLetterOrDigit() }
     }.joinToString("")
 
-    gui.jumpModeColor?.let { settings.jumpModeRGB = it.rgb }
-    gui.targetModeColor?.let { settings.targetModeRGB = it.rgb }
-    gui.textHighlightColor?.let { settings.textHighlightRGB = it.rgb }
-    gui.tagForegroundColor?.let { settings.tagForegroundRGB = it.rgb }
-    gui.tagBackgroundColor?.let { settings.tagBackgroundRGB = it.rgb }
+    panel.jumpModeColor?.let { settings.jumpModeRGB = it.rgb }
+    panel.targetModeColor?.let { settings.targetModeRGB = it.rgb }
+    panel.textHighlightColor?.let { settings.textHighlightRGB = it.rgb }
+    panel.tagForegroundColor?.let { settings.tagForegroundRGB = it.rgb }
+    panel.tagBackgroundColor?.let { settings.tagBackgroundRGB = it.rgb }
     logger.info("User applied new settings: $settings")
   }
 
-  override fun reset() = gui.reset(settings)
+  override fun reset() = panel.reset(settings)
 }
