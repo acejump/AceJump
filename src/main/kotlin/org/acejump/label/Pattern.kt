@@ -1,6 +1,7 @@
 package org.acejump.label
 
 import org.acejump.config.AceConfig
+import org.acejump.search.mapIndices
 
 /**
  * Patterns related to key priority, separation, and regexps for line mode.
@@ -18,8 +19,6 @@ enum class Pattern(val string: String) {
   companion object {
     private fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]
 
-    fun priority(char: Char) = priority[char]
-
     private var allBigrams = emptyList<String>()
       get() = AceConfig.settings.allowedChars
         .run { flatMap { e -> map { c -> "$e$c" } } }
@@ -31,21 +30,12 @@ enum class Pattern(val string: String) {
     var NUM_CHARS: Int = 36
       get() = AceConfig.settings.allowedChars.length
 
-    private val priority: Map<Char, Int> =
-      "fjghdkslavncmbxzrutyeiwoqp5849673210".mapIndices()
-
-    val defaultChars = ('a'..'z').plus('0'..'9').sortedBy { priority[it] }
-    val keyboardKeys = """
-      12345890
-      qwertyuiop
-      asdfghjkl
-      zxcvbnm
-      """.trimIndent()
-
-    val defaultOrder: Comparator<String> = compareBy(
+    val defaultTagOrder: Comparator<String> = compareBy(
       { it[0].isDigit() || it[1].isDigit() },
       { Pattern.distance(it[0], it.last()) },
-      { Pattern.priority(it[0]) })
+      AceConfig.settings.keyLayout.priority { it[0] })
+
+    fun filterTags(query: String) = allBigrams.filter { !query.endsWith(it[0]) }
 
     /**
      * Sorts available tags by key distance. Tags which are ergonomically easier
@@ -54,14 +44,22 @@ enum class Pattern(val string: String) {
      * keys (ex. 12, 21) to keys that are located further apart on the keyboard.
      */
 
-    fun filterTags(query: String) = allBigrams.filter { !query.endsWith(it[0]) }
+    enum class KeyLayout(val text: Array<String>) {
+      COLEMAK(arrayOf("1234567890", "qwfpgjluy", "arstdhneio", "zxcvbkm")),
+      DVORAK(arrayOf("1234567890", "pyfgcrl", "aoeuidhtns", "qjkxbmwvz")),
+      QWERTY(arrayOf("1234567890", "qwertyuiop", "asdfghjkl", "zxcvbnm")),
+      WORKMAN(arrayOf("1234567890", "qdrwbjfup", "ashtgyneoi", "zxmcvkl"));
 
-    private val defaultKeyboardLayout = arrayOf(
-      "1234567890",
-      "qwertyuiop",
-      "asdfghjkl",
-      "zxcvbnm"
-    )
+      // TODO: Currently specialized to QWERTY, need to make this more generic
+      private val priority = "fjghdkslavncmbxzrutyeiwoqp5849673210".mapIndices()
+      val chars = text.flatMap { it.toList() }.sortedBy { priority[it] }
+
+      fun priority(tagToChar: (String) -> Char): (String) -> Int? =
+        { priority[tagToChar(it)] }
+
+      fun keyboard() = text.joinToString("\n")
+      override fun toString() = chars.joinToString("")
+    }
 
     private val nearby: Map<Char, Map<Char, Int>> = mapOf(
       // Values are QWERTY keys sorted by physical proximity to the map key
@@ -102,7 +100,5 @@ enum class Pattern(val string: String) {
       '9' to "9807654321ioujklpyhnmtgbrfvedcwsxqaz",
       '0' to "0987654321opiklujmyhntgbrfvedcwsxqaz")
       .mapValues { it.value.mapIndices() }
-
-    private fun String.mapIndices() = mapIndexed { i, c -> Pair(c, i) }.toMap()
   }
 }

@@ -5,7 +5,6 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.Configurable
-import org.acejump.label.Pattern
 import javax.swing.JComponent
 
 /* Persists the state of the AceJump IDE settings across IDE restarts.
@@ -40,12 +39,12 @@ object AceConfig : Configurable, PersistentStateComponent<AceSettings> {
       panel.tagBackgroundColor != settings.tagBackgroundColor
 
   private fun String.distinctAlphanumerics() = toList().distinct().run {
-    if (isEmpty()) Pattern.defaultChars else filter { it.isLetterOrDigit() }
+    if (isEmpty()) settings.keyLayout.chars else filter { it.isLetterOrDigit() }
   }.joinToString("")
 
   override fun apply() {
     settings.allowedChars = panel.allowedChars.distinctAlphanumerics()
-    settings.keyboardChars = panel.keyboardChars.distinctAlphanumerics()
+    settings.keyboardChars = panel.keyboardChars
     panel.jumpModeColor?.let { settings.jumpModeRGB = it.rgb }
     panel.targetModeColor?.let { settings.targetModeRGB = it.rgb }
     panel.textHighlightColor?.let { settings.textHighlightRGB = it.rgb }

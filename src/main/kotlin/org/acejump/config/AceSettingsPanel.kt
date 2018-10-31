@@ -1,12 +1,14 @@
 package org.acejump.config
 
 import com.intellij.ui.ColorPanel
+import com.intellij.ui.SeparatorComponent
 import com.intellij.ui.layout.Cell
 import com.intellij.ui.layout.GrowPolicy.MEDIUM_TEXT
 import com.intellij.ui.layout.GrowPolicy.SHORT_TEXT
 import com.intellij.ui.layout.panel
 import org.acejump.search.aceString
 import java.awt.Color
+import java.awt.Font
 import javax.swing.JComponent
 import javax.swing.JPanel
 import javax.swing.JTextArea
@@ -14,23 +16,27 @@ import javax.swing.JTextField
 import kotlin.reflect.KProperty
 
 class AceSettingsPanel {
-  private var tagCharactersField = JTextField()
-  private var jumpModeColorWheel = ColorPanel()
-  private var targetModeColorWheel = ColorPanel()
-  private var textHighlightColorWheel = ColorPanel()
-  private var tagForegroundColorWheel = ColorPanel()
-  private var tagBackgroundColorWheel = ColorPanel()
-  private var keyboardCharsLayout = JTextArea()
+  private val tagCharactersField =
+    JTextField().apply { font = Font("monospaced", font.style, font.size) }
+  private val jumpModeColorWheel = ColorPanel()
+  private val targetModeColorWheel = ColorPanel()
+  private val textHighlightColorWheel = ColorPanel()
+  private val tagForegroundColorWheel = ColorPanel()
+  private val tagBackgroundColorWheel = ColorPanel()
+  private val keyboardCharsLayout = JTextArea()
+    .apply {
+      font = Font("monospaced", font.style, font.size)
+      isEditable = false
+    }
 
   internal val rootPanel: JPanel = panel {
     fun Cell.short(component: JComponent) = component(growPolicy = SHORT_TEXT)
     fun Cell.medium(component: JComponent) = component(growPolicy = MEDIUM_TEXT)
 
-    noteRow(aceString("tagCharsToBeUsedHeading"))
+    noteRow(aceString("tagCharsToBeUsedHeading")) { SeparatorComponent() }
     row(aceString("tagCharsToBeUsedLabel")) { medium(tagCharactersField) }
-    noteRow("Alphanumeric Keyboard Characters from top to bottom")
-    row("Keyboard keys") { medium(keyboardCharsLayout) }
-    noteRow(aceString("colorsToBeUsedHeading"))
+    row("Keyboard layout") { medium(keyboardCharsLayout) }
+    noteRow(aceString("colorsToBeUsedHeading")) { SeparatorComponent() }
     row(aceString("jumpModeColorLabel")) { short(jumpModeColorWheel) }
     row(aceString("tagBackgroundColorLabel")) { short(tagBackgroundColorWheel) }
     row(aceString("tagForegroundColorLabel")) { short(tagForegroundColorWheel) }

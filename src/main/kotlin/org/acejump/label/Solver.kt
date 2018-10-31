@@ -5,7 +5,8 @@ import com.google.common.collect.Multimaps
 import com.google.common.collect.Ordering
 import com.google.common.collect.TreeMultimap
 import com.intellij.openapi.diagnostic.Logger
-import org.acejump.label.Pattern.Companion.defaultOrder
+import org.acejump.config.AceConfig
+import org.acejump.label.Pattern.Companion.defaultTagOrder
 import org.acejump.search.wordBoundsPlus
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.viewBounds
@@ -69,9 +70,9 @@ object Solver {
     return true
   }
 
-  private val tagOrder = defaultOrder
+  private val tagOrder = defaultTagOrder
     .thenBy { eligibleSitesByTag[it].size }
-    .thenBy { Pattern.priority(it.last()) }
+    .thenBy(AceConfig.settings.keyLayout.priority { it.last() })
 
   /**
    * Sorts jump targets to determine which positions get first choice for tags,

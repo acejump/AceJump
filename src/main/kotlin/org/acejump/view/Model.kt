@@ -20,6 +20,8 @@ import java.awt.Font.PLAIN
 
 /**
  * Data holder for all settings and IDE components needed by AceJump.
+ *
+ * TODO: Integrate this class with AceSettings.
  */
 
 object Model {

@@ -24,6 +24,8 @@ interface Resettable {
 
 fun aceString(s: String) = ResourceBundle.getBundle("AceResources").getString(s)
 
+fun String.mapIndices() = mapIndexed { i, c -> Pair(c, i) }.toMap()
+
 fun <P> applyTo(vararg ps: P, fx: P.() -> Unit) = ps.forEach { it.fx() }
 
 operator fun Point.component1() = x

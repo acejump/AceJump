@@ -33,8 +33,10 @@ Bug fix: AceJump settings should now properly persist after restarting the IDE.
   </application-components>
 
   <extensions defaultExtensionNs="com.intellij">
-    <applicationService serviceInterface="org.acejump.config.AceConfig" serviceImplementation="org.acejump.config.AceConfig" overrides="true"/>
-    <applicationConfigurable groupId="tools" displayName="AceJump" id="preferences.AceConfigurable" instance="org.acejump.config.AceConfig"/>
+    <applicationService serviceImplementation="org.acejump.config.AceConfig"/>
+    <applicationConfigurable groupId="tools" displayName="AceJump"
+                             id="preferences.AceConfigurable"
+                             instance="org.acejump.config.AceConfig"/>
   </extensions>
 
   <actions>

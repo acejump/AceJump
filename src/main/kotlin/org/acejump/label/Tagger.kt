@@ -1,7 +1,7 @@
 package org.acejump.label
 
 import com.intellij.openapi.diagnostic.Logger
-import org.acejump.label.Pattern.Companion.defaultOrder
+import org.acejump.label.Pattern.Companion.defaultTagOrder
 import org.acejump.label.Pattern.Companion.filterTags
 import org.acejump.search.*
 import org.acejump.search.Jumper.hasJumped
@@ -236,7 +236,7 @@ object Tagger : Resettable {
   }
 
   private fun solveRegex(vacantResults: List<Int>, availableTags: Set<String>) =
-    availableTags.sortedWith(defaultOrder).zip(vacantResults).toMap()
+    availableTags.sortedWith(defaultTagOrder).zip(vacantResults).toMap()
 
   /**
    * Adds pre-existing tags where search string and tag overlap. For example,
