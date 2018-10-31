@@ -32,17 +32,20 @@ object AceConfig : Configurable, PersistentStateComponent<AceSettings> {
 
   override fun isModified() =
     panel.allowedChars != settings.allowedChars ||
+      panel.keyboardChars != settings.keyboardChars ||
       panel.jumpModeColor != settings.jumpModeColor ||
       panel.targetModeColor != settings.targetModeColor ||
       panel.textHighlightColor != settings.textHighlightColor ||
       panel.tagForegroundColor != settings.tagForegroundColor ||
       panel.tagBackgroundColor != settings.tagBackgroundColor
 
-  override fun apply() {
-    settings.allowedChars = panel.allowedChars.toList().distinct().run {
-      if (isEmpty()) Pattern.defaultChars else filter { it.isLetterOrDigit() }
-    }.joinToString("")
+  private fun String.distinctAlphanumerics() = toList().distinct().run {
+    if (isEmpty()) Pattern.defaultChars else filter { it.isLetterOrDigit() }
+  }.joinToString("")
 
+  override fun apply() {
+    settings.allowedChars = panel.allowedChars.distinctAlphanumerics()
+    settings.keyboardChars = panel.keyboardChars.distinctAlphanumerics()
     panel.jumpModeColor?.let { settings.jumpModeRGB = it.rgb }
     panel.targetModeColor?.let { settings.targetModeRGB = it.rgb }
     panel.textHighlightColor?.let { settings.textHighlightRGB = it.rgb }

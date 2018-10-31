@@ -9,6 +9,7 @@ import org.acejump.search.aceString
 import java.awt.Color
 import javax.swing.JComponent
 import javax.swing.JPanel
+import javax.swing.JTextArea
 import javax.swing.JTextField
 import kotlin.reflect.KProperty
 
@@ -19,6 +20,7 @@ class AceSettingsPanel {
   private var textHighlightColorWheel = ColorPanel()
   private var tagForegroundColorWheel = ColorPanel()
   private var tagBackgroundColorWheel = ColorPanel()
+  private var keyboardCharsLayout = JTextArea()
 
   internal val rootPanel: JPanel = panel {
     fun Cell.short(component: JComponent) = component(growPolicy = SHORT_TEXT)
@@ -26,6 +28,8 @@ class AceSettingsPanel {
 
     noteRow(aceString("tagCharsToBeUsedHeading"))
     row(aceString("tagCharsToBeUsedLabel")) { medium(tagCharactersField) }
+    noteRow("Alphanumeric Keyboard Characters from top to bottom")
+    row("Keyboard keys") { medium(keyboardCharsLayout) }
     noteRow(aceString("colorsToBeUsedHeading"))
     row(aceString("jumpModeColorLabel")) { short(jumpModeColorWheel) }
     row(aceString("tagBackgroundColorLabel")) { short(tagBackgroundColorWheel) }
@@ -38,6 +42,10 @@ class AceSettingsPanel {
     get() = tagCharactersField.text.toLowerCase()
     set(value) = tagCharactersField.setText(value)
 
+  internal var keyboardChars: String
+    get() = keyboardCharsLayout.text.toLowerCase()
+    set(value) = keyboardCharsLayout.setText(value)
+
   internal var jumpModeColor by jumpModeColorWheel
   internal var targetModeColor by targetModeColorWheel
   internal var textHighlightColor by textHighlightColorWheel
@@ -46,6 +54,7 @@ class AceSettingsPanel {
 
   fun reset(settings: AceSettings) {
     allowedChars = settings.allowedChars
+    keyboardChars = settings.keyboardChars
     jumpModeColor = settings.jumpModeColor
     targetModeColor = settings.targetModeColor
     textHighlightColor = settings.textHighlightColor

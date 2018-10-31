@@ -16,7 +16,7 @@ enum class Pattern(val string: String) {
   ALL_WORDS("(?<=[^a-zA-Z0-9_])[a-zA-Z0-9_]");
 
   companion object {
-    fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]
+    private fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]
 
     fun priority(char: Char) = priority[char]
 
@@ -31,7 +31,16 @@ enum class Pattern(val string: String) {
     var NUM_CHARS: Int = 36
       get() = AceConfig.settings.allowedChars.length
 
-    val defaultChars = ('a'..'z').plus('0'..'9')
+    private val priority: Map<Char, Int> =
+      "fjghdkslavncmbxzrutyeiwoqp5849673210".mapIndices()
+
+    val defaultChars = ('a'..'z').plus('0'..'9').sortedBy { priority[it] }
+    val keyboardKeys = """
+      12345890
+      qwertyuiop
+      asdfghjkl
+      zxcvbnm
+      """.trimIndent()
 
     val defaultOrder: Comparator<String> = compareBy(
       { it[0].isDigit() || it[1].isDigit() },
@@ -53,9 +62,6 @@ enum class Pattern(val string: String) {
       "asdfghjkl",
       "zxcvbnm"
     )
-
-    private val priority: Map<Char, Int> =
-      "fjghdkslavncmbxzrutyeiwoqp5849673210".mapIndices()
 
     private val nearby: Map<Char, Map<Char, Int>> = mapOf(
       // Values are QWERTY keys sorted by physical proximity to the map key
