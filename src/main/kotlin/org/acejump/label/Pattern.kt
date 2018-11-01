@@ -33,7 +33,7 @@ enum class Pattern(val string: String) {
     val defaultTagOrder: Comparator<String> = compareBy(
       { it[0].isDigit() || it[1].isDigit() },
       { Pattern.distance(it[0], it.last()) },
-      AceConfig.settings.keyLayout.priority { it[0] })
+      AceConfig.settings.layout.priority { it[0] })
 
     fun filterTags(query: String) = allBigrams.filter { !query.endsWith(it[0]) }
 
@@ -45,20 +45,33 @@ enum class Pattern(val string: String) {
      */
 
     enum class KeyLayout(val text: Array<String>) {
-      COLEMAK(arrayOf("1234567890", "qwfpgjluy", "arstdhneio", "zxcvbkm")),
-      DVORAK(arrayOf("1234567890", "pyfgcrl", "aoeuidhtns", "qjkxbmwvz")),
-      QWERTY(arrayOf("1234567890", "qwertyuiop", "asdfghjkl", "zxcvbnm")),
-      WORKMAN(arrayOf("1234567890", "qdrwbjfup", "ashtgyneoi", "zxmcvkl"));
+      COLEMK(arrayOf("1234567890", "qwfpgjluy",  "arstdhneio", "zxcvbkm")),
+      WORKMN(arrayOf("1234567890", "qdrwbjfup",  "ashtgyneoi", "zxmcvkl")),
+      DVORAK(arrayOf("1234567890", "pyfgcrl",    "aoeuidhtns", "qjkxbmwvz")),
+      QWERTY(arrayOf("1234567890", "qwertyuiop", "asdfghjkl",  "zxcvbnm")),
+      QGMLWY(arrayOf("1234567890", "qgmlwyfub",  "dstnriaeoh", "zxcvjkp")),
+      QGMLWB(arrayOf("1234567890", "qgmlwbyuv",  "dntnriaeoh", "zxcfjkp")),
+      NORMAN(arrayOf("1234567890", "qwdfkjurl",  "asetgynioh", "zxcvbpm"));
 
-      // TODO: Currently specialized to QWERTY, need to make this more generic
-      private val priority = "fjghdkslavncmbxzrutyeiwoqp5849673210".mapIndices()
-      val chars = text.flatMap { it.toList() }.sortedBy { priority[it] }
+      private val priority
+        get() = when (this) {
+          QWERTY -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
+          // TODO: Prioritize keys by ease of reach for other keyboards
+          WORKMN -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
+          COLEMK -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
+          DVORAK -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
+          QGMLWB -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
+          QGMLWY -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
+          NORMAN -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
+        }.mapIndices()
+
+      fun chars() = text.flatMap { it.toList() }.sortedBy { priority[it] }
 
       fun priority(tagToChar: (String) -> Char): (String) -> Int? =
         { priority[tagToChar(it)] }
 
       fun keyboard() = text.joinToString("\n")
-      override fun toString() = chars.joinToString("")
+      fun allChars() = chars().joinToString("")
     }
 
     private val nearby: Map<Char, Map<Char, Int>> = mapOf(

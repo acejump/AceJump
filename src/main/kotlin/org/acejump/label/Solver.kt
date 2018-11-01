@@ -72,7 +72,7 @@ object Solver {
 
   private val tagOrder = defaultTagOrder
     .thenBy { eligibleSitesByTag[it].size }
-    .thenBy(AceConfig.settings.keyLayout.priority { it.last() })
+    .thenBy(AceConfig.settings.layout.priority { it.last() })
 
   /**
    * Sorts jump targets to determine which positions get first choice for tags,

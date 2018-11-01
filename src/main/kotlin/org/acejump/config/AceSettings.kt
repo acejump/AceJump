@@ -5,9 +5,8 @@ import java.awt.Color
 import java.awt.Color.*
 import kotlin.reflect.KProperty
 
-data class AceSettings(var keyLayout: KeyLayout = KeyLayout.QWERTY,
-                       var allowedChars: String = keyLayout.toString(),
-                       var keyboardChars: String = keyLayout.keyboard(),
+data class AceSettings(var layout: KeyLayout = KeyLayout.QWERTY,
+                       var allowedChars: String = layout.allChars(),
   // These must be primitives in order to be serializable
                        internal var jumpModeRGB: Int = BLUE.rgb,
                        internal var targetModeRGB: Int = RED.rgb,

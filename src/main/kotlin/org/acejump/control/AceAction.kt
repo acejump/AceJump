@@ -10,7 +10,7 @@ import org.acejump.label.Pattern.ALL_WORDS
 import org.acejump.search.Jumper
 import org.acejump.search.getNameOfFileInEditor
 import org.acejump.view.Boundary.*
-import org.acejump.view.Model.DEFAULT_BOUNDARY
+import org.acejump.view.Model.defaultBoundary
 import org.acejump.view.Model.boundaries
 import org.acejump.view.Model.editor
 import java.awt.event.KeyEvent
@@ -26,7 +26,7 @@ open class AceAction : DumbAwareAction() {
   }
 
   override fun actionPerformed(e: AnActionEvent) {
-    boundaries = DEFAULT_BOUNDARY
+    boundaries = defaultBoundary
     editor = e.getData(EDITOR) ?: return
     val textLength = editor.document.textLength
     logger.info("Invoked on ${editor.getNameOfFileInEditor()} ($textLength)")

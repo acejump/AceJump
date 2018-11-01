@@ -3,12 +3,7 @@ package org.acejump.view
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
-import com.intellij.openapi.editor.colors.EditorColorsManager.getInstance
-import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
 import com.intellij.openapi.editor.impl.EditorImpl
-import com.intellij.openapi.editor.markup.EffectType.BOXED
-import com.intellij.openapi.editor.markup.EffectType.ROUNDED_BOX
-import com.intellij.openapi.editor.markup.TextAttributes
 import com.intellij.openapi.project.ProjectManager
 import org.acejump.config.AceConfig
 import org.acejump.search.defaultEditor
@@ -16,7 +11,6 @@ import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
 import java.awt.Color.*
 import java.awt.Font
 import java.awt.Font.BOLD
-import java.awt.Font.PLAIN
 
 /**
  * Data holder for all settings and IDE components needed by AceJump.
@@ -30,18 +24,20 @@ object Model {
     set(value) {
       editorText = value.document.text
       if (value == field) return
-
-//      // When the editor is updated, we must update some properties
-//      Handler.reset()
-
       field = value
 
-      EditorSettingsExternalizable.getInstance().run {
-        naturalBlock = isBlockCursor
-        naturalBlink = isBlinkCaret
-      }
+      editor.run {
+        settings.run {
+          naturalBlock = isBlockCursor
+          naturalBlink = isBlinkCaret
+        }
 
-      naturalColor = getInstance().globalScheme.getColor(CARET_COLOR) ?: BLACK
+        colorsScheme.run {
+          getColor(CARET_COLOR).let { naturalColor = it }
+          getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
+            ?.backgroundColor.let { naturalHighlight = it }
+        }
+      }
     }
 
   val markup
@@ -52,18 +48,10 @@ object Model {
     get() = editor.caretModel.offset
   var editorText = editor.document.text
 
-  var globalScheme = getInstance().globalScheme
-
-  var naturalBlock = EditorSettingsExternalizable.getInstance().isBlockCursor
-  var naturalBlink = EditorSettingsExternalizable.getInstance().isBlinkCaret
-  var naturalColor = globalScheme.getColor(CARET_COLOR) ?: BLACK
-  var naturalHighlight = globalScheme
-    .getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)?.backgroundColor ?: YELLOW
-
-  val targetModeHighlightStyle =
-    TextAttributes(null, null, AceConfig.settings.targetModeColor, ROUNDED_BOX, PLAIN)
-  val textHighlightStyle =
-    TextAttributes(null, GREEN, AceConfig.settings.textHighlightColor, BOXED, PLAIN)
+  var naturalBlock = false
+  var naturalBlink = true
+  var naturalColor = BLACK
+  var naturalHighlight = YELLOW
 
   val scheme
     get() = editor.colorsScheme
@@ -86,17 +74,12 @@ object Model {
     get() = DEFAULT_BUFFER < editorText.length
   const val MAX_TAG_RESULTS = 300
 
-  val DEFAULT_BOUNDARY = FULL_FILE_BOUNDARY
-  var boundaries: Boundary = DEFAULT_BOUNDARY
+  val defaultBoundary = FULL_FILE_BOUNDARY
+  var boundaries: Boundary = defaultBoundary
 
   fun Editor.setupCaret() {
-    naturalBlock = settings.isBlockCursor
     settings.isBlockCursor = true
-
-    naturalBlink = settings.isBlinkCaret
     settings.isBlinkCaret = false
-
-    naturalColor = colorsScheme.getColor(CARET_COLOR) ?: BLACK
     colorsScheme.setColor(CARET_COLOR, AceConfig.settings.jumpModeColor)
   }
 }
