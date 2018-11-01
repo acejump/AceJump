@@ -32,6 +32,7 @@ object Scroller {
     return true
   }
 
+  // TODO: Why doesn't this work? https://github.com/acejump/AceJump/issues/179
   private fun findPreviousPosition(): LogicalPosition? {
     val prevIndex = textMatches.toList().dropLastWhile { it < viewBounds.first }
       .lastOrNull() ?: textMatches.lastOrNull() ?: return null
