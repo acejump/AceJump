@@ -1,12 +1,10 @@
-
 import com.intellij.testFramework.EditorActionTestCase
-import com.intellij.testFramework.fixtures.JavaCodeInsightFixtureTestCase
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
 
 /**
- * @see JavaCodeInsightFixtureTestCase
- * @see LightCodeInsightFixtureTestCase
+ * @see com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
  */
-class  AceTest: EditorActionTestCase() {
+class AceTest : EditorActionTestCase() {
   override fun getActionId() = "AceAction"
+
+  fun testSomething() {} // Why doesn't this work?
 }
