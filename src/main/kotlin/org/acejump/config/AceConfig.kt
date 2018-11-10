@@ -5,7 +5,6 @@ import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.Configurable
-import javax.swing.JComponent
 
 /* Persists the state of the AceJump IDE settings across IDE restarts.
  * https://www.jetbrains.org/intellij/sdk/docs/basics/persisting_state_of_components.html
@@ -27,7 +26,7 @@ object AceConfig : Configurable, PersistentStateComponent<AceSettings> {
 
   override fun getDisplayName() = "AceJump"
 
-  override fun createComponent(): JComponent = panel.rootPanel
+  override fun createComponent() = panel.rootPanel
 
   override fun isModified() =
     panel.allowedChars != settings.allowedChars ||
