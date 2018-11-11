@@ -198,7 +198,7 @@ object Tagger : Resettable {
 
   private fun String.canAssignShortTag(tagMap: Map<String, Int>): Boolean {
     var i = 0
-    for(tag in tagMap) {
+    for (tag in tagMap) {
       if (tag.key[0] == this[0] &&
         editor.canIndicesBeSimultaneouslyVisible(tagMap[this]!!, tag.value)) i++
       if (1 < i) return false

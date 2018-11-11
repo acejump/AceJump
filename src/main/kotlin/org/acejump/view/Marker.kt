@@ -14,11 +14,9 @@ import org.acejump.view.Model.fontHeight
 import org.acejump.view.Model.fontWidth
 import org.acejump.view.Model.rectHeight
 import org.acejump.view.Model.rectVOffset
+import java.awt.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
-import java.awt.Graphics
-import java.awt.Graphics2D
-import java.awt.Point
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 import org.acejump.view.Model.editorText as text
@@ -65,7 +63,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
       tag?.alignTag(Canvas)
         ?.apply { Canvas.registerTag(this, tag) }
         ?.let {
-          if(it == NONE) return
+          if (it == NONE) return
           highlightTag(it); drawTagForeground(it)
         }
   }
@@ -75,24 +73,24 @@ class Marker(val query: String, val tag: String?, val index: Int)
     (g as Graphics2D).highlightEditorText()
 
   private fun Graphics2D.highlightEditorText() = run {
-      val tagX = start.x + fontWidth
-      val tagWidth = tag?.length?.times(fontWidth) ?: 0
+    val tagX = start.x + fontWidth
+    val tagWidth = tag?.length?.times(fontWidth) ?: 0
 
-      fun highlightRegex() {
-        composite = getInstance(SRC_OVER, 0.40.toFloat())
-        val xPos = if (alignment == RIGHT) tagX - fontWidth else start.x
-        fillRoundRect(xPos, startY, fontWidth, rectHeight, arcD, arcD)
-      }
-
-      setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
-
-      color = AceConfig.settings.textHighlightColor
-      if (regex) highlightRegex()
-      else {
-        fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
-        if (JumpMode.equals(TARGET)) surroundTargetWord()
-      }
+    fun highlightRegex() {
+      composite = getInstance(SRC_OVER, 0.40.toFloat())
+      val xPos = if (alignment == RIGHT) tagX - fontWidth else start.x
+      fillRoundRect(xPos, startY, fontWidth, rectHeight, arcD, arcD)
     }
+
+    setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
+
+    color = AceConfig.settings.textHighlightColor
+    if (regex) highlightRegex()
+    else {
+      fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
+      if (JumpMode.equals(TARGET)) surroundTargetWord()
+    }
+  }
 
   private fun Graphics2D.surroundTargetWord() {
     color = AceConfig.settings.targetModeColor

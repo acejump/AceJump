@@ -8,7 +8,8 @@ import com.intellij.openapi.project.ProjectManager
 import org.acejump.config.AceConfig
 import org.acejump.search.defaultEditor
 import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
-import java.awt.Color.*
+import java.awt.Color.BLACK
+import java.awt.Color.YELLOW
 import java.awt.Font
 import java.awt.Font.BOLD
 

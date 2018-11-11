@@ -1,9 +1,6 @@
 package org.acejump.label
 
-import com.google.common.collect.HashBiMap
-import com.google.common.collect.Multimaps
-import com.google.common.collect.Ordering
-import com.google.common.collect.TreeMultimap
+import com.google.common.collect.*
 import com.intellij.openapi.diagnostic.Logger
 import org.acejump.config.AceConfig
 import org.acejump.label.Pattern.Companion.defaultTagOrder
