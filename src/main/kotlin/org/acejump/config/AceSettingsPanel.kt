@@ -38,6 +38,7 @@ class AceSettingsPanel {
     }
   }
 
+  // https://github.com/JetBrains/intellij-community/blob/master/platform/platform-impl/src/com/intellij/ui/layout/readme.md
   internal val rootPanel: JPanel = panel {
     fun Cell.short(component: JComponent) = component(growPolicy = SHORT_TEXT)
     fun Cell.medium(component: JComponent) = component(growPolicy = MEDIUM_TEXT)

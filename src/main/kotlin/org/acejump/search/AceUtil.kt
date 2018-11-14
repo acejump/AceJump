@@ -1,8 +1,12 @@
 package org.acejump.search
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.*
-import com.intellij.openapi.fileEditor.*
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.LogicalPosition
+import com.intellij.openapi.editor.VisualPosition
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
 import org.acejump.view.Model.MAX_TAG_RESULTS
@@ -10,7 +14,9 @@ import org.acejump.view.Model.viewBounds
 import java.awt.Point
 import java.util.*
 import javax.swing.JComponent
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 interface Resettable {
   fun reset()
@@ -167,16 +173,15 @@ fun Editor.getLineCount() = document.run {
 /**
  * Gets the actual number of characters in the file
  *
- * @param includeEndNewLine True include newline
+ * @param countNewLines True include newline
  *
  * @return The file's character count
  */
 
-fun Editor.getFileSize(includeEndNewLine: Boolean = false): Int {
+fun Editor.getFileSize(countNewLines: Boolean = false): Int {
   val len = document.textLength
   val doc = document.charsSequence
-  return if (includeEndNewLine || len == 0 || doc[len - 1] != '\n') len
-  else len - 1
+  return if (countNewLines || len == 0 || doc[len - 1] != '\n') len else len - 1
 }
 
 /**

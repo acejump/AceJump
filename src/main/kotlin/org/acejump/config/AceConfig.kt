@@ -1,6 +1,8 @@
 package org.acejump.config
 
-import com.intellij.openapi.components.*
+import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.Configurable
 
@@ -11,7 +13,7 @@ import com.intellij.openapi.options.Configurable
 @State(name = "AceConfig", storages = [(Storage("AceJump.xml"))])
 object AceConfig : Configurable, PersistentStateComponent<AceSettings> {
   private val logger = Logger.getInstance(AceConfig::class.java)
-  var settings: AceSettings = AceSettings()
+  var settings = AceSettings()
 
   override fun getState() = settings
 
@@ -20,7 +22,7 @@ object AceConfig : Configurable, PersistentStateComponent<AceSettings> {
     settings = state
   }
 
-  private val panel = AceSettingsPanel()
+  private val panel by lazy { AceSettingsPanel() }
 
   override fun getDisplayName() = "AceJump"
 

@@ -6,5 +6,7 @@ import com.intellij.testFramework.EditorActionTestCase
 class AceTest : EditorActionTestCase() {
   override fun getActionId() = "AceAction"
 
-  fun testSomething() {} // Why doesn't this work?
+  fun testSomething() {
+    assert(true)
+  }
 }
