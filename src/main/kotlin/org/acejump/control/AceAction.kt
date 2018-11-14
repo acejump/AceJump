@@ -10,8 +10,8 @@ import org.acejump.label.Pattern.ALL_WORDS
 import org.acejump.search.Jumper
 import org.acejump.search.getNameOfFileInEditor
 import org.acejump.view.Boundary.*
-import org.acejump.view.Model.defaultBoundary
 import org.acejump.view.Model.boundaries
+import org.acejump.view.Model.defaultBoundary
 import org.acejump.view.Model.editor
 import java.awt.event.KeyEvent
 

@@ -3,14 +3,10 @@ package org.acejump.view
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
-import org.acejump.search.Resettable
-import org.acejump.search.getView
-import org.acejump.search.runLater
+import org.acejump.search.*
 import org.acejump.view.Model.fontWidth
 import org.acejump.view.Model.viewBounds
-import java.awt.Graphics
-import java.awt.Graphics2D
-import java.awt.Point
+import java.awt.*
 import javax.swing.JComponent
 import javax.swing.SwingUtilities.convertPoint
 
@@ -37,7 +33,7 @@ object Canvas : JComponent(), Resettable {
     contentComponent.add(Canvas)
     Canvas.setBounds(0, 0, contentComponent.width, contentComponent.height)
 
-    if(ApplicationInfo.getInstance().build.components.first() < 173) {
+    if (ApplicationInfo.getInstance().build.components.first() < 173) {
       val loc = convertPoint(Canvas, location, component.rootPane)
       Canvas.setLocation(-loc.x, -loc.y)
     }

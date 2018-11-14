@@ -5,9 +5,9 @@ import org.acejump.view.Model.editor
 import org.acejump.view.Model.viewBounds
 
 /**
-* Returns a list of indices where the query begins, within the given range.
-* These are full indices, ie. are not offset to the beginning of the range.
-*/
+ * Returns a list of indices where the query begins, within the given range.
+ * These are full indices, ie. are not offset to the beginning of the range.
+ */
 
 object Scanner {
   fun findMatchingSites(editorText: String, model: AceFindModel, cache: Set<Int>) =

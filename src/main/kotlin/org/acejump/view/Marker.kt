@@ -14,11 +14,9 @@ import org.acejump.view.Model.fontHeight
 import org.acejump.view.Model.fontWidth
 import org.acejump.view.Model.rectHeight
 import org.acejump.view.Model.rectVOffset
+import java.awt.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
-import java.awt.Graphics
-import java.awt.Graphics2D
-import java.awt.Point
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 import org.acejump.view.Model.editorText as text
