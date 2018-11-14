@@ -5,6 +5,7 @@ import java.awt.Color
 import java.awt.Color.*
 import kotlin.reflect.KProperty
 
+// TODO: https://github.com/acejump/AceJump/issues/215
 data class AceSettings(var layout: KeyLayout = KeyLayout.QWERTY,
                        var allowedChars: String = layout.allChars(),
                        // These must be primitives in order to be serializable

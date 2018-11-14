@@ -8,6 +8,8 @@ import com.intellij.openapi.options.Configurable
 
 /* Persists the state of the AceJump IDE settings across IDE restarts.
  * https://www.jetbrains.org/intellij/sdk/docs/basics/persisting_state_of_components.html
+ *
+ * TODO: https://github.com/acejump/AceJump/issues/254
  */
 
 @State(name = "AceConfig", storages = [(Storage("AceJump.xml"))])

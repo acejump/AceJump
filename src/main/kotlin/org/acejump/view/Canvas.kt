@@ -45,6 +45,7 @@ object Canvas : JComponent(), Resettable {
 
   private fun Editor.storeBounds() {
     viewBounds = getView()
+    // TODO: Fix reference, cf. https://github.com/acejump/AceJump/issues/200
     this::offsetToLogicalPosition.let {
       logger.info("View bounds: $viewBounds (lines " +
         "${it(viewBounds.first).line}..${it(viewBounds.last).line})")

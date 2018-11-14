@@ -132,6 +132,9 @@ class Marker : CustomHighlighterRenderer {
     drawString(tag!!.toUpperCase(), tagPosition!!.x, tagPosition.y + fontHeight)
   }
 
+  // TODO: Fix tag alignment and visibility issues
+  // https://github.com/acejump/AceJump/issues/233
+  // https://github.com/acejump/AceJump/issues/228
   private fun String.alignTag(canvas: Canvas): Point {
     val x = tagPoint.x + fontWidth
 //    val top = Point(x - fontWidth, y - fontHeight)

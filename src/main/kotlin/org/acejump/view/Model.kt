@@ -16,7 +16,7 @@ import java.awt.Font.BOLD
 /**
  * Data holder for all settings and IDE components needed by AceJump.
  *
- * TODO: Integrate this class with AceSettings.
+ * TODO: Integrate this class with [org.acejump.config.AceSettings]
  */
 
 object Model {

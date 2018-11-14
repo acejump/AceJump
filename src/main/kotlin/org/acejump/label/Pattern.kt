@@ -57,6 +57,7 @@ enum class Pattern(val string: String) {
         get() = when (this) {
           QWERTY -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
           // TODO: Prioritize keys by ease of reach for other keyboards
+          // TODO: https://github.com/acejump/AceJump/issues/172
           WORKMN -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
           COLEMK -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
           DVORAK -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
