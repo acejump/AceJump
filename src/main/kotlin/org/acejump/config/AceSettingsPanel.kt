@@ -58,6 +58,7 @@ class AceSettingsPanel {
     get() = keyboardLayoutCombo.selectedItem as KeyLayout
     set(value) { keyboardLayoutCombo.selectedItem = value }
 
+  // Property-to-property delegation: https://stackoverflow.com/q/45074596/1772342
   internal var keyChars by keyboardLayoutArea
   internal var allowedChars by tagCharsField
   internal var jumpModeColor by jumpModeColorWheel

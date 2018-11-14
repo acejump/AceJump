@@ -7,7 +7,7 @@ import kotlin.reflect.KProperty
 
 data class AceSettings(var layout: KeyLayout = KeyLayout.QWERTY,
                        var allowedChars: String = layout.allChars(),
-  // These must be primitives in order to be serializable
+                       // These must be primitives in order to be serializable
                        internal var jumpModeRGB: Int = BLUE.rgb,
                        internal var targetModeRGB: Int = RED.rgb,
                        internal var definitionModeRGB: Int = MAGENTA.rgb,

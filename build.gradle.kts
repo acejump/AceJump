@@ -17,7 +17,6 @@ tasks {
 }
 
 plugins {
-  `kotlin-dsl`
   idea apply true
   kotlin("jvm") version "1.3.0"
   id("org.jetbrains.intellij") version "0.3.12"

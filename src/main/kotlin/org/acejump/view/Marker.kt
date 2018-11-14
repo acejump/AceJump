@@ -29,31 +29,47 @@ import org.acejump.view.Model.editorText as text
  * alignment and painting should be handled here. Tags are "captioned" with two
  * or fewer characters. To select a tag, a user will type the tag's assigned
  * "caption", which will move the caret to a known index in the document.
+ *
+ * TODO: Clean up this class.
  */
 
-class Marker(val query: String, val tag: String?, val index: Int)
-  : CustomHighlighterRenderer {
-  private var srcPoint = editor.getPointRelative(index, editor.contentComponent)
-  private var queryLength = query.length
-  private var trueOffset = query.length - 1
-  private val searchWidth = queryLength * fontWidth
+class Marker : CustomHighlighterRenderer {
+  val index: Int
+  private val query: String
+  private val tag: String?
+  private var srcPoint: Point
+  private var queryLength: Int
+  private var trueOffset: Int
+  private val searchWidth: Int
+  private val tgIdx: Int
+  private val start: Point
+  private val startY: Int
+  private var tagPoint: Point
+  private var yPos: Int
+  private var alignment: Alignment
 
-  // TODO: Clean up this mess.
-  init {
+  constructor(query: String, tag: String?, index: Int) {
+    this.query = query
+    this.tag = tag
+    this.index = index
+    this.srcPoint = editor.getPointRelative(index, editor.contentComponent)
+    this.queryLength = query.length
+    this.trueOffset = query.length - 1
+    this.searchWidth = queryLength * fontWidth
+
     var i = 1
     while (i < query.length && index + i < text.length &&
       query[i].toLowerCase() == text[index + i].toLowerCase()) i++
-
     trueOffset = i - 1
     queryLength = i
-  }
 
-  private val tgIdx = index + trueOffset
-  private val start = editor.getPoint(index)
-  private val startY = start.y + rectVOffset
-  private var tagPoint = editor.getPointRelative(tgIdx, editor.contentComponent)
-  private var yPos = tagPoint.y + rectVOffset
-  private var alignment = RIGHT
+    this.tgIdx = index + trueOffset
+    this.start = editor.getPoint(index)
+    this.startY = start.y + rectVOffset
+    this.tagPoint = editor.getPointRelative(tgIdx, editor.contentComponent)
+    this.yPos = tagPoint.y + rectVOffset
+    this.alignment = RIGHT
+  }
 
   enum class Alignment { /*TOP, BOTTOM,*/ LEFT, RIGHT, NONE }
 
@@ -65,7 +81,7 @@ class Marker(val query: String, val tag: String?, val index: Int)
       tag?.alignTag(Canvas)
         ?.apply { Canvas.registerTag(this, tag) }
         ?.let {
-          if(it == NONE) return
+          if (it == NONE) return
           highlightTag(it); drawTagForeground(it)
         }
   }
@@ -75,24 +91,24 @@ class Marker(val query: String, val tag: String?, val index: Int)
     (g as Graphics2D).highlightEditorText()
 
   private fun Graphics2D.highlightEditorText() = run {
-      val tagX = start.x + fontWidth
-      val tagWidth = tag?.length?.times(fontWidth) ?: 0
+    val tagX = start.x + fontWidth
+    val tagWidth = tag?.length?.times(fontWidth) ?: 0
 
-      fun highlightRegex() {
-        composite = getInstance(SRC_OVER, 0.40.toFloat())
-        val xPos = if (alignment == RIGHT) tagX - fontWidth else start.x
-        fillRoundRect(xPos, startY, fontWidth, rectHeight, arcD, arcD)
-      }
-
-      setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
-
-      color = AceConfig.settings.textHighlightColor
-      if (regex) highlightRegex()
-      else {
-        fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
-        if (JumpMode.equals(TARGET)) surroundTargetWord()
-      }
+    fun highlightRegex() {
+      composite = getInstance(SRC_OVER, 0.40.toFloat())
+      val xPos = if (alignment == RIGHT) tagX - fontWidth else start.x
+      fillRoundRect(xPos, startY, fontWidth, rectHeight, arcD, arcD)
     }
+
+    setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
+
+    color = AceConfig.settings.textHighlightColor
+    if (regex) highlightRegex()
+    else {
+      fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
+      if (JumpMode.equals(TARGET)) surroundTargetWord()
+    }
+  }
 
   private fun Graphics2D.surroundTargetWord() {
     color = AceConfig.settings.targetModeColor
