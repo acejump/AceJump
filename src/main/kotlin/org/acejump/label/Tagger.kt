@@ -47,7 +47,7 @@ object Tagger : Resettable {
   private val logger = Logger.getInstance(Tagger::class.java)
 
   private val Iterable<Marker>.noneInView
-    get() = none { it.index in viewBounds }
+    get() = none { it inside viewBounds }
 
   fun markOrJump(model: AceFindModel, results: SortedSet<Int>) {
     model.run {

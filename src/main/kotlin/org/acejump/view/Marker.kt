@@ -34,7 +34,7 @@ import org.acejump.view.Model.editorText as text
  */
 
 class Marker : CustomHighlighterRenderer {
-  val index: Int
+  private val index: Int
   private val query: String
   private val tag: String?
   private var srcPoint: Point
@@ -198,4 +198,6 @@ class Marker : CustomHighlighterRenderer {
     highlightFirst()
     highlightLast()
   }
+
+  infix fun inside(viewBounds: IntRange) = index in viewBounds
 }
