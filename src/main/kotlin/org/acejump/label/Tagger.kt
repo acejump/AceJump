@@ -216,6 +216,7 @@ object Tagger: Resettable {
       else if (hasTagSuffixInView(query)) return this
     }
 
+    // TODO: Fix missing tags, cf. https://github.com/acejump/AceJump/issues/245
     val (onScreen, offScreen) = results.partition { it in viewBounds }
     val completeResultSet = onScreen + offScreen
     // Some results are untagged. Let's assign some tags!
