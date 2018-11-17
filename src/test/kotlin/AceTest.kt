@@ -9,7 +9,7 @@ import kotlin.system.measureTimeMillis
 /**
  * Functional test cases and end-to-end performance tests.
  *
- * @see com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
+ * TODO: Add more structure to test cases, use test resources to define files.
  */
 
 class AceTest : LightCodeInsightFixtureTestCase() {
