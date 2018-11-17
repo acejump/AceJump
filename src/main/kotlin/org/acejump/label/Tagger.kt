@@ -52,8 +52,8 @@ object Tagger : Resettable {
   fun markOrJump(model: AceFindModel, results: SortedSet<Int>) {
     model.run {
       if (!regex) regex = isRegularExpressions
-      query = if (regex) " $stringToFind" else stringToFind.mapIndexed { index, c ->
-        if (index == 0) c else c.toLowerCase()
+      query = if (regex) " $stringToFind" else stringToFind.mapIndexed { i, c ->
+        if (i == 0) c else c.toLowerCase()
       }.joinToString("")
       logger.info("Received query: \"$query\"")
     }
@@ -154,7 +154,7 @@ object Tagger : Resettable {
   private fun markOrScrollToNextOccurrence() {
     markAndMapTags().apply { if (isNotEmpty()) tagMap = this }
 
-    if (!markers.isEmpty() && markers.noneInView && query.length > 1)
+    if (markers.isNotEmpty() && markers.noneInView && query.length > 1)
       runAndWait { Scroller.ifQueryExistsScrollToNextOccurrence() }
   }
 

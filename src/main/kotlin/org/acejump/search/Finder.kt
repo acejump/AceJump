@@ -27,7 +27,7 @@ import kotlin.system.measureTimeMillis
 
 object Finder : Resettable {
   @Volatile
-  private var results: SortedSet<Int> = sortedSetOf()
+  var results: SortedSet<Int> = sortedSetOf()
   @Volatile
   private var textHighlights = listOf<RangeHighlighter>()
   @Volatile
@@ -126,7 +126,7 @@ object Finder : Resettable {
 
   private fun createTextHighlight(start: Int, end: Int) =
     markup.addRangeHighlighter(start, end, HIGHLIGHT_LAYER, null, EXACT_RANGE)
-      .apply { customRenderer = Marker(query, null, this.startOffset) }
+      .apply { customRenderer = Marker(query, null, startOffset) }
 
   private fun tag(model: AceFindModel, results: SortedSet<Int>) {
     synchronized(this) { Tagger.markOrJump(model, results) }
