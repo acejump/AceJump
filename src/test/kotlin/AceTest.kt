@@ -70,7 +70,7 @@ class AceTest : LightCodeInsightFixtureTestCase() {
   override fun tearDown() {
     myFixture.performEditorAction(IdeActions.ACTION_EDITOR_ESCAPE)
     UIUtil.dispatchAllInvocationEvents()
-    assert(Canvas.jumpLocations.isEmpty())
+    assertEmpty(editor.markupModel.allHighlighters)
     super.tearDown()
   }
 }
