@@ -1,6 +1,7 @@
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
+import com.intellij.util.ui.UIUtil
 import org.acejump.control.AceAction
 import org.acejump.search.Finder
 
@@ -11,6 +12,7 @@ class AceTest : LightCodeInsightFixtureTestCase() {
   override fun tearDown() {
     myFixture.performEditorAction(IdeActions.ACTION_EDITOR_ESCAPE)
     assert(Finder.results.isEmpty())
+    UIUtil.dispatchAllInvocationEvents()
     super.tearDown()
   }
 
