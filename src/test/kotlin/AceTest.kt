@@ -4,6 +4,7 @@ import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
 import com.intellij.util.ui.UIUtil
 import org.acejump.control.AceAction
 import org.acejump.search.Finder
+import org.acejump.view.Canvas
 
 /**
  * @see com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
@@ -11,25 +12,25 @@ import org.acejump.search.Finder
 class AceTest : LightCodeInsightFixtureTestCase() {
   override fun tearDown() {
     myFixture.performEditorAction(IdeActions.ACTION_EDITOR_ESCAPE)
-    assert(Finder.results.isEmpty())
     UIUtil.dispatchAllInvocationEvents()
+    assert(Canvas.jumpLocations.isEmpty())
     super.tearDown()
   }
 
-  fun `test finder finds text`() {
+  fun `test finder finds all occurrences`() {
     val code = "test test test"
 
     invokeAndSearch(code, "test")
 
-    assert(Finder.results.size == 3)
+    assert(Canvas.jumpLocations.size == 3)
   }
 
   fun `test finder finds nothing`() {
     val code = "test test test"
 
-    invokeAndSearch(code, "qezt")
+    invokeAndSearch(code, "qest")
 
-    assert(Finder.results.size == 0)
+    assert(Canvas.jumpLocations.isEmpty())
   }
 
 
@@ -38,7 +39,16 @@ class AceTest : LightCodeInsightFixtureTestCase() {
 
     invokeAndSearch(code, "tezt")
 
-    assert(Finder.results.size == 3)
+    assert(Canvas.jumpLocations.size == 3)
+  }
+
+  fun `test jump to first occurrence`() {
+    val code = "<caret>testing 1234"
+
+    invokeAndSearch(code, "1")
+
+    myFixture.performEditorAction(IdeActions.ACTION_EDITOR_ENTER)
+    // TODO: Verify that the caret has moved to "testing <caret>1234"
   }
 
   private fun invokeAndSearch(code: String, query: String) =
@@ -46,5 +56,6 @@ class AceTest : LightCodeInsightFixtureTestCase() {
       configureByText(PlainTextFileType.INSTANCE, code)
       testAction(AceAction())
       type(query)
+      UIUtil.dispatchAllInvocationEvents()
     }
 }

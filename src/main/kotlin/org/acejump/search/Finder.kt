@@ -27,7 +27,7 @@ import kotlin.system.measureTimeMillis
 
 object Finder : Resettable {
   @Volatile
-  var results: SortedSet<Int> = sortedSetOf()
+  private var results: SortedSet<Int> = sortedSetOf()
   @Volatile
   private var textHighlights = listOf<RangeHighlighter>()
   @Volatile
