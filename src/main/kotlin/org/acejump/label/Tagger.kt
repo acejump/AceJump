@@ -34,7 +34,7 @@ import kotlin.system.measureTimeMillis
  * @see Jumper
  */
 
-object Tagger : Resettable {
+object Tagger: Resettable {
   var markers: List<Marker> = emptyList()
     private set
   var regex = false
@@ -154,7 +154,7 @@ object Tagger : Resettable {
   private fun markOrScrollToNextOccurrence() {
     markAndMapTags().apply { if (isNotEmpty()) tagMap = this }
 
-    if (markers.isNotEmpty() && markers.noneInView && query.length > 1)
+    if (markers.isNotEmpty() && markers.noneInView && 1 < query.length)
       runAndWait { Scroller.ifQueryExistsScrollToNextOccurrence() }
   }
 

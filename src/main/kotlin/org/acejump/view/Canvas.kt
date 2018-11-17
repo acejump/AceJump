@@ -21,7 +21,7 @@ import javax.swing.SwingUtilities.convertPoint
  * @see Marker
  */
 
-object Canvas : JComponent(), Resettable {
+object Canvas: JComponent(), Resettable {
   private val logger = Logger.getInstance(Canvas::class.java)
   private val occupied = hashSetOf<Point>()
   @Volatile

@@ -15,7 +15,7 @@ import javax.swing.*
 import javax.swing.text.JTextComponent
 import kotlin.reflect.KProperty
 
-class AceSettingsPanel {
+internal class AceSettingsPanel {
   private val tagCharsField = JTextField()
   private val keyboardLayoutCombo = ComboBox<KeyLayout>()
   private val keyboardLayoutArea = JTextArea()

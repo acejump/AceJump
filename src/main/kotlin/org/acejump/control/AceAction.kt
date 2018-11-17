@@ -19,7 +19,7 @@ import java.awt.event.KeyEvent
  * Entry point for all actions. The IntelliJ Platform calls AceJump here.
  */
 
-open class AceAction : DumbAwareAction() {
+open class AceAction: DumbAwareAction() {
   open val logger = Logger.getInstance(javaClass)
   override fun update(action: AnActionEvent) {
     action.presentation.isEnabled = action.getData(EDITOR) != null
@@ -37,19 +37,19 @@ open class AceAction : DumbAwareAction() {
   open fun customize() = Jumper.toggleMode()
 }
 
-class AceTargetAction : AceAction() {
+class AceTargetAction: AceAction() {
   override fun customize() = Jumper.toggleTargetMode()
 }
 
-class AceLineAction : AceAction() {
+class AceLineAction: AceAction() {
   override fun customize() = regexSearch(Pattern.LINE_MARK)
 }
 
-object AceDefinitionAction : AceAction() {
+object AceDefinitionAction: AceAction() {
   override fun customize() = Jumper.toggleDeclarationMode()
 }
 
-object AceKeyAction : AceAction() {
+object AceKeyAction: AceAction() {
   override fun actionPerformed(e: AnActionEvent) {
     val inputEvent = e.inputEvent as? KeyEvent ?: return
     logger.info("Registered key: ${KeyEvent.getKeyText(inputEvent.keyCode)}")
@@ -61,7 +61,7 @@ object AceKeyAction : AceAction() {
  * Search for words in the complete file
  */
 
-class AceWordAction : AceAction() {
+class AceWordAction: AceAction() {
   override fun customize() = regexSearch(ALL_WORDS, SCREEN_BOUNDARY)
 }
 
@@ -69,7 +69,7 @@ class AceWordAction : AceAction() {
  * Search for words from the start of the screen to the caret
  */
 
-object AceWordForwardAction : AceAction() {
+object AceWordForwardAction: AceAction() {
   override fun customize() = regexSearch(ALL_WORDS, AFTER_CARET_BOUNDARY)
 }
 
@@ -77,6 +77,6 @@ object AceWordForwardAction : AceAction() {
  * Search for words from the caret position to the start of the screen
  */
 
-object AceWordBackwardsAction : AceAction() {
+object AceWordBackwardsAction: AceAction() {
   override fun customize() = regexSearch(ALL_WORDS, BEFORE_CARET_BOUNDARY)
 }

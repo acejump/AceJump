@@ -4,8 +4,8 @@ import com.intellij.find.FindModel
 import kotlin.text.RegexOption.IGNORE_CASE
 import kotlin.text.RegexOption.MULTILINE
 
-class AceFindModel : FindModel {
-  constructor(key: String, isRegex: Boolean = false) : super() {
+class AceFindModel: FindModel {
+  constructor(key: String, isRegex: Boolean = false): super() {
     isCaseSensitive = false
     stringToFind = key
     isRegularExpressions = isRegex

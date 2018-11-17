@@ -9,7 +9,7 @@ import java.lang.System.currentTimeMillis
  * times inside the delay, but doing so will only prolong the event from firing.
  */
 
-object Trigger : () -> Unit {
+object Trigger: () -> Unit {
   private val logger = Logger.getInstance(Trigger::class.java)
   private var delay = 0L
   private var timer = currentTimeMillis()

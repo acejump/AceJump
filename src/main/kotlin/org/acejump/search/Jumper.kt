@@ -25,7 +25,7 @@ import java.util.*
  * Caret controller. Responsible for moving the caret once a tag is selected.
  */
 
-object Jumper : Resettable {
+object Jumper: Resettable {
   @Volatile
   var hasJumped = false
   private val logger = Logger.getInstance(Jumper::class.java)

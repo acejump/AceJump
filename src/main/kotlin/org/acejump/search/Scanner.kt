@@ -9,7 +9,7 @@ import org.acejump.view.Model.viewBounds
  * These are full indices, ie. are not offset to the beginning of the range.
  */
 
-object Scanner {
+internal object Scanner {
   fun findMatchingSites(editorText: String, model: AceFindModel, cache: Set<Int>) =
     editorText.run {
       val query = model.stringToFind

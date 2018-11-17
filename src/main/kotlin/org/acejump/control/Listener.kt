@@ -1,8 +1,6 @@
 package org.acejump.control
 
 import com.intellij.openapi.diagnostic.Logger
-import com.intellij.openapi.editor.colors.EditorColorsListener
-import com.intellij.openapi.editor.colors.EditorColorsScheme
 import com.intellij.openapi.editor.event.VisibleAreaEvent
 import com.intellij.openapi.editor.event.VisibleAreaListener
 import org.acejump.control.Handler.redoFind
@@ -16,10 +14,11 @@ import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 import kotlin.system.measureTimeMillis
 
-internal object Listener : FocusListener, AncestorListener,
-  EditorColorsListener, VisibleAreaListener {
+internal object Listener: FocusListener, AncestorListener, VisibleAreaListener {
   private val logger = Logger.getInstance(Listener::class.java)
+
   fun enable() =
+  // TODO: Do we really need `synchronized` here?
     synchronized(this) {
       editor.run {
         component.addFocusListener(Listener)
@@ -29,6 +28,7 @@ internal object Listener : FocusListener, AncestorListener,
     }
 
   fun disable() =
+  // TODO: Do we really need `synchronized` here?
     synchronized(this) {
       editor.run {
         component.removeFocusListener(Listener)
@@ -65,8 +65,6 @@ internal object Listener : FocusListener, AncestorListener,
       else if (Tagger.regex) return false
       else !Tagger.hasMatchBetweenOldAndNewView(viewBounds, this)
     }
-
-  override fun globalSchemeChange(scheme: EditorColorsScheme?) = redoFind()
 
   override fun ancestorMoved(ancestorEvent: AncestorEvent?) {
     if (!canTagsSurviveViewResize()) {

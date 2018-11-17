@@ -25,7 +25,7 @@ import kotlin.system.measureTimeMillis
  * @see Tagger
  */
 
-object Finder : Resettable {
+object Finder: Resettable {
   @Volatile
   private var results: SortedSet<Int> = sortedSetOf()
   @Volatile

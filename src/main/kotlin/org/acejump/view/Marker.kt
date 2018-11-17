@@ -33,7 +33,7 @@ import org.acejump.view.Model.editorText as text
  * TODO: Clean up this class.
  */
 
-class Marker : CustomHighlighterRenderer {
+class Marker: CustomHighlighterRenderer {
   private val index: Int
   private val query: String
   private val tag: String?

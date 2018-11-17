@@ -11,7 +11,7 @@ import java.awt.Color
 internal enum class JumpMode {
   DISABLED, DEFAULT, TARGET, DEFINE, WORD, LINE;
 
-  companion object : Resettable {
+  companion object: Resettable {
     private var mode: JumpMode = DISABLED
       set(value) {
         field = value

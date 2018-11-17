@@ -13,7 +13,7 @@ import com.intellij.openapi.options.Configurable
  */
 
 @State(name = "AceConfig", storages = [(Storage("AceJump.xml"))])
-object AceConfig : Configurable, PersistentStateComponent<AceSettings> {
+object AceConfig: Configurable, PersistentStateComponent<AceSettings> {
   private val logger = Logger.getInstance(AceConfig::class.java)
   var settings = AceSettings()
 

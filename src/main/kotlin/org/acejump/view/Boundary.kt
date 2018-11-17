@@ -10,7 +10,7 @@ import kotlin.math.min
  * Interface which defines the boundary inside the file to be searched
  */
 
-enum class Boundary : ClosedRange<Int> {
+enum class Boundary: ClosedRange<Int> {
   // Search the complete file
   FULL_FILE_BOUNDARY {
     override val start: Int
