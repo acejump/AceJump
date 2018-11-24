@@ -13,7 +13,6 @@ import org.acejump.view.Boundary.*
 import org.acejump.view.Model.boundaries
 import org.acejump.view.Model.defaultBoundary
 import org.acejump.view.Model.editor
-import java.awt.event.KeyEvent
 
 /**
  * Entry point for all actions. The IntelliJ Platform calls AceJump here.
@@ -36,14 +35,6 @@ open class AceAction: DumbAwareAction() {
 
   open fun customize() = Jumper.toggleMode()
 }
-
-//object AceKeyAction: AceAction() {
-//  override fun actionPerformed(e: AnActionEvent) {
-//    val inputEvent = e.inputEvent as? KeyEvent ?: return
-//    logger.info("Registered key: ${KeyEvent.getKeyText(inputEvent.keyCode)}")
-//    Handler.processCommand(inputEvent.keyCode)
-//  }
-//}
 
 /**
  * When target mode is activated, selecting a tag will highlight an entire word.

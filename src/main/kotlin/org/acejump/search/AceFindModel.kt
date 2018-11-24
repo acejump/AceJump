@@ -5,7 +5,7 @@ import kotlin.text.RegexOption.IGNORE_CASE
 import kotlin.text.RegexOption.MULTILINE
 
 class AceFindModel: FindModel {
-  constructor(key: String, isRegex: Boolean = false): super() {
+  internal constructor(key: String, isRegex: Boolean = false): super() {
     isCaseSensitive = false
     stringToFind = key
     isRegularExpressions = isRegex
@@ -17,7 +17,9 @@ class AceFindModel: FindModel {
 
     if (!isCaseSensitive && stringToFind.first().isLowerCase())
       options.add(IGNORE_CASE)
-    if (!isRegularExpressions) regex = Regex.escape(stringToFind)
+    if (!isRegularExpressions)
+      regex = Regex.escape(stringToFind)
+
     return Regex(regex, options)
   }
 }

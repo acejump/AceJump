@@ -58,12 +58,12 @@ enum class Pattern(val string: String) {
           QWERTY -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
           // TODO: Prioritize keys by ease of reach for other keyboards
           // TODO: https://github.com/acejump/AceJump/issues/172
-          WORKMN -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
           COLEMK -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
           DVORAK -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
+          NORMAN -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
           QGMLWB -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
           QGMLWY -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
-          NORMAN -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
+          WORKMN -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
         }.mapIndices()
 
       fun chars() = text.flatMap { it.toList() }.sortedBy { priority[it] }

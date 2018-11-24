@@ -1,10 +1,11 @@
-package org.acejump.search
+package org.acejump.control
 
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType.CENTER
 import org.acejump.label.Tagger.textMatches
+import org.acejump.search.*
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.viewBounds
 
@@ -23,7 +24,8 @@ object Scroller {
   private var scrollY = 0
 
   fun scroll(isNext: Boolean = true): Boolean {
-    val position = if (isNext) findNextPosition() ?: return false
+    val position = if (isNext) findNextPosition()
+      ?: return false
     else findPreviousPosition() ?: return false
     editor.scrollingModel.disableAnimation()
     editor.scrollingModel.scrollTo(position, CENTER)

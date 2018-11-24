@@ -24,6 +24,7 @@ internal class AceSettingsPanel {
   private val textHighlightColorWheel = ColorPanel()
   private val tagForegroundColorWheel = ColorPanel()
   private val tagBackgroundColorWheel = ColorPanel()
+  private val displayQueryCheckBox = JCheckBox()
 
   init {
     tagCharsField.apply { font = Font("monospaced", font.style, font.size) }
@@ -53,6 +54,8 @@ internal class AceSettingsPanel {
     row(aceString("tagForegroundColorLabel")) { short(tagForegroundColorWheel) }
     row(aceString("targetModeColorLabel")) { short(targetModeColorWheel) }
     row(aceString("textHighlightColorLabel")) { short(textHighlightColorWheel) }
+    row(aceString("appearanceHeading")) { SeparatorComponent() }
+    row(aceString("displayQueryLabel")) { short(displayQueryCheckBox) }
   }
 
   internal var keyboardLayout: KeyLayout
@@ -67,6 +70,7 @@ internal class AceSettingsPanel {
   internal var textHighlightColor by textHighlightColorWheel
   internal var tagForegroundColor by tagForegroundColorWheel
   internal var tagBackgroundColor by tagBackgroundColorWheel
+  internal var displayQuery by displayQueryCheckBox
 
   fun reset(settings: AceSettings) {
     allowedChars = settings.allowedChars
@@ -76,6 +80,7 @@ internal class AceSettingsPanel {
     textHighlightColor = settings.textHighlightColor
     tagForegroundColor = settings.tagForegroundColor
     tagBackgroundColor = settings.tagBackgroundColor
+    displayQuery = settings.displayQuery
   }
 
   // Removal pending support for https://youtrack.jetbrains.com/issue/KT-8575
@@ -84,4 +89,7 @@ internal class AceSettingsPanel {
 
   private operator fun ColorPanel.getValue(a: AceSettingsPanel, p: KProperty<*>) = selectedColor
   private operator fun ColorPanel.setValue(a: AceSettingsPanel, p: KProperty<*>, c: Color?) = setSelectedColor(c)
+
+  private operator fun JCheckBox.getValue(a: AceSettingsPanel, p: KProperty<*>) = isEnabled
+  private operator fun JCheckBox.setValue(a: AceSettingsPanel, p: KProperty<*>, enabled: Boolean) = setEnabled(enabled)
 }

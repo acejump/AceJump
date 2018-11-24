@@ -1,6 +1,7 @@
 package org.acejump.label
 
 import com.intellij.openapi.diagnostic.Logger
+import org.acejump.control.Scroller
 import org.acejump.label.Pattern.Companion.defaultTagOrder
 import org.acejump.label.Pattern.Companion.filterTags
 import org.acejump.search.*

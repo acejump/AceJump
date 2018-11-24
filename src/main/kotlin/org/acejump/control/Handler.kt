@@ -14,8 +14,8 @@ import org.acejump.label.Pattern.*
 import org.acejump.label.Tagger
 import org.acejump.search.*
 import org.acejump.search.Finder.search
-import org.acejump.search.Scroller.restoreScroll
-import org.acejump.search.Scroller.saveScroll
+import org.acejump.control.Scroller.restoreScroll
+import org.acejump.control.Scroller.saveScroll
 import org.acejump.view.Boundary
 import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
 import org.acejump.view.Canvas
@@ -111,12 +111,12 @@ object Handler: TypedActionHandler, Resettable {
   override fun reset() {
     if (enabled) Listener.disable()
 
-    enabled = false
     clear()
     editor.restoreSettings()
   }
 
   private fun Editor.restoreSettings() = runAndWait {
+    enabled = false
     swapActions()
     uninstallKeyHandler()
     restoreScroll()
