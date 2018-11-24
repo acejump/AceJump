@@ -11,6 +11,8 @@ tasks {
     kotlinOptions.jvmTarget = "1.8"
   }
 
+  named("buildPlugin") { dependsOn("test") }
+
   withType<RunIdeTask> {
     dependsOn("test")
     findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
