@@ -37,28 +37,41 @@ open class AceAction: DumbAwareAction() {
   open fun customize() = Jumper.toggleMode()
 }
 
+//object AceKeyAction: AceAction() {
+//  override fun actionPerformed(e: AnActionEvent) {
+//    val inputEvent = e.inputEvent as? KeyEvent ?: return
+//    logger.info("Registered key: ${KeyEvent.getKeyText(inputEvent.keyCode)}")
+//    Handler.processCommand(inputEvent.keyCode)
+//  }
+//}
+
+/**
+ * When target mode is activated, selecting a tag will highlight an entire word.
+ */
+
 class AceTargetAction: AceAction() {
   override fun customize() = Jumper.toggleTargetMode()
 }
+
+/**
+ * When line mode is activated, we will tag the beginning and end of each line.
+ */
 
 class AceLineAction: AceAction() {
   override fun customize() = regexSearch(Pattern.LINE_MARK)
 }
 
+/**
+ * When declaration mode is activated, selecting a tag will take us to the
+ * definition (i.e. declaration) of the token in the editor, if it exists.
+ */
+
 object AceDefinitionAction: AceAction() {
   override fun customize() = Jumper.toggleDeclarationMode()
 }
 
-object AceKeyAction: AceAction() {
-  override fun actionPerformed(e: AnActionEvent) {
-    val inputEvent = e.inputEvent as? KeyEvent ?: return
-    logger.info("Registered key: ${KeyEvent.getKeyText(inputEvent.keyCode)}")
-    Handler.processCommand(inputEvent.keyCode)
-  }
-}
-
 /**
- * Search for words in the complete file
+ * When word mode is activated, we will tag all words on the screen.
  */
 
 class AceWordAction: AceAction() {

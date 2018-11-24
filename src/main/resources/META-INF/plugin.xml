@@ -40,7 +40,6 @@ Bug fix: AceJump settings should now properly persist after restarting the IDE.
   </extensions>
 
   <actions>
-    <!-- Add your actions here -->
     <action id="AceAction"
             class="org.acejump.control.AceAction"
             text="Activate AceJump mode"

@@ -22,7 +22,7 @@ object Scroller {
   private var scrollX = 0
   private var scrollY = 0
 
-  fun ifQueryExistsScrollToNextOccurrence(isNext: Boolean = true): Boolean {
+  fun scroll(isNext: Boolean = true): Boolean {
     val position = if (isNext) findNextPosition() ?: return false
     else findPreviousPosition() ?: return false
     editor.scrollingModel.disableAnimation()

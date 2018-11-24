@@ -30,17 +30,14 @@ object Jumper: Resettable {
   var hasJumped = false
   private val logger = Logger.getInstance(Jumper::class.java)
 
-  fun toggleMode() {
-    logger.info("Setting jump mode to ${JumpMode.toggle()}")
-  }
+  fun toggleMode() = toggleMode(null)
 
-  fun toggleTargetMode() {
-    logger.info("Setting jump mode to ${JumpMode.toggle(TARGET)}")
-  }
+  fun toggleTargetMode() = toggleMode(TARGET)
 
-  fun toggleDeclarationMode() {
-    logger.info("Setting jump mode to ${JumpMode.toggle(DEFINE)}")
-  }
+  fun toggleDeclarationMode() = toggleMode(DEFINE)
+
+  private fun toggleMode(mode: JumpMode? = null) =
+    logger.info("Entering ${JumpMode.toggle(mode)} mode")
 
   fun jump(index: Int) = runAndWait {
     editor.run {

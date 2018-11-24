@@ -12,6 +12,7 @@ tasks {
   }
 
   withType<RunIdeTask> {
+    dependsOn("test")
     findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
   }
 }
@@ -21,6 +22,10 @@ plugins {
   kotlin("jvm") version "1.3.0"
   id("org.jetbrains.intellij") version "0.3.12"
   id("org.jetbrains.gradle.plugin.idea-ext") version "0.3" apply true
+}
+
+tasks.withType(KotlinCompile::class) {
+  kotlinOptions.freeCompilerArgs += "-progressive"
 }
 
 idea.project {
