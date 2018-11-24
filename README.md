@@ -101,6 +101,8 @@ If you would like to [contribute](https://github.com/acejump/AceJump/pulls), her
 
 To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -PluginDev`.
 
+To just run [the tests](src/test/kotlin/AceTest.kt), execute `./gradlew test` - this is usually much faster than starting an IDE.
+
 For documentation on plugin development, see the [IntelliJ Platform SDK](www.jetbrains.org/intellij/sdk/docs/).
 
 If you enjoy using AceJump, you might also enjoy reading [the code](src/main/kotlin/org/acejump/label/Solver.kt).
