@@ -1,4 +1,3 @@
-import org.gradle.internal.impldep.org.testng.TestNG
 import org.jetbrains.gradle.ext.GradleTask
 import org.jetbrains.gradle.ext.ProjectSettings
 import org.jetbrains.gradle.ext.Remote
