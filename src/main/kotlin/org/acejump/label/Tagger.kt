@@ -118,10 +118,10 @@ object Tagger: Resettable {
   fun jumpToNextOrNearestVisible() =
     tagMap.values.filter { it in viewBounds }.sorted().let { tags ->
       if (caretOffset in viewBounds) {
-        tags.firstOrNull { it > caretOffset }?.let { return Jumper.jump(it) }
-        tags.lastOrNull { it < caretOffset }?.let { return Jumper.jump(it) }
+        tags.firstOrNull { it > caretOffset }?.let { return Jumper.jumpTo(it) }
+        tags.lastOrNull { it < caretOffset }?.let { return Jumper.jumpTo(it) }
       } else {
-        tags.firstOrNull()?.let { Jumper.jump(it) }
+        tags.firstOrNull()?.let { Jumper.jumpTo(it) }
       }
     }
 
@@ -129,7 +129,7 @@ object Tagger: Resettable {
     tagMap.entries.firstOrNull { it.solves(query) && it.value in viewBounds }
       ?.run {
         logger.info("User selected tag: ${key.toUpperCase()}")
-        Jumper.jump(value)
+        Jumper.jumpTo(value)
       }
 
   /**

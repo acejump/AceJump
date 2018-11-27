@@ -39,35 +39,21 @@ object Jumper: Resettable {
   private fun toggleMode(mode: JumpMode? = null) =
     logger.info("Entering ${JumpMode.toggle(mode)} mode")
 
-  fun jump(index: Int) = runAndWait {
+  fun jumpTo(offset: Int) = runAndWait {
     editor.run {
-      val logPos = editor.offsetToLogicalPosition(index)
+      val logPos = editor.offsetToLogicalPosition(offset)
       logger.info("Jumping to line ${logPos.line}, column ${logPos.column}...")
 
+      moveCaretTo(offset)
+
       when {
-        Finder.isShiftSelectEnabled -> selectRange(caretModel.offset, index)
-        // Moving the caret will trigger a reset, flipping targetModeEnabled,
-        // so we need to move the caret and select the word at the same time
-        JumpMode.equals(TARGET) -> moveCaret(index).also { selectWordAtOffset(index) }
-        JumpMode.equals(DEFINE) -> moveCaret(index).also { gotoSymbolAction() }
-        else -> moveCaret(index)
+        Finder.isShiftSelectEnabled -> selectRange(caretModel.offset, offset)
+        JumpMode.equals(TARGET) -> selectWordAtOffset(offset)
+        JumpMode.equals(DEFINE) -> gotoSymbolAction()
       }
 
       hasJumped = true
     }
-  }
-
-  // Add current caret position to navigation history
-  private fun Editor.appendToHistory() =
-    CommandProcessor.getInstance().executeCommand(project,
-      aceJumpHistoryAppender, "AceJumpHistoryAppender",
-      DocCommandGroupId.noneGroupId(document), document)
-
-
-  private fun moveCaret(offset: Int) = editor.run {
-    appendToHistory()
-    selectionModel.removeSelection()
-    caretModel.moveToOffset(offset)
   }
 
   private val aceJumpHistoryAppender = {
@@ -76,6 +62,17 @@ object Jumper: Resettable {
       includeCurrentCommandAsNavigation()
       includeCurrentPlaceAsChangePlace()
     }
+  }
+
+  private fun Editor.appendCaretPositionToNavigationHistory() =
+    CommandProcessor.getInstance().executeCommand(project,
+      aceJumpHistoryAppender, "AceJumpHistoryAppender",
+      DocCommandGroupId.noneGroupId(document), document)
+
+  private fun moveCaretTo(offset: Int) = editor.run {
+    appendCaretPositionToNavigationHistory()
+    selectionModel.removeSelection()
+    caretModel.moveToOffset(offset)
   }
 
   private fun Editor.selectWordAtOffset(offset: Int = caretModel.offset) {
@@ -92,8 +89,8 @@ object Jumper: Resettable {
   }
 
   private fun gotoSymbolAction(): ActionCallback =
-    ActionManager.getInstance().tryToExecute(GotoDeclarationAction(), ActionCommand.getInputEvent("NewFromTemplate"), null, null, true)
-
+    ActionManager.getInstance().tryToExecute(GotoDeclarationAction(),
+      ActionCommand.getInputEvent("NewFromTemplate"), null, null, true)
 
   override fun reset() {
     JumpMode.reset()
