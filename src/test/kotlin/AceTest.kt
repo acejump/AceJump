@@ -50,7 +50,8 @@ class AceTest: LightCodeInsightFixtureTestCase() {
   private fun String.lookFor(query: String) =
     myFixture.run {
       maybeWarmUp(this@lookFor, query)
-      assert(measureTimeMillis { this@lookFor.justDoQuery(query) } < 100)
+      val queryTime = measureTimeMillis { this@lookFor.justDoQuery(query) }
+      assert(queryTime < 100) { "Query exceeded time limit! ($queryTime ms)" }
       editor.markupModel.allHighlighters.map { it.startOffset }.toSet()
     }
 
