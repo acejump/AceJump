@@ -8,7 +8,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 tasks {
   withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
+    kotlinOptions.freeCompilerArgs += "-progressive"
   }
 
   named("buildPlugin") { dependsOn("test") }
@@ -26,10 +27,6 @@ plugins {
   id("org.jetbrains.gradle.plugin.idea-ext") version "0.3" apply true
 }
 
-tasks.withType(KotlinCompile::class) {
-  kotlinOptions.freeCompilerArgs += "-progressive"
-}
-
 idea.project {
   (this as ExtensionAware)
   configure<ProjectSettings> {
@@ -41,6 +38,11 @@ idea.project {
       }
     }
   }
+}
+
+dependencies {
+  // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
+  compileOnly(kotlin("stdlib-jdk8"))
 }
 
 repositories.mavenCentral()
