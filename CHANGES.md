@@ -2,6 +2,14 @@
 
 ### 3.5.2
 
+Various improvements to settings page, including a keyboard layout selector.
+
+Shorter tags on average, AceJump tries to use a single-character tag more often.
+
+Tag characters are now prioritized by user-defined order from the settings page.
+
+Fixes an issue when running the plugin on platform version 2018.3 and above.
+
 ### 3.5.1
 
 Now supports searching for CaPiTaLiZeD letters (typing capital letters in the query will force a case-sensitive search).

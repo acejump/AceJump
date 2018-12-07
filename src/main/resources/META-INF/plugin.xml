@@ -9,14 +9,13 @@
   </description>
   <change-notes>
     <![CDATA[
-Now supports searching for CaPiTaLiZeD letters (typing capital letters in the query will force a case-sensitive search).
+Various improvements to settings page, including a keyboard layout selector.
 
-<b>Declaration Mode</b>: Press the AceJump shortcut a second time to activate Declaration Mode, which will jump to the declaration of a variable in the editor.
+Shorter tags on average, AceJump tries to use a single-character tag more often.
 
-Keep hitting the AceJump shortcut to cycle between modes (default, declaration, target, disabled).
+Tag characters are now prioritized by user-defined order from the settings page.
 
-Bug fix: AceJump settings should now properly persist after restarting the IDE.
-
+Fixes an issue when running the plugin on platform version 2018.3 and above.
 <a href="https://github.com/acejump/AceJump/blob/master/CHANGES.md">Release Notes</a> ]]>
   </change-notes>
 
