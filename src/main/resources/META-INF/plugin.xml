@@ -23,7 +23,7 @@ Fixes an issue when running the plugin on platform version 2018.3 and above.
 
   <category>Navigation</category>
   <vendor url="https://github.com/acejump/AceJump">AceJump</vendor>
-  <idea-version since-build="143.379"/>
+  <idea-version since-build="182.5107.41"/>
 
   <application-components>
     <component>
