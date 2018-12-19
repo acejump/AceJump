@@ -46,6 +46,8 @@ class AceTest: LightCodeInsightFixtureTestCase() {
     myFixture.checkResult("tes<caret>ting 1234")
   }
 
+  // TODO: Write test case for https://github.com/acejump/AceJump/issues/264
+
   // Enforces the results are available in less than 100ms
   private fun String.lookFor(query: String) =
     myFixture.run {
