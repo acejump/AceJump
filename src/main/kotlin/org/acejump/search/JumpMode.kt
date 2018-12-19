@@ -19,7 +19,7 @@ internal enum class JumpMode {
           DEFAULT -> AceConfig.settings.jumpModeColor
           DEFINE -> AceConfig.settings.definitionModeColor
           TARGET -> AceConfig.settings.targetModeColor
-          DISABLED -> Model.naturalColor
+          DISABLED -> Model.naturalCaretColor
           else -> AceConfig.settings.jumpModeColor
         })
 
