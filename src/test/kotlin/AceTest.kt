@@ -3,6 +3,7 @@ import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
 import com.intellij.util.ui.UIUtil
 import org.acejump.control.AceAction
+import org.acejump.view.Canvas
 import kotlin.system.measureTimeMillis
 
 /**
@@ -11,7 +12,7 @@ import kotlin.system.measureTimeMillis
  * TODO: Add more structure to test cases, use test resources to define files.
  */
 
-class AceTest: LightCodeInsightFixtureTestCase() {
+class AceTest : LightCodeInsightFixtureTestCase() {
   fun `test that scanner finds all occurrences of single character`() =
     assertEquals("test test test".lookFor("t"), setOf(0, 3, 5, 8, 10, 13))
 
@@ -46,14 +47,19 @@ class AceTest: LightCodeInsightFixtureTestCase() {
     myFixture.checkResult("tes<caret>ting 1234")
   }
 
-  // TODO: Write test case for https://github.com/acejump/AceJump/issues/264
+  fun `test shift selection`() {
+    "<caret>testing 1234".lookFor("4")
+    val firstTag = Canvas.jumpLocations.first().tag!!
+    myFixture.type(firstTag)
+    assertEquals("testing 123", myFixture.editor.selectionModel.selectedText)
+  }
 
   // Enforces the results are available in less than 100ms
   private fun String.lookFor(query: String) =
     myFixture.run {
       maybeWarmUp(this@lookFor, query)
       val queryTime = measureTimeMillis { this@lookFor.justDoQuery(query) }
-      assert(queryTime < 1000) { "Query exceeded time limit! ($queryTime ms)" }
+      assert(queryTime < 100) { "Query exceeded time limit! ($queryTime ms)" }
       editor.markupModel.allHighlighters.map { it.startOffset }.toSet()
     }
 
