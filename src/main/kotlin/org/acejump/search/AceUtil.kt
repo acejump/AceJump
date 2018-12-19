@@ -1,12 +1,8 @@
 package org.acejump.search
 
 import com.intellij.openapi.application.ApplicationManager
-import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.LogicalPosition
-import com.intellij.openapi.editor.VisualPosition
-import com.intellij.openapi.fileEditor.FileDocumentManager
-import com.intellij.openapi.fileEditor.FileEditorManager
-import com.intellij.openapi.fileEditor.TextEditor
+import com.intellij.openapi.editor.*
+import com.intellij.openapi.fileEditor.*
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
 import org.acejump.view.Model.MAX_TAG_RESULTS
@@ -14,9 +10,7 @@ import org.acejump.view.Model.viewBounds
 import java.awt.Point
 import java.util.*
 import javax.swing.JComponent
-import kotlin.math.abs
-import kotlin.math.max
-import kotlin.math.min
+import kotlin.math.*
 
 interface Resettable {
   fun reset()
@@ -35,10 +29,10 @@ operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 
-@Deprecated("This is applied too broadly. Narrow down use sites where necessary.")
+@Deprecated("This is applied too broadly. Narrow down usages where necessary.")
 fun runAndWait(t: () -> Unit) = ApplicationManager.getApplication().invokeAndWait(t)
 
-@Deprecated("This is applied too broadly. Narrow down use sites where necessary.")
+@Deprecated("This is applied too broadly. Narrow down usages where necessary.")
 fun runLater(t: () -> Unit) = ApplicationManager.getApplication().invokeLater(t)
 
 fun Editor.offsetCenter(first: Int, second: Int): LogicalPosition {
