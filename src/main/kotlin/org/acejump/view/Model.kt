@@ -3,6 +3,7 @@ package org.acejump.view
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
+import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.ProjectManager
 import org.acejump.config.AceConfig
@@ -24,7 +25,6 @@ object Model {
     get() = if (field.isDisposed) defaultEditor() else field
     set(value) {
       editorText = value.document.text
-      if (value == field) return
       field = value
 
       editor.run {
@@ -33,11 +33,10 @@ object Model {
           naturalBlink = isBlinkCaret
         }
 
-        colorsScheme.run {
-          getColor(CARET_COLOR).let { naturalColor = it }
-          getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
-            ?.backgroundColor.let { naturalHighlight = it }
-        }
+        naturalCaretColor = EditorColorsManager.getInstance().globalScheme
+          .getColor(CARET_COLOR) ?: BLACK
+        colorsScheme.getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
+          ?.backgroundColor.let { naturalHighlight = it }
       }
     }
 
@@ -51,7 +50,7 @@ object Model {
 
   var naturalBlock = false
   var naturalBlink = true
-  var naturalColor = BLACK
+  var naturalCaretColor = BLACK
   var naturalHighlight = YELLOW
 
   val scheme
