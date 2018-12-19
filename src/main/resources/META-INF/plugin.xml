@@ -9,13 +9,7 @@
   </description>
   <change-notes>
     <![CDATA[
-Various improvements to settings page, including a keyboard layout selector.
-
-Shorter tags on average, AceJump tries to use a single-character tag more often.
-
-Tag characters are now prioritized by user-defined order from the settings page.
-
-Fixes an issue when running the plugin on platform version 2018.3 and above.
+Fixes two regressions affecting tag color and shift-selection.
 <a href="https://github.com/acejump/AceJump/blob/master/CHANGES.md">Release Notes</a> ]]>
   </change-notes>
 

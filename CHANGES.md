@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.5.3
+
+Fixes for two regressions affecting caret color and shift-selection.
+
 ### 3.5.2
 
 Various improvements to settings page, including a keyboard layout selector.
