@@ -39,16 +39,17 @@ object Jumper: Resettable {
   private fun toggleMode(mode: JumpMode? = null) =
     logger.info("Entering ${JumpMode.toggle(mode)} mode")
 
-  fun jumpTo(offset: Int) = runAndWait {
+  fun jumpTo(newOffset: Int) = runAndWait {
     editor.run {
-      val logPos = editor.offsetToLogicalPosition(offset)
+      val logPos = editor.offsetToLogicalPosition(newOffset)
       logger.info("Jumping to line ${logPos.line}, column ${logPos.column}...")
 
-      moveCaretTo(offset)
+      val oldOffset = caretModel.offset
+      moveCaretTo(newOffset)
 
       when {
-        Finder.isShiftSelectEnabled -> selectRange(caretModel.offset, offset)
-        JumpMode.equals(TARGET) -> selectWordAtOffset(offset)
+        Finder.isShiftSelectEnabled -> selectRange(oldOffset, newOffset)
+        JumpMode.equals(TARGET) -> selectWordAtOffset(newOffset)
         JumpMode.equals(DEFINE) -> gotoSymbolAction()
       }
 
