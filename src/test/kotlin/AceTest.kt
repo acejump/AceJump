@@ -1,3 +1,4 @@
+
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
@@ -60,8 +61,15 @@ class AceTest : LightCodeInsightFixtureTestCase() {
       maybeWarmUp(this@lookFor, query)
       val queryTime = measureTimeMillis { this@lookFor.justDoQuery(query) }
       assert(queryTime < 100) { "Query exceeded time limit! ($queryTime ms)" }
+      ensureCorrectNumberOfTags(query)
       editor.markupModel.allHighlighters.map { it.startOffset }.toSet()
     }
+
+  // Ensures that the correct number of locations are tagged
+  private fun String.ensureCorrectNumberOfTags(query: String) =
+    assertEquals(split(query.fold("") { prefix, char ->
+      if ((prefix + char) in this) prefix + char else return
+    }).size - 1, editor.markupModel.allHighlighters.size)
 
   private var shouldWarmup = true
   // Should be run exactly once to warm up the JVM
