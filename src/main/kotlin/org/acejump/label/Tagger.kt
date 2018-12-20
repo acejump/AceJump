@@ -35,7 +35,7 @@ import kotlin.system.measureTimeMillis
  * @see Jumper
  */
 
-object Tagger: Resettable {
+object Tagger : Resettable {
   var markers: List<Marker> = emptyList()
     private set
   var regex = false
@@ -115,14 +115,11 @@ object Tagger: Resettable {
     this.isLetterOrDigit() xor other.isLetterOrDigit() ||
       this.isWhitespace() xor other.isWhitespace()
 
-  fun jumpToNextOrNearestVisible() =
+  fun jumpToNextOrNearestVisible() = Jumper.jumpTo(nextOrNearestVisibleOffset())
+
+  fun nextOrNearestVisibleOffset() =
     tagMap.values.filter { it in viewBounds }.sorted().let { tags ->
-      if (caretOffset in viewBounds) {
-        tags.firstOrNull { it > caretOffset }?.let { return Jumper.jumpTo(it) }
-        tags.lastOrNull { it < caretOffset }?.let { return Jumper.jumpTo(it) }
-      } else {
-        tags.firstOrNull()?.let { Jumper.jumpTo(it) }
-      }
+      tags.firstOrNull { it > caretOffset } ?: tags.first()
     }
 
   private fun giveJumpOpportunity() =

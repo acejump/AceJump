@@ -4,6 +4,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.CustomHighlighterRenderer
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import org.acejump.config.AceConfig
+import org.acejump.label.Tagger
 import org.acejump.label.Tagger.regex
 import org.acejump.search.*
 import org.acejump.search.JumpMode.TARGET
@@ -17,6 +18,7 @@ import org.acejump.view.Model.rectVOffset
 import java.awt.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
+import java.awt.Color.BLUE
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 import org.acejump.view.Model.editorText as text
@@ -31,7 +33,7 @@ import org.acejump.view.Model.editorText as text
  * TODO: Clean up this class.
  */
 
-class Marker: CustomHighlighterRenderer {
+class Marker : CustomHighlighterRenderer {
   private val index: Int
   private val query: String
   val tag: String?
@@ -109,6 +111,13 @@ class Marker: CustomHighlighterRenderer {
       fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
       if (JumpMode.equals(TARGET)) surroundTargetWord()
     }
+
+    if (index == Tagger.nextOrNearestVisibleOffset()) indicateAsNearestMatch()
+  }
+
+  private fun Graphics2D.indicateAsNearestMatch() {
+    color = BLUE
+    drawLine(start.x, startY, start.x, startY + rectHeight)
   }
 
   private fun Graphics2D.surroundTargetWord() {
