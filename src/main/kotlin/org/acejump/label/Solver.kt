@@ -61,8 +61,8 @@ object Solver {
    */
 
   private fun tryToAssignTag(tag: String, sites: Collection<Int>): Boolean {
-    if (newTags.containsKey(tag)) return false
-    val index = sites.firstOrNull { !newTags.containsValue(it) } ?: return false
+    if (tag in newTags.keys) return false
+    val index = sites.firstOrNull { it !in newTags.values } ?: return false
     newTags[tag] = index
     return true
   }

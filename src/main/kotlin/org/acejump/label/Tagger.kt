@@ -119,7 +119,7 @@ object Tagger : Resettable {
 
   fun nextOrNearestVisibleOffset() =
     tagMap.values.filter { it in viewBounds }.sorted().let { tags ->
-      tags.firstOrNull { it > caretOffset } ?: tags.first()
+      tags.firstOrNull { it > caretOffset } ?: tags.firstOrNull() ?: caretOffset
     }
 
   private fun giveJumpOpportunity() =
@@ -279,5 +279,5 @@ object Tagger : Resettable {
   fun hasTagSuffixInView(query: String) =
     tagMap.any { it.value in viewBounds && it.isCompatibleWithQuery(query) }
 
-  infix fun canDiscard(i: Int) = !(Finder.skim || tagMap.containsValue(i) || i == -1)
+  infix fun canDiscard(i: Int) = !(Finder.skim || i in tagMap.values || i == -1)
 }

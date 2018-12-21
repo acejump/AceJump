@@ -187,7 +187,7 @@ class Marker : CustomHighlighterRenderer {
       composite = getInstance(SRC_OVER, 0.40.toFloat())
       color = AceConfig.settings.textHighlightColor
 
-      if (tag != null && lastQueryChar == tag.first() && lastQueryChar != textChar) {
+      if (tag != null && lastQueryChar == tag[0] && lastQueryChar != textChar) {
         fillRoundRect(tagX, yPos, fontWidth, rectHeight, arcD, arcD)
         tagX += fontWidth
         tagWidth -= fontWidth
