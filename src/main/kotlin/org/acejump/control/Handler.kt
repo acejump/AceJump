@@ -5,22 +5,18 @@ import com.intellij.openapi.actionSystem.IdeActions.*
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.actionSystem.EditorActionHandler
-import com.intellij.openapi.editor.actionSystem.EditorActionManager
-import com.intellij.openapi.editor.actionSystem.TypedActionHandler
+import com.intellij.openapi.editor.actionSystem.*
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
+import org.acejump.control.Scroller.restoreScroll
+import org.acejump.control.Scroller.saveScroll
 import org.acejump.label.Pattern
 import org.acejump.label.Pattern.*
 import org.acejump.label.Tagger
 import org.acejump.search.*
 import org.acejump.search.Finder.search
-import org.acejump.control.Scroller.restoreScroll
-import org.acejump.control.Scroller.saveScroll
-import org.acejump.view.Boundary
+import org.acejump.view.*
 import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
-import org.acejump.view.Canvas
 import org.acejump.view.Canvas.bindCanvas
-import org.acejump.view.Model
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.setupCaret
 
@@ -36,7 +32,8 @@ object Handler: TypedActionHandler, Resettable {
 
   private val editorActionMap = mutableMapOf<String, EditorActionHandler>(
     ACTION_EDITOR_BACKSPACE to makeHandler { clear() },
-    ACTION_EDITOR_ENTER to makeHandler { Tagger.jumpToNextOrNearestVisible() },
+    ACTION_EDITOR_START_NEW_LINE to makeHandler{ Selector.select(false) },
+    ACTION_EDITOR_ENTER to makeHandler { Selector.select() },
     ACTION_EDITOR_TAB to makeHandler { Scroller.scroll(true) },
     ACTION_EDITOR_PREV_PARAMETER to makeHandler { Scroller.scroll(false) },
     ACTION_EDITOR_MOVE_CARET_UP to makeHandler { regexSearch(CODE_INDENTS) },

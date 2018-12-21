@@ -48,6 +48,15 @@ class AceTest : LightCodeInsightFixtureTestCase() {
     myFixture.checkResult("tes<caret>ting 1234")
   }
 
+
+  fun `test that jumping to previous occurrence succeeds`() {
+    "te<caret>sting 1234".lookFor("t")
+
+    myFixture.performEditorAction(IdeActions.ACTION_EDITOR_START_NEW_LINE)
+
+    myFixture.checkResult("<caret>testing 1234")
+  }
+
   fun `test tag selection`() {
     "<caret>testing 1234".lookFor("g")
     val firstTag = Canvas.jumpLocations.first().tag!!
@@ -72,7 +81,7 @@ class AceTest : LightCodeInsightFixtureTestCase() {
       maybeWarmUp(this@lookFor, query)
       val queryTime = measureTimeMillis { this@lookFor.justDoQuery(query) }
 //      assert(queryTime < 100) { "Query exceeded time limit! ($queryTime ms)" }
-      ensureCorrectNumberOfTags(query)
+      this@lookFor.replace("<caret>", "").ensureCorrectNumberOfTags(query)
       editor.markupModel.allHighlighters.map { it.startOffset }.toSet()
     }
 

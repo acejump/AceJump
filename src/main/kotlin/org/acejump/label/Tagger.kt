@@ -7,7 +7,6 @@ import org.acejump.label.Pattern.Companion.filterTags
 import org.acejump.search.*
 import org.acejump.search.Jumper.hasJumped
 import org.acejump.view.Marker
-import org.acejump.view.Model.caretOffset
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.viewBounds
@@ -114,13 +113,6 @@ object Tagger : Resettable {
   private infix fun Char.isUnlike(other: Char) =
     this.isLetterOrDigit() xor other.isLetterOrDigit() ||
       this.isWhitespace() xor other.isWhitespace()
-
-  fun jumpToNextOrNearestVisible() = Jumper.jumpTo(nextOrNearestVisibleOffset())
-
-  fun nextOrNearestVisibleOffset() =
-    tagMap.values.filter { it in viewBounds }.sorted().let { tags ->
-      tags.firstOrNull { it > caretOffset } ?: tags.firstOrNull() ?: caretOffset
-    }
 
   private fun giveJumpOpportunity() =
     tagMap.entries.firstOrNull { it.solves(query) && it.value in viewBounds }

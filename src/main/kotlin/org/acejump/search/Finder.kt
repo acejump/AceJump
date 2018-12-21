@@ -147,6 +147,8 @@ object Finder: Resettable {
       } else true
     }
 
+  fun visibleResult() = results.filter { it in viewBounds }.sorted()
+
   private fun String.isValidQuery() =
     Tagger.hasTagSuffixInView(query) ||
       results.any {

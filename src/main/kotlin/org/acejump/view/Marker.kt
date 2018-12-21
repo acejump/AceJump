@@ -4,7 +4,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.markup.CustomHighlighterRenderer
 import com.intellij.openapi.editor.markup.RangeHighlighter
 import org.acejump.config.AceConfig
-import org.acejump.label.Tagger
+import org.acejump.control.Selector
 import org.acejump.label.Tagger.regex
 import org.acejump.search.*
 import org.acejump.search.JumpMode.TARGET
@@ -112,7 +112,7 @@ class Marker : CustomHighlighterRenderer {
       if (JumpMode.equals(TARGET)) surroundTargetWord()
     }
 
-    if (index == Tagger.nextOrNearestVisibleOffset()) indicateAsNearestMatch()
+    if (index == Selector.nearestVisible()) indicateAsNearestMatch()
   }
 
   private fun Graphics2D.indicateAsNearestMatch() {
