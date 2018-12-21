@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.5.4
+
+Introduces cyclical selection: press Enter or Shift + Enter to cycle through tags on the screen. Press Escape to return to the editor.
+
 ### 3.5.3
 
 Fixes for two regressions affecting caret color and shift-selection.

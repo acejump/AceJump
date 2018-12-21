@@ -9,7 +9,7 @@
   </description>
   <change-notes>
     <![CDATA[
-Fixes two regressions affecting tag color and shift-selection.
+Introduces cyclical selection: press Enter or Shift + Enter to cycle through tags on the screen. Press Escape to return to the editor.
 <a href="https://github.com/acejump/AceJump/blob/master/CHANGES.md">Release Notes</a> ]]>
   </change-notes>
 
