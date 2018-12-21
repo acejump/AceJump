@@ -13,12 +13,12 @@ import org.acejump.view.Model.arcD
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.fontHeight
 import org.acejump.view.Model.fontWidth
+import org.acejump.view.Model.naturalCaretColor
 import org.acejump.view.Model.rectHeight
 import org.acejump.view.Model.rectVOffset
 import java.awt.*
 import java.awt.AlphaComposite.SRC_OVER
 import java.awt.AlphaComposite.getInstance
-import java.awt.Color.BLUE
 import java.awt.RenderingHints.KEY_ANTIALIASING
 import java.awt.RenderingHints.VALUE_ANTIALIAS_ON
 import org.acejump.view.Model.editorText as text
@@ -116,7 +116,7 @@ class Marker : CustomHighlighterRenderer {
   }
 
   private fun Graphics2D.indicateAsNearestMatch() {
-    color = BLUE
+    color = naturalCaretColor
     drawLine(start.x, startY, start.x, startY + rectHeight)
   }
 
