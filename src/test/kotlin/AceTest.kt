@@ -1,5 +1,4 @@
-
-import com.intellij.openapi.actionSystem.IdeActions
+import com.intellij.openapi.actionSystem.IdeActions.*
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
 import com.intellij.util.ui.UIUtil
@@ -15,78 +14,76 @@ import kotlin.system.measureTimeMillis
 
 class AceTest : LightCodeInsightFixtureTestCase() {
   fun `test that scanner finds all occurrences of single character`() =
-    assertEquals("test test test".lookFor("t"), setOf(0, 3, 5, 8, 10, 13))
+    assertEquals("test test test".search("t"), setOf(0, 3, 5, 8, 10, 13))
 
   fun `test empty results for an absent query`() =
-    assertEmpty("test test test".lookFor("best"))
+    assertEmpty("test test test".search("best"))
 
   fun `test sticky results on a query with extra characters`() =
-    assertEquals("test test test".lookFor("testz"), setOf(0, 5, 10))
+    assertEquals("test test test".search("testz"), setOf(0, 5, 10))
 
   fun `test a query inside text with some variations`() =
-    assertEquals("abcd dabc cdab".lookFor("cd"), setOf(2, 10))
+    assertEquals("abcd dabc cdab".search("cd"), setOf(2, 10))
 
   fun `test a query containing a space character`() =
-    assertEquals("abcd dabc cdab".lookFor("cd "), setOf(2))
+    assertEquals("abcd dabc cdab".search("cd "), setOf(2))
 
   fun `test a query containing a { character`() =
-    assertEquals("abcd{dabc cdab".lookFor("cd{"), setOf(2))
+    assertEquals("abcd{dabc cdab".search("cd{"), setOf(2))
 
   fun `test that jumping to first occurrence succeeds`() {
-    "<caret>testing 1234".lookFor("1")
+    "<caret>testing 1234".search("1")
 
-    myFixture.performEditorAction(IdeActions.ACTION_EDITOR_ENTER)
+    myFixture.performEditorAction(ACTION_EDITOR_ENTER)
 
     myFixture.checkResult("testing <caret>1234")
   }
 
   fun `test that jumping to second occurrence succeeds`() {
-    "<caret>testing 1234".lookFor("ti")
+    "<caret>testing 1234".search("ti")
 
-    myFixture.performEditorAction(IdeActions.ACTION_EDITOR_ENTER)
+    myFixture.performEditorAction(ACTION_EDITOR_ENTER)
 
     myFixture.checkResult("tes<caret>ting 1234")
   }
 
 
   fun `test that jumping to previous occurrence succeeds`() {
-    "te<caret>sting 1234".lookFor("t")
+    "te<caret>sting 1234".search("t")
 
-    myFixture.performEditorAction(IdeActions.ACTION_EDITOR_START_NEW_LINE)
+    myFixture.performEditorAction(ACTION_EDITOR_START_NEW_LINE)
 
     myFixture.checkResult("<caret>testing 1234")
   }
 
   fun `test tag selection`() {
-    "<caret>testing 1234".lookFor("g")
-    val firstTag = Canvas.jumpLocations.first().tag!!
+    "<caret>testing 1234".search("g")
 
-    myFixture.type(firstTag)
-    UIUtil.dispatchAllInvocationEvents()
+    typeAndWaitForResults(Canvas.jumpLocations.first().tag!!)
 
     myFixture.checkResult("testin<caret>g 1234")
   }
 
   fun `test shift selection`() {
-    "<caret>testing 1234".lookFor("4")
-    val firstTag = Canvas.jumpLocations.first().tag!!
-    myFixture.type(firstTag.toUpperCase())
-    UIUtil.dispatchAllInvocationEvents()
+    "<caret>testing 1234".search("4")
 
-    assertEquals("testing 123", editor.selectionModel.selectedText)
+    typeAndWaitForResults(Canvas.jumpLocations.first().tag!!)
+
+    myFixture.checkResult("<selection>testing 123</selection>4")
   }
+
   // Enforces the results are available in less than 100ms
-  private fun String.lookFor(query: String) =
+  private fun String.search(query: String) =
     myFixture.run {
-      maybeWarmUp(this@lookFor, query)
-      val queryTime = measureTimeMillis { this@lookFor.justDoQuery(query) }
-//      assert(queryTime < 100) { "Query exceeded time limit! ($queryTime ms)" }
-      this@lookFor.replace("<caret>", "").ensureCorrectNumberOfTags(query)
+      maybeWarmUp(this@search, query)
+      val queryTime = measureTimeMillis { this@search.executeQuery(query) }
+//    assert(queryTime < 100) { "Query exceeded time limit! ($queryTime ms)" }
+      this@search.replace(Regex("<[^>]*>"), "").assertCorrectNumberOfTags(query)
       editor.markupModel.allHighlighters.map { it.startOffset }.toSet()
     }
 
   // Ensures that the correct number of locations are tagged
-  private fun String.ensureCorrectNumberOfTags(query: String) =
+  private fun String.assertCorrectNumberOfTags(query: String) =
     assertEquals(split(query.fold("") { prefix, char ->
       if ((prefix + char) in this) prefix + char else return
     }).size - 1, editor.markupModel.allHighlighters.size)
@@ -95,8 +92,8 @@ class AceTest : LightCodeInsightFixtureTestCase() {
   // Should be run exactly once to warm up the JVM
   private fun maybeWarmUp(text: String, query: String) {
     if (shouldWarmup) {
-      text.justDoQuery(query)
-      myFixture.performEditorAction(IdeActions.ACTION_EDITOR_ESCAPE)
+      text.executeQuery(query)
+      myFixture.performEditorAction(ACTION_EDITOR_ESCAPE)
       UIUtil.dispatchAllInvocationEvents()
       // Now the JVM is warm, never run this method again
       shouldWarmup = false
@@ -104,19 +101,21 @@ class AceTest : LightCodeInsightFixtureTestCase() {
   }
 
   // Just does a query without enforcing any time limit
-  private fun String.justDoQuery(query: String) {
+  private fun String.executeQuery(query: String) {
     myFixture.run {
-      configureByText(PlainTextFileType.INSTANCE, this@justDoQuery)
+      configureByText(PlainTextFileType.INSTANCE, this@executeQuery)
       testAction(AceAction())
-      type(query)
-      UIUtil.dispatchAllInvocationEvents()
+      typeAndWaitForResults(query)
     }
   }
 
   override fun tearDown() {
-    myFixture.performEditorAction(IdeActions.ACTION_EDITOR_ESCAPE)
+    myFixture.performEditorAction(ACTION_EDITOR_ESCAPE)
     UIUtil.dispatchAllInvocationEvents()
     assertEmpty(editor.markupModel.allHighlighters)
     super.tearDown()
   }
+
+  fun typeAndWaitForResults(string: String) =
+    myFixture.type(string).also { UIUtil.dispatchAllInvocationEvents() }
 }
