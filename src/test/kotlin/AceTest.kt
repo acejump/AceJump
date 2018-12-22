@@ -67,9 +67,9 @@ class AceTest : LightCodeInsightFixtureTestCase() {
   fun `test shift selection`() {
     "<caret>testing 1234".search("4")
 
-    typeAndWaitForResults(Canvas.jumpLocations.first().tag!!)
+    typeAndWaitForResults(Canvas.jumpLocations.first().tag!!.toUpperCase())
 
-    myFixture.checkResult("<selection>testing 123</selection>4")
+    myFixture.checkResult("<selection>testing 123<caret></selection>4")
   }
 
   // Enforces the results are available in less than 100ms
