@@ -2,8 +2,6 @@ package org.acejump.view
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
-import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
-import com.intellij.openapi.editor.colors.EditorColorsManager
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.ProjectManager
 import org.acejump.config.AceConfig
@@ -26,18 +24,6 @@ object Model {
     set(value) {
       editorText = value.document.text
       field = value
-
-      editor.run {
-        settings.run {
-          naturalBlock = isBlockCursor
-          naturalBlink = isBlinkCaret
-        }
-
-        naturalCaretColor = EditorColorsManager.getInstance().globalScheme
-          .getColor(CARET_COLOR) ?: BLACK
-        colorsScheme.getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
-          ?.backgroundColor.let { naturalHighlight = it }
-      }
     }
 
   val markup
