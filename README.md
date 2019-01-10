@@ -84,9 +84,7 @@ To build AceJump, clone and run the Gradle task [`buildPlugin`](https://github.c
 
 The build artifact will be placed in `build/distributions/`.
 
-*Miscellaneous: AceJump uses the [Gradle Kotlin DSL](https://github.com/gradle/kotlin-dsl) with the [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-plugin).*
-
-*For more information, please refer to the [Gradle Kotlin DSL Docs](https://gradle.github.io/kotlin-dsl-docs/) (currently alpha).*
+*Miscellaneous: AceJump is built using [Gradle](https://gradle.com/) with the [Gradle Kotlin DSL](https://docs.gradle.org/5.0-rc-1/userguide/kotlin_dsl.html) and the [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-plugin).*
 
 ## Contributing
 
