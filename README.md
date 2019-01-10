@@ -33,11 +33,11 @@ AceJump tags are *not* case sensitive. Holding down <kbd>Shift</kbd> when typing
 
 - If no matches can be found on screen, AceJump will scroll to the next match it can find.
 
-- Pressing <kbd>Enter</kbd> during a search will cycle through the next visible results.
+- Pressing <kbd>Enter</kbd> or <kbd>Shift</kbd>+<kbd>Enter</kbd> during a search will cycle through tagged results on screen.
 
-  - To select a location and return to the editor, press <kbd>Esc</kbd>.
+  - To select a location and continue editing, just press <kbd>Esc</kbd>.
 
-  - To use this feature with IdeaVim, you must be in Vim's Insert Mode.
+  - To use this feature with IdeaVim, you must be in Vim's Insert Mode (to be fixed at a later point).
 
 - Keep typing! AceJump will accept multiple sequential characters before tag selection.
 
