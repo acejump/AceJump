@@ -33,11 +33,11 @@ AceJump tags are *not* case sensitive. Holding down <kbd>Shift</kbd> when typing
 
 - If no matches can be found on screen, AceJump will scroll to the next match it can find.
 
-- Pressing <kbd>Enter</kbd> during a search will cycle through the next visible results.
+- Pressing <kbd>Enter</kbd> or <kbd>Shift</kbd>+<kbd>Enter</kbd> during a search will cycle through tagged results on screen.
 
-  - To select a location and return to the editor, press <kbd>Esc</kbd>.
+  - To select a location and continue editing, just press <kbd>Esc</kbd>.
 
-  - To use this feature with IdeaVim, you must be in Vim's Insert Mode.
+  - To use this feature with IdeaVim, you must be in Vim's Insert Mode (to be fixed at a later point).
 
 - Keep typing! AceJump will accept multiple sequential characters before tag selection.
 
@@ -84,9 +84,7 @@ To build AceJump, clone and run the Gradle task [`buildPlugin`](https://github.c
 
 The build artifact will be placed in `build/distributions/`.
 
-*Miscellaneous: AceJump uses the [Gradle Kotlin DSL](https://github.com/gradle/kotlin-dsl) with the [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-plugin).*
-
-*For more information, please refer to the [Gradle Kotlin DSL Docs](https://gradle.github.io/kotlin-dsl-docs/) (currently alpha).*
+*Miscellaneous: AceJump is built using [Gradle](https://gradle.com/) with the [Gradle Kotlin DSL](https://docs.gradle.org/5.1/userguide/kotlin_dsl.html) and the [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-plugin).*
 
 ## Contributing
 
