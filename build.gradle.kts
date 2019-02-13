@@ -1,7 +1,5 @@
 import org.jetbrains.gradle.ext.GradleTask
 import org.jetbrains.gradle.ext.ProjectSettings
-import org.jetbrains.gradle.ext.Remote
-import org.jetbrains.gradle.ext.RunConfiguration
 import org.jetbrains.intellij.tasks.RunIdeTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -23,7 +21,7 @@ plugins {
   idea apply true
   kotlin("jvm") version "1.3.21"
   id("org.jetbrains.intellij") version "0.4.2"
-  id("org.jetbrains.gradle.plugin.idea-ext") version "0.5" apply true
+  id("org.jetbrains.gradle.plugin.idea-ext") version "0.3" apply true
 }
 
 idea.project {
