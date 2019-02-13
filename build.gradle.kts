@@ -21,9 +21,9 @@ tasks {
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.3.11"
-  id("org.jetbrains.intellij") version "0.4.1"
-  id("org.jetbrains.gradle.plugin.idea-ext") version "0.3" apply true
+  kotlin("jvm") version "1.3.21"
+  id("org.jetbrains.intellij") version "0.4.2"
+  id("org.jetbrains.gradle.plugin.idea-ext") version "0.5" apply true
 }
 
 idea.project {
