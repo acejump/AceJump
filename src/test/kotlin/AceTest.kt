@@ -116,6 +116,6 @@ class AceTest : LightCodeInsightFixtureTestCase() {
     super.tearDown()
   }
 
-  fun typeAndWaitForResults(string: String) =
+  private fun typeAndWaitForResults(string: String) =
     myFixture.type(string).also { UIUtil.dispatchAllInvocationEvents() }
 }
