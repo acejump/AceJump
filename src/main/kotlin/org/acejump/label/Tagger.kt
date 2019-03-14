@@ -120,8 +120,8 @@ object Tagger : Resettable {
     tagMap.entries.firstOrNull { it.solves(query) && it.value in viewBounds }
       ?.run {
         logger.info("User selected tag: ${key.toUpperCase()}")
-        Jumper.jumpTo(value)
         tagSelected = true
+        Jumper.jumpTo(value)
       }
 
   /**

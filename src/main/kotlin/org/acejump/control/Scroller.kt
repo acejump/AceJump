@@ -24,8 +24,7 @@ object Scroller {
   private var scrollY = 0
 
   fun scroll(isNext: Boolean = true): Boolean {
-    val position = if (isNext) findNextPosition()
-      ?: return false
+    val position = if (isNext) findNextPosition() ?: return false
     else findPreviousPosition() ?: return false
     editor.scrollingModel.disableAnimation()
     editor.scrollingModel.scrollTo(position, CENTER)
