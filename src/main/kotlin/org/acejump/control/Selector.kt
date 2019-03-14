@@ -5,14 +5,17 @@ import org.acejump.search.Jumper
 import org.acejump.view.Model.caretOffset
 
 object Selector {
-  fun select(forward: Boolean = true) = Jumper.jumpTo(nearestVisible(forward))
+  fun select(forward: Boolean = true) {
+    val matches = nearestVisibleMatches(forward)
+    if (matches.isEmpty()) return
+    Jumper.jumpTo(matches.first())
+    if (matches.size == 1) Handler.reset()
+  }
 
-  fun nearestVisible(forward: Boolean = true) =
-    Finder.visibleResult().run { if (forward) nextItem() else previousItem() }
-
-  private fun List<Int>.previousItem() =
-    lastOrNull { it < caretOffset } ?: lastOrNull() ?: caretOffset
-
-  private fun List<Int>.nextItem() =
-    firstOrNull { it > caretOffset } ?: firstOrNull() ?: caretOffset
+  fun nearestVisibleMatches(forward: Boolean = true) =
+    Finder.visibleResults().sortedWith(compareBy(
+      { it == caretOffset },
+      { (it <= caretOffset) == forward },
+      { if (forward) it - caretOffset else caretOffset - it }
+    ))
 }

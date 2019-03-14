@@ -26,8 +26,6 @@ import java.util.*
  */
 
 object Jumper: Resettable {
-  @Volatile
-  var hasJumped = false
   private val logger = Logger.getInstance(Jumper::class.java)
 
   fun toggleMode() = toggleMode(null)
@@ -40,8 +38,8 @@ object Jumper: Resettable {
     logger.info("Entering ${JumpMode.toggle(mode)} mode")
 
   fun jumpTo(newOffset: Int) = runAndWait {
-    editor.run {
-      val logPos = editor.offsetToLogicalPosition(newOffset)
+    editor.apply {
+      val logPos = offsetToLogicalPosition(newOffset)
       logger.info("Jumping to line ${logPos.line}, column ${logPos.column}...")
 
       val oldOffset = caretModel.offset
@@ -52,8 +50,6 @@ object Jumper: Resettable {
         JumpMode.equals(TARGET) -> selectWordAtOffset(newOffset)
         JumpMode.equals(DEFINE) -> gotoSymbolAction()
       }
-
-      hasJumped = true
     }
   }
 
@@ -93,8 +89,5 @@ object Jumper: Resettable {
     ActionManager.getInstance().tryToExecute(GotoDeclarationAction(),
       ActionCommand.getInputEvent("NewFromTemplate"), null, null, true)
 
-  override fun reset() {
-    JumpMode.reset()
-    hasJumped = false
-  }
+  override fun reset() = JumpMode.reset()
 }

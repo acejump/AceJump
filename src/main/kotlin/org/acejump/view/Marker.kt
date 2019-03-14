@@ -112,7 +112,8 @@ class Marker : CustomHighlighterRenderer {
       if (JumpMode.equals(TARGET)) surroundTargetWord()
     }
 
-    if (index == Selector.nearestVisible()) indicateAsNearestMatch()
+    if (index == Selector.nearestVisibleMatches().firstOrNull())
+      indicateAsNearestMatch()
   }
 
   private fun Graphics2D.indicateAsNearestMatch() {

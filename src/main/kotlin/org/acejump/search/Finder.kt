@@ -95,7 +95,7 @@ object Finder: Resettable {
 
   fun search(model: AceFindModel = AceFindModel(query)) {
     measureTimeMillis {
-      results = Scanner.findMatchingSites(editorText, model, results)
+     results = Scanner.findMatchingSites(editorText, model, results)
     }.let { logger.info("Found ${results.size} matching sites in $it ms") }
 
     paintTextHighlights(model)
@@ -147,7 +147,7 @@ object Finder: Resettable {
       } else true
     }
 
-  fun visibleResult() = results.filter { it in viewBounds }.sorted()
+  fun visibleResults() = results.filter { it in viewBounds }
 
   private fun String.isValidQuery() =
     Tagger.hasTagSuffixInView(query) ||

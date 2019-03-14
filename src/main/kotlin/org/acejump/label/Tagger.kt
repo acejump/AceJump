@@ -5,7 +5,6 @@ import org.acejump.control.Scroller
 import org.acejump.label.Pattern.Companion.defaultTagOrder
 import org.acejump.label.Pattern.Companion.filterTags
 import org.acejump.search.*
-import org.acejump.search.Jumper.hasJumped
 import org.acejump.view.Marker
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
@@ -46,6 +45,9 @@ object Tagger : Resettable {
   private var tagMap: Map<String, Int> = emptyMap()
   private val logger = Logger.getInstance(Tagger::class.java)
 
+  @Volatile
+  var tagSelected = false
+
   private val Iterable<Marker>.noneInView
     get() = none { it inside viewBounds }
 
@@ -63,7 +65,7 @@ object Tagger : Resettable {
     }.let { if (!regex) logger.info("Refined search results in $it ms") }
 
     giveJumpOpportunity()
-    if (!hasJumped) markOrScrollToNextOccurrence()
+    if (!tagSelected) markOrScrollToNextOccurrence()
   }
 
   /**
@@ -119,6 +121,7 @@ object Tagger : Resettable {
       ?.run {
         logger.info("User selected tag: ${key.toUpperCase()}")
         Jumper.jumpTo(value)
+        tagSelected = true
       }
 
   /**
@@ -245,6 +248,7 @@ object Tagger : Resettable {
     tagMap = emptyMap()
     query = ""
     markers = emptyList()
+    tagSelected = false
   }
 
   private fun getTextPortionOfQuery(tag: String, query: String) =
