@@ -5,9 +5,7 @@ import com.intellij.openapi.actionSystem.IdeActions.*
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.actionSystem.EditorActionHandler
-import com.intellij.openapi.editor.actionSystem.EditorActionManager
-import com.intellij.openapi.editor.actionSystem.TypedActionHandler
+import com.intellij.openapi.editor.actionSystem.*
 import com.intellij.openapi.editor.colors.EditorColors
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.openapi.editor.colors.EditorColorsManager
@@ -19,11 +17,9 @@ import org.acejump.label.Pattern.*
 import org.acejump.label.Tagger
 import org.acejump.search.*
 import org.acejump.search.Finder.search
-import org.acejump.view.Boundary
+import org.acejump.view.*
 import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
-import org.acejump.view.Canvas
 import org.acejump.view.Canvas.bindCanvas
-import org.acejump.view.Model
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.setupCaret
 import java.awt.Color
@@ -59,7 +55,7 @@ object Handler : TypedActionHandler, Resettable {
   fun regexSearch(regex: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) =
     Canvas.reset().also { search(regex, bounds) }
 
-  fun activate() = runAndWait { if (!enabled) configureEditor() }
+  fun activate() = if (!enabled) configureEditor() else {}
 
   private fun clear() {
     applyTo(Tagger, Jumper, Finder, Canvas) { reset() }
@@ -75,16 +71,18 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   private fun configureEditor() =
-    editor.run {
-      enabled = true
-      saveScroll()
-      saveCaret()
-      saveColors()
-      setupCaret()
-      bindCanvas()
-      swapActionHandler()
-      installKeyHandler()
-      Listener.enable()
+    runAndWait {
+      editor.run {
+        enabled = true
+        saveScroll()
+        saveCaret()
+        saveColors()
+        setupCaret()
+        bindCanvas()
+        swapActionHandler()
+        installKeyHandler()
+        Listener.enable()
+      }
     }
 
   private fun swapActionHandler() = EditorActionManager.getInstance().run {
@@ -108,11 +106,10 @@ object Handler : TypedActionHandler, Resettable {
       }
     }
 
-    if (Finder.query.isNotEmpty() || Tagger.regex)
-      runLater {
-        Finder.search()
-        repaintTagMarkers()
-      }
+    if (Finder.query.isNotEmpty() || Tagger.regex) {
+      Finder.search()
+      repaintTagMarkers()
+    }
   }
 
   override fun reset() {

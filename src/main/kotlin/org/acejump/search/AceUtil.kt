@@ -110,11 +110,11 @@ fun Editor.getView(): IntRange {
   return startOffset..endOffset
 }
 
-fun Editor.selectRange(fromOffset: Int, toOffset: Int) {
-  selectionModel.removeSelection()
-  selectionModel.setSelection(fromOffset, toOffset)
-  caretModel.moveToOffset(toOffset)
-}
+fun Editor.selectRange(fromOffset: Int, toOffset: Int) = runAndWait {
+    selectionModel.removeSelection()
+    selectionModel.setSelection(fromOffset, toOffset)
+    caretModel.moveToOffset(toOffset)
+  }
 
 /**
  * Returns whether two indices can be simultaneously visible on screen

@@ -52,10 +52,9 @@ class Marker : CustomHighlighterRenderer {
     this.query = query
     this.tag = tag
     this.index = index
-    this.srcPoint = editor.getPointRelative(index, editor.contentComponent)
-    this.queryLength = query.length
-    this.trueOffset = query.length - 1
-    this.searchWidth = queryLength * fontWidth
+    queryLength = query.length
+    trueOffset = query.length - 1
+    searchWidth = queryLength * fontWidth
 
     var i = 1
     while (i < query.length && index + i < text.length &&
@@ -63,12 +62,17 @@ class Marker : CustomHighlighterRenderer {
     trueOffset = i - 1
     queryLength = i
 
-    this.tgIdx = index + trueOffset
-    this.start = editor.getPoint(index)
-    this.startY = start.y + rectVOffset
-    this.tagPoint = editor.getPointRelative(tgIdx, editor.contentComponent)
-    this.yPos = tagPoint.y + rectVOffset
-    this.alignment = RIGHT
+    tgIdx = index + trueOffset
+
+    editor.run {
+      start = getPoint(index)
+      srcPoint = getPointRelative(index, contentComponent)
+      tagPoint = getPointRelative(tgIdx, contentComponent)
+    }
+
+    startY = start.y + rectVOffset
+    yPos = tagPoint.y + rectVOffset
+    alignment = RIGHT
   }
 
   enum class Alignment { /*TOP, BOTTOM,*/ LEFT, RIGHT, NONE }
@@ -144,11 +148,11 @@ class Marker : CustomHighlighterRenderer {
   // https://github.com/acejump/AceJump/issues/233
   // https://github.com/acejump/AceJump/issues/228
   private fun String.alignTag(canvas: Canvas): Point {
-    val x = tagPoint.x + fontWidth
+    val xPos = tagPoint.x + fontWidth
 //    val top = Point(x - fontWidth, y - fontHeight)
 //    val bottom = Point(x - fontWidth, y + fontHeight)
     val left = Point(srcPoint.x - fontWidth * length, yPos)
-    val right = Point(x, yPos)
+    val right = Point(xPos, yPos)
 
     val nextCharIsWhiteSpace = text.length <= index + 1 ||
       text[index + 1].isWhitespace()

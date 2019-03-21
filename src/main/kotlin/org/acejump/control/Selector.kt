@@ -8,7 +8,7 @@ object Selector {
   fun select(forward: Boolean = true) {
     val matches = nearestVisibleMatches(forward)
     if (matches.isEmpty()) return
-    Jumper.jumpTo(matches.first())
+    Jumper.jumpTo(matches.first(), false)
     if (matches.size == 1) Handler.reset()
   }
 

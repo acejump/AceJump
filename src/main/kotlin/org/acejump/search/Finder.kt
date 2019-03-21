@@ -99,7 +99,7 @@ object Finder: Resettable {
     }.let { logger.info("Found ${results.size} matching sites in $it ms") }
 
     paintTextHighlights(model)
-    if (!skim) runLater { tag(model, results) }
+    if (!skim) tag(model, results)
   }
 
   /**

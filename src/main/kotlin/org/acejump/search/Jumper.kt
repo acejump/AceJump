@@ -10,7 +10,6 @@ import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.ui.playback.commands.ActionCommand
-import com.intellij.openapi.util.ActionCallback
 import com.intellij.openapi.util.TextRange
 import org.acejump.search.JumpMode.DEFINE
 import org.acejump.search.JumpMode.TARGET
@@ -37,8 +36,8 @@ object Jumper: Resettable {
   private fun toggleMode(mode: JumpMode? = null) =
     logger.info("Entering ${JumpMode.toggle(mode)} mode")
 
-  fun jumpTo(newOffset: Int) = runAndWait {
-    editor.apply {
+  fun jumpTo(newOffset: Int, done: Boolean = true) =
+    editor.run {
       val logPos = offsetToLogicalPosition(newOffset)
       logger.info("Jumping to line ${logPos.line}, column ${logPos.column}...")
 
@@ -46,12 +45,11 @@ object Jumper: Resettable {
       moveCaretTo(newOffset)
 
       when {
-        Finder.isShiftSelectEnabled -> selectRange(oldOffset, newOffset)
+        Finder.isShiftSelectEnabled && done -> selectRange(oldOffset, newOffset)
         JumpMode.equals(TARGET) -> selectWordAtOffset(newOffset)
-        JumpMode.equals(DEFINE) -> gotoSymbolAction()
+        JumpMode.equals(DEFINE) && done -> gotoSymbolAction()
       }
     }
-  }
 
   private val aceJumpHistoryAppender = {
     with(IdeDocumentHistory.getInstance(project) as IdeDocumentHistoryImpl) {
@@ -85,9 +83,11 @@ object Jumper: Resettable {
     selectRange(startOfWordOffset, endOfWordOffset)
   }
 
-  private fun gotoSymbolAction(): ActionCallback =
-    ActionManager.getInstance().tryToExecute(GotoDeclarationAction(),
-      ActionCommand.getInputEvent("NewFromTemplate"), null, null, true)
+  private fun gotoSymbolAction() =
+    runAndWait {
+      ActionManager.getInstance().tryToExecute(GotoDeclarationAction(),
+        ActionCommand.getInputEvent("NewFromTemplate"), null, null, true)
+    }
 
   override fun reset() = JumpMode.reset()
 }

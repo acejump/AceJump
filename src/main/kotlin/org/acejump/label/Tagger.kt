@@ -134,7 +134,7 @@ object Tagger : Resettable {
     query.endsWith(key, true) && isCompatibleWithQuery(query)
 
   private fun Map.Entry<String, Int>.isCompatibleWithQuery(query: String) =
-    getTextPortionOfQuery(key, query).let { text ->
+    query.getPlaintextPortion(key).let { text ->
       regex || editorText.regionMatches(
         thisOffset = value,
         other = text,
@@ -155,9 +155,7 @@ object Tagger : Resettable {
     full = true
     if (query.isEmpty()) return emptyMap()
     return compact(assignTags(textMatches)).apply {
-      runAndWait {
-        markers = map { (tag, index) -> Marker(query, tag, index) }
-      }
+      markers = map { (tag, index) -> Marker(query, tag, index) }
     }
   }
 
@@ -175,7 +173,7 @@ object Tagger : Resettable {
     val compacted = tagMap.mapKeysTo(HashMap(tagMap.size)) { e ->
       val tag = e.key
       if (e.value !in viewBounds) return@mapKeysTo tag
-      val canBeCompacted = tag.canAssignShortTag(tagMap)
+      val canBeCompacted = tag.canBeShortened(tagMap)
       // Avoid matching query - will trigger a jump. TODO: lift this constraint.
       val queryEndsWith = query.endsWith(tag[0]) || query.endsWith(tag)
       return@mapKeysTo if (canBeCompacted && !queryEndsWith) {
@@ -189,7 +187,7 @@ object Tagger : Resettable {
     return compacted
   }
 
-  private fun String.canAssignShortTag(tagMap: Map<String, Int>): Boolean {
+  private fun String.canBeShortened(tagMap: Map<String, Int>): Boolean {
     var i = 0
     for (tag in tagMap) {
       if (tag.key[0] == this[0] &&
@@ -251,12 +249,11 @@ object Tagger : Resettable {
     tagSelected = false
   }
 
-  private fun getTextPortionOfQuery(tag: String, query: String) =
-    when {
-      query.endsWith(tag, true) -> query.dropLast(tag.length)
-      query.endsWith(tag.first(), true) -> query.dropLast(1)
-      else -> query
-    }
+  private fun String.getPlaintextPortion(tag: String) = when {
+    endsWith(tag, true) -> dropLast(tag.length)
+    endsWith(tag.first(), true) -> dropLast(1)
+    else -> this
+  }
 
   /**
    * Returns true if the Tagger contains a match in the new view, that is not
