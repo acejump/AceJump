@@ -15,6 +15,10 @@ tasks {
     dependsOn("test")
     findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
   }
+
+  withType<Zip> {
+    archiveFileName.set("AceJump.zip")
+  }
 }
 
 plugins {
