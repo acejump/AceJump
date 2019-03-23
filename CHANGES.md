@@ -1,5 +1,13 @@
 # Changelog
 
+### 3.5.5
+
+<kbd>Enter</kbd> will now escape exit from AceJump when there is a single visible tag. #274
+
+<kbd>Shift</kbd>+<kbd>Tab</kbd> to scroll to previous occurrences now works properly. #179
+
+Fixes an error with sticky block caret mode. #269
+
 ### 3.5.4
 
 Introduces cyclical selection: press Enter or Shift + Enter to cycle through tags on the screen. Press Escape to return to the editor.
