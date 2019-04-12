@@ -70,9 +70,13 @@ fun String.wordBoundsPlus(index: Int): Pair<Int, Int> {
   return Pair(left, right)
 }
 
-fun defaultEditor() = FileEditorManager.getInstance(ProjectManager.getInstance()
-  .run { openProjects.firstOrNull() ?: defaultProject })
-  .run { selectedTextEditor ?: allEditors.first { it is TextEditor } as Editor }
+fun defaultEditor(): Editor =
+  FileEditorManager.getInstance(ProjectManager.getInstance()
+    .run { openProjects.firstOrNull() ?: defaultProject })
+    .run {
+      selectedTextEditor ?: allEditors.firstOrNull { it is Editor } as? Editor
+      ?: EditorFactory.getInstance().run { createEditor(createDocument("")) }
+    }
 
 fun Editor.getPoint(idx: Int) = visualPositionToXY(offsetToVisualPosition(idx))
 
@@ -111,10 +115,10 @@ fun Editor.getView(): IntRange {
 }
 
 fun Editor.selectRange(fromOffset: Int, toOffset: Int) = runAndWait {
-    selectionModel.removeSelection()
-    selectionModel.setSelection(fromOffset, toOffset)
-    caretModel.moveToOffset(toOffset)
-  }
+  selectionModel.removeSelection()
+  selectionModel.setSelection(fromOffset, toOffset)
+  caretModel.moveToOffset(toOffset)
+}
 
 /**
  * Returns whether two indices can be simultaneously visible on screen

@@ -25,8 +25,8 @@ open class AceAction: DumbAwareAction() {
   }
 
   override fun actionPerformed(e: AnActionEvent) {
-    boundaries = defaultBoundary
     editor = e.getData(EDITOR) ?: return
+    boundaries = defaultBoundary
     val textLength = editor.document.textLength
     logger.info("Invoked on ${editor.getNameOfFileInEditor()} ($textLength)")
     Handler.activate()

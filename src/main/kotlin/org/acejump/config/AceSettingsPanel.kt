@@ -3,6 +3,9 @@ package org.acejump.config
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.ColorPanel
 import com.intellij.ui.SeparatorComponent
+import com.intellij.ui.components.JBCheckBox
+import com.intellij.ui.components.JBTextArea
+import com.intellij.ui.components.JBTextField
 import com.intellij.ui.layout.Cell
 import com.intellij.ui.layout.GrowPolicy.MEDIUM_TEXT
 import com.intellij.ui.layout.GrowPolicy.SHORT_TEXT
@@ -11,20 +14,22 @@ import org.acejump.label.Pattern.Companion.KeyLayout
 import org.acejump.search.aceString
 import java.awt.Color
 import java.awt.Font
-import javax.swing.*
+import javax.swing.JCheckBox
+import javax.swing.JComponent
+import javax.swing.JPanel
 import javax.swing.text.JTextComponent
 import kotlin.reflect.KProperty
 
 internal class AceSettingsPanel {
-  private val tagCharsField = JTextField()
+  private val tagCharsField = JBTextField()
   private val keyboardLayoutCombo = ComboBox<KeyLayout>()
-  private val keyboardLayoutArea = JTextArea()
+  private val keyboardLayoutArea = JBTextArea()
   private val jumpModeColorWheel = ColorPanel()
   private val targetModeColorWheel = ColorPanel()
   private val textHighlightColorWheel = ColorPanel()
   private val tagForegroundColorWheel = ColorPanel()
   private val tagBackgroundColorWheel = ColorPanel()
-  private val displayQueryCheckBox = JCheckBox()
+  private val displayQueryCheckBox = JBCheckBox()
 
   init {
     tagCharsField.apply { font = Font("monospaced", font.style, font.size) }

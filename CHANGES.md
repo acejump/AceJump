@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.5.6
+
+Fixes: #249, #275, #278
+
 ### 3.5.5
 
 <kbd>Enter</kbd> will now escape exit from AceJump when there is a single visible tag. #274
