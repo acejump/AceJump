@@ -84,7 +84,7 @@ object Jumper: Resettable {
   }
 
   private fun gotoSymbolAction() =
-    runAndWait {
+    runNow {
       ActionManager.getInstance().tryToExecute(GotoDeclarationAction(),
         ActionCommand.getInputEvent("NewFromTemplate"), null, null, true)
     }

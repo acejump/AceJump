@@ -71,7 +71,7 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   private fun configureEditor() =
-    runAndWait {
+    runNow {
       editor.run {
         enabled = true
         saveScroll()
@@ -99,7 +99,7 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   fun redoFind() {
-    runAndWait {
+    runNow {
       editor.run {
         restoreCanvas()
         bindCanvas()
@@ -119,7 +119,7 @@ object Handler : TypedActionHandler, Resettable {
     editor.restoreSettings()
   }
 
-  private fun Editor.restoreSettings() = runAndWait {
+  private fun Editor.restoreSettings() = runNow {
     enabled = false
     swapActionHandler()
     uninstallKeyHandler()
@@ -151,12 +151,12 @@ object Handler : TypedActionHandler, Resettable {
     EditorColorsManager.getInstance().globalScheme.getAttributes(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES)
       ?.backgroundColor.let { Model.naturalHighlight = it }
 
-  private fun Editor.restoreCaret() = runAndWait {
+  private fun Editor.restoreCaret() = runNow {
     settings.isBlinkCaret = Model.naturalBlink
     settings.isBlockCursor = Model.naturalBlock
   }
 
-  private fun Editor.restoreColors() = runAndWait {
+  private fun Editor.restoreColors() = runNow {
     colorsScheme.run {
       setAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES,
         getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)

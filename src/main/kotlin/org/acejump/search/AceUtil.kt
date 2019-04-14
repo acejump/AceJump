@@ -30,7 +30,7 @@ operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 
 @Deprecated("This is applied too broadly. Narrow down usages where necessary.")
-fun runAndWait(t: () -> Unit) = ApplicationManager.getApplication().invokeAndWait(t)
+fun runNow(t: () -> Unit) = ApplicationManager.getApplication().invokeAndWait(t)
 
 @Deprecated("This is applied too broadly. Narrow down usages where necessary.")
 fun runLater(t: () -> Unit) = ApplicationManager.getApplication().invokeLater(t)
@@ -95,7 +95,7 @@ fun Editor.isFirstCharacterOfLine(index: Int) =
  */
 
 fun getFeasibleRegion(results: List<Int>, takeAtMost: Int = MAX_TAG_RESULTS) =
-  ((viewBounds.first + viewBounds.last) / 2).let { middleOfScreen ->
+  (viewBounds.run { first + last } / 2).let { middleOfScreen ->
     results.sortedBy { abs(middleOfScreen - it) }
       .take(min(results.size, takeAtMost))
   }.sorted().let { if (it.isNotEmpty()) it.first()..it.last() else null }
@@ -114,7 +114,7 @@ fun Editor.getView(): IntRange {
   return startOffset..endOffset
 }
 
-fun Editor.selectRange(fromOffset: Int, toOffset: Int) = runAndWait {
+fun Editor.selectRange(fromOffset: Int, toOffset: Int) = runNow {
   selectionModel.removeSelection()
   selectionModel.setSelection(fromOffset, toOffset)
   caretModel.moveToOffset(toOffset)

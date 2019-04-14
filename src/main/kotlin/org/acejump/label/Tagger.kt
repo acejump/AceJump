@@ -148,7 +148,7 @@ object Tagger : Resettable {
     markAndMapTags().apply { if (isNotEmpty()) tagMap = this }
 
     if (markers.isNotEmpty() && markers.noneInView && 1 < query.length)
-      runAndWait { Scroller.scroll() }
+      runNow { Scroller.scroll() }
   }
 
   private fun markAndMapTags(): Map<String, Int> {
