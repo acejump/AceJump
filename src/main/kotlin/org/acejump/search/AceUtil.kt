@@ -30,6 +30,12 @@ operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 
+/**
+ * TODO: This is mostly an antipattern and can be replaced with [ReadAction.run]
+ *
+ * Further details: https://www.jetbrains.org/intellij/sdk/docs/basics/architectural_overview/general_threading_rules.html#readwrite-lock
+ */
+
 @Deprecated("This is applied too broadly. Narrow down usages where necessary.")
 fun runNow(t: () -> Unit) = ApplicationManager.getApplication().invokeAndWait(t)
 
