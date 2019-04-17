@@ -1,6 +1,7 @@
 package org.acejump.search
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.editor.*
 import com.intellij.openapi.fileEditor.*
 import com.intellij.openapi.project.ProjectManager
@@ -125,6 +126,7 @@ fun Editor.selectRange(fromOffset: Int, toOffset: Int) = runNow {
  */
 
 fun Editor.canIndicesBeSimultaneouslyVisible(idx0: Int, idx1: Int): Boolean {
+  // Thread must must have read access
   val line1 = offsetToLogicalPosition(idx0).line
   val line2 = offsetToLogicalPosition(idx1).line
 

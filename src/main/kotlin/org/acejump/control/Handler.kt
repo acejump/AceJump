@@ -148,7 +148,7 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   private fun saveColors() =
-    EditorColorsManager.getInstance().globalScheme.getAttributes(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES)
+    EditorColorsManager.getInstance().globalScheme.getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
       ?.backgroundColor.let { Model.naturalHighlight = it }
 
   private fun Editor.restoreCaret() = runNow {
