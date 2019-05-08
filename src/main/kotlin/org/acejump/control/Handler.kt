@@ -6,10 +6,8 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.*
-import com.intellij.openapi.editor.colors.EditorColors
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
 import org.acejump.control.Scroller.restoreScroll
 import org.acejump.control.Scroller.saveScroll
 import org.acejump.label.Pattern
@@ -136,14 +134,13 @@ object Handler : TypedActionHandler, Resettable {
     }
 
   private fun saveCaret() {
-    EditorSettingsExternalizable.getInstance().run {
+    editor.settings.run {
       Model.naturalBlock = isBlockCursor
       Model.naturalBlink = isBlinkCaret
     }
 
-    EditorColorsManager.getInstance().globalScheme.run {
-      Model.naturalCaretColor = getColor(EditorColors.CARET_COLOR)
-        ?: Color.BLACK
+    editor.caretModel.primaryCaret.visualAttributes.run {
+      Model.naturalCaretColor = this.color ?: Color.BLACK
     }
   }
 
