@@ -17,7 +17,7 @@ interface Resettable {
   fun reset()
 }
 
-fun aceString(s: String) = ResourceBundle.getBundle("org/acejump/config/AceResources").getString(s)
+fun aceString(s: String) = ResourceBundle.getBundle("AceResources").getString(s)
 
 fun String.mapIndices() = mapIndexed { i, c -> Pair(c, i) }.toMap()
 
