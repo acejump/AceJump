@@ -54,4 +54,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.5.5"
+version = "3.5.6"
