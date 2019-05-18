@@ -17,6 +17,8 @@ import org.acejump.view.Model.editorText
 import org.acejump.view.Model.markup
 import org.acejump.view.Model.viewBounds
 import java.util.*
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.system.measureTimeMillis
 
 /**
@@ -113,7 +115,7 @@ object Finder: Resettable {
       val newHighlights = results.map { index ->
         val s = if (index == editorText.length) index - 1 else index
         val e = if (model.isRegularExpressions) s + 1 else s + query.length
-        createTextHighlight(s, e)
+        createTextHighlight(max(s, 0), min(e, editorText.length - 1))
       }
 
       if (!results.isEmpty()) {
