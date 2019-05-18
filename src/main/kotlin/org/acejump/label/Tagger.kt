@@ -196,7 +196,7 @@ object Tagger : Resettable {
         if (tag.key[0] == this[0] &&
           editor.canIndicesBeSimultaneouslyVisible(tagMap[this]!!, tag.value))
           i++
-        if (1 < i) canBeShortened = false; break
+        if (1 < i) { canBeShortened = false; break }
       }
     }
 
