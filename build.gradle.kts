@@ -50,6 +50,7 @@ repositories.mavenCentral()
 
 intellij {
   pluginName = "AceJump"
+  version = "IC-2019.1"
   updateSinceUntilBuild = false
 }
 

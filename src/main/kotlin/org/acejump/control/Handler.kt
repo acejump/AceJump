@@ -6,7 +6,8 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.*
-import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
+import com.intellij.openapi.editor.colors.EditorColors
+import com.intellij.openapi.editor.colors.EditorColors.*
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import org.acejump.control.Scroller.restoreScroll
 import org.acejump.control.Scroller.saveScroll
@@ -53,7 +54,8 @@ object Handler : TypedActionHandler, Resettable {
   fun regexSearch(regex: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) =
     Canvas.reset().also { search(regex, bounds) }
 
-  fun activate() = if (!enabled) configureEditor() else {}
+  fun activate() = if (!enabled) configureEditor() else {
+  }
 
   private fun clear() {
     applyTo(Tagger, Jumper, Finder, Canvas) { reset() }
@@ -140,7 +142,9 @@ object Handler : TypedActionHandler, Resettable {
     }
 
     editor.caretModel.primaryCaret.visualAttributes.run {
-      Model.naturalCaretColor = this.color ?: Color.BLACK
+      Model.naturalCaretColor = color
+        ?: EditorColorsManager.getInstance().globalScheme.getColor(CARET_COLOR)
+          ?: Color.BLACK
     }
   }
 
