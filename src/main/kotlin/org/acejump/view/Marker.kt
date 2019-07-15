@@ -85,7 +85,7 @@ class Marker : CustomHighlighterRenderer {
       tag?.alignTag(Canvas)
         ?.apply { Canvas.registerTag(this, tag) }
         ?.let {
-          if (it == NONE) return
+          if (alignment == NONE) return
           highlightTag(it); drawTagForeground(it)
         }
   }
