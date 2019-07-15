@@ -23,7 +23,7 @@ Press the AceJump shortcut, followed by <kbd>→</kbd> to target the last, <kbd>
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
 
-AceJump tags are *not* case sensitive. Holding down <kbd>Shift</kbd> when typing the last tag character will select all text from the current cursor position to that destination.
+AceJump search is [smart case](http://ideavim.sourceforge.net/vim/usr_27.html#vim.27%2E1) sensitive, however tag selection is *not* case sensitive. Holding down <kbd>Shift</kbd> when typing the last tag character will select all text from the current cursor position to that destination.
 
 ## Tips
 
@@ -118,13 +118,12 @@ Please [see here](/CHANGES.md) for a detailed list of changes.
 AceJump is inspired by prior work, but adds several improvements, including:
 
 * **Target mode**: Jump and select an full word in one rapid motion.
-* **Line Mode**: Jump to the first, last, or first non-whitespace character of a line.
+* **Line Mode**: Jump to the first, last, or first non-whitespace character of any line on-screen.
 * **Word Mode**: Jump to the first character of any visible word on-screen in two keystrokes or less.
-* **Declaration Mode**: Jump to the declaration of a token in the editor instead of the token.
-* **Real-time** search: Type any string in the editor, and AceJump will highlight and tag matches instantly.
+* **Declaration Mode**: Jump to the declaration of a token (if it is available) rather than the token itself.
 * **Full text** search: If a string is not visible on the screen, AceJump will scroll to the next occurrence.
-* **Smart tag** rendering: Tags will occupy nearby whitespace if available, rather than block text.
-* **Keyboard-friendly** tagging: AceJump tries to minimize finger travel distance on QWERTY keyboards.
+* **Smart tag** rendering: Tags will occupy nearby whitespace if available, rather than block adjacent text.
+* **Ergonomic** tagging: AceJump tries to minimize finger travel distance on most common keyboards layouts.
 
 The following plugins have a similar UI for navigating text and web browsing:
 

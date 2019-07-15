@@ -7,9 +7,8 @@ import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.*
 import com.intellij.openapi.editor.colors.EditorColors
-import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
+import com.intellij.openapi.editor.colors.EditorColors.*
 import com.intellij.openapi.editor.colors.EditorColorsManager
-import com.intellij.openapi.editor.ex.EditorSettingsExternalizable
 import org.acejump.control.Scroller.restoreScroll
 import org.acejump.control.Scroller.saveScroll
 import org.acejump.label.Pattern
@@ -55,7 +54,8 @@ object Handler : TypedActionHandler, Resettable {
   fun regexSearch(regex: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) =
     Canvas.reset().also { search(regex, bounds) }
 
-  fun activate() = if (!enabled) configureEditor() else {}
+  fun activate() = if (!enabled) configureEditor() else {
+  }
 
   private fun clear() {
     applyTo(Tagger, Jumper, Finder, Canvas) { reset() }
@@ -71,7 +71,7 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   private fun configureEditor() =
-    runAndWait {
+    runNow {
       editor.run {
         enabled = true
         saveScroll()
@@ -99,7 +99,7 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   fun redoFind() {
-    runAndWait {
+    runNow {
       editor.run {
         restoreCanvas()
         bindCanvas()
@@ -119,7 +119,7 @@ object Handler : TypedActionHandler, Resettable {
     editor.restoreSettings()
   }
 
-  private fun Editor.restoreSettings() = runAndWait {
+  private fun Editor.restoreSettings() = runNow {
     enabled = false
     swapActionHandler()
     uninstallKeyHandler()
@@ -136,27 +136,28 @@ object Handler : TypedActionHandler, Resettable {
     }
 
   private fun saveCaret() {
-    EditorSettingsExternalizable.getInstance().run {
+    editor.settings.run {
       Model.naturalBlock = isBlockCursor
       Model.naturalBlink = isBlinkCaret
     }
 
-    EditorColorsManager.getInstance().globalScheme.run {
-      Model.naturalCaretColor = getColor(EditorColors.CARET_COLOR)
-        ?: Color.BLACK
+    editor.caretModel.primaryCaret.visualAttributes.run {
+      Model.naturalCaretColor = color
+        ?: EditorColorsManager.getInstance().globalScheme.getColor(CARET_COLOR)
+          ?: Color.BLACK
     }
   }
 
   private fun saveColors() =
-    EditorColorsManager.getInstance().globalScheme.getAttributes(EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES)
+    EditorColorsManager.getInstance().globalScheme.getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
       ?.backgroundColor.let { Model.naturalHighlight = it }
 
-  private fun Editor.restoreCaret() = runAndWait {
+  private fun Editor.restoreCaret() = runNow {
     settings.isBlinkCaret = Model.naturalBlink
     settings.isBlockCursor = Model.naturalBlock
   }
 
-  private fun Editor.restoreColors() = runAndWait {
+  private fun Editor.restoreColors() = runNow {
     colorsScheme.run {
       setAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES,
         getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)

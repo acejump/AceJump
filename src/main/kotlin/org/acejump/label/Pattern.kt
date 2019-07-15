@@ -49,6 +49,7 @@ enum class Pattern(val string: String) {
       WORKMN(arrayOf("1234567890", "qdrwbjfup",  "ashtgyneoi", "zxmcvkl")),
       DVORAK(arrayOf("1234567890", "pyfgcrl",    "aoeuidhtns", "qjkxbmwvz")),
       QWERTY(arrayOf("1234567890", "qwertyuiop", "asdfghjkl",  "zxcvbnm")),
+      QWERTZ(arrayOf("1234567890", "qwertzuiop", "asdfghjkl",  "yxcvbnm")),
       QGMLWY(arrayOf("1234567890", "qgmlwyfub",  "dstnriaeoh", "zxcvjkp")),
       QGMLWB(arrayOf("1234567890", "qgmlwbyuv",  "dntnriaeoh", "zxcfjkp")),
       NORMAN(arrayOf("1234567890", "qwdfkjurl",  "asetgynioh", "zxcvbpm"));
@@ -56,14 +57,13 @@ enum class Pattern(val string: String) {
       private val priority
         get() = when (this) {
           QWERTY -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
-          // TODO: Prioritize keys by ease of reach for other keyboards
-          // TODO: https://github.com/acejump/AceJump/issues/172
-          COLEMK -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
-          DVORAK -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
-          NORMAN -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
-          QGMLWB -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
-          QGMLWY -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
-          WORKMN -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
+          QWERTZ -> "fjghdkslavncmbxyrutzeiwoqp5849673210"
+          COLEMK -> "tndhseriaovkcmbxzgjplfuwyq5849673210"
+          DVORAK -> "uhetidonasxkbjmqwvzghycprl5849673210"
+          NORMAN -> "tneigysoahbvpcmxzjkufrdlwq5849673210"
+          QGMLWY -> "naterisodhvkcpjxzlfmuwygbq5849673210"
+          QGMLWB -> "naterisodhfkcpjxzlymuwbgvq5849673210"
+          WORKMN -> "tnhegysoaiclvkmxzwfrubjdpq5849673210"
         }.mapIndices()
 
       fun chars() = text.flatMap { it.toList() }.sortedBy { priority[it] }

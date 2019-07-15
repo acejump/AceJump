@@ -19,12 +19,7 @@ import java.awt.Font.BOLD
  */
 
 object Model {
-  var editor = defaultEditor()
-    get() = if (field.isDisposed) defaultEditor() else field
-    set(value) {
-      editorText = value.document.text
-      field = value
-    }
+  var editor: Editor = defaultEditor()
 
   val markup
     get() = editor.markupModel
@@ -32,7 +27,8 @@ object Model {
     get() = editor.project ?: ProjectManager.getInstance().defaultProject
   val caretOffset
     get() = editor.caretModel.offset
-  var editorText = editor.document.text
+  val editorText
+    get() = editor.document.text
 
   var naturalBlock = false
   var naturalBlink = true

@@ -1,5 +1,11 @@
 # Changelog
 
+### 3.5.6
+
+Key prioritization for most common keyboard layouts and fixes for a number of minor issues.
+
+Fixes: Index OOB #242, Missing editor #249, #275, Forgotten block caret #278, QWERTZ layout #273
+
 ### 3.5.5
 
 <kbd>Enter</kbd> will now escape exit from AceJump when there is a single visible tag. #274

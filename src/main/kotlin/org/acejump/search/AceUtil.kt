@@ -1,6 +1,7 @@
 package org.acejump.search
 
 import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.editor.*
 import com.intellij.openapi.fileEditor.*
 import com.intellij.openapi.project.ProjectManager
@@ -29,8 +30,14 @@ operator fun CharSequence.get(i: Int, j: Int) = substring(i, j).toCharArray()
 
 fun String.hasSpaceRight(i: Int) = length <= i + 1 || this[i + 1].isWhitespace()
 
+/**
+ * TODO: This is mostly an antipattern and can be replaced with [ReadAction.run]
+ *
+ * Further details: https://www.jetbrains.org/intellij/sdk/docs/basics/architectural_overview/general_threading_rules.html#readwrite-lock
+ */
+
 @Deprecated("This is applied too broadly. Narrow down usages where necessary.")
-fun runAndWait(t: () -> Unit) = ApplicationManager.getApplication().invokeAndWait(t)
+fun runNow(t: () -> Unit) = ApplicationManager.getApplication().invokeAndWait(t)
 
 @Deprecated("This is applied too broadly. Narrow down usages where necessary.")
 fun runLater(t: () -> Unit) = ApplicationManager.getApplication().invokeLater(t)
@@ -70,9 +77,13 @@ fun String.wordBoundsPlus(index: Int): Pair<Int, Int> {
   return Pair(left, right)
 }
 
-fun defaultEditor() = FileEditorManager.getInstance(ProjectManager.getInstance()
-  .run { openProjects.firstOrNull() ?: defaultProject })
-  .run { selectedTextEditor ?: allEditors.first { it is TextEditor } as Editor }
+fun defaultEditor(): Editor =
+  FileEditorManager.getInstance(ProjectManager.getInstance()
+    .run { openProjects.firstOrNull() ?: defaultProject })
+    .run {
+      selectedTextEditor ?: allEditors.firstOrNull { it is Editor } as? Editor
+      ?: EditorFactory.getInstance().run { createEditor(createDocument("")) }
+    }
 
 fun Editor.getPoint(idx: Int) = visualPositionToXY(offsetToVisualPosition(idx))
 
@@ -91,7 +102,7 @@ fun Editor.isFirstCharacterOfLine(index: Int) =
  */
 
 fun getFeasibleRegion(results: List<Int>, takeAtMost: Int = MAX_TAG_RESULTS) =
-  ((viewBounds.first + viewBounds.last) / 2).let { middleOfScreen ->
+  (viewBounds.run { first + last } / 2).let { middleOfScreen ->
     results.sortedBy { abs(middleOfScreen - it) }
       .take(min(results.size, takeAtMost))
   }.sorted().let { if (it.isNotEmpty()) it.first()..it.last() else null }
@@ -110,17 +121,18 @@ fun Editor.getView(): IntRange {
   return startOffset..endOffset
 }
 
-fun Editor.selectRange(fromOffset: Int, toOffset: Int) = runAndWait {
-    selectionModel.removeSelection()
-    selectionModel.setSelection(fromOffset, toOffset)
-    caretModel.moveToOffset(toOffset)
-  }
+fun Editor.selectRange(fromOffset: Int, toOffset: Int) = runNow {
+  selectionModel.removeSelection()
+  selectionModel.setSelection(fromOffset, toOffset)
+  caretModel.moveToOffset(toOffset)
+}
 
 /**
  * Returns whether two indices can be simultaneously visible on screen
  */
 
 fun Editor.canIndicesBeSimultaneouslyVisible(idx0: Int, idx1: Int): Boolean {
+  // Thread must must have read access
   val line1 = offsetToLogicalPosition(idx0).line
   val line2 = offsetToLogicalPosition(idx1).line
 
