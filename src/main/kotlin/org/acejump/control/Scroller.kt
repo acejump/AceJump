@@ -4,6 +4,7 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.LogicalPosition
 import com.intellij.openapi.editor.ScrollType.CENTER
+import com.intellij.openapi.editor.ScrollType.MAKE_VISIBLE
 import org.acejump.label.Tagger.textMatches
 import org.acejump.search.*
 import org.acejump.view.Model.editor
@@ -28,9 +29,21 @@ object Scroller {
     else findPreviousPosition() ?: return false
     editor.scrollingModel.disableAnimation()
     editor.scrollingModel.scrollTo(position, CENTER)
+
+    val firstInView = textMatches.first { it in editor.getView() }
+    val horizontalOffset = editor.offsetToLogicalPosition(firstInView).column
+    if(horizontalOffset > editor.scrollingModel.visibleArea.width)
+      editor.scrollingModel.scrollHorizontally(horizontalOffset)
+
     viewBounds = editor.getView()
 
     return true
+  }
+
+  fun ensureCaretVisible(): Boolean {
+    val initialArea = editor.scrollingModel.visibleArea
+    editor.scrollingModel.scrollToCaret(MAKE_VISIBLE)
+    return editor.scrollingModel.visibleArea == initialArea
   }
 
   private fun findPreviousPosition(): LogicalPosition? {

@@ -9,7 +9,8 @@ object Selector {
     val matches = nearestVisibleMatches(forward)
     if (matches.isEmpty()) return
     Jumper.jumpTo(matches.first(), false)
-    if (matches.size == 1) Handler.reset()
+    val wasAlreadyVisible = Scroller.ensureCaretVisible()
+    if (matches.size == 1 && wasAlreadyVisible) Handler.reset()
   }
 
   fun nearestVisibleMatches(forward: Boolean = true) =

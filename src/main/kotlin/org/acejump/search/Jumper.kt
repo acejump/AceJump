@@ -11,6 +11,7 @@ import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.ui.playback.commands.ActionCommand
 import com.intellij.openapi.util.TextRange
+import org.acejump.control.Scroller
 import org.acejump.search.JumpMode.DEFINE
 import org.acejump.search.JumpMode.TARGET
 import org.acejump.view.Model.editor
