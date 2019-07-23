@@ -16,9 +16,8 @@ import org.acejump.search.JumpMode.TARGET
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.project
-import java.lang.Math.max
-import java.lang.Math.min
-import java.util.*
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Caret controller. Responsible for moving the caret once a tag is selected.

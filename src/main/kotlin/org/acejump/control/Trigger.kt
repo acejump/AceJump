@@ -3,6 +3,7 @@ package org.acejump.control
 import com.intellij.openapi.diagnostic.Logger
 import org.acejump.search.runLater
 import java.lang.System.currentTimeMillis
+import kotlin.math.abs
 
 /**
  * Timer for triggering events with a designated delay. May be invoked multiple
@@ -23,7 +24,7 @@ object Trigger: () -> Unit {
       isRunning = true
 
       while (currentTimeMillis() - timer <= delay)
-        Thread.sleep(Math.abs(delay - (currentTimeMillis() - timer)))
+        Thread.sleep(abs(delay - (currentTimeMillis() - timer)))
 
       try {
         invokable()

@@ -7,8 +7,8 @@ import org.acejump.label.Pattern.Companion.defaultTagOrder
 import org.acejump.search.wordBoundsPlus
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.viewBounds
-import java.lang.Math.max
 import kotlin.collections.set
+import kotlin.math.max
 import kotlin.system.measureTimeMillis
 
 /*

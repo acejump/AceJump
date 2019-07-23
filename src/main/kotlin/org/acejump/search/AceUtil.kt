@@ -136,7 +136,7 @@ fun Editor.canIndicesBeSimultaneouslyVisible(idx0: Int, idx1: Int): Boolean {
   val line1 = offsetToLogicalPosition(idx0).line
   val line2 = offsetToLogicalPosition(idx1).line
 
-  return Math.abs(line1 - line2) < getScreenHeight()
+  return abs(line1 - line2) < getScreenHeight()
 }
 
 /*
