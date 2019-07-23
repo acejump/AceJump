@@ -1,7 +1,7 @@
 package org.acejump.control
 
 import com.intellij.openapi.diagnostic.Logger
-import org.jetbrains.concurrency.runAsync
+import org.acejump.search.runLater
 import java.lang.System.currentTimeMillis
 
 /**
@@ -38,6 +38,6 @@ object Trigger: () -> Unit {
   operator fun invoke(withDelay: Long = 750, event: () -> Unit = {}) {
     delay = withDelay
     invokable = event
-    runAsync(this)
+    runLater(this)
   }
 }
