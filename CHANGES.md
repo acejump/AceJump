@@ -1,5 +1,11 @@
 # Changelog
 
+### 3.5.7
+
+<kbd>Tab</kbd><kbd>Enter</kbd> will now scroll horizontally if results are not visible.
+
+Fixes #294 "Access is allowed from event dispatch thread only" error
+
 ### 3.5.6
 
 Key prioritization for most common keyboard layouts and fixes for a number of minor issues.
