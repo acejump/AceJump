@@ -27,12 +27,12 @@ enum class Pattern(val string: String) {
     val NUM_TAGS: Int
       get() = NUM_CHARS * NUM_CHARS
 
-    var NUM_CHARS: Int = 36
+    val NUM_CHARS: Int
       get() = AceConfig.settings.allowedChars.length
 
     val defaultTagOrder: Comparator<String> = compareBy(
       { it[0].isDigit() || it[1].isDigit() },
-      { Pattern.distance(it[0], it.last()) },
+      { distance(it[0], it.last()) },
       AceConfig.settings.layout.priority { it[0] })
 
     fun filterTags(query: String) = allBigrams.filter { !query.endsWith(it[0]) }

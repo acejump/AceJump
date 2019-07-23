@@ -6,7 +6,6 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.*
-import com.intellij.openapi.editor.colors.EditorColors
 import com.intellij.openapi.editor.colors.EditorColors.*
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import org.acejump.control.Scroller.restoreScroll
@@ -15,7 +14,6 @@ import org.acejump.label.Pattern
 import org.acejump.label.Pattern.*
 import org.acejump.label.Tagger
 import org.acejump.search.*
-import org.acejump.search.Finder.search
 import org.acejump.view.*
 import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
 import org.acejump.view.Canvas.bindCanvas
@@ -52,7 +50,7 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   fun regexSearch(regex: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) =
-    Canvas.reset().also { search(regex, bounds) }
+    Canvas.reset().also { Finder.search(regex, bounds) }
 
   fun activate() = if (!enabled) configureEditor() else {
   }

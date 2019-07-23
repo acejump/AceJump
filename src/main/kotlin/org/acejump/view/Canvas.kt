@@ -35,11 +35,11 @@ object Canvas: JComponent(), Resettable {
     reset()
     storeBounds()
     contentComponent.add(Canvas)
-    Canvas.setBounds(0, 0, contentComponent.width, contentComponent.height)
+    setBounds(0, 0, contentComponent.width, contentComponent.height)
 
     if (ApplicationInfo.getInstance().build.components.first() < 173) {
       val loc = convertPoint(Canvas, location, component.rootPane)
-      Canvas.setLocation(-loc.x, -loc.y)
+      setLocation(-loc.x, -loc.y)
     }
   }
 

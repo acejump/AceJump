@@ -88,7 +88,7 @@ fun defaultEditor(): Editor =
 fun Editor.getPoint(idx: Int) = visualPositionToXY(offsetToVisualPosition(idx))
 
 fun Editor.getPointRelative(index: Int, relativeToComponent: JComponent) =
-  RelativePoint(relativeToComponent, getPoint(index)).originalPoint!!
+  RelativePoint(relativeToComponent, getPoint(index)).originalPoint
 
 fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)

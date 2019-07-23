@@ -9,7 +9,7 @@ import org.acejump.view.Marker
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.viewBounds
-import java.util.SortedSet
+import java.util.*
 import kotlin.collections.HashMap
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -41,7 +41,7 @@ object Tagger : Resettable {
   var query = ""
     private set
   var full = false // Tracks whether all search results were successfully tagged
-  var textMatches: SortedSet<Int> = sortedSetOf<Int>()
+  var textMatches: SortedSet<Int> = sortedSetOf()
   private var tagMap: Map<String, Int> = emptyMap()
   private val logger = Logger.getInstance(Tagger::class.java)
 

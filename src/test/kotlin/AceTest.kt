@@ -1,6 +1,6 @@
 import com.intellij.openapi.actionSystem.IdeActions.*
 import com.intellij.openapi.fileTypes.PlainTextFileType
-import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase
+import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.ui.UIUtil
 import org.acejump.control.AceAction
 import org.acejump.view.Canvas
@@ -12,7 +12,7 @@ import kotlin.system.measureTimeMillis
  * TODO: Add more structure to test cases, use test resources to define files.
  */
 
-class AceTest : LightCodeInsightFixtureTestCase() {
+class AceTest : BasePlatformTestCase() {
   fun `test that scanner finds all occurrences of single character`() =
     assertEquals("test test test".search("t"), setOf(0, 3, 5, 8, 10, 13))
 
@@ -86,7 +86,7 @@ class AceTest : LightCodeInsightFixtureTestCase() {
   private fun String.assertCorrectNumberOfTags(query: String) =
     assertEquals(split(query.fold("") { prefix, char ->
       if ((prefix + char) in this) prefix + char else return
-    }).size - 1, editor.markupModel.allHighlighters.size)
+    }).size - 1, myFixture.editor.markupModel.allHighlighters.size)
 
   private var shouldWarmup = true
   // Should be run exactly once to warm up the JVM
@@ -112,7 +112,7 @@ class AceTest : LightCodeInsightFixtureTestCase() {
   override fun tearDown() {
     myFixture.performEditorAction(ACTION_EDITOR_ESCAPE)
     UIUtil.dispatchAllInvocationEvents()
-    assertEmpty(editor.markupModel.allHighlighters)
+    assertEmpty(myFixture.editor.markupModel.allHighlighters)
     super.tearDown()
   }
 
