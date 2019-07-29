@@ -150,9 +150,13 @@ object Handler : TypedActionHandler, Resettable {
     EditorColorsManager.getInstance().globalScheme.getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
       ?.backgroundColor.let { Model.naturalHighlight = it }
 
-  private fun Editor.restoreCaret() = runNow {
-    settings.isBlinkCaret = Model.naturalBlink
-    settings.isBlockCursor = Model.naturalBlock
+  private fun Editor.restoreCaret() {
+    if (!isDisposed) {
+      runNow {
+        settings.isBlinkCaret = Model.naturalBlink
+        settings.isBlockCursor = Model.naturalBlock
+      }
+    }
   }
 
   private fun Editor.restoreColors() = runNow {
