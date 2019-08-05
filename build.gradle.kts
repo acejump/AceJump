@@ -44,6 +44,9 @@ idea.project {
 dependencies {
   // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
   compileOnly(kotlin("stdlib-jdk8"))
+  compile("org.bytedeco:javacv-platform:1.5.1")
+  compile("org.bytedeco:tesseract-platform:1.5.1")
+  compile("org.bytedeco:leptonica-platform:1.5.1")
 }
 
 repositories.mavenCentral()
@@ -55,4 +58,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.5.7"
+version = "3.6.0"

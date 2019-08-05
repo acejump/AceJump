@@ -1,8 +1,12 @@
 # Changelog
 
+### 3.6.0
+
+AceJump now supports full-screen tagging.
+
 ### 3.5.7
 
-<kbd>Tab</kbd><kbd>Enter</kbd> will now scroll horizontally if results are not visible.
+<kbd>Tab</kbd>/<kbd>Enter</kbd> will now scroll horizontally if results are not visible.
 
 Fixes #294 "Access is allowed from event dispatch thread only" error
 
