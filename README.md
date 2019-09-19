@@ -7,7 +7,7 @@
 [![][apache-license-svg]](LICENSE)
 [![][twitter-badge]][twitter-url]
 
-[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate AceJump. Type any string in the editor, followed by one of illustrated tags, to jump its position:
+[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate AceJump. Type any string in the editor, followed by one of the illustrated tags, to jump its position:
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177444/124fb534-a74d-11e6-8912-1d220ae27091.png)
 
@@ -31,7 +31,7 @@ AceJump search is [smart case](http://ideavim.sourceforge.net/vim/usr_27.html#vi
 
 - If you make a mistake searching, just press <kbd>Backspace</kbd> to restart from scratch.
 
-- If no matches can be found on screen, AceJump will scroll to the next match it can find.
+- If no matches can be found on-screen, AceJump will scroll to the next match it can find.
 
 - Pressing <kbd>Enter</kbd> or <kbd>Shift</kbd>+<kbd>Enter</kbd> during a search will cycle through tagged results on screen.
 
@@ -117,11 +117,11 @@ Please [see here](/CHANGES.md) for a detailed list of changes.
 
 AceJump is inspired by prior work, but adds several improvements, including:
 
-* **Target mode**: Jump and select an full word in one rapid motion.
+* **Target mode**: Jump and select a full word in one rapid motion.
 * **Line Mode**: Jump to the first, last, or first non-whitespace character of any line on-screen.
 * **Word Mode**: Jump to the first character of any visible word on-screen in two keystrokes or less.
 * **Declaration Mode**: Jump to the declaration of a token (if it is available) rather than the token itself.
-* **Full text** search: If a string is not visible on the screen, AceJump will scroll to the next occurrence.
+* **Full-text** search: If a string is not visible on the screen, AceJump will scroll to the next occurrence.
 * **Smart tag** rendering: Tags will occupy nearby whitespace if available, rather than block adjacent text.
 * **Ergonomic** tagging: AceJump tries to minimize finger travel distance on most common keyboards layouts.
 
