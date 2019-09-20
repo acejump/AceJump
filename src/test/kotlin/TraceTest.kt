@@ -33,6 +33,8 @@ class TraceTest : Application() {
       System.err.println("Could not initialize Tesseract")
       exitProcess(1)
     }
+//    api.SetVariable("tessedit_char_whitelist", "abcABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.");
+
   }
 
   private val results = mutableListOf<Target>()
@@ -46,7 +48,7 @@ class TraceTest : Application() {
     val canvas = Canvas(bounds.width, bounds.height)
     val gc = canvas.graphicsContext2D
 
-    for (i in 0..10) println(measureTimeMillis { paintTargets(gc!!) })
+    println(measureTimeMillis { paintTargets(gc!!) })
     val pane = Pane()
     pane.children.add(canvas)
 
