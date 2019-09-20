@@ -1,4 +1,3 @@
-
 import javafx.application.Application
 import javafx.event.EventHandler
 import javafx.scene.Scene
@@ -13,7 +12,9 @@ import javafx.stage.StageStyle.TRANSPARENT
 import org.bytedeco.javacpp.IntPointer
 import org.bytedeco.javacv.Java2DFrameConverter
 import org.bytedeco.javacv.LeptonicaFrameConverter
+import org.bytedeco.leptonica.PIX
 import org.bytedeco.leptonica.global.lept
+import org.bytedeco.tesseract.ResultIterator
 import org.bytedeco.tesseract.TessBaseAPI
 import org.bytedeco.tesseract.global.tesseract.*
 import org.junit.Ignore
@@ -22,9 +23,19 @@ import java.awt.*
 import java.net.URI
 import java.net.URLEncoder
 import kotlin.system.exitProcess
+import kotlin.system.measureTimeMillis
 
 class TraceTest : Application() {
-  private val results = mutableListOf<Map>()
+  private val api = TessBaseAPI()
+  private val robot = Robot()
+  init {
+    if (api.Init("src/main/resources", "eng") != 0) {
+      System.err.println("Could not initialize Tesseract")
+      exitProcess(1)
+    }
+  }
+
+  private val results = mutableListOf<Target>()
 
   @Throws(Exception::class)
   override fun start(stage: Stage) {
@@ -35,14 +46,14 @@ class TraceTest : Application() {
     val canvas = Canvas(bounds.width, bounds.height)
     val gc = canvas.graphicsContext2D
 
-    drawStuff(gc!!)
+    for (i in 0..10) println(measureTimeMillis { paintTargets(gc!!) })
     val pane = Pane()
     pane.children.add(canvas)
 
     val scene = Scene(pane, bounds.width, bounds.height)
     scene.onMouseClicked = EventHandler { e ->
       val tg = results.firstOrNull { it.isPointInMap(e.x.toInt(), e.y.toInt()) }
-      if(tg != null)
+      if (tg != null)
         try {
           val desktop = Desktop.getDesktop()
           val encodedQuery = URLEncoder.encode(tg.string, "UTF-8")
@@ -69,61 +80,67 @@ class TraceTest : Application() {
     stage.show()
   }
 
-  private fun drawStuff(gc: GraphicsContext) {
-    val api = TessBaseAPI()
-
-    if (api.Init("src/main/resources", "eng") != 0) {
-      System.err.println("Could not initialize Tesseract.")
-      exitProcess(1)
-    }
-
+  private fun getScreenContents(): PIX {
     val screenRect = Rectangle(Toolkit.getDefaultToolkit().screenSize)
-    val capture = Robot().createScreenCapture(screenRect)
+    val capture = robot.createScreenCapture(screenRect)
     val j2d = Java2DFrameConverter().convert(capture)
-    val pix = LeptonicaFrameConverter().convert(j2d)
+    return LeptonicaFrameConverter().convert(j2d)
+  }
 
-    api.SetImage(pix)
-    api.Recognize(TessMonitorCreate())
-    val resultIt = api.GetIterator()
-    val pageIteratorLevel = RIL_WORD
-    if (resultIt != null) do {
-      val outText = resultIt.GetUTF8Text(pageIteratorLevel)
-      val conf = resultIt.Confidence(pageIteratorLevel)
+  private fun paintTarget(resultIt: ResultIterator, gc: GraphicsContext) {
+    val outText = resultIt.GetUTF8Text(RIL_WORD)
+    val conf = resultIt.Confidence(RIL_WORD)
 //      println("${outText.string} ($conf)")
 
-      val left = IntPointer(1)
-      val top = IntPointer(1)
-      val right = IntPointer(1)
-      val bottom = IntPointer(1)
-      val pageIt = TessResultIteratorGetPageIterator(resultIt)
-      TessPageIteratorBoundingBox(pageIt, RIL_WORD, left, top, right, bottom)
+    val left = IntPointer(1)
+    val top = IntPointer(1)
+    val right = IntPointer(1)
+    val bottom = IntPointer(1)
+    val pageIt = TessResultIteratorGetPageIterator(resultIt)
+    TessPageIteratorBoundingBox(pageIt, RIL_WORD, left, top, right, bottom)
 
-      val x = left.get().toDouble()
-      val y = top.get().toDouble()
-      val width = (right.get() - left.get()).toDouble()
-      val height = (bottom.get() - top.get()).toDouble()
+    val x = left.get().toDouble()
+    val y = top.get().toDouble()
+    val width = (right.get() - left.get()).toDouble()
+    val height = (bottom.get() - top.get()).toDouble()
 //      println("x: $x, y: $y, width: $width, height: $height")
 
-      gc.fill = Color(0.0, 1.0, 0.0, 0.4)
-      if (conf > 20 && outText.string.length > 3) {
-        gc.fillRoundRect(x, y, width, height, 10.0, 10.0)
-        results.add(Map(outText.string,
-          x.toInt(), y.toInt(), (x + width).toInt(), (y + height).toInt()))
-      }
+    gc.fill = Color(0.0, 1.0, 0.0, 0.4)
+    if (conf > 1 && outText.string.length > 3) {
+      gc.fillRoundRect(x, y, width, height, 10.0, 10.0)
+      results.add(Target(outText.string,
+        x.toInt(), y.toInt(), right.get(), bottom.get()))
+    }
 
-      outText.deallocate()
-    } while (resultIt.Next(pageIteratorLevel))
+    outText.deallocate()
+    arrayOf(left, top, right, bottom).forEach { it.deallocate() }
+  }
 
-    api.End()
-    lept.pixDestroy(pix)
+  private fun paintTargets(gc: GraphicsContext) {
+    var start = System.currentTimeMillis()
+    val image = getScreenContents()
+    results.clear()
+    api.SetImage(image)
+    println("Setup time: ${System.currentTimeMillis() - start}")
+    start = System.currentTimeMillis()
+    api.Recognize(TessMonitorCreate())
+    println("Recognize time: ${System.currentTimeMillis() - start}")
+    start = System.currentTimeMillis()
+    val resultIt = api.GetIterator()
+    if (resultIt != null) do {
+      paintTarget(resultIt, gc)
+    } while (resultIt.Next(RIL_WORD))
+    println("Read time: ${System.currentTimeMillis() - start}")
+    start = System.currentTimeMillis()
+    lept.pixDestroy(image)
+    println("Cleanup time: ${System.currentTimeMillis() - start}")
   }
 
   @Ignore
   @Test
   fun traceTest() = launch()
 
-  inner class Map(
-    val string: String = "",
+  inner class Target(val string: String = "",
     val x1: Int = 0, val y1: Int = 0, val x2: Int = 0, val y2: Int = 0) {
     fun isPointInMap(x: Int, y: Int) = x in x1..x2 && y in y1..y2
   }
