@@ -1,3 +1,4 @@
+
 import javafx.application.Application
 import javafx.event.EventHandler
 import javafx.scene.Scene
@@ -14,6 +15,7 @@ import org.bytedeco.javacv.Java2DFrameConverter
 import org.bytedeco.javacv.LeptonicaFrameConverter
 import org.bytedeco.leptonica.PIX
 import org.bytedeco.leptonica.global.lept
+import org.bytedeco.leptonica.global.lept.pixScale
 import org.bytedeco.tesseract.ResultIterator
 import org.bytedeco.tesseract.TessBaseAPI
 import org.bytedeco.tesseract.global.tesseract.*
@@ -34,7 +36,6 @@ class TraceTest : Application() {
       exitProcess(1)
     }
 //    api.SetVariable("tessedit_char_whitelist", "abcABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.");
-
   }
 
   private val results = mutableListOf<Target>()
@@ -54,7 +55,7 @@ class TraceTest : Application() {
 
     val scene = Scene(pane, bounds.width, bounds.height)
     scene.onMouseClicked = EventHandler { e ->
-      val tg = results.firstOrNull { it.isPointInMap(e.x.toInt(), e.y.toInt()) }
+      val tg = results.firstOrNull { it.isPointInMap(e.x, e.y) }
       if (tg != null)
         try {
           val desktop = Desktop.getDesktop()
@@ -82,11 +83,14 @@ class TraceTest : Application() {
     stage.show()
   }
 
+  val SCALE_FACTOR = 4.0f
+
   private fun getScreenContents(): PIX {
     val screenRect = Rectangle(Toolkit.getDefaultToolkit().screenSize)
     val capture = robot.createScreenCapture(screenRect)
     val j2d = Java2DFrameConverter().convert(capture)
-    return LeptonicaFrameConverter().convert(j2d)
+    val pix = LeptonicaFrameConverter().convert(j2d)
+    return pixScale(pix, SCALE_FACTOR, SCALE_FACTOR)
   }
 
   private fun paintTarget(resultIt: ResultIterator, gc: GraphicsContext) {
@@ -101,17 +105,18 @@ class TraceTest : Application() {
     val pageIt = TessResultIteratorGetPageIterator(resultIt)
     TessPageIteratorBoundingBox(pageIt, RIL_WORD, left, top, right, bottom)
 
-    val x = left.get().toDouble()
-    val y = top.get().toDouble()
-    val width = (right.get() - left.get()).toDouble()
-    val height = (bottom.get() - top.get()).toDouble()
+    val x = left.get().toDouble() / SCALE_FACTOR
+    val y = top.get().toDouble() / SCALE_FACTOR
+    val width = (right.get() - left.get()).toDouble() / SCALE_FACTOR
+    val height = (bottom.get() - top.get()).toDouble() / SCALE_FACTOR
 //      println("x: $x, y: $y, width: $width, height: $height")
 
-    gc.fill = Color(0.0, 1.0, 0.0, 0.4)
     if (conf > 1 && outText.string.length > 3) {
+      gc.fill = Color(0.0, 1.0, 0.0, 0.4)
       gc.fillRoundRect(x, y, width, height, 10.0, 10.0)
-      results.add(Target(outText.string,
-        x.toInt(), y.toInt(), right.get(), bottom.get()))
+      gc.fill = Color(1.0, 1.0, 0.0, 1.0)
+      gc.fillRoundRect(x, y + width, height * 0.7 * 3, height, 10.0, 10.0)
+      results.add(Target(outText.string, x, y, x + width, y + height))
     }
 
     outText.deallocate()
@@ -143,7 +148,7 @@ class TraceTest : Application() {
   fun traceTest() = launch()
 
   inner class Target(val string: String = "",
-    val x1: Int = 0, val y1: Int = 0, val x2: Int = 0, val y2: Int = 0) {
-    fun isPointInMap(x: Int, y: Int) = x in x1..x2 && y in y1..y2
+    val x1: Double = 0.0, val y1: Double = 0.0, val x2: Double = 0.0, val y2: Double = 0.0) {
+    fun isPointInMap(x: Double, y: Double) = x in x1..x2 && y in y1..y2
   }
 }
