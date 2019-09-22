@@ -48,6 +48,8 @@ dependencies {
   compile("org.bytedeco:tesseract-platform:1.5.1")
   compile("org.bytedeco:leptonica-platform:1.5.1")
   implementation("com.1stleg:jnativehook:2.1.0")
+  implementation("org.openjfx:javafx-swing:11")
+  implementation("org.openjfx:javafx:11")
 }
 
 repositories.mavenCentral()

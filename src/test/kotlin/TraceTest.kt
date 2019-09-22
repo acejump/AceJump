@@ -1,4 +1,3 @@
-
 import javafx.application.Application
 import javafx.event.EventHandler
 import javafx.scene.Scene
@@ -19,10 +18,10 @@ import org.bytedeco.leptonica.global.lept.pixScale
 import org.bytedeco.tesseract.ResultIterator
 import org.bytedeco.tesseract.TessBaseAPI
 import org.bytedeco.tesseract.global.tesseract.*
-import org.junit.Ignore
 import org.junit.Test
-import java.awt.*
-import java.net.URI
+import java.awt.Rectangle
+import java.awt.Robot
+import java.awt.Toolkit
 import java.net.URLEncoder
 import kotlin.system.exitProcess
 import kotlin.system.measureTimeMillis
@@ -58,10 +57,8 @@ class TraceTest : Application() {
       val tg = results.firstOrNull { it.isPointInMap(e.x, e.y) }
       if (tg != null)
         try {
-          val desktop = Desktop.getDesktop()
           val encodedQuery = URLEncoder.encode(tg.string, "UTF-8")
-          val oURL = URI("https://stackoverflow.com/search?q=$encodedQuery")
-          desktop.browse(oURL)
+          hostServices.showDocument("https://stackoverflow.com/search?q=$encodedQuery")
         } catch (e: Exception) {
           e.printStackTrace()
         }
@@ -143,7 +140,6 @@ class TraceTest : Application() {
     println("Cleanup time: ${System.currentTimeMillis() - start}")
   }
 
-  @Ignore
   @Test
   fun traceTest() = launch()
 
