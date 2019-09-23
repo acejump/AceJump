@@ -6,7 +6,8 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.*
-import com.intellij.openapi.editor.colors.EditorColors.*
+import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
+import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.openapi.editor.colors.EditorColorsManager
 import org.acejump.control.Scroller.restoreScroll
 import org.acejump.control.Scroller.saveScroll
@@ -84,7 +85,7 @@ object Handler : TypedActionHandler, Resettable {
     }
 
   private fun swapActionHandler() = EditorActionManager.getInstance().run {
-    editorActionMap.forEach { actionId, handler ->
+    editorActionMap.forEach { (actionId, handler) ->
       editorActionMap[actionId] = getActionHandler(actionId)
       setActionHandler(actionId, handler)
     }
@@ -121,10 +122,12 @@ object Handler : TypedActionHandler, Resettable {
     enabled = false
     swapActionHandler()
     uninstallKeyHandler()
-    restoreScroll()
-    restoreCanvas()
-    restoreCaret()
-    restoreColors()
+    if(!isDisposed) {
+      restoreScroll()
+      restoreCanvas()
+      restoreCaret()
+      restoreColors()
+    }
   }
 
   private fun Editor.restoreCanvas() =
@@ -150,14 +153,11 @@ object Handler : TypedActionHandler, Resettable {
     EditorColorsManager.getInstance().globalScheme.getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
       ?.backgroundColor.let { Model.naturalHighlight = it }
 
-  private fun Editor.restoreCaret() {
-    if (!isDisposed) {
+  private fun Editor.restoreCaret() =
       runNow {
         settings.isBlinkCaret = Model.naturalBlink
         settings.isBlockCursor = Model.naturalBlock
       }
-    }
-  }
 
   private fun Editor.restoreColors() = runNow {
     colorsScheme.run {

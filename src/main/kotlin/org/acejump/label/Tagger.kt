@@ -60,12 +60,14 @@ object Tagger : Resettable {
       logger.info("Received query: \"$query\"")
     }
 
+    val availableTags = filterTags(query).filter { it !in tagMap }.toSet()
+
     measureTimeMillis {
-      textMatches = refineSearchResults(results)
+      textMatches = refineSearchResults(results, availableTags)
     }.let { if (!regex) logger.info("Refined search results in $it ms") }
 
     giveJumpOpportunity()
-    if (!tagSelected) markOrScrollToNextOccurrence()
+    if (!tagSelected) markOrScrollToNextOccurrence(availableTags)
   }
 
   /**
@@ -74,9 +76,9 @@ object Tagger : Resettable {
    * in a very large document.
    */
 
-  private fun refineSearchResults(results: SortedSet<Int>): SortedSet<Int> {
+  private fun refineSearchResults(results: SortedSet<Int>,
+                                  availableTags: Set<String>): SortedSet<Int> {
     if (regex) return results
-    val availableTags = filterTags(query).filter { it !in tagMap }.toSet()
 
     val sites = results.filter { editorText.admitsTagAtLocation(it) }
     val discards = results.size - sites.size
@@ -144,17 +146,17 @@ object Tagger : Resettable {
       )
     }
 
-  private fun markOrScrollToNextOccurrence() {
-    markAndMapTags().apply { if (isNotEmpty()) tagMap = this }
+  private fun markOrScrollToNextOccurrence(availableTags: Set<String>) {
+    markAndMapTags(availableTags).apply { if (isNotEmpty()) tagMap = this }
 
     if (markers.isNotEmpty() && markers.noneInView && 1 < query.length)
       runNow { Scroller.scroll() }
   }
 
-  private fun markAndMapTags(): Map<String, Int> {
+  private fun markAndMapTags(availableTags: Set<String>): Map<String, Int> {
     full = true
     if (query.isEmpty()) return emptyMap()
-    return compact(assignTags(textMatches)).apply {
+    return compact(assignTags(textMatches, availableTags)).apply {
       markers = map { (tag, index) -> Marker(query, tag, index) }
     }
   }
@@ -203,7 +205,8 @@ object Tagger : Resettable {
     return canBeShortened
   }
 
-  private fun assignTags(results: Set<Int>): Map<String, Int> {
+  private fun assignTags(results: Set<Int>,
+                         availableTags: Set<String>): Map<String, Int> {
     var timeElapsed = System.currentTimeMillis()
     val newTags = transferExistingTagsCompatibleWithQuery()
     // Ongoing queries with results in view do not need further tag assignment
@@ -217,7 +220,6 @@ object Tagger : Resettable {
     val completeResultSet = onScreen + offScreen
     // Some results are untagged. Let's assign some tags!
     val vacantResults = completeResultSet.filter { it !in newTags.values }
-    val availableTags = filterTags(query).filter { it !in tagMap }.toSet()
     if (availableTags.size < vacantResults.size) full = false
 
     logger.run {
@@ -228,8 +230,8 @@ object Tagger : Resettable {
       info("Time elapsed: $timeElapsed ms")
     }
 
-    return if (regex) solveRegex(vacantResults, availableTags)
-    else Solver.solve(vacantResults, availableTags)
+    return if (regex) solveRegex(vacantResults, availableTags) else
+    Solver(editorText, query, vacantResults, availableTags, viewBounds).solve()
   }
 
   private fun solveRegex(vacantResults: List<Int>, availableTags: Set<String>) =

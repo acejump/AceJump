@@ -5,8 +5,6 @@ import com.intellij.openapi.diagnostic.Logger
 import org.acejump.config.AceConfig
 import org.acejump.label.Pattern.Companion.defaultTagOrder
 import org.acejump.search.wordBoundsPlus
-import org.acejump.view.Model.editorText
-import org.acejump.view.Model.viewBounds
 import kotlin.collections.set
 import kotlin.math.max
 import kotlin.system.measureTimeMillis
@@ -20,10 +18,10 @@ import kotlin.system.measureTimeMillis
  *
  * More concretely, tags are typically two-character strings containing alpha-
  * numeric symbols. Documents are plaintext files. Indices are produced by a
- * search query, i.e. the preceding N characters of every index i in document
- * d are identical. For characters proceeding d[i], all bets are off. We might
- * assume that P(d[i]|d[i-1]) has some structure for d~D. Ultimately, we want a
- * fast algorithm which maximizes the number of tagged document indices.
+ * search query of length N, i.e. the preceding N characters of every index i in
+ * document d are identical. For characters proceeding d[i], all bets are off.
+ * We can assume that P(d[i]|d[i-1]) has some structure for d~D. Ultimately, we
+ * want a fast algorithm which maximizes the number of tagged document indices.
  *
  * Tags are used by the typist to select indices within a document. To select an
  * index, the typist starts by activating AceJump and searching for a character.
@@ -47,10 +45,15 @@ import kotlin.system.measureTimeMillis
  * Once assigned, a visible tag must never change during the selection process.
  */
 
-object Solver {
+class Solver(val text: String,
+             val query: String = "",
+             val results: Collection<Int>,
+             val availableTags: Set<String> = Pattern.filterTags("").toSet(),
+             val viewBounds: IntRange = 0..text.length) {
   private val logger = Logger.getInstance(Solver::class.java)
-  private var newTags: MutableMap<String, Int> = HashBiMap.create()
-  private var strings: Set<String> = hashSetOf()
+  private var newTags: MutableMap<String, Int> = HashMap(Pattern.NUM_TAGS)
+  private var strings: Set<String> =
+    HashSet(results.map { getWordFragments(it) }.flatten())
 
   /**
    * Iterates through remaining available tags, until we find one matching our
@@ -83,7 +86,7 @@ object Solver {
     // Sites in immediate view should come first
     { it !in viewBounds },
     // Ensure that the first letter of a word is prioritized for tagging
-    { editorText[max(0, it - 1)].isLetterOrDigit() },
+    { text[max(0, it - 1)].isLetterOrDigit() },
     { it })
 
   /**
@@ -120,15 +123,11 @@ object Solver {
    * @return A list of all tags and their corresponding indices
    */
 
-  fun solve(results: Collection<Int>, tags: Set<String>): Map<String, Int> {
-    eligibleSitesByTag.clear()
-    newTags = HashMap(Pattern.NUM_TAGS)
-    strings = HashSet(results.map { getWordFragments(it) }.flatten())
-
+  fun solve(): Map<String, Int> {
     var totalAssigned = 0
     var timeAssigned = 0L
     val timeElapsed = measureTimeMillis {
-      val tagsByFirstLetter = tags.groupBy { it[0] }
+      val tagsByFirstLetter = availableTags.groupBy { it[0] }
       results.parallelStream().forEach { site ->
         val compatibleTags = tagsByFirstLetter.getTagsCompatibleWith(site)
         compatibleTags.forEach { tag -> eligibleSitesByTag.put(tag, site) }
@@ -171,9 +170,9 @@ object Solver {
     getWordFragments(this).map { it + char }.none { it in strings }
 
   private fun getWordFragments(site: Int): List<String> {
-    val left = max(0, site + Tagger.query.length - 1)
-    val right = editorText.wordBoundsPlus(site).second
+    val left = max(0, site + query.length - 1)
+    val right = text.wordBoundsPlus(site).second
 
-    return (left..right).map { editorText.substring(left, it).toLowerCase() }
+    return (left..right).map { text.substring(left, it).toLowerCase() }
   }
 }

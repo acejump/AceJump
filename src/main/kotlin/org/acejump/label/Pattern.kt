@@ -19,10 +19,10 @@ enum class Pattern(val string: String) {
   companion object {
     private fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]
 
-    private var allBigrams = emptyList<String>()
+    private val allBigrams
       get() = AceConfig.settings.allowedChars
         .run { flatMap { e -> map { c -> "$e$c" } } }
-        .also { field = it }
+        .sortedWith(defaultTagOrder)
 
     val NUM_TAGS: Int
       get() = NUM_CHARS * NUM_CHARS
