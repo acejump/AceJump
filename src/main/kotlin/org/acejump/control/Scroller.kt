@@ -92,7 +92,7 @@ object Scroller {
   }
 
   fun Editor.restoreScroll() {
-    if (caretModel.offset !in getView()) {
+    if (!isDisposed && caretModel.offset !in getView()) {
       scrollingModel.scrollVertically(scrollY)
       scrollingModel.scrollHorizontally(scrollX)
     }
