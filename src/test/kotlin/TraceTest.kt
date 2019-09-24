@@ -28,7 +28,6 @@ import kotlin.system.exitProcess
 import kotlin.system.measureTimeMillis
 
 class TraceTest : Application() {
-  private lateinit var stage: Stage
   private val api = TessBaseAPI()
   private val robot = Robot()
   private var query = ""
@@ -107,7 +106,6 @@ class TraceTest : Application() {
     }
 
   override fun start(stage: Stage) {
-    this.stage = stage
     stage.initStyle(StageStyle.TRANSPARENT)
     while (!activated) { Thread.sleep(10) }
     stage.scene = scene
@@ -161,7 +159,9 @@ class TraceTest : Application() {
     val capture = robot.createScreenCapture(screenRect)
     val j2d = Java2DFrameConverter().convert(capture)
     val pix = LeptonicaFrameConverter().convert(j2d)
-    return pixScale(pix, SCALE_FACTOR, SCALE_FACTOR)
+    val pixScaled = pixScale(pix, SCALE_FACTOR, SCALE_FACTOR)
+    pix.deallocate()
+    return pixScaled
   }
 
   private fun paintTarget(canvas: Canvas, target: Target, tag: String) {
