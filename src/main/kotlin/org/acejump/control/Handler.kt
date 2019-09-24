@@ -53,8 +53,7 @@ object Handler : TypedActionHandler, Resettable {
   fun regexSearch(regex: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) =
     Canvas.reset().also { Finder.search(regex, bounds) }
 
-  fun activate() = if (!enabled) configureEditor() else {
-  }
+  fun activate() = if (!enabled) configureEditor() else { }
 
   private fun clear() {
     applyTo(Tagger, Jumper, Finder, Canvas) { reset() }

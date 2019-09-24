@@ -207,7 +207,7 @@ Major rewrite of AceJump. Introducing:
 
 ### 2.0.13
 
-Fix a regression affecting *Target Mode* and line-based navigation: https://github.com/johnlindquist/AceJump/commit/cc3a23a3bd6754d11100f15f3dddc4d8529926df#diff-a483c757116bde46e566a8b01520a807L51</dd>
+Fix a regression affecting *Target Mode* and line-based navigation: <https://github.com/johnlindquist/AceJump/commit/cc3a23a3bd6754d11100f15f3dddc4d8529926df#diff-a483c757116bde46e566a8b01520a807L51>
 
 ### 2.0.12
 

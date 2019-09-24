@@ -1,10 +1,7 @@
-
 import javafx.application.Application
 import javafx.event.EventHandler
 import javafx.scene.Scene
 import javafx.scene.canvas.Canvas
-import javafx.scene.input.KeyCode.ESCAPE
-import javafx.scene.input.KeyEvent
 import javafx.scene.input.MouseEvent
 import javafx.scene.layout.Pane
 import javafx.scene.paint.Color
@@ -20,7 +17,10 @@ import org.bytedeco.leptonica.global.lept.pixScale
 import org.bytedeco.tesseract.ResultIterator
 import org.bytedeco.tesseract.TessBaseAPI
 import org.bytedeco.tesseract.global.tesseract.*
-import org.junit.Ignore
+import org.jnativehook.GlobalScreen
+import org.jnativehook.NativeHookException
+import org.jnativehook.keyboard.NativeKeyEvent
+import org.jnativehook.keyboard.NativeKeyListener
 import org.junit.Test
 import java.awt.*
 import java.net.URLEncoder
@@ -28,56 +28,107 @@ import kotlin.system.exitProcess
 import kotlin.system.measureTimeMillis
 
 class TraceTest : Application() {
+  private lateinit var stage: Stage
   private val api = TessBaseAPI()
   private val robot = Robot()
+  private var query = ""
+  @Volatile var resultMap: Map<String, Target> = mapOf()
+  @Volatile var activated = false
+  @Volatile lateinit var scene: Scene
 
   init {
     if (api.Init("src/main/resources", "eng") != 0) {
       System.err.println("Could not initialize Tesseract")
       exitProcess(1)
     }
-//    api.SetVariable("tessedit_char_whitelist", "abcABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.");
+    registerKeyListener()
+    Thread {
+      while (!activated) {
+        println("Activated: $activated")
+        resultMap = findTargets()
+        scene = paintScene()
+      }
+    }.start()
+  }
+
+  fun paintScene(): Scene {
+    val canvas = Screen.getPrimary().visualBounds.run { Canvas(width, height) }
+    println(measureTimeMillis { paintTargets(canvas, resultMap) })
+    val pane = Pane().apply { children.add(canvas) }
+    val scene = Scene(pane, canvas.width, canvas.height).apply {
+      onMouseClicked = makeClickHandler(resultMap.values)
+//      onKeyPressed = makeEventHandler(stage)
+      fill = Color.TRANSPARENT
+    }
+
+    return scene
+  }
+
+  fun registerKeyListener() {
+    try {
+      GlobalScreen.registerNativeHook()
+    } catch (ex: NativeHookException) {
+      System.err.println(ex.message)
+      exitProcess(1)
+    }
+
+    GlobalScreen.addNativeKeyListener(object : NativeKeyListener {
+      @Volatile
+      var ctrlDown = false
+
+      override fun nativeKeyPressed(p0: NativeKeyEvent) {
+        activated = true
+//        if (p0.keyCode == NativeKeyEvent.VC_SEMICOLON) ctrlDown = true
+//        else if (p0.keyCode == NativeKeyEvent.VC_SEMICOLON && ctrlDown) {
+//          activated = true
+//          println("Activated!")
+//        }
+      }
+
+      override fun nativeKeyReleased(p0: NativeKeyEvent) {
+        if (p0.keyCode == NativeKeyEvent.CTRL_MASK) ctrlDown = false
+      }
+
+      override fun nativeKeyTyped(e: NativeKeyEvent) {
+        if (!e.keyChar.isLetterOrDigit()) exitProcess(0)
+        else {
+          query += e.keyChar
+          resultMap[query.takeLast(2)]?.run { jumpTo(this); query = "" }
+        }
+      }
+    })
   }
 
   fun makeClickHandler(results: Collection<Target>) =
     EventHandler<MouseEvent> { e ->
       val tg = results.firstOrNull { it.isPointInMap(e.x, e.y) }
-      if (tg != null)
-        try {
-          val encodedQuery = URLEncoder.encode(tg.string, "UTF-8")
-          hostServices.showDocument("https://stackoverflow.com/search?q=$encodedQuery")
-        } catch (e: Exception) {
-          e.printStackTrace()
-        }
+      if (tg != null) jumpTo(tg)
       // println("Received click event at: (x: ${e.x} y: ${e.y})")
     }
 
-  @Throws(Exception::class)
   override fun start(stage: Stage) {
-    val bounds = Screen.getPrimary().visualBounds
-
+    this.stage = stage
     stage.initStyle(StageStyle.TRANSPARENT)
-
-    val resultMap = findTargets()
-
-    val canvas = Canvas(bounds.width, bounds.height)
-    println(measureTimeMillis { paintTargets(canvas, resultMap) })
-    val pane = Pane().apply { children.add(canvas) }
-    val scene = Scene(pane, bounds.width, bounds.height)
-    scene.onMouseClicked = makeClickHandler(resultMap.values)
-    scene.onKeyPressed = makeEventHandler(stage)
-    scene.fill = Color.TRANSPARENT
-
+    while (!activated) { Thread.sleep(10) }
     stage.scene = scene
     stage.x = 0.0
     stage.y = 0.0
     stage.show()
   }
 
-  private fun makeEventHandler(stage: Stage): EventHandler<in KeyEvent>? =
-    EventHandler { e ->
-      if (e.code == ESCAPE) stage.close()
+  val queryPrefix = "https://stackoverflow.com/search?q="
+
+  fun jumpTo(tg: Target) {
+    try {
+      val encodedQuery = URLEncoder.encode(tg.string, "UTF-8")
+      hostServices.showDocument("$queryPrefix$encodedQuery")
+//      robot.mouseMove(tg.x1.toInt(), tg.y1.toInt())
+//      robot.mousePress(InputEvent.BUTTON1_DOWN_MASK)
+//      robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK)
+    } catch (e: Exception) {
+      e.printStackTrace()
     }
+  }
 
   fun TessBaseAPI.recognizeImage(image: PIX) {
     var start = System.currentTimeMillis()
@@ -135,7 +186,7 @@ class TraceTest : Application() {
       10.0)
     gc.fill = Color(0.0, 0.0, 0.0, 1.0)
     gc.font = Font.font("Courier")
-    gc.fillText(tag, startOfTag, target.y2)
+    gc.fillText(tag.toUpperCase(), startOfTag, target.y2)
   }
 
   private fun readTargetFromResult(resultIt: ResultIterator): Target {
@@ -196,7 +247,6 @@ class TraceTest : Application() {
     fun isPointInMap(x: Double, y: Double) = x in x1..x2 && y in y1..y2
   }
 
-  @Ignore
   @Test
   fun traceTest() = launch()
 }

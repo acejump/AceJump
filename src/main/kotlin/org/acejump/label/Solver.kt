@@ -118,8 +118,6 @@ class Solver(val text: String,
    * A. Should be as short as possible. A tag may be "compacted" later.
    * B. Should prefer keys that are physically closer on a QWERTY keyboard.
    *
-   * @param results All indices to be tagged
-   *
    * @return A list of all tags and their corresponding indices
    */
 
