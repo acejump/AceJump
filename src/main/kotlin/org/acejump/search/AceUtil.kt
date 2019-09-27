@@ -3,7 +3,8 @@ package org.acejump.search
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.editor.*
-import com.intellij.openapi.fileEditor.*
+import com.intellij.openapi.fileEditor.FileDocumentManager
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
 import org.acejump.view.Model.MAX_TAG_RESULTS
@@ -18,8 +19,6 @@ interface Resettable {
 }
 
 fun aceString(s: String) = ResourceBundle.getBundle("AceResources").getString(s)
-
-fun String.mapIndices() = mapIndexed { i, c -> Pair(c, i) }.toMap()
 
 fun <P> applyTo(vararg ps: P, fx: P.() -> Unit) = ps.forEach { it.fx() }
 

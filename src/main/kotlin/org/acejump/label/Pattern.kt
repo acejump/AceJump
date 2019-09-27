@@ -1,7 +1,6 @@
 package org.acejump.label
 
 import org.acejump.config.AceConfig
-import org.acejump.search.mapIndices
 
 /**
  * Patterns related to key priority, separation, and regexps for line mode.
@@ -44,15 +43,15 @@ enum class Pattern(val string: String) {
      * keys (ex. 12, 21) to keys that are located further apart on the keyboard.
      */
 
-    enum class KeyLayout(val text: Array<String>) {
-      COLEMK(arrayOf("1234567890", "qwfpgjluy",  "arstdhneio", "zxcvbkm")),
-      WORKMN(arrayOf("1234567890", "qdrwbjfup",  "ashtgyneoi", "zxmcvkl")),
-      DVORAK(arrayOf("1234567890", "pyfgcrl",    "aoeuidhtns", "qjkxbmwvz")),
-      QWERTY(arrayOf("1234567890", "qwertyuiop", "asdfghjkl",  "zxcvbnm")),
-      QWERTZ(arrayOf("1234567890", "qwertzuiop", "asdfghjkl",  "yxcvbnm")),
-      QGMLWY(arrayOf("1234567890", "qgmlwyfub",  "dstnriaeoh", "zxcvjkp")),
-      QGMLWB(arrayOf("1234567890", "qgmlwbyuv",  "dntnriaeoh", "zxcfjkp")),
-      NORMAN(arrayOf("1234567890", "qwdfkjurl",  "asetgynioh", "zxcvbpm"));
+    enum class KeyLayout(vararg val text: String) {
+      COLEMK("1234567890", "qwfpgjluy", "arstdhneio", "zxcvbkm"),
+      WORKMN("1234567890", "qdrwbjfup", "ashtgyneoi", "zxmcvkl"),
+      DVORAK("1234567890", "pyfgcrl", "aoeuidhtns", "qjkxbmwvz"),
+      QWERTY("1234567890", "qwertyuiop", "asdfghjkl", "zxcvbnm"),
+      QWERTZ("1234567890", "qwertzuiop", "asdfghjkl", "yxcvbnm"),
+      QGMLWY("1234567890", "qgmlwyfub", "dstnriaeoh", "zxcvjkp"),
+      QGMLWB("1234567890", "qgmlwbyuv", "dntnriaeoh", "zxcfjkp"),
+      NORMAN("1234567890", "qwdfkjurl", "asetgynioh", "zxcvbpm");
 
       private val priority
         get() = when (this) {
@@ -116,3 +115,5 @@ enum class Pattern(val string: String) {
       .mapValues { it.value.mapIndices() }
   }
 }
+
+fun String.mapIndices() = mapIndexed { i, c -> Pair(c, i) }.toMap()
