@@ -7,15 +7,15 @@
 [![][apache-license-svg]](LICENSE)
 [![][twitter-badge]][twitter-url]
 
-[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>;</kbd> by default) to activate AceJump. Type any string in the editor, followed by one of the illustrated tags, to jump its position:
+[AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate AceJump. Type any string in the editor, followed by one of the illustrated tags, to jump its position:
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177444/124fb534-a74d-11e6-8912-1d220ae27091.png)
 
-Press the AceJump shortcut a second time to activate **Declaration Mode**, which is equivalent to the `Navigate To` action in the IDE. Press the AceJump shortcut three times before completing a tag to activate **Target Mode**. Once **Target Mode** is activated, jumping to a tag will select an entire word. **Target Mode** can also be activated directly by pressing the shortcut for `AceTargetAction` (<kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd> by default).
+Press the AceJump shortcut a second time to activate **Declaration Mode**, which is equivalent to the `Navigate To` action in the IDE. Press the AceJump shortcut three times before completing a tag to activate **Target Mode**. Once **Target Mode** is activated, jumping to a tag will select an entire word. **Target Mode** can also be activated directly by pressing the shortcut for `AceTargetAction` (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd> by default).
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177362/a9976398-a74c-11e6-955d-df029c7b329b.png)
 
-Press the AceJump shortcut for **Line Mode**(<kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), to target the beginning, first non-whitespace, and last character of every line in the editor). Then jump to one by completing the tag.
+Press the AceJump shortcut for **Line Mode**(<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> by default), to target the beginning, first non-whitespace, and last character of every line in the editor). Then jump to one by completing the tag.
 
 ![](https://cloud.githubusercontent.com/assets/175716/20533565/f7d04d1e-b0ab-11e6-8b89-f7b10a98752d.png)
 
@@ -117,8 +117,8 @@ Please [see here](/CHANGES.md) for a detailed list of changes.
 
 AceJump is inspired by prior work, but adds several improvements, including:
 
-* **Target mode**: Jump and select a full word in one rapid motion. (<kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd>)
-* **Line Mode**: Jump to the first, last, or first non-whitespace character of any line on-screen (<kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd>).
+* **Target mode**: Jump and select a full word in one rapid motion. (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd>)
+* **Line Mode**: Jump to the first, last, or first non-whitespace character of any line on-screen (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd>).
 * **Word Mode**: Jump to the first character of any visible word on-screen in two keystrokes or less.
 * **Declaration Mode**: Jump to the declaration of a token (if it is available) rather than the token itself.
 * **Full-text** search: If a string is not visible on the screen, AceJump will scroll to the next occurrence.
