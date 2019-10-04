@@ -13,7 +13,7 @@ enum class Pattern(val string: String) {
   LINE_MARK(END_OF_LINE.string + "|" +
     START_OF_LINE.string + "|" +
     CODE_INDENTS.string),
-  ALL_WORDS("(?<=[^a-zA-Z0-9_])[a-zA-Z0-9_]");
+  ALL_WORDS("(?<=[^a-zA-Z0-9_]|\\A)[a-zA-Z0-9_]");
 
   companion object {
     private fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]

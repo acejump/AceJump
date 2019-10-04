@@ -14,7 +14,7 @@ internal object Scanner {
     editorText.run {
       val query = model.stringToFind
       // If the cache is populated, filter it instead of redoing prior work
-      if (cache.isEmpty()) findAll(model.toRegex(), 0)
+      if (cache.isEmpty()) findAll(model.toRegex(), boundaries.start)
       else cache.asSequence().filter {
         regionMatches(
           thisOffset = it + query.length - 1,
@@ -40,8 +40,8 @@ internal object Scanner {
   private tailrec fun filterNextResult(result: MatchResult): MatchResult? {
     val next = result.next() ?: return null
     val offset = next.range.first
-    return if (offset >= boundaries.endInclusive) null
-    else if (editor.isNotFolded(offset) && offset in boundaries) next
+    return if (offset !in boundaries) null
+    else if (editor.isNotFolded(offset)) next
     else filterNextResult(next)
   }
 }

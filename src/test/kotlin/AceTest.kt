@@ -1,8 +1,10 @@
+import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.IdeActions.*
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.ui.UIUtil
-import org.acejump.control.AceAction
+import org.acejump.control.*
+import org.acejump.label.Tagger
 import org.acejump.view.Canvas
 import kotlin.system.measureTimeMillis
 
@@ -34,7 +36,7 @@ class AceTest : BasePlatformTestCase() {
   fun `test that jumping to first occurrence succeeds`() {
     "<caret>testing 1234".search("1")
 
-    myFixture.performEditorAction(ACTION_EDITOR_ENTER)
+    takeAction(ACTION_EDITOR_ENTER)
 
     myFixture.checkResult("testing <caret>1234")
   }
@@ -42,7 +44,7 @@ class AceTest : BasePlatformTestCase() {
   fun `test that jumping to second occurrence succeeds`() {
     "<caret>testing 1234".search("ti")
 
-    myFixture.performEditorAction(ACTION_EDITOR_ENTER)
+    takeAction(ACTION_EDITOR_ENTER)
 
     myFixture.checkResult("tes<caret>ting 1234")
   }
@@ -51,7 +53,7 @@ class AceTest : BasePlatformTestCase() {
   fun `test that jumping to previous occurrence succeeds`() {
     "te<caret>sting 1234".search("t")
 
-    myFixture.performEditorAction(ACTION_EDITOR_START_NEW_LINE)
+    takeAction(ACTION_EDITOR_START_NEW_LINE)
 
     myFixture.checkResult("<caret>testing 1234")
   }
@@ -70,6 +72,22 @@ class AceTest : BasePlatformTestCase() {
     typeAndWaitForResults(Canvas.jumpLocations.first().tag!!.toUpperCase())
 
     myFixture.checkResult("<selection>testing 123<caret></selection>4")
+  }
+
+  fun `test words before caret action`() {
+    makeEditor("test words <caret> before caret is two")
+
+    takeAction(AceWordBackwardsAction)
+
+    assertEquals(Tagger.markers.size, 2)
+  }
+
+  fun `test words after caret action`() {
+    makeEditor("test words <caret> after caret is four")
+
+    takeAction(AceWordForwardAction)
+
+    assertEquals(Tagger.markers.size, 4)
   }
 
   // Enforces the results are available in less than 100ms
@@ -93,24 +111,31 @@ class AceTest : BasePlatformTestCase() {
   private fun maybeWarmUp(text: String, query: String) {
     if (shouldWarmup) {
       text.executeQuery(query)
-      myFixture.performEditorAction(ACTION_EDITOR_ESCAPE)
+      takeAction(ACTION_EDITOR_ESCAPE)
       UIUtil.dispatchAllInvocationEvents()
       // Now the JVM is warm, never run this method again
       shouldWarmup = false
     }
   }
 
+  fun makeEditor(contents: String) =
+    myFixture.configureByText(PlainTextFileType.INSTANCE, contents)
+
+  fun takeAction(action: String) = myFixture.performEditorAction(action)
+
+  fun takeAction(action: AnAction) = myFixture.testAction(action)
+
   // Just does a query without enforcing any time limit
   private fun String.executeQuery(query: String) {
     myFixture.run {
-      configureByText(PlainTextFileType.INSTANCE, this@executeQuery)
+      makeEditor(this@executeQuery)
       testAction(AceAction())
       typeAndWaitForResults(query)
     }
   }
 
   override fun tearDown() {
-    myFixture.performEditorAction(ACTION_EDITOR_ESCAPE)
+    takeAction(ACTION_EDITOR_ESCAPE)
     UIUtil.dispatchAllInvocationEvents()
     assertEmpty(myFixture.editor.markupModel.allHighlighters)
     super.tearDown()
