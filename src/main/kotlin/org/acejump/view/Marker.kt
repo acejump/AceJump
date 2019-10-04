@@ -34,7 +34,7 @@ import org.acejump.view.Model.editorText as text
  */
 
 class Marker : CustomHighlighterRenderer {
-  private val index: Int
+  val index: Int
   private val query: String
   val tag: String?
   private var srcPoint: Point
@@ -78,7 +78,7 @@ class Marker : CustomHighlighterRenderer {
   enum class Alignment { /*TOP, BOTTOM,*/ LEFT, RIGHT, NONE }
 
   // Called by AceJump (as a renderable element of Canvas)
-  fun paintMe(graphics2D: Graphics2D) = graphics2D.run {
+  fun paintMe(graphics: Graphics) = (graphics as Graphics2D).run {
     setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
     if (!Finder.skim)
@@ -95,9 +95,7 @@ class Marker : CustomHighlighterRenderer {
    */
 
   override fun paint(editor: Editor, highlight: RangeHighlighter, g: Graphics) =
-    (g as Graphics2D).highlightEditorText()
-
-  private fun Graphics2D.highlightEditorText() = run {
+    (g as Graphics2D).run {
     val tagX = start.x + fontWidth
     val tagWidth = tag?.length?.times(fontWidth) ?: 0
 

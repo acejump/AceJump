@@ -1,5 +1,7 @@
 package org.acejump.label
 
+import com.google.common.collect.BiMap
+import com.google.common.collect.HashBiMap
 import com.intellij.openapi.diagnostic.Logger
 import org.acejump.control.Scroller
 import org.acejump.label.Pattern.Companion.defaultTagOrder
@@ -10,9 +12,6 @@ import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.viewBounds
 import java.util.*
-import kotlin.collections.HashMap
-import kotlin.collections.component1
-import kotlin.collections.component2
 import kotlin.system.measureTimeMillis
 
 /**
@@ -42,14 +41,13 @@ object Tagger : Resettable {
     private set
   var full = false // Tracks whether all search results were successfully tagged
   var textMatches: SortedSet<Int> = sortedSetOf()
-  private var tagMap: Map<String, Int> = emptyMap()
+  @Volatile var tagMap: BiMap<String, Int> = HashBiMap.create()
   private val logger = Logger.getInstance(Tagger::class.java)
 
   @Volatile
   var tagSelected = false
 
-  private val Iterable<Marker>.noneInView
-    get() = none { it inside viewBounds }
+  private fun Iterable<Int>.noneInView() = none { it in viewBounds }
 
   fun markOrJump(model: AceFindModel, results: SortedSet<Int>) {
     model.run {
@@ -67,7 +65,7 @@ object Tagger : Resettable {
     }.let { if (!regex) logger.info("Refined search results in $it ms") }
 
     giveJumpOpportunity()
-    if (!tagSelected) markOrScrollToNextOccurrence(availableTags)
+    if (!tagSelected) mark(textMatches, availableTags)
   }
 
   /**
@@ -146,18 +144,16 @@ object Tagger : Resettable {
       )
     }
 
-  private fun markOrScrollToNextOccurrence(availableTags: Set<String>) {
-    markAndMapTags(availableTags).apply { if (isNotEmpty()) tagMap = this }
-
-    if (markers.isNotEmpty() && markers.noneInView && 1 < query.length)
-      runNow { Scroller.scroll() }
-  }
-
-  private fun markAndMapTags(availableTags: Set<String>): Map<String, Int> {
+  private fun mark(textMatches: SortedSet<Int>, availableTags: Set<String>) {
     full = true
-    if (query.isEmpty()) return emptyMap()
-    return compact(assignTags(textMatches, availableTags)).apply {
-      markers = map { (tag, index) -> Marker(query, tag, index) }
+    if (query.isEmpty()) HashBiMap.create()
+    else assignTags(textMatches, availableTags).compact().apply {
+      markers = textMatches.map { Marker(query, inverse()[it], it) }
+      if (isNotEmpty()) {
+        tagMap = this
+        if (tagMap.values.noneInView() && 1 < query.length)
+          runNow { Scroller.scroll() }
+      }
     }
   }
 
@@ -169,13 +165,13 @@ object Tagger : Resettable {
    * 3. The query does not end with the shortened tag, in whole or part.
    */
 
-  private fun compact(tagMap: Map<String, Int>): Map<String, Int> {
+  private fun Map<String, Int>.compact(): HashBiMap<String, Int> {
     var timeElapsed = System.currentTimeMillis()
     var totalCompacted = 0
-    val compacted = tagMap.mapKeysTo(HashMap(tagMap.size)) { e ->
+    val compacted = mapKeysTo(HashBiMap.create(size)) { e ->
       val tag = e.key
       if (e.value !in viewBounds) return@mapKeysTo tag
-      val canBeCompacted = tag.canBeShortened(tagMap)
+      val canBeCompacted = tag.canBeShortened(this)
       // Avoid matching query - will trigger a jump. TODO: lift this constraint.
       val queryEndsWith = query.endsWith(tag[0]) || query.endsWith(tag)
       return@mapKeysTo if (canBeCompacted && !queryEndsWith) {
@@ -250,7 +246,7 @@ object Tagger : Resettable {
     regex = false
     full = false
     textMatches = sortedSetOf()
-    tagMap = emptyMap()
+    tagMap = HashBiMap.create()
     query = ""
     markers = emptyList()
     tagSelected = false

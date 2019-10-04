@@ -3,13 +3,10 @@ package org.acejump.view
 import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Editor
-import org.acejump.search.Resettable
-import org.acejump.search.getView
-import org.acejump.search.runLater
+import org.acejump.search.*
 import org.acejump.view.Model.fontWidth
 import org.acejump.view.Model.viewBounds
 import java.awt.Graphics
-import java.awt.Graphics2D
 import java.awt.Point
 import javax.swing.JComponent
 import javax.swing.SwingUtilities.convertPoint
@@ -57,7 +54,7 @@ object Canvas: JComponent(), Resettable {
 
     super.paint(graphics)
     occupied.clear()
-    jumpLocations.forEach { it.paintMe(graphics as Graphics2D) }
+    jumpLocations.forEach { if(it.tag != null) it.paintMe(graphics) }
   }
 
   fun registerTag(p: Point, tag: String) =

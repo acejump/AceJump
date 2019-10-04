@@ -27,13 +27,11 @@ import kotlin.system.measureTimeMillis
  * @see Tagger
  */
 
-object Finder: Resettable {
+object Finder : Resettable {
   @Volatile
   private var results: SortedSet<Int> = sortedSetOf()
   @Volatile
   private var textHighlights = listOf<RangeHighlighter>()
-  @Volatile
-  private var viewHighlights = listOf<RangeHighlighter>()
   private var HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
   private val logger = Logger.getInstance(Finder::class.java)
   var isShiftSelectEnabled = false
@@ -97,11 +95,11 @@ object Finder: Resettable {
 
   fun search(model: AceFindModel = AceFindModel(query)) {
     measureTimeMillis {
-     results = Scanner.findMatchingSites(editorText, model, results)
+      results = Scanner.findMatchingSites(editorText, model, results)
     }.let { logger.info("Found ${results.size} matching sites in $it ms") }
 
-    paintTextHighlights(model)
     if (!skim) tag(model, results)
+    markup(Tagger.markers, model)
   }
 
   /**
@@ -110,38 +108,41 @@ object Finder: Resettable {
    * @see com.intellij.openapi.editor.markup.MarkupModel
    */
 
-  fun paintTextHighlights(model: AceFindModel = AceFindModel(query)) =
+  fun markup(markers: List<Marker>, model: AceFindModel = AceFindModel(query)) =
     runLater {
-      val newHighlights = results.map { index ->
-        val s = if (index == editorText.length) index - 1 else index
-        val e = if (model.isRegularExpressions) s + 1 else s + query.length
-        createTextHighlight(max(s, 0), min(e, editorText.length - 1))
-      }
+      if (markers.isEmpty()) return@runLater
 
-      if (!results.isEmpty()) {
-        textHighlights.forEach { markup.removeHighlighter(it) }
-        textHighlights = newHighlights
+      textHighlights.forEach { markup.removeHighlighter(it) }
+      textHighlights = markers.map {
+        val start = it.index - if (it.index == editorText.length) 1 else 0
+        val end = start + if (model.isRegularExpressions) 1 else query.length
+        createTextHighlight(it, max(start, 0), min(end, editorText.length - 1))
       }
-
-      viewHighlights = textHighlights.filter { it.startOffset in viewBounds }
     }
 
-  private fun createTextHighlight(start: Int, end: Int) =
+  private fun createTextHighlight(marker: Marker, start: Int, end: Int) =
     markup.addRangeHighlighter(start, end, HIGHLIGHT_LAYER, null, EXACT_RANGE)
-      .apply { customRenderer = Marker(query, null, startOffset) }
+      .apply { customRenderer = marker }
 
   private fun tag(model: AceFindModel, results: SortedSet<Int>) {
     synchronized(this) { Tagger.markOrJump(model, results) }
-    viewHighlights = viewHighlights.discardIf { Tagger canDiscard startOffset }
+    val (iv, ov) = textHighlights.partition { it.startOffset in viewBounds }
+
+    iv.cull()
+    runLater { ov.cull() }
+
+    if (model.stringToFind == query || model.isRegularExpressions)
+      Handler.repaintTagMarkers()
+  }
+
+  private fun List<RangeHighlighter>.cull() =
+    discardIf { Tagger canDiscard startOffset }
       .also { newHighlights ->
-        val numDiscarded = viewHighlights.size - newHighlights.size
+        val numDiscarded = size - newHighlights.size
         if (numDiscarded != 0) logger.info("Discarded $numDiscarded highlights")
       }
 
-    if (model.stringToFind == query || model.isRegularExpressions) Handler.repaintTagMarkers()
-  }
-
-  private fun List<RangeHighlighter>.discardIf(cond: RangeHighlighter.() -> Boolean) =
+  fun List<RangeHighlighter>.discardIf(cond: RangeHighlighter.() -> Boolean) =
     filter {
       if (cond(it)) {
         runLater { markup.removeHighlighter(it) }
@@ -169,6 +170,5 @@ object Finder: Resettable {
     skim = false
     results = sortedSetOf()
     textHighlights = listOf()
-    viewHighlights = listOf()
   }
 }

@@ -50,11 +50,11 @@ object Scroller {
     val prevIndex = textMatches.toList().dropLastWhile { it > viewBounds.first }
       .lastOrNull() ?: textMatches.lastOrNull() ?: return null
 
-    val prevLogicalPosition = editor.offsetToLogicalPosition(prevIndex)
+    val prevLineNum = editor.offsetToLogicalPosition(prevIndex).line
 
     // Try to capture as many previous results as will fit in a screenful
     fun maximizeCoverageOfPreviousOccurrence(): LogicalPosition {
-      val minVisibleLine = prevLogicalPosition.line - editor.getScreenHeight()
+      val minVisibleLine = prevLineNum - editor.getScreenHeight()
       val firstVisibleIndex = editor.getLineStartOffset(minVisibleLine)
       val firstIndex = textMatches.dropWhile { it < firstVisibleIndex }.first()
       return editor.offsetCenter(firstIndex, prevIndex)
@@ -73,11 +73,11 @@ object Scroller {
     val nextIndex = textMatches.dropWhile { it <= viewBounds.last }
       .firstOrNull() ?: textMatches.firstOrNull() ?: return null
 
-    val nextLogicalPosition = editor.offsetToLogicalPosition(nextIndex)
+    val nextLineNum = editor.offsetToLogicalPosition(nextIndex).line
 
     // Try to capture as many subsequent results as will fit in a screenful
     fun maximizeCoverageOfNextOccurrence(): LogicalPosition {
-      val maxVisibleLine = nextLogicalPosition.line + editor.getScreenHeight()
+      val maxVisibleLine = nextLineNum + editor.getScreenHeight()
       val lastVisibleIndex = editor.getLineEndOffset(maxVisibleLine, true)
       val lastIndex = textMatches.toList().dropLastWhile { it > lastVisibleIndex }.last()
       return editor.offsetCenter(nextIndex, lastIndex)
