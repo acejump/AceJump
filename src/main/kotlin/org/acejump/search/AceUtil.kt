@@ -100,11 +100,11 @@ fun Editor.isFirstCharacterOfLine(index: Int) =
  * @return
  */
 
-fun getFeasibleRegion(results: List<Int>, takeAtMost: Int = MAX_TAG_RESULTS) =
+fun getFeasibleRegion(results: Set<Int>, takeAtMost: Int = MAX_TAG_RESULTS) =
   (viewBounds.run { first + last } / 2).let { middleOfScreen ->
     results.sortedBy { abs(middleOfScreen - it) }
       .take(min(results.size, takeAtMost))
-  }.sorted().let { if (it.isNotEmpty()) it.first()..it.last() else null }
+  }.sorted().let { if (it.isNotEmpty()) it.first()..it.last() else viewBounds }
 
 fun Editor.getView(): IntRange {
   val firstVisibleLine = max(0, getVisualLineAtTopOfScreen() - 1)

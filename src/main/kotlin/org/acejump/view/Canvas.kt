@@ -54,7 +54,7 @@ object Canvas: JComponent(), Resettable {
 
     super.paint(graphics)
     occupied.clear()
-    jumpLocations.forEach { if(it.tag != null) it.paintMe(graphics) }
+    jumpLocations.forEach { it.paintMe(graphics) }
   }
 
   fun registerTag(p: Point, tag: String) =

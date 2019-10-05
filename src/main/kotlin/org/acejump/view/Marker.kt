@@ -47,13 +47,17 @@ class Marker : CustomHighlighterRenderer {
   private var tagPoint: Point
   private var yPos: Int
   private var alignment: Alignment
+  private val endsWith: Boolean
 
   constructor(query: String, tag: String?, index: Int) {
     this.query = query
     this.tag = tag
     this.index = index
-    queryLength = query.length
+    val lastQueryChar = query.last()
+    endsWith = tag != null && lastQueryChar == tag[0]
+    queryLength = query.length - if(endsWith) 1 else 0
     trueOffset = query.length - 1
+
     searchWidth = queryLength * fontWidth
 
     var i = 1
@@ -180,7 +184,6 @@ class Marker : CustomHighlighterRenderer {
     if (query.isEmpty() || alignment == NONE) return
 
     var tagX = point!!.x
-    val lastQueryChar = query.last()
     var tagWidth = tag?.length?.times(fontWidth) ?: 0
     val charIndex = index + query.length - 1
     val beforeEnd = charIndex < text.length
@@ -190,7 +193,7 @@ class Marker : CustomHighlighterRenderer {
       composite = getInstance(SRC_OVER, 0.40.toFloat())
       color = AceConfig.settings.textHighlightColor
 
-      if (tag != null && lastQueryChar == tag[0] && lastQueryChar != textChar) {
+      if (endsWith && query.last() != textChar) {
         fillRoundRect(tagX, yPos, fontWidth, rectHeight, arcD, arcD)
         tagX += fontWidth
         tagWidth -= fontWidth

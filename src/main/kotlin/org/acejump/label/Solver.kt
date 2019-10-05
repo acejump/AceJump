@@ -78,7 +78,7 @@ class Solver(val text: String,
    * Sorts jump targets to determine which positions get first choice for tags,
    * by taking into account the structure of the surrounding text. For example,
    * if the jump target is the first letter in a word, it is advantageous to
-   * prioritize this location (in case we run out of tags), since the user is
+   * prioritize this location (in case we run out of tags), since the typist is
    * more likely to target words by their leading character.
    */
 
@@ -121,7 +121,7 @@ class Solver(val text: String,
    * @return A list of all tags and their corresponding indices
    */
 
-  fun solve(): Map<String, Int> {
+  fun map(): Map<String, Int> {
     var totalAssigned = 0
     var timeAssigned = 0L
     val timeElapsed = measureTimeMillis {
@@ -161,7 +161,7 @@ class Solver(val text: String,
   /**
    * Returns true IFF the tag, when inserted at any position in the word, could
    * match an existing substring elsewhere in the editor text. We should never
-   * use a tag which can be partly completed by typing plaintext.
+   * assign a tag which can be partly completed by typing plaintext.
    */
 
   private infix fun Int.isCompatibleWithTagChar(char: Char) =

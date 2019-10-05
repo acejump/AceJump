@@ -91,9 +91,7 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   fun repaintTagMarkers() {
-    if (Canvas.jumpLocations.isEmpty() || Tagger.markers.size <= Canvas.jumpLocations.size) {
-      if (Tagger.tagSelected) reset() else Canvas.jumpLocations = Tagger.markers
-    }
+    if (Tagger.tagSelected) reset() else Canvas.jumpLocations = Tagger.markers
   }
 
   fun redoFind() {

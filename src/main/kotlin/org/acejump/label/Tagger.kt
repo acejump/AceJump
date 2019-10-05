@@ -39,9 +39,12 @@ object Tagger : Resettable {
     private set
   var query = ""
     private set
+
+  @Volatile
   var full = false // Tracks whether all search results were successfully tagged
   var textMatches: SortedSet<Int> = sortedSetOf()
-  @Volatile var tagMap: BiMap<String, Int> = HashBiMap.create()
+  @Volatile
+  var tagMap: BiMap<String, Int> = HashBiMap.create()
   private val logger = Logger.getInstance(Tagger::class.java)
 
   @Volatile
@@ -61,11 +64,14 @@ object Tagger : Resettable {
     val availableTags = filterTags(query).filter { it !in tagMap }.toSet()
 
     measureTimeMillis {
-      textMatches = refineSearchResults(results, availableTags)
+      textMatches = refineSearchResults(results)
     }.let { if (!regex) logger.info("Refined search results in $it ms") }
 
     giveJumpOpportunity()
-    if (!tagSelected) mark(textMatches, availableTags)
+    if (!tagSelected && query.isNotEmpty()) mark(textMatches, availableTags)
+
+    if (1 < query.length && tagMap.values.noneInView())
+      runNow { Scroller.scroll() }
   }
 
   /**
@@ -74,21 +80,14 @@ object Tagger : Resettable {
    * in a very large document.
    */
 
-  private fun refineSearchResults(results: SortedSet<Int>,
-                                  availableTags: Set<String>): SortedSet<Int> {
+  private fun refineSearchResults(results: SortedSet<Int>): SortedSet<Int> {
     if (regex) return results
 
     val sites = results.filter { editorText.admitsTagAtLocation(it) }
     val discards = results.size - sites.size
-    discards.let { if (it > 0) logger.info("Discarded $it contiguous results") }
+    discards.let { if (it > 0) logger.info("Discarded $it unsuitable results") }
 
-    val hasAmpleTags = availableTags.size >= sites.size
-
-    val feasibleRegion = getFeasibleRegion(sites) ?: return sites.toSortedSet()
-    val remainder = sites.partition { hasAmpleTags || it in feasibleRegion }
-    remainder.second.size.let { if (it > 0) logger.info("Discarded $it OOBs") }
-
-    return remainder.first.toSortedSet()
+    return sites.toSortedSet()
   }
 
   /**
@@ -116,13 +115,14 @@ object Tagger : Resettable {
     this.isLetterOrDigit() xor other.isLetterOrDigit() ||
       this.isWhitespace() xor other.isWhitespace()
 
-  private fun giveJumpOpportunity() =
-    tagMap.entries.firstOrNull { it.solves(query) && it.value in viewBounds }
-      ?.run {
+  private fun giveJumpOpportunity() {
+    tagMap.entries.filter { it.value in viewBounds }
+      .firstOrNull { it.solves(query) }?.run {
         logger.info("User selected tag: ${key.toUpperCase()}")
         tagSelected = true
         Jumper.jumpTo(value)
       }
+  }
 
   /**
    * Returns true if and only if a tag location is unambiguously completed by a
@@ -144,18 +144,14 @@ object Tagger : Resettable {
       )
     }
 
-  private fun mark(textMatches: SortedSet<Int>, availableTags: Set<String>) {
-    full = true
-    if (query.isEmpty()) HashBiMap.create()
-    else assignTags(textMatches, availableTags).compact().apply {
-      markers = textMatches.map { Marker(query, inverse()[it], it) }
-      if (isNotEmpty()) {
+  private fun mark(results: SortedSet<Int>, availableTags: Set<String>) =
+      assignMissingTags(results, availableTags).compact().apply {
         tagMap = this
-        if (tagMap.values.noneInView() && 1 < query.length)
-          runNow { Scroller.scroll() }
+        markers = if(results.isEmpty()) // Last query char must be a tag char
+          tagMap.map { (tag, index) -> Marker(query, tag, index) }
+        else results.map { Marker(query, tagMap.inverse()[it], it) }
+        full = markers.size == tagMap.size
       }
-    }
-  }
 
   /**
    * Shortens previously assigned tags. Two-character tags may be shortened to
@@ -171,10 +167,9 @@ object Tagger : Resettable {
     val compacted = mapKeysTo(HashBiMap.create(size)) { e ->
       val tag = e.key
       if (e.value !in viewBounds) return@mapKeysTo tag
-      val canBeCompacted = tag.canBeShortened(this)
       // Avoid matching query - will trigger a jump. TODO: lift this constraint.
       val queryEndsWith = query.endsWith(tag[0]) || query.endsWith(tag)
-      return@mapKeysTo if (canBeCompacted && !queryEndsWith) {
+      return@mapKeysTo if (!queryEndsWith && tag.canBeShortened(this)) {
         totalCompacted++
         tag[0].toString()
       } else tag
@@ -194,29 +189,31 @@ object Tagger : Resettable {
         if (tag.key[0] == this[0] &&
           editor.canIndicesBeSimultaneouslyVisible(tagMap[this]!!, tag.value))
           i++
-        if (1 < i) { canBeShortened = false; break }
+        if (1 < i) {
+          canBeShortened = false; break
+        }
       }
     }
 
     return canBeShortened
   }
 
-  private fun assignTags(results: Set<Int>,
-                         availableTags: Set<String>): Map<String, Int> {
+  private fun assignMissingTags(results: Set<Int>,
+                                availableTags: Set<String>): Map<String, Int> {
+    val remainder = getFeasibleSites(results)
+
     var timeElapsed = System.currentTimeMillis()
-    val newTags = transferExistingTagsCompatibleWithQuery()
+    val oldTags = transferExistingTagsCompatibleWithQuery()
     // Ongoing queries with results in view do not need further tag assignment
-    newTags.run {
+    oldTags.run {
       if (regex && isNotEmpty() && values.all { it in viewBounds }) return this
       else if (hasTagSuffixInView(query)) return this
     }
 
-    // TODO: Fix missing tags, cf. https://github.com/acejump/AceJump/issues/245
-    val (onScreen, offScreen) = results.partition { it in viewBounds }
+    val (onScreen, offScreen) = remainder.partition { it in viewBounds }
     val completeResultSet = onScreen + offScreen
     // Some results are untagged. Let's assign some tags!
-    val vacantResults = completeResultSet.filter { it !in newTags.values }
-    if (availableTags.size < vacantResults.size) full = false
+    val vacantResults = completeResultSet.filter { it !in oldTags.values }
 
     logger.run {
       timeElapsed = System.currentTimeMillis() - timeElapsed
@@ -226,8 +223,15 @@ object Tagger : Resettable {
       info("Time elapsed: $timeElapsed ms")
     }
 
-    return if (regex) solveRegex(vacantResults, availableTags) else
-    Solver(editorText, query, vacantResults, availableTags, viewBounds).solve()
+    return if (regex) solveRegex(vacantResults, availableTags) else oldTags +
+      Solver(editorText, query, vacantResults, availableTags, viewBounds).map()
+  }
+
+  private fun getFeasibleSites(results: Set<Int>): List<Int> {
+    val feasibleRegion = getFeasibleRegion(results)
+    val remainder = results.partition { it in feasibleRegion }
+    remainder.second.size.let { if (it > 0) logger.info("Discarded $it OOBs") }
+    return remainder.first
   }
 
   private fun solveRegex(vacantResults: List<Int>, availableTags: Set<String>) =
