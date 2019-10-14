@@ -58,7 +58,7 @@ class Marker : CustomHighlighterRenderer {
     queryLength = query.length - if(endsWith) 1 else 0
     trueOffset = query.length - 1
 
-    searchWidth = queryLength * fontWidth
+    searchWidth = if (regex) 0 else queryLength * fontWidth
 
     var i = 1
     while (i < query.length && index + i < text.length &&
