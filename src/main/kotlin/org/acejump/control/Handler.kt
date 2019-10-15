@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.actionSystem.*
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.util.containers.ContainerUtil
 import org.acejump.control.Scroller.restoreScroll
 import org.acejump.control.Scroller.saveScroll
 import org.acejump.label.Pattern
@@ -27,6 +28,7 @@ import java.awt.Color
  */
 
 object Handler : TypedActionHandler, Resettable {
+  private val listeners: MutableList<AceJumpListener> = ContainerUtil.createLockFreeCopyOnWriteList()
   private val logger = Logger.getInstance(Handler::class.java)
   private var enabled = false
   private val typingAction = EditorActionManager.getInstance().typedAction
@@ -111,8 +113,19 @@ object Handler : TypedActionHandler, Resettable {
   override fun reset() {
     if (enabled) Listener.disable()
 
+    // In order to get Finder.query value, listeners should
+    //  be placed before cleanup
+    listeners.forEach(AceJumpListener::finished)
     clear()
     editor.restoreSettings()
+  }
+
+  fun addAceJumpListener(listener: AceJumpListener) {
+    listeners += listener
+  }
+
+  fun removeAceJumpListener(listener: AceJumpListener) {
+    listeners -= listener
   }
 
   private fun Editor.restoreSettings() = runNow {
@@ -162,5 +175,9 @@ object Handler : TypedActionHandler, Resettable {
         getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
           .apply { backgroundColor = Model.naturalHighlight })
     }
+  }
+
+  interface AceJumpListener {
+    fun finished() {}
   }
 }
