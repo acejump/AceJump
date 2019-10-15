@@ -86,11 +86,15 @@ object Finder : Resettable {
 
   fun search(pattern: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) {
     logger.info("Searching for regular expression: ${pattern.name} in $bounds")
+    search(pattern.string, bounds)
+  }
+
+  fun search(pattern: String, bounds: Boundary = FULL_FILE_BOUNDARY) {
     boundaries = bounds
     // TODO: Fix this broken reset
     reset()
     Tagger.reset()
-    search(AceFindModel(pattern.string, true))
+    search(AceFindModel(pattern, true))
   }
 
   fun search(model: AceFindModel = AceFindModel(query)) {
