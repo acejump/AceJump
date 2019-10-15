@@ -276,3 +276,12 @@ fun Editor.normalizeLine(line: Int) = max(0, min(line, getLineCount() - 1))
 fun Editor.normalizeOffset(line: Int, offset: Int, allowEnd: Boolean) =
   if (getFileSize(allowEnd) == 0) 0 else
     max(min(offset, getLineEndOffset(line, allowEnd)), getLineStartOffset(line))
+
+/**
+ * This annotation is a marker which means that the annotated function is
+ *   used in external plugins.
+ */
+
+@Retention(AnnotationRetention.SOURCE)
+@Target(AnnotationTarget.FUNCTION)
+annotation class ExternalUsage

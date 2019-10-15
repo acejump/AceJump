@@ -52,9 +52,11 @@ object Handler : TypedActionHandler, Resettable {
     override fun doExecute(e: Editor, c: Caret?, dc: DataContext?) = handle()
   }
 
+  @ExternalUsage
   fun regexSearch(regex: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) =
     Canvas.reset().also { Finder.search(regex, bounds) }
 
+  @ExternalUsage
   fun customRegexSearch(regex: String, bounds: Boundary = FULL_FILE_BOUNDARY) =
     Canvas.reset().also { Finder.search(regex, bounds) }
 
@@ -123,10 +125,12 @@ object Handler : TypedActionHandler, Resettable {
     editor.restoreSettings()
   }
 
+  @ExternalUsage
   fun addAceJumpListener(listener: AceJumpListener) {
     listeners += listener
   }
 
+  @ExternalUsage
   fun removeAceJumpListener(listener: AceJumpListener) {
     listeners -= listener
   }

@@ -113,6 +113,7 @@ object Finder : Resettable {
    *   AceFindModel should be empty. Additionally, if
    *   AceFindModes.isRegex == true, only one symbol is highlighted in document.
    */
+  @ExternalUsage
   fun markResults(
     results: SortedSet<Int>,
     model: AceFindModel = AceFindModel("", true)
