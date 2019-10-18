@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.actionSystem.*
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.openapi.editor.colors.EditorColorsManager
+import com.intellij.util.containers.ContainerUtil
 import org.acejump.control.Scroller.restoreScroll
 import org.acejump.control.Scroller.saveScroll
 import org.acejump.label.Pattern
@@ -27,6 +28,7 @@ import java.awt.Color
  */
 
 object Handler : TypedActionHandler, Resettable {
+  private val listeners: MutableList<AceJumpListener> = ContainerUtil.createLockFreeCopyOnWriteList()
   private val logger = Logger.getInstance(Handler::class.java)
   private var enabled = false
   private val typingAction = EditorActionManager.getInstance().typedAction
@@ -50,7 +52,12 @@ object Handler : TypedActionHandler, Resettable {
     override fun doExecute(e: Editor, c: Caret?, dc: DataContext?) = handle()
   }
 
+  @ExternalUsage
   fun regexSearch(regex: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) =
+    Canvas.reset().also { Finder.search(regex, bounds) }
+
+  @ExternalUsage
+  fun customRegexSearch(regex: String, bounds: Boundary = FULL_FILE_BOUNDARY) =
     Canvas.reset().also { Finder.search(regex, bounds) }
 
   fun activate() = if (!enabled) configureEditor() else { }
@@ -111,8 +118,21 @@ object Handler : TypedActionHandler, Resettable {
   override fun reset() {
     if (enabled) Listener.disable()
 
+    // In order to get Finder.query value, listeners should
+    //  be placed before cleanup
+    listeners.forEach(AceJumpListener::finished)
     clear()
     editor.restoreSettings()
+  }
+
+  @ExternalUsage
+  fun addAceJumpListener(listener: AceJumpListener) {
+    listeners += listener
+  }
+
+  @ExternalUsage
+  fun removeAceJumpListener(listener: AceJumpListener) {
+    listeners -= listener
   }
 
   private fun Editor.restoreSettings() = runNow {
@@ -162,5 +182,9 @@ object Handler : TypedActionHandler, Resettable {
         getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
           .apply { backgroundColor = Model.naturalHighlight })
     }
+  }
+
+  interface AceJumpListener {
+    fun finished() {}
   }
 }
