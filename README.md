@@ -107,8 +107,6 @@ To just run [the tests](src/test/kotlin/AceTest.kt), execute `./gradlew test` - 
 
 For documentation on plugin development, see the [IntelliJ Platform SDK](http://www.jetbrains.org/intellij/sdk/docs/).
 
-If you enjoy using AceJump, you might also enjoy reading [the code](src/main/kotlin/org/acejump/label/Solver.kt).
-
 ## Release notes
 
 Please [see here](/CHANGES.md) for a detailed list of changes.
@@ -158,6 +156,17 @@ The following plugins have a similar UI for navigating text and web browsing:
 | [Vim Vixen](https://github.com/ueokande/vim-vixen)                    |                  [⬇](https://addons.mozilla.org/firefox/addon/vim-vixen/)                   | [Firefox 57+](https://blog.mozilla.org/addons/2017/09/28/webextensions-in-firefox-57/) | :heavy_check_mark:  |                [JavaScript](https://www.javascript.com/)                 |
 | [Tridactyl](https://github.com/tridactyl/tridactyl)                   |                [⬇](https://addons.mozilla.org/firefox/addon/tridactyl-vim/)                 | [Firefox 57+](https://blog.mozilla.org/addons/2017/09/28/webextensions-in-firefox-57/) | :heavy_check_mark:  |              [TypeScript](https://www.typescriptlang.org/)               |
 | [Vimari](https://github.com/guyht/vimari)                             |                        [⬇](https://github.com/guyht/vimari/releases)                        |                        [Safari](https://www.apple.com/safari/)                         | :heavy_check_mark:  |                [JavaScript](https://www.javascript.com/)                 |
+
+## Acknowledgements
+
+The following individuals have significantly improved AceJump through their contributions and feedback:
+
+* [John Lindquist](https://github.com/johnlindquist)
+* [Sven Speckmaier](https://github.com/svensp)
+* [Alex Plate](https://github.com/AlexPl292)
+* [Stefan Monnier](https://www.iro.umontreal.ca/~monnier/)
+
+AceJump is made possible by users just like you! If you enjoy using AceJump, please consider [contributing](#contributing).
 
 <!-- Badges -->
 [jetbrains-team-page]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
