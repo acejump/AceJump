@@ -114,7 +114,7 @@ fun Editor.getView(): IntRange {
   val height = getScreenHeight() + 2
   val lastLine = visualLineToLogicalLine(firstVisibleLine + height)
   var endOffset = getLineEndOffset(lastLine, true)
-  endOffset = normalizeOffset(lastLine, endOffset, true)
+  endOffset = normalizeOffset(lastLine, endOffset)
   endOffset = min(max(0, document.textLength - 1), endOffset + 1)
 
   return startOffset..endOffset
@@ -240,7 +240,7 @@ fun Editor.getLineStartOffset(line: Int) =
  * end offset for the line
  */
 
-fun Editor.getLineEndOffset(line: Int, allowEnd: Boolean) =
+fun Editor.getLineEndOffset(line: Int, allowEnd: Boolean = true) =
   when {
     line < 0 -> 0
     line >= getLineCount() -> getFileSize(allowEnd)
@@ -273,7 +273,7 @@ fun Editor.normalizeLine(line: Int) = max(0, min(line, getLineCount() - 1))
  * @return The normalized column number
  */
 
-fun Editor.normalizeOffset(line: Int, offset: Int, allowEnd: Boolean) =
+fun Editor.normalizeOffset(line: Int, offset: Int, allowEnd: Boolean = true) =
   if (getFileSize(allowEnd) == 0) 0 else
     max(min(offset, getLineEndOffset(line, allowEnd)), getLineStartOffset(line))
 

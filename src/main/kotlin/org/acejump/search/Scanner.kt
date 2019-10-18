@@ -27,9 +27,7 @@ internal object Scanner {
     }.toSortedSet()
 
   private fun Set<Int>.isCacheValidForRange() =
-    viewBounds.let { view ->
-      first() < view.first && last() > view.last
-    }
+    viewBounds.let { view -> first() < view.first && last() > view.last }
 
   private fun CharSequence.findAll(regex: Regex, startingFromIndex: Int) =
     generateSequence(

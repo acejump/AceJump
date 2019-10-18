@@ -1,8 +1,8 @@
 # Changelog
 
-### 3.6.0
+### 3.5.8
 
-AceJump now supports full-screen tagging.
+Tagging improvements, support for external plugin integration, fixes #304, #255
 
 ### 3.5.7
 

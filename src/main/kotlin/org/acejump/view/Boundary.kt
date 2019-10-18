@@ -1,5 +1,7 @@
 package org.acejump.view
 
+import org.acejump.search.getLineEndOffset
+import org.acejump.search.getLineStartOffset
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.viewBounds
@@ -42,21 +44,21 @@ enum class Boundary: ClosedRange<Int> {
   // Search on the current line
   CURRENT_LINE_BOUNDARY {
     override val start: Int
-      get() = editor.document.getLineStartOffset(editor.caretModel.logicalPosition.line)
+      get() = editor.getLineStartOffset(editor.caretModel.logicalPosition.line)
     override val endInclusive: Int
-      get() = editor.document.getLineEndOffset(editor.caretModel.logicalPosition.line)
+      get() = editor.getLineEndOffset(editor.caretModel.logicalPosition.line)
   },
   // Search after caret within line
   CURRENT_LINE_AFTER_CARET_BOUNDARY {
     override val start: Int
     get() = max(editor.caretModel.offset, viewBounds.first)
     override val endInclusive: Int
-    get() = editor.document.getLineEndOffset(editor.caretModel.logicalPosition.line)
+    get() = editor.getLineEndOffset(editor.caretModel.logicalPosition.line)
   },
   // Search before caret within line
   CURRENT_LINE_BEFORE_CARET_BOUNDARY {
     override val start: Int
-    get() = editor.document.getLineStartOffset(editor.caretModel.logicalPosition.line)
+    get() = editor.getLineStartOffset(editor.caretModel.logicalPosition.line)
     override val endInclusive: Int
     get() = min(editor.caretModel.offset, viewBounds.last)
   }

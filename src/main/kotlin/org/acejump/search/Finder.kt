@@ -106,16 +106,15 @@ object Finder : Resettable {
   }
 
   /**
-   * This method should not be inlined because it's used in IdeaVim integration plugin
+   * This method is used by IdeaVim integration plugin and must not be inlined.
    *
-   * The default model is like that because if this function was called from
-   *   the outer scope, it means that [results] are already collected and
-   *   AceFindModel should be empty. Additionally, if
-   *   AceFindModes.isRegex == true, only one symbol is highlighted in document.
+   * By default, when this function is called externally, [results] are already
+   * collected and [AceFindModel] should be empty. Additionally, if the flag
+   * [AceFindModel.isRegularExpressions] is true only one symbol is highlighted.
    */
+
   @ExternalUsage
-  fun markResults(
-    results: SortedSet<Int>,
+  fun markResults(results: SortedSet<Int>,
     model: AceFindModel = AceFindModel("", true)
   ) {
     if (!skim) tag(model, results)
@@ -146,10 +145,10 @@ object Finder : Resettable {
 
   private fun tag(model: AceFindModel, results: SortedSet<Int>) {
     synchronized(this) { Tagger.markOrJump(model, results) }
-    val (iv, ov) = textHighlights.partition { it.startOffset in viewBounds }
+    val (ivb, ovb) = textHighlights.partition { it.startOffset in viewBounds }
 
-    iv.cull()
-    runLater { ov.cull() }
+    ivb.cull()
+    runLater { ovb.cull() }
 
     if (model.stringToFind == query || model.isRegularExpressions)
       Handler.repaintTagMarkers()
