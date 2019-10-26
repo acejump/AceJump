@@ -111,7 +111,7 @@ class Marker : CustomHighlighterRenderer {
 
     setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
-    color = AceConfig.settings.textHighlightColor
+    color = AceConfig.textHighlightColor
     if (regex) highlightRegex()
     else {
       fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
@@ -128,7 +128,7 @@ class Marker : CustomHighlighterRenderer {
   }
 
   private fun Graphics2D.surroundTargetWord() {
-    color = AceConfig.settings.targetModeColor
+    color = AceConfig.targetModeColor
     val (wordStart, wordEnd) = text.wordBounds(index)
 
     val xPos = editor.getPoint(wordStart).x
@@ -140,7 +140,7 @@ class Marker : CustomHighlighterRenderer {
 
   private fun Graphics2D.drawTagForeground(tagPosition: Point?) {
     font = Model.font
-    color = AceConfig.settings.tagForegroundColor
+    color = AceConfig.tagForegroundColor
     composite = getInstance(SRC_OVER, 1.toFloat())
 
     drawString(tag!!.toUpperCase(), tagPosition!!.x, tagPosition.y + fontHeight)
@@ -191,7 +191,7 @@ class Marker : CustomHighlighterRenderer {
 
     fun highlightFirst() {
       composite = getInstance(SRC_OVER, 0.40.toFloat())
-      color = AceConfig.settings.textHighlightColor
+      color = AceConfig.textHighlightColor
 
       if (endsWith && query.last() != textChar) {
         fillRoundRect(tagX, yPos, fontWidth, rectHeight, arcD, arcD)
@@ -201,7 +201,7 @@ class Marker : CustomHighlighterRenderer {
     }
 
     fun highlightLast() {
-      color = AceConfig.settings.tagBackgroundColor
+      color = AceConfig.tagBackgroundColor
       if (alignment != RIGHT || text.hasSpaceRight(index) || regex)
         composite = getInstance(SRC_OVER, 1.toFloat())
 

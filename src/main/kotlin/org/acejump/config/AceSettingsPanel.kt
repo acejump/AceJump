@@ -40,7 +40,7 @@ internal class AceSettingsPanel {
 
     keyboardLayoutCombo.run {
       KeyLayout.values().forEach { addItem(it) }
-      addActionListener { keyChars = (selectedItem as KeyLayout).keyboard() }
+      addActionListener { keyChars = (selectedItem as KeyLayout).joinBy("\n") }
     }
   }
 

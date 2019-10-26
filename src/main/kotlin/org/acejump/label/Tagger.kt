@@ -3,9 +3,9 @@ package org.acejump.label
 import com.google.common.collect.BiMap
 import com.google.common.collect.HashBiMap
 import com.intellij.openapi.diagnostic.Logger
+import org.acejump.config.AceConfig
 import org.acejump.control.Scroller
 import org.acejump.label.Pattern.Companion.defaultTagOrder
-import org.acejump.label.Pattern.Companion.filterTags
 import org.acejump.search.*
 import org.acejump.view.Marker
 import org.acejump.view.Model.editor
@@ -61,7 +61,7 @@ object Tagger : Resettable {
       logger.info("Received query: \"$query\"")
     }
 
-    val availableTags = filterTags(query).filter { it !in tagMap }.toSet()
+    val availableTags = AceConfig.getCompatibleTags(query) { it !in tagMap }
 
     measureTimeMillis {
       textMatches = refineSearchResults(results)

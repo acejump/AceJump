@@ -1,13 +1,14 @@
 package org.acejump.config
 
 import org.acejump.label.Pattern.Companion.KeyLayout
+import org.acejump.label.Pattern.Companion.KeyLayout.QWERTY
 import java.awt.Color
 import java.awt.Color.*
 import kotlin.reflect.KProperty
 
 // TODO: https://github.com/acejump/AceJump/issues/215
-data class AceSettings(var layout: KeyLayout = KeyLayout.QWERTY,
-                       var allowedChars: String = layout.allChars(),
+data class AceSettings(var layout: KeyLayout = QWERTY,
+                       var allowedChars: String = layout.text,
                        // These must be primitives in order to be serializable
                        internal var jumpModeRGB: Int = BLUE.rgb,
                        internal var targetModeRGB: Int = RED.rgb,

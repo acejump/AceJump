@@ -46,9 +46,9 @@ import kotlin.system.measureTimeMillis
  */
 
 class Solver(val text: String,
-             val query: String = "",
+             val query: String,
              val results: Collection<Int>,
-             val availableTags: Set<String> = Pattern.filterTags("").toSet(),
+             val availableTags: Set<String>,
              val viewBounds: IntRange = 0..text.length) {
   private val logger = Logger.getInstance(Solver::class.java)
   private var newTags: MutableMap<String, Int> = HashMap(Pattern.NUM_TAGS)
@@ -72,7 +72,7 @@ class Solver(val text: String,
 
   private val tagOrder = defaultTagOrder
     .thenBy { eligibleSitesByTag[it].size }
-    .thenBy(AceConfig.settings.layout.priority { it.last() })
+    .thenBy(AceConfig.layout.priority { it.last() })
 
   /**
    * Sorts jump targets to determine which positions get first choice for tags,

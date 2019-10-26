@@ -3,6 +3,9 @@ package org.acejump.config
 import com.intellij.openapi.components.*
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.Configurable
+import org.acejump.label.Pattern
+import org.acejump.label.Pattern.Companion.KeyLayout
+import java.awt.Color
 
 /* Persists the state of the AceJump IDE settings across IDE restarts.
  * https://www.jetbrains.org/intellij/sdk/docs/basics/persisting_state_of_components.html
@@ -11,7 +14,28 @@ import com.intellij.openapi.options.Configurable
 @State(name = "AceConfig", storages = [(Storage("AceJump.xml"))])
 object AceConfig: Configurable, PersistentStateComponent<AceSettings> {
   private val logger = Logger.getInstance(AceConfig::class.java)
-  var settings = AceSettings()
+  private var settings = AceSettings()
+    set(value) {
+      allPossibleTags = value.allowedChars.bigrams()
+      field = value
+    }
+
+  val allowedChars: String get() = settings.allowedChars
+  val layout: KeyLayout get() = settings.layout
+  val jumpModeColor: Color get() = settings.jumpModeColor
+  val textHighlightColor: Color get() = settings.textHighlightColor
+  val targetModeColor: Color get() = settings.targetModeColor
+  val definitionModeColor: Color get() = settings.definitionModeColor
+  val tagForegroundColor: Color get() = settings.tagForegroundColor
+  val tagBackgroundColor: Color get() = settings.tagBackgroundColor
+
+  private var allPossibleTags: Set<String> = settings.allowedChars.bigrams()
+
+  private fun String.bigrams() = run { flatMap { e -> map { c -> "$e$c" } } }
+      .sortedWith(Pattern.defaultTagOrder).toSet()
+
+  fun getCompatibleTags(query: String, matching: (String) -> Boolean) =
+    Pattern.filter(allPossibleTags, query).filter(matching).toSet()
 
   override fun getState() = settings
 
@@ -35,12 +59,16 @@ object AceConfig: Configurable, PersistentStateComponent<AceSettings> {
       panel.tagForegroundColor != settings.tagForegroundColor ||
       panel.tagBackgroundColor != settings.tagBackgroundColor
 
-  private fun String.distinctAlphanumerics() = toList().distinct().run {
-    if (isEmpty()) settings.layout.chars() else filter { it.isLetterOrDigit() }
-  }.joinToString("")
+  private fun String.distinctAlphanumerics() =
+    if (isEmpty()) settings.layout.text
+    else toList().distinct().filter(Char::isLetterOrDigit).joinToString("")
 
   override fun apply() {
-    settings.allowedChars = panel.allowedChars.distinctAlphanumerics()
+    panel.allowedChars.distinctAlphanumerics().let {
+      settings.allowedChars = it
+      allPossibleTags = it.bigrams()
+    }
+
     settings.layout = panel.keyboardLayout
     panel.jumpModeColor?.let { settings.jumpModeRGB = it.rgb }
     panel.targetModeColor?.let { settings.targetModeRGB = it.rgb }

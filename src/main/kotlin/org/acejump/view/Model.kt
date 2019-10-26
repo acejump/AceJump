@@ -62,6 +62,6 @@ object Model {
   fun Editor.setupCaret() {
     settings.isBlockCursor = true
     settings.isBlinkCaret = false
-    colorsScheme.setColor(CARET_COLOR, AceConfig.settings.jumpModeColor)
+    colorsScheme.setColor(CARET_COLOR, AceConfig.jumpModeColor)
   }
 }

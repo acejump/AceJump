@@ -18,23 +18,19 @@ enum class Pattern(val string: String) {
   companion object {
     private fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]
 
-    private val allBigrams
-      get() = AceConfig.settings.allowedChars
-        .run { flatMap { e -> map { c -> "$e$c" } } }
-        .sortedWith(defaultTagOrder)
+    val defaultTagOrder: Comparator<String> = compareBy(
+      { it[0].isDigit() || it[1].isDigit() },
+      { distance(it[0], it.last()) },
+      AceConfig.layout.priority { it[0] })
 
     val NUM_TAGS: Int
       get() = NUM_CHARS * NUM_CHARS
 
     val NUM_CHARS: Int
-      get() = AceConfig.settings.allowedChars.length
+      get() = AceConfig.allowedChars.length
 
-    val defaultTagOrder: Comparator<String> = compareBy(
-      { it[0].isDigit() || it[1].isDigit() },
-      { distance(it[0], it.last()) },
-      AceConfig.settings.layout.priority { it[0] })
-
-    fun filterTags(query: String) = allBigrams.filter { !query.endsWith(it[0]) }
+    fun filter(bigrams: Set<String>, query: String) =
+      bigrams.filter { !query.endsWith(it[0]) }
 
     /**
      * Sorts available tags by key distance. Tags which are ergonomically easier
@@ -43,7 +39,7 @@ enum class Pattern(val string: String) {
      * keys (ex. 12, 21) to keys that are located further apart on the keyboard.
      */
 
-    enum class KeyLayout(vararg val text: String) {
+    enum class KeyLayout(vararg val rows: String) {
       COLEMK("1234567890", "qwfpgjluy", "arstdhneio", "zxcvbkm"),
       WORKMN("1234567890", "qdrwbjfup", "ashtgyneoi", "zxmcvkl"),
       DVORAK("1234567890", "pyfgcrl", "aoeuidhtns", "qjkxbmwvz"),
@@ -65,13 +61,14 @@ enum class Pattern(val string: String) {
           WORKMN -> "tnhegysoaiclvkmxzwfrubjdpq5849673210"
         }.mapIndices()
 
-      fun chars() = text.flatMap { it.toList() }.sortedBy { priority[it] }
+      val text by lazy {
+        joinBy("").toCharArray().sortedBy { priority[it] }.joinToString("")
+      }
 
       fun priority(tagToChar: (String) -> Char): (String) -> Int? =
         { priority[tagToChar(it)] }
 
-      fun keyboard() = text.joinToString("\n")
-      fun allChars() = chars().joinToString("")
+      fun joinBy(separator: CharSequence) = rows.joinToString(separator)
     }
 
     private val nearby: Map<Char, Map<Char, Int>> = mapOf(

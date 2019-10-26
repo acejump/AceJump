@@ -17,11 +17,11 @@ internal enum class JumpMode {
       set(value) {
         field = value
         setCaretColor(when (field) {
-          DEFAULT -> AceConfig.settings.jumpModeColor
-          DEFINE -> AceConfig.settings.definitionModeColor
-          TARGET -> AceConfig.settings.targetModeColor
+          DEFAULT -> AceConfig.jumpModeColor
+          DEFINE -> AceConfig.definitionModeColor
+          TARGET -> AceConfig.targetModeColor
           DISABLED -> Model.naturalCaretColor
-          else -> AceConfig.settings.jumpModeColor
+          else -> AceConfig.jumpModeColor
         })
 
         Finder.markup(Tagger.markers)

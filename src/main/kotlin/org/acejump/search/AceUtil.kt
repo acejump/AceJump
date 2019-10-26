@@ -13,6 +13,8 @@ import java.awt.Point
 import java.util.*
 import javax.swing.JComponent
 import kotlin.math.*
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
 interface Resettable {
   fun reset()
