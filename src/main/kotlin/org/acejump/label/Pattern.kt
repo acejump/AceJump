@@ -46,7 +46,7 @@ enum class Pattern(val string: String) {
       QWERTY("1234567890", "qwertyuiop", "asdfghjkl", "zxcvbnm"),
       QWERTZ("1234567890", "qwertzuiop", "asdfghjkl", "yxcvbnm"),
       QGMLWY("1234567890", "qgmlwyfub", "dstnriaeoh", "zxcvjkp"),
-      QGMLWB("1234567890", "qgmlwbyuv", "dntnriaeoh", "zxcfjkp"),
+      QGMLWB("1234567890", "qgmlwbyuv", "dstnriaeoh", "zxcfjkp"),
       NORMAN("1234567890", "qwdfkjurl", "asetgynioh", "zxcvbpm");
 
       private val priority
@@ -54,7 +54,7 @@ enum class Pattern(val string: String) {
           QWERTY -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
           QWERTZ -> "fjghdkslavncmbxyrutzeiwoqp5849673210"
           COLEMK -> "tndhseriaovkcmbxzgjplfuwyq5849673210"
-          DVORAK -> "uhetidonasxkbjmqwvzghycprl5849673210"
+          DVORAK -> "uhetidonasxkbjmqwvzgfycprl5849673210"
           NORMAN -> "tneigysoahbvpcmxzjkufrdlwq5849673210"
           QGMLWY -> "naterisodhvkcpjxzlfmuwygbq5849673210"
           QGMLWB -> "naterisodhfkcpjxzlymuwbgvq5849673210"
