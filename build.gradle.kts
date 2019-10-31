@@ -7,15 +7,14 @@ tasks {
     kotlinOptions.freeCompilerArgs += "-progressive"
   }
 
-  named("buildPlugin") { dependsOn("test") }
+  named<Zip>("buildPlugin") {
+    dependsOn("test")
+    archiveFileName.set("AceJump.zip")
+  }
 
   withType<RunIdeTask> {
     dependsOn("test")
     findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
-  }
-
-  withType<Zip> {
-    archiveFileName.set("AceJump.zip")
   }
 }
 
