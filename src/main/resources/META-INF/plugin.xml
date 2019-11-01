@@ -9,7 +9,7 @@
   </description>
   <change-notes>
     <![CDATA[
-Improved IdeaVim integration, tagging adjustments and fixes for a number of minor issues.
+Fix a build configuration error affecting plugins which depend on AceJump and tagging issue on DVORAK/QGMLWB keyboards.
 <a href="https://github.com/acejump/AceJump/blob/master/CHANGES.md">Release Notes</a> ]]>
   </change-notes>
 
