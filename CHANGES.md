@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.5.9
+
+Fix a build configuration error affecting plugins which depend on AceJump. Fixes #305.
+
 ### 3.5.8
 
 Tagging improvements, support for external plugin integration, fixes #304, #255
