@@ -2,31 +2,31 @@
 
 ### 3.5.9
 
-Fix a build configuration error affecting plugins which depend on AceJump. Fixes #305.
+Fix a build configuration error affecting plugins which depend on AceJump. Fixes [#305](https://github.com/acejump/AceJump/issues/305).
 
 ### 3.5.8
 
-Tagging improvements, support for external plugin integration, fixes #304, #255
+Tagging improvements, support for external plugin integration, fixes [#304](https://github.com/acejump/AceJump/issues/304), [#255](https://github.com/acejump/AceJump/issues/255)
 
 ### 3.5.7
 
 <kbd>Tab</kbd>/<kbd>Enter</kbd> will now scroll horizontally if results are not visible.
 
-Fixes #294 "Access is allowed from event dispatch thread only" error
+Fixes [#294](https://github.com/acejump/AceJump/issues/294) "Access is allowed from event dispatch thread only" error
 
 ### 3.5.6
 
 Key prioritization for most common keyboard layouts and fixes for a number of minor issues.
 
-Fixes: Index OOB #242, Missing editor #249, #275, Forgotten block caret #278, QWERTZ layout #273
+Fixes: Index OOB [#242](https://github.com/acejump/AceJump/issues/242), Missing editor [#249](https://github.com/acejump/AceJump/issues/249), [#275](https://github.com/acejump/AceJump/issues/275), Forgotten block caret [#278](https://github.com/acejump/AceJump/issues/278), QWERTZ layout [#273](https://github.com/acejump/AceJump/issues/273)
 
 ### 3.5.5
 
-<kbd>Enter</kbd> will now escape exit from AceJump when there is a single visible tag. #274
+<kbd>Enter</kbd> will now escape exit from AceJump when there is a single visible tag. [#274](https://github.com/acejump/AceJump/issues/274)
 
-<kbd>Shift</kbd>+<kbd>Tab</kbd> to scroll to previous occurrences now works properly. #179
+<kbd>Shift</kbd>+<kbd>Tab</kbd> to scroll to previous occurrences now works properly. [#179](https://github.com/acejump/AceJump/issues/179)
 
-Fixes an error with sticky block caret mode. #269
+Fixes an error with sticky block caret mode. [#269](https://github.com/acejump/AceJump/issues/269)
 
 ### 3.5.4
 
@@ -60,13 +60,13 @@ Bug fix: AceJump settings should now properly persist after restarting the IDE.
 
 Adds two new features. "**Word-Mode**" and quick tag selection.
 
-**Word Mode** removes search and addresses latency issues raised in #161. To learn more about **Word Mode**, see the [readme](https://github.com/johnlindquist/AceJump#tips).
+**Word Mode** removes search and addresses latency issues raised in [#161](https://github.com/acejump/AceJump/issues/161). To learn more about **Word Mode**, see the [readme](https://github.com/johnlindquist/AceJump#tips).
 
-Pressing <kbd>Enter</kbd> during a search will jump to the next visible match (or closest match, if next is not visible), as per #133.
+Pressing <kbd>Enter</kbd> during a search will jump to the next visible match (or closest match, if next is not visible), as per [#133](https://github.com/acejump/AceJump/issues/133).
 
 ### 3.4.3
 
-Stability improvements and tagging optimizations. Fixes #206, #202.
+Stability improvements and tagging optimizations. Fixes [#206](https://github.com/acejump/AceJump/issues/206), [#202](https://github.com/acejump/AceJump/issues/202).
 
 ### 3.4.2
 
@@ -82,7 +82,7 @@ Restores original scroll position if tab search cancelled. Minor improvements to
 
 ### 3.3.6
 
-Fix for #129.
+Fix for [#129](https://github.com/acejump/AceJump/issues/129).
 
 ### 3.3.5
 
@@ -215,7 +215,7 @@ Fix a regression affecting *Target Mode* and line-based navigation: <https://git
 
 ### 2.0.12
 
-Fix ClassCastException when input letter not present: #73
+Fix ClassCastException when input letter not present: [#73](https://github.com/acejump/AceJump/issues/73)
 
 ### 2.0.11
 
@@ -227,11 +227,11 @@ Support 2016.2, remove upper version limit, update internal Kotlin version
 
 ### 2.0.9
 
-Compile on Java 7 to address: #61
+Compile on Java 7 to address: [#61](https://github.com/acejump/AceJump/issues/61)
 
 ### 2.0.8
 
-Compile on Java 6 to address: #59
+Compile on Java 6 to address: [#59](https://github.com/acejump/AceJump/issues/59)
 
 ### 2.0.7
 
@@ -239,15 +239,15 @@ Language update for Kotlin 1.0 release.
 
 ### 2.0.6
 
-Fixing "lost focus" bugs mentioned here: #41
+Fixing "lost focus" bugs mentioned here: [#41](https://github.com/acejump/AceJump/issues/41)
 
 ### 2.0.5
 
-Fixing "backspace" bugs mentioned here: #20
+Fixing "backspace" bugs mentioned here: [#20](https://github.com/acejump/AceJump/issues/20)
 
 ### 2.0.4
 
-Fixing "code folding" bugs mentioned here: #24
+Fixing "code folding" bugs mentioned here: [#24](https://github.com/acejump/AceJump/issues/24)
 
 ### 2.0.3
 
@@ -271,7 +271,7 @@ Switching to Kotlin for the code base
 
 ### 1.0.4
 
-Fixing #9 and #6
+Fixing [#9](https://github.com/acejump/AceJump/issues/9) and [#6](https://github.com/acejump/AceJump/issues/6)
 
 ### 1.0.3
 
