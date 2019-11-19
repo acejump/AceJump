@@ -71,7 +71,7 @@ object Jumper: Resettable {
 
   private fun Editor.selectWordAtOffset(offset: Int = caretModel.offset) {
     val ranges = ArrayList<TextRange>()
-    addWordSelection(false, editorText, offset, ranges)
+    addWordSelection(settings.isCamelWords, editorText, offset, ranges)
 
     if (ranges.isEmpty()) return
 
