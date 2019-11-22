@@ -92,6 +92,7 @@ AceJump is supported by community members like you. Contributions are highly wel
 
 If you would like to [contribute](https://github.com/acejump/AceJump/pulls), here are a few of the ways you can help improve AceJump:
 
+* [Design a logo](https://github.com/acejump/AceJump/issues/313)
 * [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
 * [Support for full screen tagging](https://github.com/acejump/AceJump/issues/144)
 * [Animated documentation](https://github.com/acejump/AceJump/issues/145)
