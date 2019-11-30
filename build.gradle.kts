@@ -1,4 +1,4 @@
-import org.jetbrains.intellij.tasks.RunIdeTask
+import org.jetbrains.intellij.tasks.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 tasks {
@@ -15,6 +15,10 @@ tasks {
   withType<RunIdeTask> {
     dependsOn("test")
     findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
+  }
+
+  withType<PublishTask> {
+    token(project.findProperty("jbr.token") as String? ?: System.getenv("JBR_TOKEN"))
   }
 }
 
