@@ -13,7 +13,7 @@ internal object Scanner {
   fun findMatchingSites(searchText: String, model: AceFindModel, cache: Set<Int>) =
     searchText.run {
       val query = model.stringToFind
-      if (query.isEmpty()) return sortedSetOf<Int>()
+      if (searchText.isEmpty() || query.isEmpty()) return sortedSetOf<Int>()
       // If the cache is populated, filter it instead of redoing prior work
       if (cache.isEmpty()) findAll(model.toRegex(), boundaries.start)
       else cache.asSequence().filter { index ->
