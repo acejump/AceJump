@@ -35,7 +35,7 @@ Fix a build configuration error affecting plugins which depend on AceJump and ta
   <actions>
     <action id="AceAction"
             class="org.acejump.control.AceAction"
-            text="Activate AceJump mode"
+            text="Activate AceJump Mode"
             description="Targets a character in AceJump">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
@@ -63,15 +63,15 @@ Fix a build configuration error affecting plugins which depend on AceJump and ta
             description="Searches for all words on the screen in AceJump"/>
     <action id="AceWordForwardAction"
             class="org.acejump.control.AceWordForwardAction"
-            text="Start in Word Mode only searching after the caret"
+            text="Start in Word Mode"
             description="Searches for all words after the caret in AceJump"/>
     <action id="AceWordBackwardsAction"
             class="org.acejump.control.AceWordBackwardsAction"
-            text="Start in Word Mode only searching before the caret"
+            text="Start in Word Mode"
             description="Searches for all words before the caret in AceJump"/>
     <action id="AceDeclarationAction"
             class="org.acejump.control.AceDefinitionAction"
             text="Start in Declaration Mode"
-            description="Go to the declaration of a token in the editor"/>
+            description="AceJump will invoke the 'Navigate To' action after jumping"/>
   </actions>
 </idea-plugin>
