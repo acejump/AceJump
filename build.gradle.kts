@@ -1,5 +1,16 @@
 import org.jetbrains.intellij.tasks.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.intellij.tasks.PatchPluginXmlTask
+
+plugins {
+  idea apply true
+  kotlin("jvm") version "1.3.61"
+  id("org.jetbrains.intellij") version "0.4.14"
+}
+
+fun fetchChangeNotes() = File("CHANGES.md").readLines().drop(4).takeWhile { !it.startsWith("###") }.let { notes ->
+  "<![CDATA[$notes<a href=\"https://github.com/acejump/AceJump/blob/master/src/main/resources/META-INF/CHANGES.md\">Release Notes</a> ]]>"
+}
 
 tasks {
   withType<KotlinCompile> {
@@ -18,14 +29,14 @@ tasks {
   }
 
   withType<PublishTask> {
-    token(project.findProperty("jbr.token") as String? ?: System.getenv("JBR_TOKEN"))
+    token(project.findProperty("jbr.token") as String?
+      ?: System.getenv("JBR_TOKEN"))
   }
-}
 
-plugins {
-  idea apply true
-  kotlin("jvm") version "1.3.61"
-  id("org.jetbrains.intellij") version "0.4.14"
+  withType<PatchPluginXmlTask> {
+    sinceBuild("183.*")
+    changeNotes(fetchChangeNotes())
+  }
 }
 
 dependencies {
