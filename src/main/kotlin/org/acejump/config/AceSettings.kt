@@ -16,7 +16,8 @@ data class AceSettings(var layout: KeyLayout = QWERTY,
                        internal var textHighlightRGB: Int = GREEN.rgb,
                        internal var tagForegroundRGB: Int = BLACK.rgb,
                        internal var tagBackgroundRGB: Int = YELLOW.rgb,
-                       internal var displayQuery: Boolean = false) {
+                       internal var displayQuery: Boolean = false,
+                       internal var supportPinyin: Boolean = true) {
 
   // ...but we expose them to the world as Color
   val jumpModeColor: Color by { jumpModeRGB }

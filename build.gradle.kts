@@ -42,6 +42,7 @@ tasks {
 dependencies {
   // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
   compileOnly(kotlin("stdlib-jdk8"))
+  implementation("net.duguying.pinyin:pinyin:0.0.1")
 }
 
 repositories.mavenCentral()
