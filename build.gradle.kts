@@ -20,8 +20,8 @@ tasks {
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.3.60"
-  id("org.jetbrains.intellij") version "0.4.13"
+  kotlin("jvm") version "1.3.61"
+  id("org.jetbrains.intellij") version "0.4.15"
 }
 
 dependencies {
