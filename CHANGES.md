@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.6.0
+
+Adds support for Chinese [#314](https://github.com/acejump/AceJump/issues/314).
+
 ### 3.5.9
 
 Fix a build configuration error affecting plugins which depend on AceJump. Fixes [#305](https://github.com/acejump/AceJump/issues/305).

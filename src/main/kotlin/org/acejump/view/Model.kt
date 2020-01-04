@@ -4,6 +4,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.ProjectManager
+import net.duguying.pinyin.Pinyin
 import org.acejump.config.AceConfig
 import org.acejump.search.defaultEditor
 import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
@@ -11,6 +12,7 @@ import java.awt.Color.BLACK
 import java.awt.Color.YELLOW
 import java.awt.Font
 import java.awt.Font.BOLD
+import java.lang.Character.UnicodeScript
 
 /**
  * Data holder for all settings and IDE components needed by AceJump.
@@ -27,8 +29,17 @@ object Model {
     get() = editor.project ?: ProjectManager.getInstance().defaultProject
   val caretOffset
     get() = editor.caretModel.offset
-  val editorText
+  val editorText: String
     get() = editor.document.text
+      .let { if (AceConfig.supportPinyin) mapToPinyin(it) else it }
+
+  private fun mapToPinyin(it: String) =
+    it.mapNotNull {
+      if (UnicodeScript.of(it.toInt()) == UnicodeScript.HAN)
+        pinyin.translateFirstChar(it.toString()).first() else it
+    }.joinToString("")
+
+  val pinyin = Pinyin()
 
   var naturalBlock = false
   var naturalBlink = true

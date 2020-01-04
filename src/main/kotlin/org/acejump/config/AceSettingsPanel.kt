@@ -30,6 +30,7 @@ internal class AceSettingsPanel {
   private val tagForegroundColorWheel = ColorPanel()
   private val tagBackgroundColorWheel = ColorPanel()
   private val displayQueryCheckBox = JBCheckBox()
+  private val supportPinyinCheckBox = JBCheckBox()
 
   init {
     tagCharsField.apply { font = Font("monospaced", font.style, font.size) }
@@ -61,6 +62,8 @@ internal class AceSettingsPanel {
     row(aceString("textHighlightColorLabel")) { short(textHighlightColorWheel) }
     row(aceString("appearanceHeading")) { SeparatorComponent() }
     row(aceString("displayQueryLabel")) { short(displayQueryCheckBox) }
+    row(aceString("languagesHeading")) { SeparatorComponent() }
+    row(aceString("supportPinyin")) { short(supportPinyinCheckBox) }
   }
 
   internal var keyboardLayout: KeyLayout
@@ -76,6 +79,7 @@ internal class AceSettingsPanel {
   internal var tagForegroundColor by tagForegroundColorWheel
   internal var tagBackgroundColor by tagBackgroundColorWheel
   internal var displayQuery by displayQueryCheckBox
+  internal var supportPinyin by supportPinyinCheckBox
 
   fun reset(settings: AceSettings) {
     allowedChars = settings.allowedChars
@@ -86,6 +90,7 @@ internal class AceSettingsPanel {
     tagForegroundColor = settings.tagForegroundColor
     tagBackgroundColor = settings.tagBackgroundColor
     displayQuery = settings.displayQuery
+    supportPinyin = settings.supportPinyin
   }
 
   // Removal pending support for https://youtrack.jetbrains.com/issue/KT-8575

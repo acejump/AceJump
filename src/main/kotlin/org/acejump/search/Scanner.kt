@@ -10,14 +10,15 @@ import org.acejump.view.Model.viewBounds
  */
 
 internal object Scanner {
-  fun findMatchingSites(editorText: String, model: AceFindModel, cache: Set<Int>) =
-    editorText.run {
+  fun findMatchingSites(searchText: String, model: AceFindModel, cache: Set<Int>) =
+    searchText.run {
       val query = model.stringToFind
+      if (searchText.isEmpty() || query.isEmpty()) return sortedSetOf<Int>()
       // If the cache is populated, filter it instead of redoing prior work
       if (cache.isEmpty()) findAll(model.toRegex(), boundaries.start)
-      else cache.asSequence().filter {
+      else cache.asSequence().filter { index ->
         regionMatches(
-          thisOffset = it + query.length - 1,
+          thisOffset = index + query.length - 1,
           other = query.last().toString(),
           otherOffset = 0,
           length = 1,

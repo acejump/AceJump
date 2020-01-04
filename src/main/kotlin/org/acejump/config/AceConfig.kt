@@ -28,6 +28,7 @@ object AceConfig: Configurable, PersistentStateComponent<AceSettings> {
   val definitionModeColor: Color get() = settings.definitionModeColor
   val tagForegroundColor: Color get() = settings.tagForegroundColor
   val tagBackgroundColor: Color get() = settings.tagBackgroundColor
+  val supportPinyin: Boolean get() = settings.supportPinyin
 
   private var allPossibleTags: Set<String> = settings.allowedChars.bigrams()
 
@@ -57,7 +58,8 @@ object AceConfig: Configurable, PersistentStateComponent<AceSettings> {
       panel.targetModeColor != settings.targetModeColor ||
       panel.textHighlightColor != settings.textHighlightColor ||
       panel.tagForegroundColor != settings.tagForegroundColor ||
-      panel.tagBackgroundColor != settings.tagBackgroundColor
+      panel.tagBackgroundColor != settings.tagBackgroundColor ||
+      panel.supportPinyin != settings.supportPinyin
 
   private fun String.distinctAlphanumerics() =
     if (isEmpty()) settings.layout.text
@@ -75,6 +77,7 @@ object AceConfig: Configurable, PersistentStateComponent<AceSettings> {
     panel.textHighlightColor?.let { settings.textHighlightRGB = it.rgb }
     panel.tagForegroundColor?.let { settings.tagForegroundRGB = it.rgb }
     panel.tagBackgroundColor?.let { settings.tagBackgroundRGB = it.rgb }
+    panel.supportPinyin.let { settings.supportPinyin = it }
     logger.info("User applied new settings: $settings")
   }
 

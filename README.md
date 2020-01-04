@@ -49,7 +49,7 @@ AceJump search is [smart case](http://ideavim.sourceforge.net/vim/usr_27.html#vi
 
 AceJump can be [installed directly from the IDE](https://www.jetbrains.com/help/idea/managing-plugins.html#install), via **Settings | Plugins | Browse Repositories... | 🔍 "AceJump"**.
 
-[Canary builds](https://teamcity.jetbrains.com/repository/download/acejump_buildplugin/.lastSuccessful/AceJump.zip?guest=1) are provided courtesy of [TeamCity](https://www.jetbrains.com/teamcity/). These can be downloaded and [installed from disk](https://www.jetbrains.com/help/idea/managing-plugins.html#c5e86b83).
+[Canary builds](https://teamcity.jetbrains.com/repository/download/acejump_buildplugin/.lastSuccessful/AceJump.zip?guest=1) are provided courtesy of [TeamCity](https://www.jetbrains.com/teamcity/). These can be downloaded and [installed from disk](https://www.jetbrains.com/help/idea/managing-plugins.html#install_plugin_from_disk).
 
 ## Configuring
 
@@ -92,6 +92,7 @@ AceJump is supported by community members like you. Contributions are highly wel
 
 If you would like to [contribute](https://github.com/acejump/AceJump/pulls), here are a few of the ways you can help improve AceJump:
 
+* [Design a logo](https://github.com/acejump/AceJump/issues/313)
 * [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
 * [Support for full screen tagging](https://github.com/acejump/AceJump/issues/144)
 * [Animated documentation](https://github.com/acejump/AceJump/issues/145)
