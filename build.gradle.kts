@@ -4,8 +4,9 @@ import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.3.61"
-  id("org.jetbrains.intellij") version "0.4.15"
+  kotlin("jvm") version "1.3.70"
+  id("org.jetbrains.intellij") version "0.4.16"
+  id("de.fayard.refreshVersions") version "0.8.6"
 }
 
 fun fetchChangeNotes() = File("CHANGES.md").readLines().drop(4).takeWhile { !it.startsWith("###") }.let { notes ->
@@ -42,7 +43,7 @@ tasks {
 dependencies {
   // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
   compileOnly(kotlin("stdlib-jdk8"))
-  implementation("net.duguying.pinyin:pinyin:0.0.1")
+  implementation("net.duguying.pinyin:pinyin:_")
 }
 
 repositories.mavenCentral()
