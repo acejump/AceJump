@@ -12,6 +12,7 @@ import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.viewBounds
 import java.util.*
+import kotlin.streams.toList
 import kotlin.system.measureTimeMillis
 
 /**
@@ -63,9 +64,8 @@ object Tagger : Resettable {
 
     val availableTags = AceConfig.getCompatibleTags(query) { it !in tagMap }
 
-    measureTimeMillis {
-      textMatches = refineSearchResults(results)
-    }.let { if (!regex) logger.info("Refined search results in $it ms") }
+    measureTimeMillis { textMatches = refineSearchResults(results) }
+      .let { if (!regex) logger.info("Refined search results in $it ms") }
 
     giveJumpOpportunity()
     if (!tagSelected && query.isNotEmpty()) mark(textMatches, availableTags)
@@ -83,7 +83,10 @@ object Tagger : Resettable {
   private fun refineSearchResults(results: SortedSet<Int>): SortedSet<Int> {
     if (regex) return results
 
-    val sites = results.filter { editorText.admitsTagAtLocation(it) }
+    val admittance: (t: Int) -> Boolean = { editorText.admitsTagAtLocation(it) }
+    val sites = if (results.size < 500) results.filter(admittance)
+    else results.parallelStream().filter(admittance).toList()
+
     val discards = results.size - sites.size
     discards.let { if (it > 0) logger.info("Discarded $it unsuitable results") }
 
