@@ -9,7 +9,8 @@ plugins {
   id("de.fayard.refreshVersions") version "0.8.6"
 }
 
-fun fetchChangeNotes() = File("CHANGES.md").readLines().drop(4).takeWhile { !it.startsWith("###") }.let { notes ->
+fun fetchChangeNotes() =
+  File("CHANGES.md").readLines().drop(4).takeWhile { !it.startsWith("###") }.let { notes ->
   "<![CDATA[$notes<a href=\"https://github.com/acejump/AceJump/blob/master/src/main/resources/META-INF/CHANGES.md\">Release Notes</a> ]]>"
 }
 

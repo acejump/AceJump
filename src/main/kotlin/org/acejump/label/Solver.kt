@@ -70,6 +70,21 @@ class Solver(val text: String,
     return true
   }
 
+  /**
+   * Ensures tag conservation. Most tags prefer to occupy certain sites during
+   * assignment, since not all tags may be assigned to all sites. Therefore, we
+   * must spend our tag "budget" wisely, in order to cover the most sites with
+   * the tags we have at our disposal. We should consider the "most restrictive"
+   * tags first, since they have the least chance of being available as further
+   * sites are assigned.
+   *
+   * Tags which are compatible with the fewest sites should have preference for
+   * first assignment. Here we ensure that scarce tags are prioritized for their
+   * subsequent binding to available sites.
+   *
+   * @see isCompatibleWithTagChar This defines how tags may be assigned to sites.
+   */
+
   private val tagOrder = defaultTagOrder
     .thenBy { eligibleSitesByTag[it].size }
     .thenBy(AceConfig.layout.priority { it.last() })
@@ -88,21 +103,6 @@ class Solver(val text: String,
     // Ensure that the first letter of a word is prioritized for tagging
     { text[max(0, it - 1)].isLetterOrDigit() },
     { it })
-
-  /**
-   * Ensures tag conservation. Most tags prefer to occupy certain sites during
-   * assignment, since not all tags may be assigned to all sites. Therefore, we
-   * must spend our tag "budget" wisely, in order to cover the most sites with
-   * the tags we have at our disposal. We should consider the "most restrictive"
-   * tags first, since they have the least chance of being available as further
-   * sites are assigned.
-   *
-   * Tags which are compatible with the fewest sites should have preference for
-   * first assignment. Here we ensure that scarce tags are prioritized for their
-   * subsequent binding to available sites.
-   *
-   * @see isCompatibleWithTagChar This defines how tags may be assigned to sites.
-   */
 
   private val eligibleSitesByTag = Multimaps.synchronizedSetMultimap(
     TreeMultimap.create<String, Int>(Ordering.natural(), siteOrder))
