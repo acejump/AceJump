@@ -41,9 +41,13 @@ AceJump search is [smart case](http://ideavim.sourceforge.net/vim/usr_27.html#vi
 
 - Keep typing! AceJump will accept multiple sequential characters before tag selection.
 
-- **Word Mode** is a new action that will tag all visible words as soon as it is activated.
+- Press the AceJump shortcut multiple times to cycle between modes.
 
-  - To bind a keyboard shortcut to **Word Mode**, open **Settings | Keymap | 🔍 "AceJump"**
+- **Word Mode** action that will tag all visible words as soon as it is activated.
+
+- **Declaration Mode** will jump to a token's declaration, if it exists.
+
+- To rebind any keyboard shortcuts visit **Settings | Keymap | 🔍 "AceJump"**
 
 ## Installing
 
@@ -167,7 +171,7 @@ The following individuals have significantly improved AceJump through their cont
 * [Alex Plate](https://github.com/AlexPl292)
 * [Stefan Monnier](https://www.iro.umontreal.ca/~monnier/)
 
-AceJump is made possible by users just like you! If you enjoy using AceJump, please consider [contributing](#contributing).
+AceJump is made possible by users just like you! If you enjoy using AceJump, please consider [Contributing](#contributing).
 
 <!-- Badges -->
 [jetbrains-team-page]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
@@ -177,6 +181,5 @@ AceJump is made possible by users just like you! If you enjoy using AceJump, ple
 [plugin-repo-page]: https://plugins.jetbrains.com/plugin/7086-acejump
 [plugin-repo-svg]: https://img.shields.io/jetbrains/plugin/v/7086-acejump.svg
 [plugin-download-svg]: https://img.shields.io/jetbrains/plugin/d/7086-acejump.svg
-[apache-license-svg]: https://img.shields.io/badge/License-GPL%20v3-blue.svg
 [twitter-url]: https://twitter.com/search?f=tweets&q=AceJump
 [twitter-badge]: https://img.shields.io/twitter/url/http/shields.io.svg?style=social
