@@ -38,11 +38,12 @@ import kotlin.system.measureTimeMillis
  *    2.) All indices in the document will be reachable by a short key sequence
  *
  * If there is an insufficient number of two-character tags to cover every index
- * (which typically occurs for a common character in a long document), then we
- * attempt to maximize the number of tags assigned to document indices. The key
- * is, all tags must be assigned as soon as possible, i.e. as soon as the first
- * character is received or when the typist ceases typing (at the very latest).
- * Once assigned, a visible tag must never change during the selection process.
+ * (which typically occurs when the user searches for a common character within
+ * a long document), then we attempt to maximize the number of tags assigned to
+ * document indices. The key is, all tags must be assigned as soon as possible,
+ * i.e. as soon as the first character is received or whenever the user ceases
+ * typing (at the very latest). Once assigned, a visible tag must never change
+ * at any time during the selection process, so as not to confuse the user.
  */
 
 class Solver(val text: String,

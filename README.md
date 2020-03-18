@@ -116,13 +116,13 @@ Please [see here](/CHANGES.md) for a detailed list of changes.
 
 AceJump is inspired by prior work, but adds several improvements, including:
 
+* **Ergonomic** tagging: Tries to minimize finger and eye travel on most common keyboards layouts and languages.
+* **Full-text** search: If a string is not visible on the screen, AceJump will scroll to the next occurrence.
+* **Smart tag** rendering: Tags will occupy nearby whitespace if available, rather than block adjacent text.
 * **Target mode**: Jump and select a full word in one rapid motion. (<kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>;</kbd>)
 * **Line Mode**: Jump to the first, last, or first non-whitespace character of any line on-screen (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd>).
 * **Word Mode**: Jump to the first character of any visible word on-screen in two keystrokes or less.
 * **Declaration Mode**: Jump to the declaration of a token (if it is available) rather than the token itself.
-* **Full-text** search: If a string is not visible on the screen, AceJump will scroll to the next occurrence.
-* **Smart tag** rendering: Tags will occupy nearby whitespace if available, rather than block adjacent text.
-* **Ergonomic** tagging: AceJump tries to minimize finger travel distance on most common keyboards layouts.
 
 The following plugins have a similar UI for navigating text and web browsing:
 
