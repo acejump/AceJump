@@ -6,6 +6,10 @@ import java.awt.Color
 import java.awt.Color.*
 import kotlin.reflect.KProperty
 
+/**
+ * Settings model located for [AceSettingsPanel].
+ */
+
 // TODO: https://github.com/acejump/AceJump/issues/215
 data class AceSettings(var layout: KeyLayout = QWERTY,
                        var allowedChars: String = layout.text,

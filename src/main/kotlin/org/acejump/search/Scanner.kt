@@ -16,13 +16,22 @@ internal object Scanner {
   val cores = Runtime.getRuntime().availableProcessors() - 1
   private val logger = Logger.getInstance(Scanner::class.java)
 
-  fun findMatchingSites(model: AceFindModel, cache: Set<Int>) =
+  /**
+   * Returns indices of locations matching the [model]. Provide a [cache] in
+   * order to filter prior results that have been returned by this method.
+   */
+
+  fun findMatchingSites(model: AceFindModel, cache: Set<Int> = emptySet()) =
     if (!LONG_DOCUMENT || cache.size != 0 || boundaries != FULL_FILE_BOUNDARY)
       editorText.search(model, cache, boundaries.intRange()).toSortedSet()
     else
       editorText.chunk().parallelStream().map { chunk ->
         editorText.search(model, cache, chunk)
       }.toList().flatten().toSortedSet()
+
+  /**
+   * Breaks up text to search into [chunkSize] chunks for parallelized search.
+   */
 
   private fun String.chunk(chunkSize: Int = count { it == '\n' } / cores + 1) =
     splitToSequence("\n", "\r").toList().run {
@@ -34,11 +43,14 @@ internal object Scanner {
       }
     }
 
+  /**
+   * Searches the [cache] (if it is populated), or else the whole document.
+   */
+
   fun String.search(model: AceFindModel, cache: Set<Int>, chunk: IntRange) =
     run {
       val query = model.stringToFind
       if (isEmpty() || query.isEmpty()) sortedSetOf<Int>()
-      // If the cache is populated, filter it instead of redoing prior work
       else if (cache.isNotEmpty()) filterCache(cache, query)
       else findAll(model.toRegex(), chunk)
     }.toList()

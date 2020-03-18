@@ -114,6 +114,10 @@ object Tagger : Resettable {
     this.isLetterOrDigit() xor other.isLetterOrDigit() ||
       this.isWhitespace() xor other.isWhitespace()
 
+  /**
+   * Checks whether a visible tag has been selected, and if so, jumps to it.
+   */
+
   private fun giveJumpOpportunity() {
     tagMap.entries.filter { it.value in viewBounds }
       .firstOrNull { it.solves(query) }?.run {
@@ -197,10 +201,14 @@ object Tagger : Resettable {
     return canBeShortened
   }
 
+  /**
+   * Assigns [availableTags] to [results]. Initially, all results are vacant.
+   * If there are any untagged results visible, assign as many tags as possible.
+   * Assuming all visible tags have been assigned, there is nothing left to do.
+   */
+
   private fun assignMissingTags(results: Set<Int>,
                                 availableTags: Set<String>): Map<String, Int> {
-    val remainder = getFeasibleSites(results)
-
     var timeElapsed = System.currentTimeMillis()
     val oldTags = transferExistingTagsCompatibleWithQuery()
     // Ongoing queries with results in view do not need further tag assignment
@@ -209,6 +217,7 @@ object Tagger : Resettable {
       else if (hasTagSuffixInView(query)) return this
     }
 
+    val remainder = getFeasibleSites(results)
     val (onScreen, offScreen) = remainder.partition { it in viewBounds }
     val completeResultSet = onScreen + offScreen
     // Some results are untagged. Let's assign some tags!
@@ -263,10 +272,8 @@ object Tagger : Resettable {
 
   /**
    * Returns true if the Tagger contains a match in the new view, that is not
-   * contained (visible) in the old view. This method assumes that textMatches
+   * contained (visible) in the old view. This method assumes that [textMatches]
    * are in ascending order by index.
-   *
-   * @see textMatches
    *
    * @return true if there is a match in the new range not in the old range
    */

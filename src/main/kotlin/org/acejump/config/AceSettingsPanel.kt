@@ -20,6 +20,10 @@ import javax.swing.JPanel
 import javax.swing.text.JTextComponent
 import kotlin.reflect.KProperty
 
+/**
+ * Settings view located in File | Settings | Tools | AceJump.
+ */
+
 internal class AceSettingsPanel {
   private val tagCharsField = JBTextField()
   private val keyboardLayoutCombo = ComboBox<KeyLayout>()

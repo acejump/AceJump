@@ -12,7 +12,7 @@ import org.acejump.view.Model.viewBounds
 
 /**
  * Updates the editor's vertical scroll position to make search results visible.
- * This will occur when the user presses TAB OR searches for text that does not
+ * This will occur when the user presses TAB OR searches for text which does not
  * currently appear on the screen. Once scrolling is complete, the [Listener]
  * will [Trigger] an update that re-paint tags to the screen.
  */

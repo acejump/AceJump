@@ -4,6 +4,12 @@ import org.acejump.search.Finder
 import org.acejump.search.Jumper
 import org.acejump.view.Model.caretOffset
 
+/**
+ * Supports cyclical selection of tags using the ENTER/SHIFT+ENTER keys.
+ *
+ * @see [Handler.editorActionMap]
+ */
+
 object Selector {
   fun select(forward: Boolean = true) {
     val matches = nearestVisibleMatches(forward)

@@ -20,7 +20,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Updates the [com.intellij.openapi.editor.CaretModel] when a tag is selected.
+ * Updates the [com.intellij.openapi.editor.CaretModel] after a tag is selected.
  */
 
 object Jumper: Resettable {
@@ -58,16 +58,28 @@ object Jumper: Resettable {
     }
   }
 
-  private fun Editor.appendCaretPositionToNavigationHistory() =
+  /**
+   * Ensures each jump destination is appended to [IdeDocumentHistory] so that
+   * users can navigate forward and backward using the IDE actions.
+   */
+
+  private fun Editor.appendCaretPositionToEditorNavigationHistory() =
     CommandProcessor.getInstance().executeCommand(project,
       aceJumpHistoryAppender, "AceJumpHistoryAppender",
       DocCommandGroupId.noneGroupId(document), document)
 
   private fun moveCaretTo(offset: Int) = editor.run {
-    appendCaretPositionToNavigationHistory()
+    appendCaretPositionToEditorNavigationHistory()
     selectionModel.removeSelection()
     caretModel.moveToOffset(offset)
   }
+
+  /**
+   * Selects a sequence of contiguous characters adjacent to the target offset
+   * matching [Character.isJavaIdentifierPart], or nothing at all.
+   *
+   * TODO: Make this language agnostic.
+   */
 
   private fun Editor.selectWordAtOffset(offset: Int = caretModel.offset) {
     val ranges = ArrayList<TextRange>()
@@ -81,6 +93,10 @@ object Jumper: Resettable {
 
     selectRange(startOfWordOffset, endOfWordOffset)
   }
+
+  /**
+   * Navigates to the target symbol's declaration, using [GotoDeclarationAction]
+    */
 
   private fun gotoSymbolAction() =
     runNow {

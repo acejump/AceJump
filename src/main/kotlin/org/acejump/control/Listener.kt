@@ -14,6 +14,12 @@ import javax.swing.event.AncestorEvent
 import javax.swing.event.AncestorListener
 import kotlin.system.measureTimeMillis
 
+/**
+ * Callback for GUI updates (e.g. resize, scroll). Ensures tags are painted to
+ * the screen whenever the view changes. Since visible tags are prioritized,
+ * there may be tags off-screen which have not yet been painted.
+ */
+
 internal object Listener: FocusListener, AncestorListener, VisibleAreaListener {
   private val logger = Logger.getInstance(Listener::class.java)
 

@@ -57,7 +57,7 @@ object Finder : Resettable {
     }
 
   /**
-   * A user has two possible goals when launching an AceJump search.
+   * A user has two possible intentions when launching an AceJump search.
    *
    * 1. To locate the position of a known string in the document (a.k.a. Find)
    * 2. To reposition the caret to a known location (i.e. staring at location)
@@ -151,14 +151,18 @@ object Finder : Resettable {
       Handler.repaintTagMarkers()
   }
 
+  /**
+   * Erases highlights which are no longer compatible with the current query.
+   */
+
   private fun List<RangeHighlighter>.cull() =
-    discardIf { Tagger canDiscard startOffset }
+    eraseIf { Tagger canDiscard startOffset }
       .also { newHighlights ->
         val numDiscarded = size - newHighlights.size
         if (numDiscarded != 0) logger.info("Discarded $numDiscarded highlights")
       }
 
-  fun List<RangeHighlighter>.discardIf(cond: RangeHighlighter.() -> Boolean) =
+  fun List<RangeHighlighter>.eraseIf(cond: RangeHighlighter.() -> Boolean) =
     filter {
       if (cond(it)) {
         runLater { markup.removeHighlighter(it) }

@@ -7,7 +7,9 @@ import org.acejump.label.Pattern
 import org.acejump.label.Pattern.Companion.KeyLayout
 import java.awt.Color
 
-/* Persists the state of the AceJump IDE settings across IDE restarts.
+/**
+ * Ensures consistiency between [AceSettings] and [AceSettingsPanel].
+ * Persists the state of the AceJump IDE settings across IDE restarts.
  * https://www.jetbrains.org/intellij/sdk/docs/basics/persisting_state_of_components.html
  */
 
