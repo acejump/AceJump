@@ -198,7 +198,7 @@ Hotfix for target mode.
 
 ### 3.0.4
 
-Adds "line mode" - press [Ctrl+Shift+;] to activate.
+Adds *Line Mode* - press <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd> to activate.
 
 ### 3.0.3
 
@@ -223,7 +223,7 @@ Major rewrite of AceJump. Introducing:
 
 ### 2.0.13
 
-Fix a regression affecting *Target Mode* and line-based navigation: <https://github.com/johnlindquist/AceJump/commit/cc3a23a3bd6754d11100f15f3dddc4d8529926df#diff-a483c757116bde46e566a8b01520a807L51>
+Fix a regression affecting *Target Mode* and line-based navigation.
 
 ### 2.0.12
 
