@@ -13,16 +13,10 @@
   <category>Navigation</category>
   <vendor url="https://github.com/acejump/AceJump">AceJump</vendor>
 
-  <application-components>
-    <component>
-      <implementation-class>org.acejump.config.AceConfig</implementation-class>
-    </component>
-  </application-components>
-
   <extensions defaultExtensionNs="com.intellij">
-    <applicationService serviceImplementation="org.acejump.config.AceConfig" overrides="false"/>
+    <applicationService serviceImplementation="org.acejump.config.AceConfig"/>
     <applicationConfigurable groupId="tools" displayName="AceJump"
-                             id="preferences.AceConfigurable"
+                             id="preferences.AceConfigurable" dynamic="true"
                              instance="org.acejump.config.AceConfig"/>
   </extensions>
 

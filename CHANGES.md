@@ -6,7 +6,9 @@ Adds support for Chinese [#314](https://github.com/acejump/AceJump/issues/314).
 
 Fixes constantly loading settings page [#303](https://github.com/acejump/AceJump/issues/303).
 
-Honor camel humps [#315](https://github.com/acejump/AceJump/issues/305). Thanks to @clojj.
+Honor camel humps [#315](https://github.com/acejump/AceJump/issues/315). Thanks to @clojj.
+
+Support dynamic application reloading [#322](https://github.com/acejump/AceJump/issues/322).
 
 Speed up tagging on very large files.
 
