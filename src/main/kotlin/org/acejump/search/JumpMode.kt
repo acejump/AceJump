@@ -24,7 +24,7 @@ internal enum class JumpMode {
           else -> AceConfig.jumpModeColor
         })
 
-        Finder.markup(Tagger.markers)
+        Finder.markup()
         Canvas.repaint()
       }
 

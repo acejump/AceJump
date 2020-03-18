@@ -57,12 +57,12 @@
             description="Searches for all words on the screen in AceJump"/>
     <action id="AceWordForwardAction"
             class="org.acejump.control.AceWordForwardAction"
-            text="Start in Word Mode"
-            description="Searches for all words after the caret in AceJump"/>
+            text="Start in Word Forward Mode"
+            description="Searches for all visible words after the caret in AceJump"/>
     <action id="AceWordBackwardsAction"
             class="org.acejump.control.AceWordBackwardsAction"
-            text="Start in Word Mode"
-            description="Searches for all words before the caret in AceJump"/>
+            text="Start in Word Backward Mode"
+            description="Searches for all visible words before the caret in AceJump"/>
     <action id="AceDeclarationAction"
             class="org.acejump.control.AceDefinitionAction"
             text="Start in Declaration Mode"

@@ -1,15 +1,17 @@
 package org.acejump.search
 
 import com.intellij.openapi.diagnostic.Logger
+import org.acejump.search.Scanner
 import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
 import org.acejump.view.Model.LONG_DOCUMENT
 import org.acejump.view.Model.boundaries
 import org.acejump.view.Model.editorText
+import java.util.*
 import kotlin.streams.toList
 
 /**
- * Returns a list of indices where the query begins, within the given range.
- * These are full indices, ie. are not offset to the beginning of the range.
+ * Returns a set of indices indicating query matches, within the given range.
+ * These are full indices, i.e. are not offset to the beginning of the range.
  */
 
 internal object Scanner {
@@ -17,31 +19,31 @@ internal object Scanner {
   private val logger = Logger.getInstance(Scanner::class.java)
 
   /**
-   * Returns indices of locations matching the [model]. Provide a [cache] in
-   * order to filter prior results that have been returned by this method.
+   * Returns [SortedSet] of indices matching the [model]. Providing a [cache]
+   * will filter prior results instead of searching the editor contents.
    */
 
-  fun findMatchingSites(model: AceFindModel, cache: Set<Int> = emptySet()) =
+  fun find(model: AceFindModel, cache: Set<Int> = emptySet()): SortedSet<Int> =
     if (!LONG_DOCUMENT || cache.size != 0 || boundaries != FULL_FILE_BOUNDARY)
       editorText.search(model, cache, boundaries.intRange()).toSortedSet()
-    else
-      editorText.chunk().parallelStream().map { chunk ->
-        editorText.search(model, cache, chunk)
-      }.toList().flatten().toSortedSet()
+    else editorText.chunk().parallelStream().map { chunk ->
+      editorText.search(model, cache, chunk)
+    }.toList().flatten().toSortedSet()
 
   /**
-   * Breaks up text to search into [chunkSize] chunks for parallelized search.
+   * Divides lines of text into equally-sized chunks for parallelized search.
    */
 
-  private fun String.chunk(chunkSize: Int = count { it == '\n' } / cores + 1) =
-    splitToSequence("\n", "\r").toList().run {
-      logger.info("Parallelizing query across $cores cores")
-      var offset = 0
-      chunked(chunkSize).map {
-        val len = it.joinToString("\n").length
-        (offset..(offset + len)).also { offset += len + 1 }
-      }
+  private fun String.chunk(): List<IntRange> {
+    val lines = splitToSequence("\n", "\r").toList()
+    val chunkSize = lines.size / cores + 1
+    logger.info("Parallelizing ${lines.size}-line search across $cores cores")
+    var offset = 0
+    return lines.chunked(chunkSize).map {
+      val len = it.joinToString("\n").length
+      (offset..(offset + len)).also { offset += len + 1 }
     }
+  }
 
   /**
    * Searches the [cache] (if it is populated), or else the whole document.
@@ -72,9 +74,6 @@ internal object Scanner {
       nextFunction = { result -> filterNext(result, chunk) }
     ).map { it.range.first }.toList()
 
-  fun filterNext(result: MatchResult, chunk: IntRange): MatchResult? {
-    val next = result.next() ?: return null
-    val offset = next.range.first
-    return if (offset !in chunk) null else next
-  }
+  fun filterNext(result: MatchResult, chunk: IntRange): MatchResult? =
+    result.next()?.let { if(it.range.first !in chunk) null else it }
 }

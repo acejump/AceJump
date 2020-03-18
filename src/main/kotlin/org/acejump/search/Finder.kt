@@ -97,7 +97,7 @@ object Finder : Resettable {
 
   fun search(model: AceFindModel = AceFindModel(query)) {
     measureTimeMillis {
-      results = Scanner.findMatchingSites(model, results)
+      results = Scanner.find(model, results)
     }.let { logger.info("Found ${results.size} matching sites in $it ms") }
 
     markResults(results, model)
@@ -115,8 +115,8 @@ object Finder : Resettable {
   fun markResults(results: SortedSet<Int>,
     model: AceFindModel = AceFindModel("", true)
   ) {
+    markup(results, model.isRegularExpressions)
     if (!skim) tag(model, results)
-    markup(Tagger.markers, model)
   }
 
   /**
@@ -124,21 +124,21 @@ object Finder : Resettable {
    * [com.intellij.openapi.editor.markup.MarkupModel].
    */
 
-  fun markup(markers: List<Marker>, model: AceFindModel = AceFindModel(query)) =
+  fun markup(markers: Set<Int> = results, isRegexQuery: Boolean = false) =
     runLater {
       if (markers.isEmpty()) return@runLater
 
       textHighlights.forEach { markup.removeHighlighter(it) }
       textHighlights = markers.map {
-        val start = it.index - if (it.index == editorText.length) 1 else 0
-        val end = start + if (model.isRegularExpressions) 1 else query.length
-        createTextHighlight(it, max(start, 0), min(end, editorText.length - 1))
+        val start = it - if (it == editorText.length) 1 else 0
+        val end = start + if (isRegexQuery) 1 else query.length
+        createTextHighlight(max(start, 0), min(end, editorText.length - 1))
       }
     }
 
-  private fun createTextHighlight(marker: Marker, start: Int, end: Int) =
+  private fun createTextHighlight(start: Int, end: Int) =
     markup.addRangeHighlighter(start, end, HIGHLIGHT_LAYER, null, EXACT_RANGE)
-      .apply { customRenderer = marker }
+      .apply { customRenderer = Marker.Companion }
 
   private fun tag(model: AceFindModel, results: SortedSet<Int>) {
     synchronized(this) { Tagger.markOrJump(model, results) }

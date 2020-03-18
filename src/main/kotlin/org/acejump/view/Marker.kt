@@ -33,7 +33,7 @@ import org.acejump.view.Model.editorText as text
  * TODO: Clean up this class.
  */
 
-class Marker : CustomHighlighterRenderer {
+class Marker {
   val index: Int
   private val query: String
   val tag: String?
@@ -101,44 +101,43 @@ class Marker : CustomHighlighterRenderer {
    * Called by IntelliJ as a [CustomHighlighterRenderer]. Paints [highlight]s.
    */
 
-  override fun paint(editor: Editor, highlight: RangeHighlighter, g: Graphics) =
-    (g as Graphics2D).run {
-    val tagX = start.x + fontWidth
-    val tagWidth = tag?.length?.times(fontWidth) ?: 0
+  companion object: CustomHighlighterRenderer {
+    override fun paint(editor: Editor, highlighter: RangeHighlighter, g: Graphics) =
+      (g as Graphics2D).run {
+        setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
+        color = AceConfig.textHighlightColor
+        val start = editor.getPoint(highlighter.startOffset)
+        val queryLength = highlighter.endOffset - highlighter.startOffset
+        val searchWidth = if (regex) 0 else queryLength * fontWidth
+        val startY = start.y + rectVOffset
 
-    fun highlightRegex() {
-      composite = getInstance(SRC_OVER, 0.40.toFloat())
-      val xPos = if (alignment == RIGHT) tagX - fontWidth else start.x
-      fillRoundRect(xPos, startY, fontWidth, rectHeight, arcD, arcD)
+        fun highlightRegex() {
+          composite = getInstance(SRC_OVER, 0.40.toFloat())
+          fillRoundRect(start.x, startY, fontWidth, rectHeight, arcD, arcD)
+        }
+
+        if (regex) highlightRegex()
+        else {
+          fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
+          if (JumpMode.equals(TARGET)) surroundTargetWord(highlighter.startOffset, startY)
+        }
+
+        if (highlighter.startOffset == Selector.nearestVisibleMatches().firstOrNull()) {
+          color = naturalCaretColor
+          drawLine(start.x, startY, start.x, startY + rectHeight)
+        }
+      }
+
+    fun Graphics2D.surroundTargetWord(index: Int, startY: Int) {
+      color = AceConfig.targetModeColor
+      val (wordStart, wordEnd) = text.wordBounds(index)
+
+      val xPos = editor.getPoint(wordStart).x
+      val wordWidth = (wordEnd - wordStart) * fontWidth
+
+      if (text[index].isLetterOrDigit())
+        drawRoundRect(xPos, startY, wordWidth, rectHeight, arcD, arcD)
     }
-
-    setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
-
-    color = AceConfig.textHighlightColor
-    if (regex) highlightRegex()
-    else {
-      fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
-      if (JumpMode.equals(TARGET)) surroundTargetWord()
-    }
-
-    if (index == Selector.nearestVisibleMatches().firstOrNull())
-      indicateAsNearestMatch()
-  }
-
-  private fun Graphics2D.indicateAsNearestMatch() {
-    color = naturalCaretColor
-    drawLine(start.x, startY, start.x, startY + rectHeight)
-  }
-
-  private fun Graphics2D.surroundTargetWord() {
-    color = AceConfig.targetModeColor
-    val (wordStart, wordEnd) = text.wordBounds(index)
-
-    val xPos = editor.getPoint(wordStart).x
-    val wordWidth = (wordEnd - wordStart) * fontWidth
-
-    if (text[index].isLetterOrDigit())
-      drawRoundRect(xPos, startY, wordWidth, rectHeight, arcD, arcD)
   }
 
   private fun Graphics2D.drawTagForeground(tagPosition: Point?) {

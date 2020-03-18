@@ -4,6 +4,12 @@
 
 Adds support for Chinese [#314](https://github.com/acejump/AceJump/issues/314).
 
+Fixes constantly loading settings page [#303](https://github.com/acejump/AceJump/issues/303).
+
+Honor camel humps [#315](https://github.com/acejump/AceJump/issues/305). Thanks to @clojj.
+
+Speed up tagging on very large files.
+
 ### 3.5.9
 
 Fix a build configuration error affecting plugins which depend on AceJump. Fixes [#305](https://github.com/acejump/AceJump/issues/305).
