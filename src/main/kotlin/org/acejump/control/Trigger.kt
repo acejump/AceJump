@@ -6,8 +6,7 @@ import java.lang.System.currentTimeMillis
 import kotlin.math.abs
 
 /**
- * Timer for triggering events with a designated delay. May be invoked multiple
- * times inside the delay, but doing so will only prolong the event from firing.
+ * Timer for triggering events with a designated delay.
  */
 
 object Trigger: () -> Unit {
@@ -35,6 +34,11 @@ object Trigger: () -> Unit {
       isRunning = false
     }
   }
+
+  /**
+   * Can be called multiple times inside [delay], but doing so will reset the
+   * timer, delaying the [event] from occurring by [withDelay] milliseconds.
+   */
 
   operator fun invoke(withDelay: Long = 750, event: () -> Unit = {}) {
     delay = withDelay

@@ -39,9 +39,7 @@ internal object Listener: FocusListener, AncestorListener, VisibleAreaListener {
 
   /**
    * This callback is very jittery. We need to delay repainting tags by a short
-   * duration in order to prevent flashing tag syndrome.
-   *
-   * @see Trigger
+   * duration [Trigger] in order to prevent flashing tag syndrome.
    */
 
   override fun visibleAreaChanged(e: VisibleAreaEvent) {

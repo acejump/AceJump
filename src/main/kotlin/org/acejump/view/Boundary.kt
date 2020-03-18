@@ -61,5 +61,9 @@ enum class Boundary: ClosedRange<Int> {
     get() = editor.getLineStartOffset(editor.caretModel.logicalPosition.line)
     override val endInclusive: Int
     get() = min(editor.caretModel.offset, viewBounds.last)
-  }
+  };
+
+  fun intRange() = IntRange(start, endInclusive)
+
+  override fun toString() = super<ClosedRange>.toString() + " (${intRange()}) "
 }

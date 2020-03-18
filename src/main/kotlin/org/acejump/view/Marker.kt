@@ -81,7 +81,10 @@ class Marker : CustomHighlighterRenderer {
 
   enum class Alignment { /*TOP, BOTTOM,*/ LEFT, RIGHT, NONE }
 
-  // Called by AceJump (as a renderable element of Canvas)
+  /**
+   * Called by AceJump as a renderable element of [Canvas]. Paints [tag]s.
+   */
+
   fun paintMe(graphics: Graphics) = (graphics as Graphics2D).run {
     setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
 
@@ -95,7 +98,7 @@ class Marker : CustomHighlighterRenderer {
   }
 
   /**
-   * Called by IntelliJ Platform as a [CustomHighlighterRenderer]
+   * Called by IntelliJ as a [CustomHighlighterRenderer]. Paints [highlight]s.
    */
 
   override fun paint(editor: Editor, highlight: RangeHighlighter, g: Graphics) =

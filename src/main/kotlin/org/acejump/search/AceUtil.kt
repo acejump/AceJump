@@ -95,11 +95,8 @@ fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)
 
 /**
- * Returns up to MAX_TAG_RESULTS by accumulating results before and after the
+ * Returns up to [MAX_TAG_RESULTS] by accumulating results before and after the
  * view boundaries, (approximately centered around the middle of the screen).
- *
- * @see MAX_TAG_RESULTS
- * @return
  */
 
 fun getFeasibleRegion(results: Set<Int>, takeAtMost: Int = MAX_TAG_RESULTS) =

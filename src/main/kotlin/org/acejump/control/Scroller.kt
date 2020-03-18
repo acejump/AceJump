@@ -13,10 +13,8 @@ import org.acejump.view.Model.viewBounds
 /**
  * Updates the editor's vertical scroll position to make search results visible.
  * This will occur when the user presses TAB OR searches for text that does not
- * currently appear on the screen. Once scrolling is complete, the Listener will
- * trigger an update that re-paint tags to the screen.
- *
- * @see org.acejump.control.Listener
+ * currently appear on the screen. Once scrolling is complete, the [Listener]
+ * will [Trigger] an update that re-paint tags to the screen.
  */
 
 object Scroller {
@@ -65,8 +63,8 @@ object Scroller {
 
   /**
    * Returns the center of the next set of results that will fit in the editor.
-   * textMatches must be sorted prior to using Scroller. If textMatches have not
-   * previously been sorted, the result of calling this method is undefined.
+   * [textMatches] must be sorted prior to using Scroller. If [textMatches] have
+   * not previously been sorted, the result of calling this method is undefined.
    */
 
   private fun findNextPosition(): LogicalPosition? {

@@ -20,7 +20,7 @@ import kotlin.math.max
 import kotlin.math.min
 
 /**
- * Caret controller. Responsible for moving the caret once a tag is selected.
+ * Updates the [com.intellij.openapi.editor.CaretModel] when a tag is selected.
  */
 
 object Jumper: Resettable {

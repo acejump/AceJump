@@ -13,6 +13,7 @@ import java.awt.Color.YELLOW
 import java.awt.Font
 import java.awt.Font.BOLD
 import java.lang.Character.UnicodeScript
+import kotlin.streams.toList
 
 /**
  * Data holder for all settings and IDE components needed by AceJump.
@@ -31,13 +32,13 @@ object Model {
     get() = editor.caretModel.offset
   val editorText: String
     get() = editor.document.text
-      .let { if (AceConfig.supportPinyin) mapToPinyin(it) else it }
+      .let { if (AceConfig.supportPinyin) it.mapToPinyin() else it }
 
-  private fun mapToPinyin(it: String) =
-    it.mapNotNull {
-      if (UnicodeScript.of(it.toInt()) == UnicodeScript.HAN)
-        pinyin.translateFirstChar(it.toString()).first() else it
-    }.joinToString("")
+  private fun String.mapToPinyin() =
+    chars().run { if(DEFAULT_BUFFER < length) parallel() else this }.mapToObj {
+      if (UnicodeScript.of(it) == UnicodeScript.HAN)
+        pinyin.translateFirstChar(it.toString()).first() else it.toChar()
+    }.toArray().joinToString("")
 
   val pinyin = Pinyin()
 
@@ -62,7 +63,7 @@ object Model {
     get() = lineHeight - (editor as EditorImpl).descent - fontHeight
   val arcD = rectHeight - 6
   var viewBounds = 0..0
-  const val DEFAULT_BUFFER = 40000
+  const val DEFAULT_BUFFER = 30000
   val LONG_DOCUMENT
     get() = DEFAULT_BUFFER < editorText.length
   const val MAX_TAG_RESULTS = 300

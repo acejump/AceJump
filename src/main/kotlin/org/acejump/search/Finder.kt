@@ -23,8 +23,6 @@ import kotlin.system.measureTimeMillis
 
 /**
  * Singleton that searches for text in editor and highlights matching results.
- *
- * @see Tagger
  */
 
 object Finder : Resettable {
@@ -99,7 +97,7 @@ object Finder : Resettable {
 
   fun search(model: AceFindModel = AceFindModel(query)) {
     measureTimeMillis {
-      results = Scanner.findMatchingSites(editorText, model, results)
+      results = Scanner.findMatchingSites(model, results)
     }.let { logger.info("Found ${results.size} matching sites in $it ms") }
 
     markResults(results, model)
@@ -122,9 +120,8 @@ object Finder : Resettable {
   }
 
   /**
-   * Paints text highlights to the editor using the MarkupModel API.
-   *
-   * @see com.intellij.openapi.editor.markup.MarkupModel
+   * Paints text highlights beneath each query result to the editor using the
+   * [com.intellij.openapi.editor.markup.MarkupModel].
    */
 
   fun markup(markers: List<Marker>, model: AceFindModel = AceFindModel(query)) =

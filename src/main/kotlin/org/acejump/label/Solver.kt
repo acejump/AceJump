@@ -82,7 +82,7 @@ class Solver(val text: String,
    * first assignment. Here we ensure that scarce tags are prioritized for their
    * subsequent binding to available sites.
    *
-   * @see isCompatibleWithTagChar This defines how tags may be assigned to sites.
+   * @see isCompatibleWithTagChar This defines how tags may be assigned to sites
    */
 
   private val tagOrder = defaultTagOrder

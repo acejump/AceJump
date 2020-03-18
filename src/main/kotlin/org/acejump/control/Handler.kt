@@ -76,12 +76,12 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   private fun configureEditor() =
-    runNow {
-      editor.run {
-        enabled = true
-        saveScroll()
-        saveCaret()
-        saveColors()
+    editor.run {
+      enabled = true
+      saveScroll()
+      saveCaret()
+      saveColors()
+      runNow {
         setupCaret()
         bindCanvas()
         swapActionHandler()
@@ -167,7 +167,8 @@ object Handler : TypedActionHandler, Resettable {
   }
 
   private fun saveColors() =
-    EditorColorsManager.getInstance().globalScheme.getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
+    EditorColorsManager.getInstance().globalScheme
+      .getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
       ?.backgroundColor.let { Model.naturalHighlight = it }
 
   private fun Editor.restoreCaret() =
@@ -176,13 +177,14 @@ object Handler : TypedActionHandler, Resettable {
         settings.isBlockCursor = Model.naturalBlock
       }
 
-  private fun Editor.restoreColors() = runNow {
-    colorsScheme.run {
-      setAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES,
-        getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
-          .apply { backgroundColor = Model.naturalHighlight })
+  private fun Editor.restoreColors() =
+    runNow {
+      colorsScheme.run {
+        setAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES,
+          getAttributes(TEXT_SEARCH_RESULT_ATTRIBUTES)
+            .apply { backgroundColor = Model.naturalHighlight })
+      }
     }
-  }
 
   interface AceJumpListener {
     fun finished() {}

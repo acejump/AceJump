@@ -1,8 +1,10 @@
 package org.acejump.search
 
 import com.intellij.openapi.diagnostic.Logger
+import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
+import org.acejump.view.Model.LONG_DOCUMENT
 import org.acejump.view.Model.boundaries
-import org.acejump.view.Model.editor
+import org.acejump.view.Model.editorText
 import kotlin.streams.toList
 
 /**
@@ -11,38 +13,34 @@ import kotlin.streams.toList
  */
 
 internal object Scanner {
-  val numCores = Runtime.getRuntime().availableProcessors() - 1
-  const val minLinesToParallelize = 1000
+  val cores = Runtime.getRuntime().availableProcessors() - 1
   private val logger = Logger.getInstance(Scanner::class.java)
 
-  fun findMatchingSites(searchText: String, model: AceFindModel, cache: Set<Int>) =
-    searchText.run {
-      val chunks: List<Pair<Int, String>> = chunkIfTooLong(searchText)
-      if (chunks.size == 1)
-        chunks.first().second.search(model, searchText, cache)
-      else chunks.parallelStream().map { (offset, string) ->
-        string.search(model, searchText, cache).map { it + offset }
-      }.toList().flatten()
-    }.toSortedSet()
+  fun findMatchingSites(model: AceFindModel, cache: Set<Int>) =
+    if (!LONG_DOCUMENT || cache.size != 0 || boundaries != FULL_FILE_BOUNDARY)
+      editorText.search(model, cache, boundaries.intRange()).toSortedSet()
+    else
+      editorText.chunk().parallelStream().map { chunk ->
+        editorText.search(model, cache, chunk)
+      }.toList().flatten().toSortedSet()
 
-  private fun String.chunkIfTooLong(searchText: String): List<Pair<Int, String>> {
-    val lines = count { it == '\n' }
-    var offset = 0
-    return if (minLinesToParallelize < lines)
-      splitToSequence("\n", "\r").toList().run { chunked(lines / numCores + 1) }
-        .map { Pair(offset, it.joinToString("\n")).also { offset += it.second.length + 1 } }
-        .also { logger.info("Query parallelization enabled ($lines lines)") }
-    else listOf(Pair(searchText.length, searchText))
-      .also { logger.info("Query parallelization disabled ($lines lines)") }
-  }
+  private fun String.chunk(chunkSize: Int = count { it == '\n' } / cores + 1) =
+    splitToSequence("\n", "\r").toList().run {
+      logger.info("Parallelizing query across $cores cores")
+      var offset = 0
+      chunked(chunkSize).map {
+        val len = it.joinToString("\n").length
+        (offset..(offset + len)).also { offset += len + 1 }
+      }
+    }
 
-  private fun String.search(model: AceFindModel, searchText: String, cache: Set<Int>) =
+  fun String.search(model: AceFindModel, cache: Set<Int>, chunk: IntRange) =
     run {
       val query = model.stringToFind
-      if (searchText.isEmpty() || query.isEmpty()) sortedSetOf<Int>()
+      if (isEmpty() || query.isEmpty()) sortedSetOf<Int>()
       // If the cache is populated, filter it instead of redoing prior work
-      else if (cache.isEmpty()) findAll(model.toRegex(), boundaries.start)
-      else filterCache(cache, query)
+      else if (cache.isNotEmpty()) filterCache(cache, query)
+      else findAll(model.toRegex(), chunk)
     }.toList()
 
   private fun String.filterCache(cache: Set<Int>, query: String) =
@@ -56,17 +54,15 @@ internal object Scanner {
       )
     }.toList()
 
-  private fun CharSequence.findAll(regex: Regex, startingFromIndex: Int) =
+  fun CharSequence.findAll(regex: Regex, chunk: IntRange) =
     generateSequence(
-      seedFunction = { regex.find(this, startingFromIndex) },
-      nextFunction = ::filterNextResult
+      seedFunction = { regex.find(this, chunk.first) },
+      nextFunction = { result -> filterNext(result, chunk) }
     ).map { it.range.first }.toList()
 
-  private tailrec fun filterNextResult(result: MatchResult): MatchResult? {
+  fun filterNext(result: MatchResult, chunk: IntRange): MatchResult? {
     val next = result.next() ?: return null
     val offset = next.range.first
-    return if (offset !in boundaries) null
-    else if (editor.isNotFolded(offset)) next
-    else filterNextResult(next)
+    return if (offset !in chunk) null else next
   }
 }

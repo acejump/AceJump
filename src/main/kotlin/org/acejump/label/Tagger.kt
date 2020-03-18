@@ -16,7 +16,7 @@ import kotlin.streams.toList
 import kotlin.system.measureTimeMillis
 
 /**
- * Singleton that works with Finder to assign selectable tags to search results
+ * The [Tagger] works with [Finder] to assign selectable tags to search results
  * in the editor. These tags may be selected by typing their label at any point
  * during the search. Since there is no explicit signal to begin selecting a tag
  * when AceJump is active, we must infer when a tag is being selected. We do so
@@ -25,12 +25,8 @@ import kotlin.system.measureTimeMillis
  *
  * To do so, we must solve a tag assignment problem, where each search result is
  * assigned an available tag. The Tagger (1) identifies available tags (2) uses
- * the Solver to assign them, and (3) determines when a previously assigned tag
- * has been selected, then (4) calls Jumper to reposition the caret.
- *
- * @see Finder
- * @see Solver
- * @see Jumper
+ * the [Solver] to assign them, and (3) determines when a previously assigned
+ * tag has been selected, then (4) calls [Jumper] to reposition the caret.
  */
 
 object Tagger : Resettable {
