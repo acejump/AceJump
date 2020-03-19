@@ -5,7 +5,9 @@ import com.intellij.openapi.actionSystem.IdeActions.*
 import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.actionSystem.*
+import com.intellij.openapi.editor.actionSystem.EditorActionHandler
+import com.intellij.openapi.editor.actionSystem.EditorActionManager
+import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
 import com.intellij.openapi.editor.colors.EditorColorsManager
@@ -16,9 +18,11 @@ import org.acejump.label.Pattern
 import org.acejump.label.Pattern.*
 import org.acejump.label.Tagger
 import org.acejump.search.*
-import org.acejump.view.*
+import org.acejump.view.Boundary
 import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
+import org.acejump.view.Canvas
 import org.acejump.view.Canvas.bindCanvas
+import org.acejump.view.Model
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.setupCaret
 import java.awt.Color
@@ -70,9 +74,18 @@ object Handler : TypedActionHandler, Resettable {
   private fun installKeyHandler() = typingAction.setupRawHandler(this)
   private fun uninstallKeyHandler() = typingAction.setupRawHandler(oldHandler)
 
+  /**
+   * TODO: Integrate query highlighting with [AceSearchSession]
+   */
+
+  var session: AceSearchSession? = null
   override fun execute(editor: Editor, key: Char, dataContext: DataContext) {
     logger.info("Intercepted keystroke: $key")
     Finder.query += key // This will trigger an update
+
+//    if (session == null)
+//      session = AceSearchSession(editor, AceFindModel(key.toString()))
+//    else session?.findModel!!.stringToFind += key
   }
 
   private fun configureEditor() =
@@ -117,6 +130,7 @@ object Handler : TypedActionHandler, Resettable {
 
   override fun reset() {
     if (enabled) Listener.disable()
+    session = null
 
     // In order to get Finder.query value, listeners should
     //  be placed before cleanup

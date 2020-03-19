@@ -9,6 +9,7 @@ class AceFindModel: FindModel {
     isCaseSensitive = false
     stringToFind = key
     isRegularExpressions = isRegex
+    isReplaceState = false
   }
 
   fun toRegex(): Regex {

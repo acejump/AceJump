@@ -12,8 +12,8 @@ import javax.swing.JComponent
 import javax.swing.SwingUtilities.convertPoint
 
 /**
- * Overlay composed of all [Marker]s. Maintains a registry of tags' visual
- * positions once assigned. We must avoid painting two tags to the same space.
+ * Overlay composed of all tag [Marker]s. Maintains a registry of tags' visual
+ * positions once assigned, so that we do not paint two tags to the same space.
  */
 
 object Canvas: JComponent(), Resettable {
