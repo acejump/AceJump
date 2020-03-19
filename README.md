@@ -183,3 +183,4 @@ AceJump is made possible by users just like you! If you enjoy using AceJump, ple
 [plugin-download-svg]: https://img.shields.io/jetbrains/plugin/d/7086-acejump.svg
 [twitter-url]: https://twitter.com/search?f=tweets&q=AceJump
 [twitter-badge]: https://img.shields.io/twitter/url/http/shields.io.svg?style=social
+[apache-license-svg]: https://img.shields.io/badge/License-GPL%20v3-blue.svg
