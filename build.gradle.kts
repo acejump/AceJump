@@ -5,7 +5,7 @@ import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 plugins {
   idea apply true
   kotlin("jvm") version "1.3.70"
-  id("org.jetbrains.intellij") version "0.4.16"
+  id("org.jetbrains.intellij") version "0.4.17"
   id("de.fayard.refreshVersions") version "0.8.6"
 }
 
