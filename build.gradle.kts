@@ -6,7 +6,6 @@ plugins {
   idea apply true
   kotlin("jvm") version "1.3.71"
   id("org.jetbrains.intellij") version "0.4.18"
-  id("de.fayard.refreshVersions") version "0.8.6"
 }
 
 fun fetchChangeNotes() =
@@ -44,7 +43,7 @@ tasks {
 dependencies {
   // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
   compileOnly(kotlin("stdlib-jdk8"))
-  implementation("net.duguying.pinyin:pinyin:_")
+  implementation("net.duguying.pinyin:pinyin:0.0.1")
 }
 
 repositories.mavenCentral()
