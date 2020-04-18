@@ -4,7 +4,7 @@ import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.3.71"
+  kotlin("jvm") version "1.3.72"
   id("org.jetbrains.intellij") version "0.4.18"
 }
 
@@ -49,6 +49,7 @@ dependencies {
 repositories.mavenCentral()
 
 intellij {
+  version = "2020.1"
   pluginName = "AceJump"
   updateSinceUntilBuild = false
   setPlugins("java")
