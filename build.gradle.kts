@@ -10,7 +10,7 @@ plugins {
 
 fun fetchChangeNotes() =
   File("CHANGES.md").readLines().drop(4).takeWhile { !it.startsWith("###") }.let { notes ->
-  "<![CDATA[<a href=\"https://github.com/acejump/AceJump/blob/master/src/main/resources/META-INF/CHANGES.md\">Release Notes</a> ]]>"
+  "<![CDATA[ <a href=\"https://github.com/acejump/AceJump/blob/master/src/main/resources/META-INF/CHANGES.md\">Release Notes</a> ]]>"
 }
 
 tasks {
@@ -35,7 +35,7 @@ tasks {
   }
 
   withType<PatchPluginXmlTask> {
-    sinceBuild("201.*")
+    sinceBuild("201.6668.121")
     changeNotes(fetchChangeNotes())
   }
 }
