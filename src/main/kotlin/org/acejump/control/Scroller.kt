@@ -22,26 +22,29 @@ object Scroller {
   private var scrollX = 0
   private var scrollY = 0
 
-  fun scroll(isNext: Boolean = true): Boolean {
-    val position = if (isNext) findNextPosition() ?: return false
-    else findPreviousPosition() ?: return false
-    editor.scrollingModel.disableAnimation()
-    editor.scrollingModel.scrollTo(position, CENTER)
-
-    val firstInView = textMatches.first { it in editor.getView() }
-    val horizontalOffset = editor.offsetToLogicalPosition(firstInView).column
-    if(horizontalOffset > editor.scrollingModel.visibleArea.width)
-      editor.scrollingModel.scrollHorizontally(horizontalOffset)
-
-    viewBounds = editor.getView()
-
-    return true
+  fun scroll(forward: Boolean = true): Boolean {
+    logger.info("Scrolling to ${if (forward) "next" else "previous"} match")
+    val position = if (forward) findNextPosition() else findPreviousPosition()
+    return if (position != null) true.also { scrollTo(position) }
+    else false.also { logger.info("No result found") }
   }
 
-  fun ensureCaretVisible(): Boolean {
-    val initialArea = editor.scrollingModel.visibleArea
-    editor.scrollingModel.scrollToCaret(MAKE_VISIBLE)
-    return editor.scrollingModel.visibleArea == initialArea
+  private fun scrollTo(position: LogicalPosition) = editor.run {
+    scrollingModel.disableAnimation()
+    scrollingModel.scrollTo(position, CENTER)
+
+    val firstInView = textMatches.first { it in getView() }
+    val horizontalOffset = offsetToLogicalPosition(firstInView).column
+    if (horizontalOffset > scrollingModel.visibleArea.width)
+      scrollingModel.scrollHorizontally(horizontalOffset)
+
+    viewBounds = getView()
+  }
+
+  fun ensureCaretVisible() = editor.scrollingModel.run {
+    val initialArea = visibleArea
+    scrollToCaret(MAKE_VISIBLE)
+    visibleArea == initialArea
   }
 
   private fun findPreviousPosition(): LogicalPosition? {
