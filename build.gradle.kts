@@ -10,7 +10,7 @@ plugins {
 
 fun fetchChangeNotes() =
   File("CHANGES.md").readLines().drop(4).takeWhile { !it.startsWith("###") }.let { notes ->
-  "<![CDATA[$notes<a href=\"https://github.com/acejump/AceJump/blob/master/src/main/resources/META-INF/CHANGES.md\">Release Notes</a> ]]>"
+  "<![CDATA[<a href=\"https://github.com/acejump/AceJump/blob/master/src/main/resources/META-INF/CHANGES.md\">Release Notes</a> ]]>"
 }
 
 tasks {
@@ -30,12 +30,12 @@ tasks {
   }
 
   withType<PublishTask> {
-    token(project.findProperty("jbr.token") as String?
-      ?: System.getenv("JBR_TOKEN"))
+    val intellijPublishToken: String? by project
+    token(intellijPublishToken)
   }
 
   withType<PatchPluginXmlTask> {
-    sinceBuild("183.*")
+    sinceBuild("201.*")
     changeNotes(fetchChangeNotes())
   }
 }
@@ -56,4 +56,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.5.9"
+version = "3.6.0"

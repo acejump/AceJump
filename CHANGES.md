@@ -10,8 +10,6 @@ Honor camel humps [#315](https://github.com/acejump/AceJump/issues/315). Thanks 
 
 Support dynamic application reloading [#322](https://github.com/acejump/AceJump/issues/322).
 
-Speed up tagging on very large files.
-
 ### 3.5.9
 
 Fix a build configuration error affecting plugins which depend on AceJump. Fixes [#305](https://github.com/acejump/AceJump/issues/305).

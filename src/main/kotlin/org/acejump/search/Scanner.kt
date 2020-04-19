@@ -51,7 +51,7 @@ internal object Scanner {
   fun String.search(model: AceFindModel, cache: Set<Int>, chunk: IntRange) =
     run {
       val query = model.stringToFind
-      if (isEmpty() || query.isEmpty()) sortedSetOf()
+      if (isEmpty() || query.isEmpty()) sortedSetOf<Int>()
       else if (cache.isNotEmpty()) filterCache(cache, query)
       else findAll(model.toRegex(), chunk)
     }.toList()
