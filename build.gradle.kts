@@ -9,9 +9,15 @@ plugins {
 }
 
 fun fetchChangeNotes() =
-  File("CHANGES.md").readLines().drop(4).takeWhile { !it.startsWith("###") }.let { notes ->
-  "<![CDATA[ <a href=\"https://github.com/acejump/AceJump/blob/master/src/main/resources/META-INF/CHANGES.md\">Release Notes</a> ]]>"
+  File("CHANGES.md").readLines().drop(4).takeWhile { !it.startsWith("###") }.let { mdNotes ->
+    val htmlNotes = mdNotes.joinToString("\n").replace(Regex("\\[(.*)\\]\\((.*)\\)"), "<a href=\"$2\">$1</a>")
+    "$htmlNotes\n<a href=\"https://github.com/acejump/AceJump/blob/master/CHANGES.md\">Release Notes</a>"
 }
+
+val pluginDescription =
+  "AceJump allows you to quickly navigate the caret to any position visible in the editor.\n" +
+  "See a demo of <a href=\"https://www.youtube.com/watch?v=8cgy8ITtsJE\">AceJump in action</a>!\n" +
+  "Simply hit \"ctrl+;\", type a character, then type the matching character to Ace Jump."
 
 tasks {
   withType<KotlinCompile> {
@@ -37,6 +43,7 @@ tasks {
   withType<PatchPluginXmlTask> {
     sinceBuild("201.6668.121")
     changeNotes(fetchChangeNotes())
+    pluginDescription(pluginDescription)
   }
 }
 
