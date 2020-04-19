@@ -3,7 +3,6 @@ package org.acejump.search
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import org.acejump.config.AceConfig
 import org.acejump.control.Handler
-import org.acejump.label.Tagger
 import org.acejump.view.Canvas
 import org.acejump.view.Model
 import org.acejump.view.Model.editor

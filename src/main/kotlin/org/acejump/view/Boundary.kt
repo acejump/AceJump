@@ -65,5 +65,5 @@ enum class Boundary: ClosedRange<Int> {
 
   fun intRange() = IntRange(start, endInclusive)
 
-  override fun toString() = super<ClosedRange>.toString() + " (${intRange()}) "
+  override fun toString() = super.toString() + " (${intRange()}) "
 }

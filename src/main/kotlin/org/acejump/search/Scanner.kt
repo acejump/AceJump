@@ -1,7 +1,6 @@
 package org.acejump.search
 
 import com.intellij.openapi.diagnostic.Logger
-import org.acejump.search.Scanner
 import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
 import org.acejump.view.Model.LONG_DOCUMENT
 import org.acejump.view.Model.boundaries
@@ -52,7 +51,7 @@ internal object Scanner {
   fun String.search(model: AceFindModel, cache: Set<Int>, chunk: IntRange) =
     run {
       val query = model.stringToFind
-      if (isEmpty() || query.isEmpty()) sortedSetOf<Int>()
+      if (isEmpty() || query.isEmpty()) sortedSetOf()
       else if (cache.isNotEmpty()) filterCache(cache, query)
       else findAll(model.toRegex(), chunk)
     }.toList()

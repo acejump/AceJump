@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import com.intellij.openapi.editor.actionSystem.EditorActionManager
+import com.intellij.openapi.editor.actionSystem.TypedAction
 import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.colors.EditorColors.TEXT_SEARCH_RESULT_ATTRIBUTES
@@ -35,7 +36,7 @@ object Handler : TypedActionHandler, Resettable {
   private val listeners: MutableList<AceJumpListener> = ContainerUtil.createLockFreeCopyOnWriteList()
   private val logger = Logger.getInstance(Handler::class.java)
   private var enabled = false
-  private val typingAction = EditorActionManager.getInstance().typedAction
+  private val typingAction = TypedAction.getInstance()
   private val oldHandler = typingAction.rawHandler
 
   private val editorActionMap = mutableMapOf<String, EditorActionHandler>(

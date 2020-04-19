@@ -1,6 +1,7 @@
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.IdeActions.*
 import com.intellij.openapi.fileTypes.PlainTextFileType
+import com.intellij.psi.PsiFile
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.ui.UIUtil
 import org.acejump.control.*
@@ -118,7 +119,7 @@ class AceTest : BasePlatformTestCase() {
     }
   }
 
-  fun makeEditor(contents: String) =
+  fun makeEditor(contents: String): PsiFile =
     myFixture.configureByText(PlainTextFileType.INSTANCE, contents)
 
   fun takeAction(action: String) = myFixture.performEditorAction(action)
