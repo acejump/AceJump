@@ -36,7 +36,7 @@ tasks {
   }
 
   withType<PatchPluginXmlTask> {
-    sinceBuild("201.6668.121")
+    sinceBuild("201.6668.0")
     changeNotes(fetchChangeNotes())
   }
 }
@@ -57,4 +57,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.6.0"
+version = "3.6.1"
