@@ -33,11 +33,10 @@ object Model {
     get() = editor.document.text
       .let { if (AceConfig.supportPinyin) it.mapToPinyin() else it }
 
-  private fun String.mapToPinyin() =
-    chars().run { if(DEFAULT_BUFFER < length) parallel() else this }.mapToObj {
-      if (UnicodeScript.of(it) == UnicodeScript.HAN)
-        pinyin.translateFirstChar(it.toString()).first() else it.toChar()
-    }.toArray().joinToString("")
+  private fun String.mapToPinyin() = map {
+    if (UnicodeScript.of(it.toInt()) == UnicodeScript.HAN)
+      pinyin.translateFirstChar(it.toString()).first() else it
+  }.joinToString("")
 
   val pinyin = Pinyin()
 

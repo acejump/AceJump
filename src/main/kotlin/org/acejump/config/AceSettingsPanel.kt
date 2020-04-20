@@ -33,7 +33,7 @@ internal class AceSettingsPanel {
   private val textHighlightColorWheel = ColorPanel()
   private val tagForegroundColorWheel = ColorPanel()
   private val tagBackgroundColorWheel = ColorPanel()
-  private val displayQueryCheckBox = JBCheckBox()
+  private val displayQueryCheckBox = JBCheckBox().apply { isEnabled = false }
   private val supportPinyinCheckBox = JBCheckBox()
 
   init {
@@ -104,6 +104,6 @@ internal class AceSettingsPanel {
   private operator fun ColorPanel.getValue(a: AceSettingsPanel, p: KProperty<*>) = selectedColor
   private operator fun ColorPanel.setValue(a: AceSettingsPanel, p: KProperty<*>, c: Color?) = setSelectedColor(c)
 
-  private operator fun JCheckBox.getValue(a: AceSettingsPanel, p: KProperty<*>) = isEnabled
-  private operator fun JCheckBox.setValue(a: AceSettingsPanel, p: KProperty<*>, enabled: Boolean) = setEnabled(enabled)
+  private operator fun JCheckBox.getValue(a: AceSettingsPanel, p: KProperty<*>) = isSelected
+  private operator fun JCheckBox.setValue(a: AceSettingsPanel, p: KProperty<*>, selected: Boolean) = setSelected(selected)
 }

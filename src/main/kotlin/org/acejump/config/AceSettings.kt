@@ -11,17 +11,19 @@ import kotlin.reflect.KProperty
  */
 
 // TODO: https://github.com/acejump/AceJump/issues/215
-data class AceSettings(var layout: KeyLayout = QWERTY,
-                       var allowedChars: String = layout.text,
-                       // These must be primitives in order to be serializable
-                       internal var jumpModeRGB: Int = BLUE.rgb,
-                       internal var targetModeRGB: Int = RED.rgb,
-                       internal var definitionModeRGB: Int = MAGENTA.rgb,
-                       internal var textHighlightRGB: Int = GREEN.rgb,
-                       internal var tagForegroundRGB: Int = BLACK.rgb,
-                       internal var tagBackgroundRGB: Int = YELLOW.rgb,
-                       internal var displayQuery: Boolean = false,
-                       internal var supportPinyin: Boolean = true) {
+data class AceSettings(
+  var layout: KeyLayout = QWERTY,
+  var allowedChars: String = layout.text,
+  // These must be primitives in order to be serializable
+  internal var jumpModeRGB: Int = BLUE.rgb,
+  internal var targetModeRGB: Int = RED.rgb,
+  internal var definitionModeRGB: Int = MAGENTA.rgb,
+  internal var textHighlightRGB: Int = GREEN.rgb,
+  internal var tagForegroundRGB: Int = BLACK.rgb,
+  internal var tagBackgroundRGB: Int = YELLOW.rgb,
+  internal var displayQuery: Boolean = false,
+  internal var supportPinyin: Boolean = false
+) {
 
   // ...but we expose them to the world as Color
   val jumpModeColor: Color by { jumpModeRGB }

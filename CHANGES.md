@@ -1,5 +1,13 @@
 # Changelog
 
+### 3.6.1
+
+Fixes [#324](https://github.com/acejump/AceJump/issues/314). Thanks @AlexPl292!
+
+Fixes [#325](https://github.com/acejump/AceJump/issues/325).
+
+Fixes Pinyin support.
+
 ### 3.6.0
 
 Adds support for Chinese [#314](https://github.com/acejump/AceJump/issues/314).
