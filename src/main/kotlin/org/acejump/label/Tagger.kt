@@ -5,13 +5,44 @@ import com.google.common.collect.HashBiMap
 import com.intellij.openapi.diagnostic.Logger
 import org.acejump.config.AceConfig
 import org.acejump.control.Scroller
-import org.acejump.label.Pattern.Companion.defaultTagOrder
-import org.acejump.search.*
+import org.acejump.search.AceFindModel
+import org.acejump.search.Finder
+import org.acejump.search.Jumper
+import org.acejump.search.Resettable
+import org.acejump.search.canIndicesBeSimultaneouslyVisible
+import org.acejump.search.getFeasibleRegion
+import org.acejump.search.runNow
 import org.acejump.view.Marker
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.viewBounds
 import java.util.*
+import kotlin.collections.Iterable
+import kotlin.collections.List
+import kotlin.collections.Map
+import kotlin.collections.Set
+import kotlin.collections.all
+import kotlin.collections.any
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.contains
+import kotlin.collections.emptyList
+import kotlin.collections.filter
+import kotlin.collections.firstOrNull
+import kotlin.collections.isNotEmpty
+import kotlin.collections.iterator
+import kotlin.collections.joinToString
+import kotlin.collections.lastOrNull
+import kotlin.collections.map
+import kotlin.collections.mapKeysTo
+import kotlin.collections.none
+import kotlin.collections.partition
+import kotlin.collections.plus
+import kotlin.collections.sortedSetOf
+import kotlin.collections.sortedWith
+import kotlin.collections.toMap
+import kotlin.collections.toSortedSet
+import kotlin.collections.zip
 import kotlin.streams.toList
 import kotlin.system.measureTimeMillis
 
@@ -243,7 +274,7 @@ object Tagger : Resettable {
   }
 
   private fun solveRegex(vacantResults: List<Int>, availableTags: Set<String>) =
-    availableTags.sortedWith(defaultTagOrder).zip(vacantResults).toMap()
+    availableTags.sortedWith(AceConfig.defaultTagOrder).zip(vacantResults).toMap()
 
   /**
    * Adds pre-existing tags where search string and tag overlap. For example,

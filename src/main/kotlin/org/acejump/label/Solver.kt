@@ -1,9 +1,10 @@
 package org.acejump.label
 
-import com.google.common.collect.*
+import com.google.common.collect.Multimaps
+import com.google.common.collect.Ordering
+import com.google.common.collect.TreeMultimap
 import com.intellij.openapi.diagnostic.Logger
 import org.acejump.config.AceConfig
-import org.acejump.label.Pattern.Companion.defaultTagOrder
 import org.acejump.search.wordBoundsPlus
 import kotlin.collections.set
 import kotlin.math.max
@@ -86,7 +87,7 @@ class Solver(val text: String,
    * @see isCompatibleWithTagChar This defines how tags may be assigned to sites
    */
 
-  private val tagOrder = defaultTagOrder
+  private val tagOrder = AceConfig.defaultTagOrder
     .thenBy { eligibleSitesByTag[it].size }
     .thenBy(AceConfig.layout.priority { it.last() })
 
