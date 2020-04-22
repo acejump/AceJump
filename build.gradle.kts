@@ -44,10 +44,13 @@ tasks {
 dependencies {
   // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
   compileOnly(kotlin("stdlib-jdk8"))
-  implementation("net.duguying.pinyin:pinyin:0.0.1")
+  implementation("com.github.promeg:tinypinyin:2.0.3")
 }
 
-repositories.mavenCentral()
+repositories {
+  mavenCentral()
+  jcenter()
+}
 
 intellij {
   version = "2020.1"

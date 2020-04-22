@@ -1,10 +1,10 @@
 package org.acejump.view
 
+import com.github.promeg.pinyinhelper.Pinyin
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.openapi.editor.impl.EditorImpl
 import com.intellij.openapi.project.ProjectManager
-import net.duguying.pinyin.Pinyin
 import org.acejump.config.AceConfig
 import org.acejump.search.defaultEditor
 import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
@@ -33,12 +33,8 @@ object Model {
     get() = editor.document.text
       .let { if (AceConfig.supportPinyin) it.mapToPinyin() else it }
 
-  private fun String.mapToPinyin() = map {
-    if (UnicodeScript.of(it.toInt()) == UnicodeScript.HAN)
-      pinyin.translateFirstChar(it.toString()).first() else it
-  }.joinToString("")
-
-  val pinyin = Pinyin()
+  private fun String.mapToPinyin() =
+    map { Pinyin.toPinyin(it).first() }.joinToString("")
 
   var naturalBlock = false
   var naturalBlink = true
