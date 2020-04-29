@@ -12,7 +12,6 @@ import java.awt.Color.BLACK
 import java.awt.Color.YELLOW
 import java.awt.Font
 import java.awt.Font.BOLD
-import java.lang.Character.UnicodeScript
 
 /**
  * Data holder for all settings and IDE components needed by AceJump.

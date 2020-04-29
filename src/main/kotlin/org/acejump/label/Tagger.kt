@@ -149,14 +149,13 @@ object Tagger : Resettable {
    * Checks whether a visible tag has been selected, and if so, jumps to it.
    */
 
-  private fun giveJumpOpportunity() {
-    tagMap.entries.filter { it.value in viewBounds }
-      .firstOrNull { it.solves(query) }?.run {
+  private fun giveJumpOpportunity() =
+    tagMap.entries.firstOrNull { it.value in viewBounds && it solves query }
+      ?.run {
         logger.info("User selected tag: ${key.toUpperCase()}")
         tagSelected = true
         Jumper.jumpTo(value)
       }
-  }
 
   /**
    * Returns true if and only if a tag location is unambiguously completed by a
@@ -164,7 +163,7 @@ object Tagger : Resettable {
    * AND ends with the tag in question. Tags are case-insensitive.
    */
 
-  private fun Map.Entry<String, Int>.solves(query: String) =
+  private infix fun Map.Entry<String, Int>.solves(query: String) =
     query.endsWith(key, true) && isCompatibleWithQuery(query)
 
   private fun Map.Entry<String, Int>.isCompatibleWithQuery(query: String) =

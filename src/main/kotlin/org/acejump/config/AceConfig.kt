@@ -71,7 +71,7 @@ object AceConfig: Configurable, PersistentStateComponent<AceSettings> {
     '8' to "8796054321uiyhjkotgbnmlprfvedcwsxqaz",
     '9' to "9807654321ioujklpyhnmtgbrfvedcwsxqaz",
     '0' to "0987654321opiklujmyhntgbrfvedcwsxqaz")
-    .mapValues { it.value.mapIndices() }
+    .mapValues { (_, v) -> v.mapIndices() }
 
   private fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]
 
