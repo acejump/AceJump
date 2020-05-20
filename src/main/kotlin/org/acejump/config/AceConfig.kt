@@ -14,7 +14,7 @@ import java.awt.Color
  * https://www.jetbrains.org/intellij/sdk/docs/basics/persisting_state_of_components.html
  */
 
-@State(name = "AceConfig", storages = [(Storage("AceJump.xml"))])
+@State(name = "AceConfig", storages = [(Storage("\$APP_CONFIG\$/AceJump.xml"))])
 object AceConfig: Configurable, PersistentStateComponent<AceSettings> {
   private val logger = Logger.getInstance(AceConfig::class.java)
   private var settings = AceSettings()
