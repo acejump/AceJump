@@ -1,6 +1,9 @@
 package org.acejump.config
 
-import com.intellij.openapi.components.*
+import com.intellij.openapi.components.PersistentStateComponent
+import com.intellij.openapi.components.ServiceManager
+import com.intellij.openapi.components.State
+import com.intellij.openapi.components.Storage
 import com.intellij.openapi.diagnostic.Logger
 import org.acejump.label.Pattern
 import org.acejump.label.Pattern.Companion.KeyLayout
@@ -19,7 +22,7 @@ class AceConfig: PersistentStateComponent<AceSettings> {
 
   private var aceSettings = AceSettings()
     set(value) {
-      allPossibleTags = value.allowedChars.bigrams()
+      allPossibleTags = value.allowedChars.bigrams(defaultTagOrder(value.layout))
       field = value
     }
 
@@ -78,15 +81,18 @@ class AceConfig: PersistentStateComponent<AceSettings> {
 
     private fun distance(fromKey: Char, toKey: Char) = nearby[fromKey]!![toKey]
 
-    val defaultTagOrder: Comparator<String> = compareBy(
-      { it[0].isDigit() || it[1].isDigit() },
-      { distance(it[0], it.last()) },
-      layout.priority { it[0] })
+    val defaultTagOrder = defaultTagOrder(this.layout)
+
+    private fun defaultTagOrder(layout: KeyLayout) = compareBy(
+        { it[0].isDigit() || it[1].isDigit() },
+        { distance(it[0], it.last()) },
+        layout.priority { it[0] })
 
     internal var allPossibleTags: Set<String> = settings.allowedChars.bigrams()
 
-    internal fun String.bigrams() = run { flatMap { e -> map { c -> "$e$c" } } }
-      .sortedWith(defaultTagOrder).toSet()
+    internal fun String.bigrams(comparator: Comparator<String> = defaultTagOrder): Set<String> {
+      return run { flatMap { e -> map { c -> "$e$c" } } }.sortedWith(comparator).toSet()
+    }
 
     fun getCompatibleTags(query: String, matching: (String) -> Boolean) =
       Pattern.filter(allPossibleTags, query).filter(matching).toSet()
