@@ -2,6 +2,10 @@
 
 ### 3.6.1
 
+Fixes [#226](https://github.com/acejump/AceJump/issues/226).
+
+### 3.6.1
+
 Fixes [#324](https://github.com/acejump/AceJump/issues/324). Thanks @AlexPl292!
 
 Fixes [#325](https://github.com/acejump/AceJump/issues/325).

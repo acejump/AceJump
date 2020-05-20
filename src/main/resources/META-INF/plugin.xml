@@ -16,8 +16,8 @@
   <extensions defaultExtensionNs="com.intellij">
     <applicationService serviceImplementation="org.acejump.config.AceConfig"/>
     <applicationConfigurable groupId="tools" displayName="AceJump"
-                             id="preferences.AceConfigurable" dynamic="true"
-                             instance="org.acejump.config.AceConfig"/>
+                             instance="org.acejump.config.AceConfigurable"
+                             id="preferences.AceConfigurable" dynamic="true"/>
   </extensions>
 
   <actions>
