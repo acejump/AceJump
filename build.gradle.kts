@@ -5,7 +5,7 @@ import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 plugins {
   idea apply true
   kotlin("jvm") version "1.3.72"
-  id("org.jetbrains.intellij") version "0.4.18"
+  id("org.jetbrains.intellij") version "0.4.21"
 }
 
 fun fetchChangeNotes() =

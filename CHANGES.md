@@ -1,8 +1,10 @@
 # Changelog
 
-### 3.6.1
+### 3.6.2
 
-Fixes [#226](https://github.com/acejump/AceJump/issues/226).
+Fixes [#226](https://github.com/acejump/AceJump/issues/226). Thanks @AlexPl292!
+
+Update Pinyin engine.
 
 ### 3.6.1
 
