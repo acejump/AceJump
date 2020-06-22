@@ -57,7 +57,7 @@ class AceLineAction: AceAction() {
  * definition (i.e. declaration) of the token in the editor, if it exists.
  */
 
-object AceDefinitionAction: AceAction() {
+class AceDefinitionAction: AceAction() {
   override fun customize() = Jumper.toggleDeclarationMode()
 }
 
@@ -73,7 +73,7 @@ class AceWordAction: AceAction() {
  * Search for words from the start of the screen to the caret
  */
 
-object AceWordForwardAction: AceAction() {
+class AceWordForwardAction: AceAction() {
   override fun customize() = regexSearch(ALL_WORDS, AFTER_CARET_BOUNDARY)
 }
 
@@ -81,6 +81,6 @@ object AceWordForwardAction: AceAction() {
  * Search for words from the caret position to the start of the screen
  */
 
-object AceWordBackwardsAction: AceAction() {
+class AceWordBackwardsAction: AceAction() {
   override fun customize() = regexSearch(ALL_WORDS, BEFORE_CARET_BOUNDARY)
 }
