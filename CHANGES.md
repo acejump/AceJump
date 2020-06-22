@@ -1,5 +1,11 @@
 # Changelog
 
+### 3.6.3
+
+Vote for your favorite <a href="https://twitter.com/breandan/status/1274025876024438784">AceJump logo</a>!
+
+Fixes potential bug. Increases test coverage.
+
 ### 3.6.2
 
 Fixes [#226](https://github.com/acejump/AceJump/issues/226). Thanks @AlexPl292!

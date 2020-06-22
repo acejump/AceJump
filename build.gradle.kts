@@ -60,4 +60,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.6.2"
+version = "3.6.3"
