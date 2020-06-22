@@ -20,7 +20,7 @@ import java.awt.Color
 class AceConfig: PersistentStateComponent<AceSettings> {
   private val logger = Logger.getInstance(AceConfig::class.java)
 
-  private var aceSettings = AceSettings()
+  internal var aceSettings = AceSettings()
     set(value) {
       allPossibleTags = value.allowedChars.bigrams(defaultTagOrder(value.layout))
       field = value

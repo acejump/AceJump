@@ -1,9 +1,11 @@
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.IdeActions.*
+import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.psi.PsiFile
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.ui.UIUtil
+import org.acejump.config.AceConfig
 import org.acejump.control.*
 import org.acejump.label.Tagger
 import org.acejump.view.Canvas
@@ -78,18 +80,60 @@ class AceTest : BasePlatformTestCase() {
   fun `test words before caret action`() {
     makeEditor("test words <caret> before caret is two")
 
-    takeAction(AceWordBackwardsAction)
+    takeAction(AceWordBackwardsAction())
 
-    assertEquals(Tagger.markers.size, 2)
+    assertEquals(2, Tagger.markers.size)
   }
 
   fun `test words after caret action`() {
     makeEditor("test words <caret> after caret is four")
 
-    takeAction(AceWordForwardAction)
+    takeAction(AceWordForwardAction())
 
-    assertEquals(Tagger.markers.size, 4)
+    assertEquals(4, Tagger.markers.size)
   }
+
+  fun `test word mode`() {
+    makeEditor("test word action")
+
+    takeAction(AceWordAction())
+
+    assertEquals(3, Tagger.markers.size)
+
+    typeAndWaitForResults(Canvas.jumpLocations.toList()[1].tag!!)
+
+    myFixture.checkResult("test <caret>word action")
+  }
+
+  fun `test target mode`() {
+    "<caret>test target action".search("target")
+
+    takeAction(AceTargetAction())
+    typeAndWaitForResults(Canvas.jumpLocations.first().tag!!)
+
+    myFixture.checkResult("test <selection>target<caret></selection> action")
+  }
+
+  fun `test line mode`() {
+    makeEditor("    test\n    three\n    lines")
+
+    takeAction(AceLineAction())
+
+    assertEquals(9, Tagger.markers.size)
+  }
+
+  fun `test pinyin selection`() {
+    getSettings().supportPinyin = true
+
+    "test 拼音 selection".search("py")
+
+    takeAction(AceTargetAction())
+    typeAndWaitForResults(Canvas.jumpLocations.first().tag!!)
+
+    myFixture.checkResult("test <selection>拼音<caret></selection> selection")
+  }
+
+  fun getSettings() = ServiceManager.getService(AceConfig::class.java).aceSettings
 
   // Enforces the results are available in less than 100ms
   private fun String.search(query: String) =
