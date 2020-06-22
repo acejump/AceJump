@@ -2,7 +2,7 @@
 
 ### 3.6.3
 
-Vote for your favorite <a href="https://twitter.com/breandan/status/1274025876024438784">AceJump logo</a>!
+Vote for your favorite <a href="https://twitter.com/breandan/status/1274169810411274241">AceJump logo</a>!
 
 Fixes potential bug. Increases test coverage.
 
