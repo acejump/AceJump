@@ -6,12 +6,7 @@ plugins {
   idea apply true
   kotlin("jvm") version "1.3.72"
   id("org.jetbrains.intellij") version "0.4.21"
-}
-
-fun fetchChangeNotes() =
-  File("CHANGES.md").readLines().drop(4).takeWhile { !it.startsWith("###") }.let { mdNotes ->
-    val htmlNotes = mdNotes.joinToString("\n").replace(Regex("\\[(.*)\\]\\((.*)\\)"), "<a href=\"$2\">$1</a>")
-    "$htmlNotes\n<a href=\"https://github.com/acejump/AceJump/blob/master/CHANGES.md\">Release Notes</a>"
+  id("org.jetbrains.changelog") version "0.3.2"
 }
 
 tasks {
@@ -37,8 +32,13 @@ tasks {
 
   withType<PatchPluginXmlTask> {
     sinceBuild("201.6668.0")
-    changeNotes(fetchChangeNotes())
+    changeNotes({ changelog.getLatest().toHTML() })
   }
+}
+
+changelog {
+  path = "${project.projectDir}/CHANGES.md"
+  headerFormat = "{0}"
 }
 
 dependencies {
