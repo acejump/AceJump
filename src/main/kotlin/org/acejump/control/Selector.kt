@@ -13,7 +13,7 @@ import org.acejump.view.Model.caretOffset
 object Selector {
   fun select(forward: Boolean = true) {
     val matches = nearestVisibleMatches(forward)
-    if (matches.isEmpty()) return
+    matches.ifEmpty { return }
     Jumper.jumpTo(matches.first(), false)
     val wasAlreadyVisible = Scroller.ensureCaretVisible()
     if (matches.size == 1 && wasAlreadyVisible) Handler.reset()

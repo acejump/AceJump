@@ -85,7 +85,7 @@ object Jumper: Resettable {
     val ranges = ArrayList<TextRange>()
     addWordSelection(settings.isCamelWords, editorText, offset, ranges)
 
-    if (ranges.isEmpty()) return
+    ranges.ifEmpty { return }
 
     val firstRange = ranges[0]
     val startOfWordOffset = max(0, firstRange.startOffset)

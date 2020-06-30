@@ -126,7 +126,7 @@ object Finder : Resettable {
 
   fun markup(markers: Set<Int> = results, isRegexQuery: Boolean = false) =
     runLater {
-      if (markers.isEmpty()) return@runLater
+      markers.ifEmpty { return@runLater }
 
       textHighlights.forEach { markup.removeHighlighter(it) }
       textHighlights = markers.map {

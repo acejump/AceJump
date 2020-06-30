@@ -48,7 +48,7 @@ object Canvas: JComponent(), Resettable {
   }
 
   override fun paint(graphics: Graphics) {
-    if (jumpLocations.isEmpty()) return
+    jumpLocations.ifEmpty { return }
 
     super.paint(graphics)
     occupied.clear()
