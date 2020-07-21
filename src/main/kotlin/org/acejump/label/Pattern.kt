@@ -66,4 +66,4 @@ enum class Pattern(val string: String) {
   }
 }
 
-fun String.mapIndices() = mapIndexed { i, c -> Pair(c, i) }.toMap()
+fun String.mapIndices() = mapIndexed { i, c -> c to i }.toMap()

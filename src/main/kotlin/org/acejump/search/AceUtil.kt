@@ -60,10 +60,10 @@ fun Editor.isNotFolded(offset: Int) = !foldingModel.isOffsetCollapsed(offset)
  */
 
 fun String.wordBounds(index: Int): Pair<Int, Int> {
-  var (first, last) = Pair(index, index)
+  var (first, last) = index to index
   while (0 < first && get(first - 1).isJavaIdentifierPart()) first--
   while (last < length && get(last).isJavaIdentifierPart()) last++
-  return Pair(first, last)
+  return first to last
 }
 
 fun String.wordBoundsPlus(index: Int): Pair<Int, Int> {
@@ -73,7 +73,7 @@ fun String.wordBoundsPlus(index: Int): Pair<Int, Int> {
     .takeWhile { !(get(it) == '\n' || get(it) == '\r') }
     .forEach { right = it }
 
-  return Pair(left, right)
+  return left to right
 }
 
 fun defaultEditor(): Editor =
