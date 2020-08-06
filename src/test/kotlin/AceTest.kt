@@ -9,6 +9,7 @@ import org.acejump.config.AceConfig
 import org.acejump.control.*
 import org.acejump.label.Tagger
 import org.acejump.view.Canvas
+import kotlin.random.Random
 import kotlin.system.measureTimeMillis
 
 /**
@@ -133,6 +134,30 @@ class AceTest : BasePlatformTestCase() {
     myFixture.checkResult("test <selection>拼音<caret></selection> selection")
   }
 
+  fun `test tag latency`() {
+    var time = 0L
+    val random = Random(0)
+
+    repeat(100) {
+      makeEditor(
+        generateSequence {
+          generateSequence {
+            generateSequence {
+              ('a'..'z').random(random)
+            }.take(5).joinToString("")
+          }.take(20).joinToString(" ")
+        }.take(100).joinToString("\n")
+      )
+
+      myFixture.testAction(AceAction())
+      time += measureTimeMillis { typeAndWaitForResults("a") }
+      assertNotEmpty(Tagger.markers)
+      resetEditor()
+    }
+
+    println("Average time to tag results: ${time / 100}ms")
+  }
+
   fun getSettings() = ServiceManager.getService(AceConfig::class.java).aceSettings
 
   // Enforces the results are available in less than 100ms
@@ -179,12 +204,13 @@ class AceTest : BasePlatformTestCase() {
     }
   }
 
-  override fun tearDown() {
+  fun resetEditor() {
     takeAction(ACTION_EDITOR_ESCAPE)
     UIUtil.dispatchAllInvocationEvents()
     assertEmpty(myFixture.editor.markupModel.allHighlighters)
-    super.tearDown()
   }
+
+  override fun tearDown() = resetEditor().also { super.tearDown() }
 
   private fun typeAndWaitForResults(string: String) =
     myFixture.type(string).also { UIUtil.dispatchAllInvocationEvents() }
