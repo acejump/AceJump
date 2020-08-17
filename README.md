@@ -168,10 +168,12 @@ The following plugins have a similar UI for navigating text and web browsing:
 
 The following individuals have significantly improved AceJump through their contributions and feedback:
 
-* [John Lindquist](https://github.com/johnlindquist)
-* [Alex Plate](https://github.com/AlexPl292)
-* [Sven Speckmaier](https://github.com/svensp)
-* [Stefan Monnier](https://www.iro.umontreal.ca/~monnier/)
+* [John Lindquist](https://github.com/johnlindquist) for creating AceJump and supporting it for many years.
+* [Breandan Considine](https://github.com/breandan) for maintaining the project and adding some new features.
+* [Alex Plate](https://github.com/AlexPl292) for submitting [several PRs](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3AAlexPl292).
+* [Sven Speckmaier](https://github.com/svensp) for [improving](https://github.com/acejump/AceJump/pull/214) search latency.
+* [Stefan Monnier](https://www.iro.umontreal.ca/~monnier/) for algorithmic advice and maintaining Emacs for several years.
+* [Fool's Mate](https://www.fools-mate.de/) for the [icon](https://github.com/acejump/AceJump/issues/313) and graphic design.
 
 AceJump is made possible by users just like you! If you enjoy using AceJump, please consider [Contributing](#contributing).
 
