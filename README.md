@@ -1,11 +1,12 @@
-# AceJump
+<p align="center"><a href="https://plugins.jetbrains.com/plugin/7086"> <img src="logo.png" alt="AceJumpLogo"></a></p>
 
-[![][jetbrains-team-svg]][jetbrains-team-page]
-[![][teamcity-status-svg]][teamcity-build-status]
-[![][plugin-repo-svg]][plugin-repo-page]
-[![][plugin-download-svg]][plugin-repo-page]
-[![][apache-license-svg]](LICENSE)
-[![][twitter-badge]][twitter-url]
+<p align="center">
+ 	<a href="https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub" title="JetBrains on GitHub"><img src="http://jb.gg/badges/team.svg"></a>
+ 	<a href="https://teamcity.jetbrains.com/viewType.html?buildTypeId=acejump_buildplugin&guest=1" title="Build Plugin"><img src="https://teamcity.jetbrains.com/app/rest/builds/buildType:acejump_buildplugin/statusIcon.svg"></a>
+ 	<a href="https://plugins.jetbrains.com/plugin/7086-acejump" title="Jetbrains Plugin"><img src="https://img.shields.io/jetbrains/plugin/v/7086-acejump.svg"></a>
+ 	<a href="LICENSE" title="License"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg"></a>
+ 	<a href="https://twitter.com/search?q=AceJump&f=live" title="Twitter"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social"></a>
+</p>
 
 [AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate AceJump. Type any string in the editor, followed by one of the illustrated tags, to jump its position:
 
