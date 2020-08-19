@@ -127,7 +127,7 @@ AceJump is inspired by prior work, but adds several improvements, including:
 * **Line Mode**: Jump to the first, last, or first non-whitespace character of any line on-screen (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd>).
 * **Word Mode**: Jump to the first character of any visible word on-screen in two keystrokes or less.
 * **Declaration Mode**: Jump to the declaration of a token (if it is available) rather than the token itself.
-* **Pinyin support**: Support for Pinyin search and selection. To select the word 拼音, activate AceJump and type: <kbd>p</kbd><kbd>y</kbd>
+* **Pinyin support**: Pinyin search and selection, e.g. to search for "拼音", activate AceJump and type: <kbd>p</kbd><kbd>y</kbd>
 
 The following plugins have a similar UI for navigating text and web browsing:
 
