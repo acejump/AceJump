@@ -98,13 +98,14 @@ AceJump is supported by community members like you. Contributions are highly wel
 If you would like to [contribute](https://github.com/acejump/AceJump/pulls), here are a few of the ways you can help improve AceJump:
 
 * [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
-* [Support for full screen tagging](https://github.com/acejump/AceJump/issues/144)
-* [Animated documentation](https://github.com/acejump/AceJump/issues/145)
-* [Fold text between matches](https://github.com/acejump/AceJump/issues/255)
-* [Display current search text](https://github.com/acejump/AceJump/issues/227)
-* [Multi-platform support](https://github.com/acejump/AceJump/issues/229)
-* [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/217)
+* [Add option to place the caret after the search text](https://github.com/acejump/AceJump/issues/225)
 * [Support user-configurable keyboard layouts](https://github.com/acejump/AceJump/issues/172)
+* [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/217)
+* [Animated documentation](https://github.com/acejump/AceJump/issues/145)
+* [Display current search text](https://github.com/acejump/AceJump/issues/227)
+* [Support for full screen tagging](https://github.com/acejump/AceJump/issues/144)
+* [Fold text between matches](https://github.com/acejump/AceJump/issues/255)
+* [Multi-platform support](https://github.com/acejump/AceJump/issues/229)
 
 To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -PluginDev`.
 
