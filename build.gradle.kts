@@ -53,7 +53,7 @@ repositories {
 }
 
 intellij {
-  version = "2020.1"
+  version = "2020.2"
   pluginName = "AceJump"
   updateSinceUntilBuild = false
   setPlugins("java")
