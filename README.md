@@ -1,11 +1,12 @@
-# AceJump
+<p align="center"><a href="https://plugins.jetbrains.com/plugin/7086"> <img src="logo.png" alt="AceJumpLogo"></a></p>
 
-[![][jetbrains-team-svg]][jetbrains-team-page]
-[![][teamcity-status-svg]][teamcity-build-status]
-[![][plugin-repo-svg]][plugin-repo-page]
-[![][plugin-download-svg]][plugin-repo-page]
-[![][apache-license-svg]](LICENSE)
-[![][twitter-badge]][twitter-url]
+<p align="center">
+ 	<a href="https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub" title="JetBrains on GitHub"><img src="http://jb.gg/badges/team.svg"></a>
+ 	<a href="https://teamcity.jetbrains.com/viewType.html?buildTypeId=acejump_buildplugin&guest=1" title="Build Plugin"><img src="https://teamcity.jetbrains.com/app/rest/builds/buildType:acejump_buildplugin/statusIcon.svg"></a>
+ 	<a href="https://plugins.jetbrains.com/plugin/7086-acejump" title="Jetbrains Plugin"><img src="https://img.shields.io/jetbrains/plugin/v/7086-acejump.svg"></a>
+ 	<a href="LICENSE" title="License"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg"></a>
+ 	<a href="https://twitter.com/search?q=AceJump&f=live" title="Twitter"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social"></a>
+</p>
 
 [AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate AceJump. Type any string in the editor, followed by one of the illustrated tags, to jump its position:
 
@@ -96,15 +97,15 @@ AceJump is supported by community members like you. Contributions are highly wel
 
 If you would like to [contribute](https://github.com/acejump/AceJump/pulls), here are a few of the ways you can help improve AceJump:
 
-* [Design a logo](https://github.com/acejump/AceJump/issues/313)
 * [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
-* [Support for full screen tagging](https://github.com/acejump/AceJump/issues/144)
-* [Animated documentation](https://github.com/acejump/AceJump/issues/145)
-* [Fold text between matches](https://github.com/acejump/AceJump/issues/255)
-* [Display current search text](https://github.com/acejump/AceJump/issues/227)
-* [Multi-platform support](https://github.com/acejump/AceJump/issues/229)
-* [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/217)
+* [Add option to place the caret after the search text](https://github.com/acejump/AceJump/issues/225)
 * [Support user-configurable keyboard layouts](https://github.com/acejump/AceJump/issues/172)
+* [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/217)
+* [Animated documentation](https://github.com/acejump/AceJump/issues/145)
+* [Display current search text](https://github.com/acejump/AceJump/issues/227)
+* [Support for full screen tagging](https://github.com/acejump/AceJump/issues/144)
+* [Fold text between matches](https://github.com/acejump/AceJump/issues/255)
+* [Multi-platform support](https://github.com/acejump/AceJump/issues/229)
 
 To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -PluginDev`.
 
@@ -127,7 +128,7 @@ AceJump is inspired by prior work, but adds several improvements, including:
 * **Line Mode**: Jump to the first, last, or first non-whitespace character of any line on-screen (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd>).
 * **Word Mode**: Jump to the first character of any visible word on-screen in two keystrokes or less.
 * **Declaration Mode**: Jump to the declaration of a token (if it is available) rather than the token itself.
-* **Pinyin support**: Support for Pinyin search and selection. To select the word 拼音, activate AceJump and type: <kbd>p</kbd><kbd>y</kbd>
+* **Pinyin support**: Pinyin search and selection, e.g. to search for "拼音", activate AceJump and type: <kbd>p</kbd><kbd>y</kbd>
 
 The following plugins have a similar UI for navigating text and web browsing:
 
@@ -167,10 +168,12 @@ The following plugins have a similar UI for navigating text and web browsing:
 
 The following individuals have significantly improved AceJump through their contributions and feedback:
 
-* [John Lindquist](https://github.com/johnlindquist)
-* [Alex Plate](https://github.com/AlexPl292)
-* [Sven Speckmaier](https://github.com/svensp)
-* [Stefan Monnier](https://www.iro.umontreal.ca/~monnier/)
+* [John Lindquist](https://github.com/johnlindquist) for creating AceJump and supporting it for many years.
+* [Breandan Considine](https://github.com/breandan) for maintaining the project and adding some new features.
+* [Alex Plate](https://github.com/AlexPl292) for submitting [several PRs](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3AAlexPl292).
+* [Sven Speckmaier](https://github.com/svensp) for [improving](https://github.com/acejump/AceJump/pull/214) search latency.
+* [Stefan Monnier](https://www.iro.umontreal.ca/~monnier/) for algorithmic advice and maintaining Emacs for several years.
+* [Fool's Mate](https://www.fools-mate.de/) for the [icon](https://github.com/acejump/AceJump/issues/313) and graphic design.
 
 AceJump is made possible by users just like you! If you enjoy using AceJump, please consider [Contributing](#contributing).
 

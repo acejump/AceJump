@@ -6,7 +6,7 @@ plugins {
   idea apply true
   kotlin("jvm") version "1.3.72"
   id("org.jetbrains.intellij") version "0.4.21"
-  id("org.jetbrains.changelog") version "0.3.2"
+  id("org.jetbrains.changelog") version "0.4.0"
 }
 
 tasks {
