@@ -1,3 +1,4 @@
+import org.jetbrains.changelog.closure
 import org.jetbrains.intellij.tasks.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
@@ -5,7 +6,7 @@ import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 plugins {
   idea apply true
   kotlin("jvm") version "1.3.72"
-  id("org.jetbrains.intellij") version "0.5.0"
+  id("org.jetbrains.intellij") version "0.6.1"
   id("org.jetbrains.changelog") version "0.6.2"
 }
 
@@ -38,7 +39,7 @@ tasks {
 
 changelog {
   path = "${project.projectDir}/CHANGES.md"
-  headerFormat = "{0}"
+  header = closure { "${project.version}" }
 }
 
 dependencies {
