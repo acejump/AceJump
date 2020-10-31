@@ -53,7 +53,6 @@ class AceTest : BasePlatformTestCase() {
     myFixture.checkResult("tes<caret>ting 1234")
   }
 
-
   fun `test that jumping to previous occurrence succeeds`() {
     "te<caret>sting 1234".search("t")
 
