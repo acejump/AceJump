@@ -70,8 +70,10 @@ class Marker {
 
     editor.run {
       start = getPoint(index)
-      srcPoint = getPointRelative(index, contentComponent)
-      tagPoint = getPointRelative(tgIdx, contentComponent)
+      srcPoint = getPointRelative(start, contentComponent)
+      tagPoint =
+        if (index == tgIdx) srcPoint
+        else getPointRelative(getPoint(tgIdx), contentComponent)
     }
 
     startY = start.y + rectVOffset

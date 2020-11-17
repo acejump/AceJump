@@ -69,9 +69,13 @@ fun String.wordBounds(index: Int): Pair<Int, Int> {
 fun String.wordBoundsPlus(index: Int): Pair<Int, Int> {
   var (left, right) = wordBounds(index)
 
-  (right..(right + 3).coerceAtMost(length - 1)).asSequence()
-    .takeWhile { !(get(it) == '\n' || get(it) == '\r') }
-    .forEach { right = it }
+  for (it in (right..(right + 3).coerceAtMost(length - 1))) {
+    if (get(it) == '\n' || get(it) == '\r') {
+      break
+    } else {
+      right = it
+    }
+  }
 
   return left to right
 }
@@ -86,8 +90,8 @@ fun defaultEditor(): Editor =
 
 fun Editor.getPoint(idx: Int) = visualPositionToXY(offsetToVisualPosition(idx))
 
-fun Editor.getPointRelative(index: Int, relativeToComponent: JComponent) =
-  RelativePoint(relativeToComponent, getPoint(index)).originalPoint
+fun Editor.getPointRelative(absolute: Point, relativeToComponent: JComponent) =
+  RelativePoint(relativeToComponent, absolute).originalPoint
 
 fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)

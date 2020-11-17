@@ -1,12 +1,11 @@
 package org.acejump.label
 
-import com.google.common.collect.Multimaps
-import com.google.common.collect.Ordering
-import com.google.common.collect.TreeMultimap
 import com.intellij.openapi.diagnostic.Logger
+import it.unimi.dsi.fastutil.ints.*
+import it.unimi.dsi.fastutil.objects.Object2IntMap
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import org.acejump.config.AceConfig
 import org.acejump.search.wordBoundsPlus
-import kotlin.collections.set
 import kotlin.math.max
 import kotlin.system.measureTimeMillis
 
@@ -53,9 +52,11 @@ class Solver(val text: String,
              val availableTags: Set<String>,
              val viewBounds: IntRange = 0..text.length) {
   private val logger = Logger.getInstance(Solver::class.java)
-  private var newTags: MutableMap<String, Int> = HashMap(Pattern.NUM_TAGS)
+  private var newTags: Object2IntMap<String> =
+    Object2IntOpenHashMap(Pattern.NUM_TAGS)
+  private val newTagIndices: IntSet = IntOpenHashSet()
   private var strings: Set<String> =
-    HashSet(results.map { getWordFragments(it) }.flatten())
+    HashSet(results.flatMap { getWordFragments(it) })
 
   /**
    * Iterates through remaining available tags, until we find one matching our
@@ -65,10 +66,12 @@ class Solver(val text: String,
    * @param sites potential indices where a tag may be assigned
    */
 
-  private fun tryToAssignTag(tag: String, sites: Collection<Int>): Boolean {
-    if (tag in newTags.keys) return false
-    val index = sites.firstOrNull { it !in newTags.values } ?: return false
-    newTags[tag] = index
+  private fun tryToAssignTag(tag: String, sites: IntArray): Boolean {
+    if (newTags.containsKey(tag)) return false
+    val index = sites.firstOrNull { it !in newTagIndices } ?: return false
+    @Suppress("ReplacePutWithAssignment")
+    newTags.put(tag, index)
+    newTagIndices.add(index)
     return true
   }
 
@@ -88,7 +91,7 @@ class Solver(val text: String,
    */
 
   private val tagOrder = AceConfig.defaultTagOrder
-    .thenBy { eligibleSitesByTag[it].size }
+    .thenComparingInt { eligibleSitesByTag.getValue(it).size }
     .thenBy(AceConfig.layout.priority { it.last() })
 
   /**
@@ -99,15 +102,31 @@ class Solver(val text: String,
    * more likely to target words by their leading character.
    */
 
-  private val siteOrder: Comparator<Int> = compareBy(
-    // Sites in immediate view should come first
-    { it !in viewBounds },
-    // Ensure that the first letter of a word is prioritized for tagging
-    { text[max(0, it - 1)].isLetterOrDigit() },
-    { it })
+  private val siteOrder: IntComparator = IntComparator { a, b ->
+    val aInBounds = a in viewBounds
+    val bInBounds = b in viewBounds
 
-  private val eligibleSitesByTag = Multimaps.synchronizedSetMultimap(
-    TreeMultimap.create<String, Int>(Ordering.natural(), siteOrder))
+    if (aInBounds != bInBounds) {
+      // Sites in immediate view should come first
+      return@IntComparator if (aInBounds) -1 else 1
+    }
+
+    val aIsNotFirstLetter = text[max(0, a - 1)].isLetterOrDigit()
+    val bIsNotFirstLetter = text[max(0, b - 1)].isLetterOrDigit()
+
+    if (aIsNotFirstLetter != bIsNotFirstLetter) {
+      // Ensure that the first letter of a word is prioritized for tagging
+      return@IntComparator if (bIsNotFirstLetter) -1 else 1
+    }
+
+    when {
+      a < b -> -1
+      a > b -> 1
+      else -> 0
+    }
+  }
+
+  private val eligibleSitesByTag: MutableMap<String, IntList> = HashMap(100)
 
   /**
    * Maps tags to search results according to the following constraints.
@@ -128,18 +147,23 @@ class Solver(val text: String,
     var timeAssigned = 0L
     val timeElapsed = measureTimeMillis {
       val tagsByFirstLetter = availableTags.groupBy { it[0] }
-      results.parallelStream().forEach { site ->
-        val compatibleTags = tagsByFirstLetter.getTagsCompatibleWith(site)
-        compatibleTags.forEach { tag -> eligibleSitesByTag.put(tag, site) }
+      for (site in results) {
+        for (tag in tagsByFirstLetter.getTagsCompatibleWith(site)) {
+          eligibleSitesByTag.getOrPut(tag){ IntArrayList(10) }.add(site)
+        }
       }
 
-      val sortedTags = eligibleSitesByTag.keySet().sortedWith(tagOrder)
+      val sortedTags = eligibleSitesByTag.keys.toMutableList().apply {
+        sortWith(tagOrder)
+      }
 
       timeAssigned = measureTimeMillis {
-        for (tagString in sortedTags) {
-          val eligibleSites = eligibleSitesByTag[tagString]
+        for (tag in sortedTags) {
           if (totalAssigned == results.size) break
-          else if (tryToAssignTag(tagString, eligibleSites)) totalAssigned++
+
+          val eligibleSites = eligibleSitesByTag.getValue(tag)
+          eligibleSites.sort(siteOrder)
+          if (tryToAssignTag(tag, eligibleSites.toIntArray())) totalAssigned++
         }
       }
     }
