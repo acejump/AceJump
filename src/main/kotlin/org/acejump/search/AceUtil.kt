@@ -7,6 +7,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
+import com.intellij.util.IntPair
 import org.acejump.view.Model.MAX_TAG_RESULTS
 import org.acejump.view.Model.viewBounds
 import java.awt.Point
@@ -59,14 +60,18 @@ fun Editor.isNotFolded(offset: Int) = !foldingModel.isOffsetCollapsed(offset)
  * is seen on either side.
  */
 
-fun String.wordBounds(index: Int): Pair<Int, Int> {
-  var (first, last) = index to index
+fun String.wordBounds(index: Int): IntPair {
+  var first = index
+  var last = index
   while (0 < first && get(first - 1).isJavaIdentifierPart()) first--
   while (last < length && get(last).isJavaIdentifierPart()) last++
-  return first to last
+  return IntPair(first, last)
 }
 
-fun String.wordBoundsPlus(index: Int): Pair<Int, Int> {
+operator fun IntPair.component1() = this.first
+operator fun IntPair.component2() = this.second
+
+fun String.wordBoundsPlus(index: Int): IntPair {
   var (left, right) = wordBounds(index)
 
   for (it in (right..(right + 3).coerceAtMost(length - 1))) {
@@ -77,7 +82,7 @@ fun String.wordBoundsPlus(index: Int): Pair<Int, Int> {
     }
   }
 
-  return left to right
+  return IntPair(left, right)
 }
 
 fun defaultEditor(): Editor =

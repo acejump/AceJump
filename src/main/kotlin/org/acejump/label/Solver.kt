@@ -203,7 +203,8 @@ class Solver(val text: String,
   private fun getWordFragments(site: Int): List<String> {
     val left = max(0, site + query.length - 1)
     val right = text.wordBoundsPlus(site).second
+    val lowercase = text.substring(left, right).toLowerCase()
 
-    return (left..right).map { text.substring(left, it).toLowerCase() }
+    return (0..(right - left)).map { lowercase.substring(0, it) }
   }
 }
