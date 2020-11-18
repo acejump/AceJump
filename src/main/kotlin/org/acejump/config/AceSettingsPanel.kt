@@ -10,6 +10,7 @@ import com.intellij.ui.layout.GrowPolicy.MEDIUM_TEXT
 import com.intellij.ui.layout.GrowPolicy.SHORT_TEXT
 import com.intellij.ui.layout.panel
 import org.acejump.label.Pattern.Companion.KeyLayout
+import org.acejump.search.JumpMode
 import org.acejump.search.aceString
 import java.awt.Color
 import java.awt.Font
@@ -27,6 +28,10 @@ internal class AceSettingsPanel {
   private val tagCharsField = JBTextField()
   private val keyboardLayoutCombo = ComboBox<KeyLayout>()
   private val keyboardLayoutArea = JBTextArea()
+  private val cycleModeCombo1 = ComboBox<JumpMode>()
+  private val cycleModeCombo2 = ComboBox<JumpMode>()
+  private val cycleModeCombo3 = ComboBox<JumpMode>()
+  private val cycleModeCombo4 = ComboBox<JumpMode>()
   private val jumpModeColorWheel = ColorPanel()
   private val targetModeColorWheel = ColorPanel()
   private val definitionModeColorWheel = ColorPanel()
@@ -47,6 +52,26 @@ internal class AceSettingsPanel {
       KeyLayout.values().forEach { addItem(it) }
       addActionListener { keyChars = (selectedItem as KeyLayout).joinBy("\n") }
     }
+
+    cycleModeCombo1.run {
+      JumpMode.values().forEach { addItem(it) }
+      addActionListener { cycleMode1 = selectedItem as JumpMode }
+    }
+
+    cycleModeCombo2.run {
+      JumpMode.values().forEach { addItem(it) }
+      addActionListener { cycleMode2 = selectedItem as JumpMode }
+    }
+
+    cycleModeCombo3.run {
+      JumpMode.values().forEach { addItem(it) }
+      addActionListener { cycleMode3 = selectedItem as JumpMode }
+    }
+
+    cycleModeCombo4.run {
+      JumpMode.values().forEach { addItem(it) }
+      addActionListener { cycleMode4 = selectedItem as JumpMode }
+    }
   }
 
   // https://github.com/JetBrains/intellij-community/blob/master/platform/platform-impl/src/com/intellij/ui/layout/readme.md
@@ -58,6 +83,17 @@ internal class AceSettingsPanel {
       row(aceString("tagCharsToBeUsedLabel")) { medium(tagCharsField) }
       row(aceString("keyboardLayoutLabel")) { short(keyboardLayoutCombo) }
       row(aceString("keyboardDesignLabel")) { short(keyboardLayoutArea) }
+    }
+
+    titledRow(aceString("modesHeading")) {
+      row(aceString("cycleModeOrderLabel")) {
+        cell(isVerticalFlow = false, isFullWidth = false) {
+          cycleModeCombo1()
+          cycleModeCombo2()
+          cycleModeCombo3()
+          cycleModeCombo4()
+        }
+      }
     }
 
     titledRow(aceString("colorsHeading")) {
@@ -83,6 +119,10 @@ internal class AceSettingsPanel {
   internal var allowedChars by tagCharsField
   internal var keyboardLayout by keyboardLayoutCombo
   internal var keyChars by keyboardLayoutArea
+  internal var cycleMode1 by cycleModeCombo1
+  internal var cycleMode2 by cycleModeCombo2
+  internal var cycleMode3 by cycleModeCombo3
+  internal var cycleMode4 by cycleModeCombo4
   internal var jumpModeColor by jumpModeColorWheel
   internal var targetModeColor by targetModeColorWheel
   internal var definitionModeColor by definitionModeColorWheel
@@ -95,6 +135,10 @@ internal class AceSettingsPanel {
   fun reset(settings: AceSettings) {
     allowedChars = settings.allowedChars
     keyboardLayout = settings.layout
+    cycleMode1 = settings.cycleMode1
+    cycleMode2 = settings.cycleMode2
+    cycleMode3 = settings.cycleMode3
+    cycleMode4 = settings.cycleMode4
     jumpModeColor = settings.jumpModeColor
     targetModeColor = settings.targetModeColor
     definitionModeColor = settings.definitionModeColor

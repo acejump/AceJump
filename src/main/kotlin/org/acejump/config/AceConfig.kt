@@ -8,6 +8,7 @@ import com.intellij.openapi.diagnostic.Logger
 import org.acejump.label.Pattern
 import org.acejump.label.Pattern.Companion.KeyLayout
 import org.acejump.label.mapIndices
+import org.acejump.search.JumpMode
 import java.awt.Color
 
 /**
@@ -31,6 +32,10 @@ class AceConfig: PersistentStateComponent<AceSettings> {
       get() = ServiceManager.getService(AceConfig::class.java).aceSettings
     val allowedChars: String get() = settings.allowedChars
     val layout: KeyLayout get() = settings.layout
+    val cycleMode1: JumpMode get() = settings.cycleMode1
+    val cycleMode2: JumpMode get() = settings.cycleMode2
+    val cycleMode3: JumpMode get() = settings.cycleMode3
+    val cycleMode4: JumpMode get() = settings.cycleMode4
     val jumpModeColor: Color get() = settings.jumpModeColor
     val targetModeColor: Color get() = settings.targetModeColor
     val definitionModeColor: Color get() = settings.definitionModeColor
