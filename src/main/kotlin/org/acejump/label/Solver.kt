@@ -157,13 +157,20 @@ class Solver(val text: String,
         sortWith(tagOrder)
       }
 
+      val matchingSites = HashMap<IntList, IntArray>()
+      val matchingSitesAsArrays = HashMap<String, IntArray>()
+
+      for ((key, value) in eligibleSitesByTag.entries) {
+        matchingSitesAsArrays[key] = matchingSites.getOrPut(value){
+          value.toIntArray().apply { IntArrays.mergeSort(this, siteOrder) }
+        }
+      }
+
       timeAssigned = measureTimeMillis {
         for (tag in sortedTags) {
           if (totalAssigned == results.size) break
-
-          val eligibleSites = eligibleSitesByTag.getValue(tag)
-          eligibleSites.sort(siteOrder)
-          if (tryToAssignTag(tag, eligibleSites.toIntArray())) totalAssigned++
+          if (tryToAssignTag(tag, matchingSitesAsArrays.getValue(tag)))
+            totalAssigned++
         }
       }
     }
