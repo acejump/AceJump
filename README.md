@@ -107,7 +107,7 @@ If you would like to [contribute](https://github.com/acejump/AceJump/pulls), her
 * [Fold text between matches](https://github.com/acejump/AceJump/issues/255)
 * [Multi-platform support](https://github.com/acejump/AceJump/issues/229)
 
-To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -PluginDev`.
+To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -PluginDev [-x test]`.
 
 To just run [the tests](src/test/kotlin/AceTest.kt), execute `./gradlew test` - this is usually much faster than starting an IDE.
 

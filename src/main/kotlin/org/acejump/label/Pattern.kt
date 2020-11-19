@@ -10,6 +10,8 @@ enum class Pattern(val string: String) {
   END_OF_LINE("\\n|\\Z"),
   START_OF_LINE("^.|^\\n"),
   CODE_INDENTS("[^\\s].*|^\\n"),
+// START_OF_LINE("^[^\\n]{2,}|^\\n"),
+// CODE_INDENTS("[^\\s][^\\n]{2,}|^\\n"),
   LINE_MARK(END_OF_LINE.string + "|" +
     START_OF_LINE.string + "|" +
     CODE_INDENTS.string),

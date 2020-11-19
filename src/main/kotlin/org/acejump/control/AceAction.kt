@@ -44,8 +44,11 @@ class AceTargetAction: AceAction() {
   override fun customize() = Jumper.toggleTargetMode()
 }
 
-/**
+/*
  * When line mode is activated, we will tag the beginning and end of each line.
+ *
+ * TODO: https://github.com/acejump/AceJump/issues/327
+ * TODO: https://github.com/acejump/AceJump/issues/340
  */
 
 class AceLineAction: AceAction() {
