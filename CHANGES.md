@@ -1,5 +1,9 @@
 # Changelog
 
+### 3.6.4
+
+- Improvements to tag latency. Thanks to @chylex for [the PR](https://github.com/acejump/AceJump/pull/339)!
+
 ### 3.6.3
 
 - Vote for your favorite <a href="https://twitter.com/breandan/status/1274169810411274241">AceJump logo</a>!
