@@ -7,6 +7,7 @@ import com.intellij.openapi.fileEditor.FileDocumentManager
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.ui.awt.RelativePoint
+import com.intellij.util.IntPair
 import org.acejump.view.Model.MAX_TAG_RESULTS
 import org.acejump.view.Model.viewBounds
 import java.awt.Point
@@ -59,21 +60,29 @@ fun Editor.isNotFolded(offset: Int) = !foldingModel.isOffsetCollapsed(offset)
  * is seen on either side.
  */
 
-fun String.wordBounds(index: Int): Pair<Int, Int> {
-  var (first, last) = index to index
+fun String.wordBounds(index: Int): IntPair {
+  var first = index
+  var last = index
   while (0 < first && get(first - 1).isJavaIdentifierPart()) first--
   while (last < length && get(last).isJavaIdentifierPart()) last++
-  return first to last
+  return IntPair(first, last)
 }
 
-fun String.wordBoundsPlus(index: Int): Pair<Int, Int> {
+operator fun IntPair.component1() = this.first
+operator fun IntPair.component2() = this.second
+
+fun String.wordBoundsPlus(index: Int): IntPair {
   var (left, right) = wordBounds(index)
 
-  (right..(right + 3).coerceAtMost(length - 1)).asSequence()
-    .takeWhile { !(get(it) == '\n' || get(it) == '\r') }
-    .forEach { right = it }
+  for (it in (right..(right + 3).coerceAtMost(length - 1))) {
+    if (get(it) == '\n' || get(it) == '\r') {
+      break
+    } else {
+      right = it
+    }
+  }
 
-  return left to right
+  return IntPair(left, right)
 }
 
 fun defaultEditor(): Editor =
@@ -86,8 +95,8 @@ fun defaultEditor(): Editor =
 
 fun Editor.getPoint(idx: Int) = visualPositionToXY(offsetToVisualPosition(idx))
 
-fun Editor.getPointRelative(index: Int, relativeToComponent: JComponent) =
-  RelativePoint(relativeToComponent, getPoint(index)).originalPoint
+fun Editor.getPointRelative(absolute: Point, relativeToComponent: JComponent) =
+  RelativePoint(relativeToComponent, absolute).originalPoint
 
 fun Editor.isFirstCharacterOfLine(index: Int) =
   index == getLineStartOffset(offsetToLogicalPosition(index).line)

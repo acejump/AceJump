@@ -32,6 +32,7 @@ object Finder : Resettable {
   private var textHighlights = listOf<RangeHighlighter>()
   private var HIGHLIGHT_LAYER = HighlighterLayer.LAST + 1
   private val logger = Logger.getInstance(Finder::class.java)
+  private val skimTrigger = Trigger()
   var isShiftSelectEnabled = false
 
   var skim = false
@@ -79,7 +80,7 @@ object Finder : Resettable {
       skim = true
       logger.info("Skimming document for matches of: $query")
       search()
-      Trigger(400L) { skim = false; search() }
+      skimTrigger(400L) { skim = false; search() }
     } else search()
 
   fun search(pattern: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) {

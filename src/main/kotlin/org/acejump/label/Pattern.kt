@@ -42,8 +42,8 @@ enum class Pattern(val string: String) {
       QGMLWB("1234567890", "qgmlwbyuv", "dstnriaeoh", "zxcfjkp"),
       NORMAN("1234567890", "qwdfkjurl", "asetgynioh", "zxcvbpm");
 
-      private val priority
-        get() = when (this) {
+      private val priority by lazy {
+        when (this) {
           QWERTY -> "fjghdkslavncmbxzrutyeiwoqp5849673210"
           QWERTZ -> "fjghdkslavncmbxyrutzeiwoqp5849673210"
           COLEMK -> "tndhseriaovkcmbxzgjplfuwyq5849673210"
@@ -53,6 +53,7 @@ enum class Pattern(val string: String) {
           QGMLWB -> "naterisodhfkcpjxzlymuwbgvq5849673210"
           WORKMN -> "tnhegysoaiclvkmxzwfrubjdpq5849673210"
         }.mapIndices()
+      }
 
       val text by lazy {
         joinBy("").toCharArray().sortedBy { priority[it] }.joinToString("")

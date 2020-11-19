@@ -22,6 +22,7 @@ import kotlin.system.measureTimeMillis
 
 internal object Listener: FocusListener, AncestorListener, VisibleAreaListener {
   private val logger = Logger.getInstance(Listener::class.java)
+  private val redoFindTrigger = Trigger()
 
   fun enable() =
   // TODO: Do we really need `synchronized` here?
@@ -55,8 +56,8 @@ internal object Listener: FocusListener, AncestorListener, VisibleAreaListener {
         return
       }
     }
-    elapsed = (750L - elapsed).coerceAtLeast(0L)
-    Trigger(withDelay = elapsed) {
+    elapsed = (350L - elapsed).coerceAtLeast(0L)
+    redoFindTrigger(withDelay = elapsed) {
       logger.info("Visible area changed")
       redoFind()
     }
