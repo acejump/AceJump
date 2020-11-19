@@ -19,10 +19,13 @@ object Selector {
     if (matches.size == 1 && wasAlreadyVisible) Handler.reset()
   }
 
-  fun nearestVisibleMatches(forward: Boolean = true) =
-    Finder.visibleResults().sortedWith(compareBy(
+  fun nearestVisibleMatches(forward: Boolean = true): List<Int> {
+    val caretOffset = caretOffset
+
+    return Finder.visibleResults().sortedWith(compareBy(
       { it == caretOffset },
       { (it <= caretOffset) == forward },
       { if (forward) it - caretOffset else caretOffset - it }
     ))
+  }
 }
