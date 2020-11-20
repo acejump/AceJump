@@ -13,6 +13,7 @@ import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
 import org.acejump.view.Marker
 import org.acejump.view.Model.LONG_DOCUMENT
 import org.acejump.view.Model.boundaries
+import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.markup
 import org.acejump.view.Model.viewBounds
@@ -125,17 +126,25 @@ object Finder : Resettable {
    * [com.intellij.openapi.editor.markup.MarkupModel].
    */
 
-  fun markup(markers: Set<Int> = results, isRegexQuery: Boolean = false) =
-    runLater {
-      markers.ifEmpty { return@runLater }
+  fun markup(markers: Set<Int> = results, isRegexQuery: Boolean = false) {
+    if (markers.isEmpty()) {
+      return
+    }
 
+    runLater {
       textHighlights.forEach { markup.removeHighlighter(it) }
+
+      val highlightLen = if (isRegexQuery) 1 else query.length
+
+      editor.document.isInBulkUpdate = true
       textHighlights = markers.map {
         val start = it - if (it == editorText.length) 1 else 0
-        val end = start + if (isRegexQuery) 1 else query.length
+        val end = start + highlightLen
         createTextHighlight(max(start, 0), min(end, editorText.length - 1))
       }
+      editor.document.isInBulkUpdate = false
     }
+  }
 
   private fun createTextHighlight(start: Int, end: Int) =
     markup.addRangeHighlighter(start, end, HIGHLIGHT_LAYER, null, EXACT_RANGE)
