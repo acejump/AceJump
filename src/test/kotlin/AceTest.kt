@@ -11,6 +11,7 @@ import org.acejump.label.Tagger
 import org.acejump.view.Canvas
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
+import java.io.File
 
 /**
  * Functional test cases and end-to-end performance tests.
@@ -18,7 +19,7 @@ import kotlin.system.measureTimeMillis
  * TODO: Add more structure to test cases, use test resources to define files.
  */
 
-class AceTest : BasePlatformTestCase() {
+class AceTest: BasePlatformTestCase() {
   fun `test that scanner finds all occurrences of single character`() =
     assertEquals("test test test".search("t"), setOf(0, 3, 5, 8, 10, 13))
 
@@ -133,31 +134,44 @@ class AceTest : BasePlatformTestCase() {
     myFixture.checkResult("test <selection>拼音<caret></selection> selection")
   }
 
-  fun `test tag latency`() {
+  fun `test tag latency`(editorText: String) {
     var time = 0L
-    val random = Random(0)
 
-    repeat(100) {
-      makeEditor(
-        generateSequence {
-          generateSequence {
-            generateSequence {
-              ('a'..'z').random(random)
-            }.take(5).joinToString("")
-          }.take(20).joinToString(" ")
-        }.take(100).joinToString("\n")
-      )
+    editorText.toCharArray().distinct().filter { !it.isWhitespace() }
+      .forEach { query ->
+        repeat(10) {
+          makeEditor(editorText)
 
-      myFixture.testAction(AceAction())
-      time += measureTimeMillis { typeAndWaitForResults("a") }
-      assertNotEmpty(Tagger.markers)
-      resetEditor()
-    }
+          myFixture.testAction(AceAction())
+          time += measureTimeMillis { typeAndWaitForResults("$query") }
+          assert(Tagger.markers.isNotEmpty()) { "Should be tagged: $query" }
+          resetEditor()
+        }
+      }
 
     println("Average time to tag results: ${time / 100}ms")
   }
 
-  fun getSettings() = ServiceManager.getService(AceConfig::class.java).aceSettings
+  fun `test random text latency`() =
+    `test tag latency`(
+      generateSequence {
+        generateSequence {
+          generateSequence {
+            ('a'..'z').random(Random(0))
+          }.take(5).joinToString("")
+        }.take(20).joinToString(" ")
+      }.take(100).joinToString("\n")
+    )
+
+  fun `test lorem ipsum latency`() =
+    `test tag latency`(
+      File(
+        javaClass.classLoader.getResource("lipsum.txt")!!.file
+      ).readText()
+    )
+
+  fun getSettings() =
+    ServiceManager.getService(AceConfig::class.java).aceSettings
 
   // Enforces the results are available in less than 100ms
   private fun String.search(query: String) =
@@ -176,6 +190,7 @@ class AceTest : BasePlatformTestCase() {
     }).size - 1, myFixture.editor.markupModel.allHighlighters.size)
 
   private var shouldWarmup = true
+
   // Should be run exactly once to warm up the JVM
   private fun maybeWarmUp(text: String, query: String) {
     if (shouldWarmup) {
