@@ -132,11 +132,11 @@ object Finder : Resettable {
     }
 
     runLater {
-      textHighlights.forEach { markup.removeHighlighter(it) }
-
       val highlightLen = if (isRegexQuery) 1 else query.length
 
       editor.document.isInBulkUpdate = true
+      textHighlights.forEach { markup.removeHighlighter(it) }
+
       textHighlights = markers.map {
         val start = it - if (it == editorText.length) 1 else 0
         val end = start + highlightLen
@@ -172,13 +172,18 @@ object Finder : Resettable {
         if (numDiscarded != 0) logger.info("Discarded $numDiscarded highlights")
       }
 
-  fun List<RangeHighlighter>.eraseIf(cond: RangeHighlighter.() -> Boolean) =
-    filter {
-      if (cond(it)) {
-        runLater { markup.removeHighlighter(it) }
-        false
-      } else true
+  fun List<RangeHighlighter>.eraseIf(cond: RangeHighlighter.() -> Boolean): List<RangeHighlighter> {
+    val (erased, kept) = partition(cond)
+
+    if (erased.isNotEmpty()) {
+      runLater {
+        editor.document.isInBulkUpdate = true
+        erased.forEach { markup.removeHighlighter(it) }
+        editor.document.isInBulkUpdate = false
+      }
     }
+    return kept
+  }
 
   fun visibleResults() = results.filter { it in viewBounds }
 
@@ -195,7 +200,11 @@ object Finder : Resettable {
       }
 
   override fun reset() {
-    runLater { markup.removeAllHighlighters() }
+    runLater {
+      editor.document.isInBulkUpdate = true
+      markup.removeAllHighlighters()
+      editor.document.isInBulkUpdate = false
+    }
     query = ""
     skim = false
     results = sortedSetOf()
