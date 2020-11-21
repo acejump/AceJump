@@ -19,6 +19,7 @@ class AceConfigurable: Configurable {
       panel.keyboardLayout != settings.layout ||
       panel.jumpModeColor != settings.jumpModeColor ||
       panel.targetModeColor != settings.targetModeColor ||
+      panel.definitionModeColor != settings.definitionModeColor ||
       panel.textHighlightColor != settings.textHighlightColor ||
       panel.tagForegroundColor != settings.tagForegroundColor ||
       panel.tagBackgroundColor != settings.tagBackgroundColor ||
@@ -35,12 +36,14 @@ class AceConfigurable: Configurable {
     }
 
     settings.layout = panel.keyboardLayout
-    panel.jumpModeColor?.let { settings.jumpModeRGB = it.rgb }
-    panel.targetModeColor?.let { settings.targetModeRGB = it.rgb }
-    panel.textHighlightColor?.let { settings.textHighlightRGB = it.rgb }
-    panel.tagForegroundColor?.let { settings.tagForegroundRGB = it.rgb }
-    panel.tagBackgroundColor?.let { settings.tagBackgroundRGB = it.rgb }
-    panel.supportPinyin.let { settings.supportPinyin = it }
+    panel.jumpModeColor ?.let { settings.jumpModeColor = it }
+    panel.targetModeColor ?.let { settings.targetModeColor = it }
+    panel.definitionModeColor ?.let { settings.definitionModeColor = it }
+    panel.textHighlightColor ?.let { settings.textHighlightColor = it }
+    panel.tagForegroundColor ?.let { settings.tagForegroundColor = it }
+    panel.tagBackgroundColor ?.let { settings.tagBackgroundColor = it }
+    settings.supportPinyin = panel.supportPinyin
+
     logger.info("User applied new settings: $settings")
   }
 

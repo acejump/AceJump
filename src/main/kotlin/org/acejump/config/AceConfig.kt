@@ -32,9 +32,9 @@ class AceConfig: PersistentStateComponent<AceSettings> {
     val allowedChars: String get() = settings.allowedChars
     val layout: KeyLayout get() = settings.layout
     val jumpModeColor: Color get() = settings.jumpModeColor
-    val textHighlightColor: Color get() = settings.textHighlightColor
     val targetModeColor: Color get() = settings.targetModeColor
     val definitionModeColor: Color get() = settings.definitionModeColor
+    val textHighlightColor: Color get() = settings.textHighlightColor
     val tagForegroundColor: Color get() = settings.tagForegroundColor
     val tagBackgroundColor: Color get() = settings.tagBackgroundColor
     val supportPinyin: Boolean get() = settings.supportPinyin
