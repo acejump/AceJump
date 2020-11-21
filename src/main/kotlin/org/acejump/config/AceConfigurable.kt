@@ -23,6 +23,7 @@ class AceConfigurable: Configurable {
       panel.textHighlightColor != settings.textHighlightColor ||
       panel.tagForegroundColor != settings.tagForegroundColor ||
       panel.tagBackgroundColor != settings.tagBackgroundColor ||
+      panel.searchWholeFile != settings.searchWholeFile ||
       panel.supportPinyin != settings.supportPinyin
 
   private fun String.distinctAlphanumerics() =
@@ -42,6 +43,7 @@ class AceConfigurable: Configurable {
     panel.textHighlightColor ?.let { settings.textHighlightColor = it }
     panel.tagForegroundColor ?.let { settings.tagForegroundColor = it }
     panel.tagBackgroundColor ?.let { settings.tagBackgroundColor = it }
+    settings.searchWholeFile = panel.searchWholeFile
     settings.supportPinyin = panel.supportPinyin
 
     logger.info("User applied new settings: $settings")

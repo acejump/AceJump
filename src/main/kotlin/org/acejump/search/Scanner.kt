@@ -22,9 +22,9 @@ internal object Scanner {
    * will filter prior results instead of searching the editor contents.
    */
 
-  fun find(model: AceFindModel, cache: Set<Int> = emptySet()): SortedSet<Int> =
-    if (!LONG_DOCUMENT || cache.size != 0 || boundaries != FULL_FILE_BOUNDARY)
-      editorText.search(model, cache, boundaries.intRange()).toSortedSet()
+  fun find(model: AceFindModel, boundaries: IntRange, cache: Set<Int> = emptySet()): SortedSet<Int> =
+    if (!LONG_DOCUMENT || cache.size != 0 || boundaries != FULL_FILE_BOUNDARY.intRange())
+      editorText.search(model, cache, boundaries).toSortedSet()
     else editorText.chunk().parallelStream().map { chunk ->
       editorText.search(model, cache, chunk)
     }.toList().flatten().toSortedSet()

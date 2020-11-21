@@ -33,5 +33,6 @@ data class AceSettings(
   var tagBackgroundColor: Color = Color.YELLOW,
 
   var displayQuery: Boolean = false,
+  var searchWholeFile: Boolean = true,
   var supportPinyin: Boolean = false
 )
