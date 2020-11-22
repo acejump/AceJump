@@ -37,6 +37,7 @@ class Marker {
   val index: Int
   private val query: String
   val tag: String?
+  private val tagUpperCase: String?
   private var srcPoint: Point
   private var queryLength: Int
   private var trueOffset: Int
@@ -52,6 +53,7 @@ class Marker {
   constructor(query: String, tag: String?, index: Int) {
     this.query = query
     this.tag = tag
+    this.tagUpperCase = tag?.toUpperCase()
     this.index = index
     val lastQueryChar = query.last()
     endsWith = tag != null && lastQueryChar == tag[0]
@@ -62,7 +64,7 @@ class Marker {
 
     var i = 1
     while (i < query.length && index + i < text.length &&
-      query[i].toLowerCase() == text[index + i].toLowerCase()) i++
+      query[i].equals(text[index + i], ignoreCase = true)) i++
     trueOffset = i - 1
     queryLength = i
 
@@ -109,45 +111,53 @@ class Marker {
         setRenderingHint(KEY_ANTIALIASING, VALUE_ANTIALIAS_ON)
         color = AceConfig.textHighlightColor
         val start = editor.getPoint(highlighter.startOffset)
-        val queryLength = highlighter.endOffset - highlighter.startOffset
-        val searchWidth = if (regex) 0 else queryLength * fontWidth
         val startY = start.y + rectVOffset
 
-        fun highlightRegex() {
-          composite = getInstance(SRC_OVER, 0.40.toFloat())
-          fillRoundRect(start.x, startY, fontWidth, rectHeight, arcD, arcD)
+        if (regex) {
+          highlightRegex(start.x, startY)
         }
-
-        if (regex) highlightRegex()
         else {
+          val queryLength = highlighter.endOffset - highlighter.startOffset
+          val searchWidth = queryLength * fontWidth
           fillRoundRect(start.x, startY, searchWidth, rectHeight, arcD, arcD)
-          if (JumpMode.equals(TARGET)) surroundTargetWord(highlighter.startOffset, startY)
+          if (JumpMode.equals(TARGET)) {
+            surroundTargetWord(highlighter.startOffset, startY)
+          }
         }
 
-        if (highlighter.startOffset == Selector.nearestVisibleMatches().firstOrNull()) {
-          color = naturalCaretColor
-          drawLine(start.x, startY, start.x, startY + rectHeight)
-        }
+        // TODO this is a lag-fest, results should be cached before this gets turned back on
+        //if (highlighter.startOffset == Selector.nearestVisibleMatches().firstOrNull()) {
+        //  color = naturalCaretColor
+        //  drawLine(start.x, startY, start.x, startY + rectHeight)
+        //}
       }
 
-    fun Graphics2D.surroundTargetWord(index: Int, startY: Int) {
+    private fun Graphics2D.highlightRegex(x: Int, y: Int) {
+      composite = getInstance(SRC_OVER, 0.40.toFloat())
+      fillRoundRect(x, y, fontWidth, rectHeight, arcD, arcD)
+    }
+
+    private fun Graphics2D.surroundTargetWord(index: Int, startY: Int) {
+      if (!text[index].isLetterOrDigit()) {
+        return
+      }
+
       color = AceConfig.targetModeColor
       val (wordStart, wordEnd) = text.wordBounds(index)
 
       val xPos = editor.getPoint(wordStart).x
       val wordWidth = (wordEnd - wordStart) * fontWidth
 
-      if (text[index].isLetterOrDigit())
-        drawRoundRect(xPos, startY, wordWidth, rectHeight, arcD, arcD)
+      drawRoundRect(xPos, startY, wordWidth, rectHeight, arcD, arcD)
     }
   }
 
-  private fun Graphics2D.drawTagForeground(tagPosition: Point?) {
+  private fun Graphics2D.drawTagForeground(tagPosition: Point) {
     font = Model.font
     color = AceConfig.tagForegroundColor
     composite = getInstance(SRC_OVER, 1.toFloat())
 
-    drawString(tag!!.toUpperCase(), tagPosition!!.x, tagPosition.y + fontHeight)
+    drawString(tagUpperCase!!, tagPosition.x, tagPosition.y + fontHeight)
   }
 
   // TODO: Fix tag alignment and visibility issues

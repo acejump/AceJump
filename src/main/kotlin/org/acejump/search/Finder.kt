@@ -13,6 +13,7 @@ import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
 import org.acejump.view.Marker
 import org.acejump.view.Model.LONG_DOCUMENT
 import org.acejump.view.Model.boundaries
+import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.markup
 import org.acejump.view.Model.viewBounds
@@ -125,17 +126,25 @@ object Finder : Resettable {
    * [com.intellij.openapi.editor.markup.MarkupModel].
    */
 
-  fun markup(markers: Set<Int> = results, isRegexQuery: Boolean = false) =
-    runLater {
-      markers.ifEmpty { return@runLater }
+  fun markup(markers: Set<Int> = results, isRegexQuery: Boolean = false) {
+    if (markers.isEmpty()) {
+      return
+    }
 
+    runLater {
+      val highlightLen = if (isRegexQuery) 1 else query.length
+
+      editor.document.isInBulkUpdate = true
       textHighlights.forEach { markup.removeHighlighter(it) }
+
       textHighlights = markers.map {
         val start = it - if (it == editorText.length) 1 else 0
-        val end = start + if (isRegexQuery) 1 else query.length
+        val end = start + highlightLen
         createTextHighlight(max(start, 0), min(end, editorText.length - 1))
       }
+      editor.document.isInBulkUpdate = false
     }
+  }
 
   private fun createTextHighlight(start: Int, end: Int) =
     markup.addRangeHighlighter(start, end, HIGHLIGHT_LAYER, null, EXACT_RANGE)
@@ -163,13 +172,18 @@ object Finder : Resettable {
         if (numDiscarded != 0) logger.info("Discarded $numDiscarded highlights")
       }
 
-  fun List<RangeHighlighter>.eraseIf(cond: RangeHighlighter.() -> Boolean) =
-    filter {
-      if (cond(it)) {
-        runLater { markup.removeHighlighter(it) }
-        false
-      } else true
+  fun List<RangeHighlighter>.eraseIf(cond: RangeHighlighter.() -> Boolean): List<RangeHighlighter> {
+    val (erased, kept) = partition(cond)
+
+    if (erased.isNotEmpty()) {
+      runLater {
+        editor.document.isInBulkUpdate = true
+        erased.forEach { markup.removeHighlighter(it) }
+        editor.document.isInBulkUpdate = false
+      }
     }
+    return kept
+  }
 
   fun visibleResults() = results.filter { it in viewBounds }
 
@@ -186,7 +200,11 @@ object Finder : Resettable {
       }
 
   override fun reset() {
-    runLater { markup.removeAllHighlighters() }
+    runLater {
+      editor.document.isInBulkUpdate = true
+      markup.removeAllHighlighters()
+      editor.document.isInBulkUpdate = false
+    }
     query = ""
     skim = false
     results = sortedSetOf()
