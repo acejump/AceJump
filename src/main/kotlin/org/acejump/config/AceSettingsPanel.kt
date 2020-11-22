@@ -2,7 +2,6 @@ package org.acejump.config
 
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.ColorPanel
-import com.intellij.ui.SeparatorComponent
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
@@ -30,6 +29,7 @@ internal class AceSettingsPanel {
   private val keyboardLayoutArea = JBTextArea()
   private val jumpModeColorWheel = ColorPanel()
   private val targetModeColorWheel = ColorPanel()
+  private val definitionModeColorWheel = ColorPanel()
   private val textHighlightColorWheel = ColorPanel()
   private val tagForegroundColorWheel = ColorPanel()
   private val tagBackgroundColorWheel = ColorPanel()
@@ -54,31 +54,38 @@ internal class AceSettingsPanel {
     fun Cell.short(component: JComponent) = component(growPolicy = SHORT_TEXT)
     fun Cell.medium(component: JComponent) = component(growPolicy = MEDIUM_TEXT)
 
-    noteRow(aceString("tagCharsToBeUsedHeading")) { SeparatorComponent() }
-    row(aceString("tagCharsToBeUsedLabel")) { medium(tagCharsField) }
-    row("Keyboard layout") { short(keyboardLayoutCombo) }
-    row("Keyboard design") { short(keyboardLayoutArea) }
-    noteRow(aceString("colorsToBeUsedHeading")) { SeparatorComponent() }
-    row(aceString("jumpModeColorLabel")) { short(jumpModeColorWheel) }
-    row(aceString("tagBackgroundColorLabel")) { short(tagBackgroundColorWheel) }
-    row(aceString("tagForegroundColorLabel")) { short(tagForegroundColorWheel) }
-    row(aceString("targetModeColorLabel")) { short(targetModeColorWheel) }
-    row(aceString("textHighlightColorLabel")) { short(textHighlightColorWheel) }
-    row(aceString("appearanceHeading")) { SeparatorComponent() }
-    row(aceString("displayQueryLabel")) { short(displayQueryCheckBox) }
-    row(aceString("languagesHeading")) { SeparatorComponent() }
-    row(aceString("supportPinyin")) { short(supportPinyinCheckBox) }
+    titledRow(aceString("charactersAndLayoutHeading")) {
+      row(aceString("tagCharsToBeUsedLabel")) { medium(tagCharsField) }
+      row(aceString("keyboardLayoutLabel")) { short(keyboardLayoutCombo) }
+      row(aceString("keyboardDesignLabel")) { short(keyboardLayoutArea) }
+    }
+
+    titledRow(aceString("colorsHeading")) {
+      row(aceString("jumpModeColorLabel")) { short(jumpModeColorWheel) }
+      row(aceString("targetModeColorLabel")) { short(targetModeColorWheel) }
+      row(aceString("definitionModeColorLabel")) { short(definitionModeColorWheel) }
+      row(aceString("textHighlightColorLabel")) { short(textHighlightColorWheel) }
+      row(aceString("tagForegroundColorLabel")) { short(tagForegroundColorWheel) }
+      row(aceString("tagBackgroundColorLabel")) { short(tagBackgroundColorWheel) }
+    }
+
+    titledRow(aceString("appearanceHeading")) {
+      row { short(displayQueryCheckBox.apply { text = aceString("displayQueryLabel") }) }
+    }
+
+    titledRow(aceString("languagesHeading")) {
+      row { short(supportPinyinCheckBox.apply { text = aceString("supportPinyin") }) }
+    }
   }
 
-  internal var keyboardLayout: KeyLayout
-    get() = keyboardLayoutCombo.selectedItem as KeyLayout
-    set(value) { keyboardLayoutCombo.selectedItem = value }
 
   // Property-to-property delegation: https://stackoverflow.com/q/45074596/1772342
-  internal var keyChars by keyboardLayoutArea
   internal var allowedChars by tagCharsField
+  internal var keyboardLayout by keyboardLayoutCombo
+  internal var keyChars by keyboardLayoutArea
   internal var jumpModeColor by jumpModeColorWheel
   internal var targetModeColor by targetModeColorWheel
+  internal var definitionModeColor by definitionModeColorWheel
   internal var textHighlightColor by textHighlightColorWheel
   internal var tagForegroundColor by tagForegroundColorWheel
   internal var tagBackgroundColor by tagBackgroundColorWheel
@@ -90,6 +97,7 @@ internal class AceSettingsPanel {
     keyboardLayout = settings.layout
     jumpModeColor = settings.jumpModeColor
     targetModeColor = settings.targetModeColor
+    definitionModeColor = settings.definitionModeColor
     textHighlightColor = settings.textHighlightColor
     tagForegroundColor = settings.tagForegroundColor
     tagBackgroundColor = settings.tagBackgroundColor
@@ -106,4 +114,7 @@ internal class AceSettingsPanel {
 
   private operator fun JCheckBox.getValue(a: AceSettingsPanel, p: KProperty<*>) = isSelected
   private operator fun JCheckBox.setValue(a: AceSettingsPanel, p: KProperty<*>, selected: Boolean) = setSelected(selected)
+
+  private operator fun <T> ComboBox<T>.getValue(a: AceSettingsPanel, p: KProperty<*>) = selectedItem as T
+  private operator fun <T> ComboBox<T>.setValue(a: AceSettingsPanel, p: KProperty<*>, item: T) = setSelectedItem(item)
 }

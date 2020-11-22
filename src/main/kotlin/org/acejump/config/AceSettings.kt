@@ -1,10 +1,9 @@
 package org.acejump.config
 
+import com.intellij.util.xmlb.annotations.OptionTag
 import org.acejump.label.Pattern.Companion.KeyLayout
 import org.acejump.label.Pattern.Companion.KeyLayout.QWERTY
 import java.awt.Color
-import java.awt.Color.*
-import kotlin.reflect.KProperty
 
 /**
  * Settings model located for [AceSettingsPanel].
@@ -14,25 +13,25 @@ import kotlin.reflect.KProperty
 data class AceSettings(
   var layout: KeyLayout = QWERTY,
   var allowedChars: String = layout.text,
-  // These must be primitives in order to be serializable
-  internal var jumpModeRGB: Int = BLUE.rgb,
-  internal var targetModeRGB: Int = RED.rgb,
-  internal var definitionModeRGB: Int = MAGENTA.rgb,
-  internal var textHighlightRGB: Int = GREEN.rgb,
-  internal var tagForegroundRGB: Int = BLACK.rgb,
-  internal var tagBackgroundRGB: Int = YELLOW.rgb,
-  internal var displayQuery: Boolean = false,
-  internal var supportPinyin: Boolean = false
-) {
 
-  // ...but we expose them to the world as Color
-  val jumpModeColor: Color by { jumpModeRGB }
-  val targetModeColor: Color by { targetModeRGB }
-  val definitionModeColor: Color by { definitionModeRGB }
-  val textHighlightColor: Color by { textHighlightRGB }
-  val tagForegroundColor: Color by { tagForegroundRGB }
-  val tagBackgroundColor: Color by { tagBackgroundRGB }
+  @OptionTag("jumpModeRGB", converter = ColorConverter::class)
+  var jumpModeColor: Color = Color.BLUE,
 
-  // Force delegate to read the most current value by invoking as a function
-  operator fun (() -> Int).getValue(s: AceSettings, p: KProperty<*>) = Color(this())
-}
+  @OptionTag("targetModeRGB", converter = ColorConverter::class)
+  var targetModeColor: Color = Color.RED,
+
+  @OptionTag("definitionModeRGB", converter = ColorConverter::class)
+  var definitionModeColor: Color = Color.MAGENTA,
+
+  @OptionTag("textHighlightRGB", converter = ColorConverter::class)
+  var textHighlightColor: Color = Color.GREEN,
+
+  @OptionTag("tagForegroundRGB", converter = ColorConverter::class)
+  var tagForegroundColor: Color = Color.BLACK,
+
+  @OptionTag("tagBackgroundRGB", converter = ColorConverter::class)
+  var tagBackgroundColor: Color = Color.YELLOW,
+
+  var displayQuery: Boolean = false,
+  var supportPinyin: Boolean = false
+)
