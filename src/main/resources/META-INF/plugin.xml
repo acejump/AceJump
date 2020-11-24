@@ -18,48 +18,67 @@
     <applicationConfigurable groupId="tools" displayName="AceJump"
                              instance="org.acejump.config.AceConfigurable"
                              id="preferences.AceConfigurable" dynamic="true"/>
+
+    <editorActionHandler action="EditorEscape" order="first"
+                         implementationClass="org.acejump.action.AceEditorAction$Reset"/>
+    <editorActionHandler action="EditorBackSpace" order="first"
+                         implementationClass="org.acejump.action.AceEditorAction$ClearSearch"/>
+    <editorActionHandler action="EditorStartNewLine" order="first"
+                         implementationClass="org.acejump.action.AceEditorAction$SelectBackward"/>
+    <editorActionHandler action="EditorEnter" order="first"
+                         implementationClass="org.acejump.action.AceEditorAction$SelectForward"/>
+    <editorActionHandler action="EditorUp" order="first"
+                         implementationClass="org.acejump.action.AceEditorAction$SearchCodeIndents"/>
+    <editorActionHandler action="EditorLeft" order="first"
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineStarts"/>
+    <editorActionHandler action="EditorLineStart" order="first"
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineStarts"/>
+    <editorActionHandler action="EditorRight" order="first"
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineEnds"/>
+    <editorActionHandler action="EditorLineEnd" order="first"
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineEnds"/>
   </extensions>
 
   <actions>
     <action id="AceAction"
-            class="org.acejump.control.AceAction"
-            text="Activate AceJump Mode"
-            description="Targets a character in AceJump">
+            class="org.acejump.action.AceAction$ActivateOrCycleMode"
+            text="Activate / Cycle AceJump Mode">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
     </action>
+    <action id="AceWordStartAction"
+            class="org.acejump.action.AceAction$ToggleJumpMode"
+            text="Start AceJump in Jump Mode"/>
+    <action id="AceWordEndAction"
+            class="org.acejump.action.AceAction$ToggleJumpEndMode"
+            text="Start AceJump in Jump End Mode"/>
+    <action id="AceTargetAction"
+            class="org.acejump.action.AceAction$ToggleTargetMode"
+            text="Start AceJump in Target Mode">
+      <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl alt SEMICOLON"/>
+      <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl alt SEMICOLON"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt SEMICOLON"/>
+    </action>
+    <action id="AceDeclarationAction"
+            class="org.acejump.action.AceAction$ToggleDeclarationMode"
+            text="Start AceJump in Declaration Mode"/>
     <action id="AceLineAction"
-            class="org.acejump.control.AceLineAction"
-            text="Display Line Markers"
+            class="org.acejump.action.AceAction$ToggleAllLinesMode"
+            text="Start AceJump in All Lines Mode"
             description="Targets line markers in AceJump">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl shift SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl shift SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift SEMICOLON"/>
     </action>
-    <action id="AceTargetAction"
-            class="org.acejump.control.AceTargetAction"
-            text="Start in Target Mode"
-            description="Targets a whole word in AceJump">
-      <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl alt SEMICOLON"/>
-      <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl alt SEMICOLON"/>
-      <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt SEMICOLON"/>
-    </action>
     <action id="AceWordAction"
-            class="org.acejump.control.AceWordAction"
-            text="Start in Word Mode"
-            description="Searches for all words on the screen in AceJump"/>
+            class="org.acejump.action.AceAction$ToggleAllWordsMode"
+            text="Start AceJump in All Words Mode"/>
     <action id="AceWordForwardAction"
-            class="org.acejump.control.AceWordForwardAction"
-            text="Start in Word Forward Mode"
-            description="Searches for all visible words after the caret in AceJump"/>
+            class="org.acejump.action.AceAction$ToggleAllWordsForwardMode"
+            text="Start in All Words After Caret Mode"/>
     <action id="AceWordBackwardsAction"
-            class="org.acejump.control.AceWordBackwardsAction"
-            text="Start in Word Backward Mode"
-            description="Searches for all visible words before the caret in AceJump"/>
-    <action id="AceDeclarationAction"
-            class="org.acejump.control.AceDefinitionAction"
-            text="Start in Declaration Mode"
-            description="AceJump will invoke the 'Navigate To' action after jumping"/>
+            class="org.acejump.action.AceAction$ToggleAllWordsBackwardsMode"
+            text="Start in All Words Before Caret Mode"/>
   </actions>
 </idea-plugin>
