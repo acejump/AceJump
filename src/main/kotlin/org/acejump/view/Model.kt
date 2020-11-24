@@ -57,9 +57,9 @@ object Model {
   val arcD
     get() = if (AceConfig.roundedTagCorners) rectHeight - 6 else 1
   var viewBounds = 0..0
-  const val DEFAULT_BUFFER = 30000
+  const val LONG_DOCUMENT_LENGTH = 100000
   val LONG_DOCUMENT
-    get() = DEFAULT_BUFFER < editorText.length
+    get() = LONG_DOCUMENT_LENGTH < editorText.length
   const val MAX_TAG_RESULTS = 300
 
   val defaultBoundary = FULL_FILE_BOUNDARY

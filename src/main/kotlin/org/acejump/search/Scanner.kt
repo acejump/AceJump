@@ -1,9 +1,7 @@
 package org.acejump.search
 
 import com.intellij.openapi.diagnostic.Logger
-import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
-import org.acejump.view.Model.LONG_DOCUMENT
-import org.acejump.view.Model.boundaries
+import org.acejump.view.Model.LONG_DOCUMENT_LENGTH
 import org.acejump.view.Model.editorText
 import java.util.*
 import kotlin.streams.toList
@@ -22,9 +20,9 @@ internal object Scanner {
    * will filter prior results instead of searching the editor contents.
    */
 
-  fun find(model: AceFindModel, cache: Set<Int> = emptySet()): SortedSet<Int> =
-    if (!LONG_DOCUMENT || cache.size != 0 || boundaries != FULL_FILE_BOUNDARY)
-      editorText.search(model, cache, boundaries.intRange()).toSortedSet()
+  fun find(model: AceFindModel, boundaries: IntRange, cache: Set<Int> = emptySet()): SortedSet<Int> =
+    if (cache.isNotEmpty() || (boundaries.last - boundaries.first) < LONG_DOCUMENT_LENGTH)
+      editorText.search(model, cache, boundaries).toSortedSet()
     else editorText.chunk().parallelStream().map { chunk ->
       editorText.search(model, cache, chunk)
     }.toList().flatten().toSortedSet()

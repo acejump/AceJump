@@ -43,6 +43,7 @@ class AceConfig: PersistentStateComponent<AceSettings> {
     val tagForegroundColor: Color get() = settings.tagForegroundColor
     val tagBackgroundColor: Color get() = settings.tagBackgroundColor
     val roundedTagCorners: Boolean get() = settings.roundedTagCorners
+    val searchWholeFile: Boolean get() = settings.searchWholeFile
     val supportPinyin: Boolean get() = settings.supportPinyin
 
     private val nearby: Map<Char, Map<Char, Int>> = mapOf(

@@ -40,6 +40,7 @@ internal class AceSettingsPanel {
   private val tagBackgroundColorWheel = ColorPanel()
   private val displayQueryCheckBox = JBCheckBox().apply { isEnabled = false }
   private val roundedTagCornersCheckBox = JBCheckBox()
+  private val searchWholeFileCheckBox = JBCheckBox()
   private val supportPinyinCheckBox = JBCheckBox()
 
   init {
@@ -111,7 +112,8 @@ internal class AceSettingsPanel {
       row { short(roundedTagCornersCheckBox.apply { text = aceString("roundedTagCornersLabel") }) }
     }
 
-    titledRow(aceString("languagesHeading")) {
+    titledRow(aceString("behaviorHeading")) {
+      row { short(searchWholeFileCheckBox.apply { text = aceString("searchWholeFileLabel") }) }
       row { short(supportPinyinCheckBox.apply { text = aceString("supportPinyin") }) }
     }
   }
@@ -133,6 +135,7 @@ internal class AceSettingsPanel {
   internal var tagBackgroundColor by tagBackgroundColorWheel
   internal var displayQuery by displayQueryCheckBox
   internal var roundedTagCorners by roundedTagCornersCheckBox
+  internal var searchWholeFile by searchWholeFileCheckBox
   internal var supportPinyin by supportPinyinCheckBox
 
   fun reset(settings: AceSettings) {
@@ -150,6 +153,7 @@ internal class AceSettingsPanel {
     tagBackgroundColor = settings.tagBackgroundColor
     displayQuery = settings.displayQuery
     roundedTagCorners = settings.roundedTagCorners
+    searchWholeFile = settings.searchWholeFile
     supportPinyin = settings.supportPinyin
   }
 

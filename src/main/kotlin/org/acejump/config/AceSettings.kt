@@ -39,5 +39,6 @@ data class AceSettings(
 
   var displayQuery: Boolean = false,
   var roundedTagCorners: Boolean = true,
+  var searchWholeFile: Boolean = true,
   var supportPinyin: Boolean = false
 )
