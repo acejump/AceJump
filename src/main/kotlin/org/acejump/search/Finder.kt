@@ -4,12 +4,12 @@ import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea.EXACT_RANGE
 import com.intellij.openapi.editor.markup.RangeHighlighter
+import org.acejump.config.AceConfig
 import org.acejump.control.Handler
 import org.acejump.control.Trigger
 import org.acejump.label.Pattern
 import org.acejump.label.Tagger
 import org.acejump.view.Boundary
-import org.acejump.view.Boundary.FULL_FILE_BOUNDARY
 import org.acejump.view.Marker
 import org.acejump.view.Model.LONG_DOCUMENT
 import org.acejump.view.Model.boundaries
@@ -76,20 +76,24 @@ object Finder : Resettable {
    * applying tags once we have received a "chunk" of search text.
    */
 
-  private fun skimThenSearch() =
-    if (results.size == 0 && LONG_DOCUMENT) {
-      skim = true
+  private fun skimThenSearch() {
+    if (results.size == 0 && LONG_DOCUMENT && AceConfig.searchWholeFile) {
       logger.info("Skimming document for matches of: $query")
+      skim = true
       search()
       skimTrigger(400L) { skim = false; search() }
-    } else search()
+    }
+    else {
+      search()
+    }
+  }
 
-  fun search(pattern: Pattern, bounds: Boundary = FULL_FILE_BOUNDARY) {
+  fun search(pattern: Pattern, bounds: Boundary) {
     logger.info("Searching for regular expression: ${pattern.name} in $bounds")
     search(pattern.string, bounds)
   }
 
-  fun search(pattern: String, bounds: Boundary = FULL_FILE_BOUNDARY) {
+  fun search(pattern: String, bounds: Boundary) {
     boundaries = bounds
     // TODO: Fix this broken reset
     reset()
@@ -98,11 +102,23 @@ object Finder : Resettable {
   }
 
   fun search(model: AceFindModel = AceFindModel(query)) {
-    measureTimeMillis {
-      results = Scanner.find(model, results)
-    }.let { logger.info("Found ${results.size} matching sites in $it ms") }
+    val time = measureTimeMillis {
+      results = Scanner.find(model, calculateSearchBoundaries(), results)
+    }
+
+    logger.info("Found ${results.size} matching sites in $time ms")
 
     markResults(results, model)
+  }
+
+  private fun calculateSearchBoundaries(): IntRange {
+    if (AceConfig.searchWholeFile) {
+      return boundaries.intRange()
+    }
+
+    val bounds1 = boundaries
+    val bounds2 = Boundary.SCREEN_BOUNDARY
+    return max(bounds1.start, bounds2.start)..min(bounds1.endInclusive, bounds2.endInclusive)
   }
 
   /**

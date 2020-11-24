@@ -28,6 +28,7 @@ class AceConfigurable: Configurable {
       panel.tagForegroundColor != settings.tagForegroundColor ||
       panel.tagBackgroundColor != settings.tagBackgroundColor ||
       panel.roundedTagCorners != settings.roundedTagCorners ||
+      panel.searchWholeFile != settings.searchWholeFile ||
       panel.supportPinyin != settings.supportPinyin
 
   private fun String.distinctAlphanumerics() =
@@ -52,6 +53,7 @@ class AceConfigurable: Configurable {
     panel.tagForegroundColor ?.let { settings.tagForegroundColor = it }
     panel.tagBackgroundColor ?.let { settings.tagBackgroundColor = it }
     settings.roundedTagCorners = panel.roundedTagCorners
+    settings.searchWholeFile = panel.searchWholeFile
     settings.supportPinyin = panel.supportPinyin
 
     logger.info("User applied new settings: $settings")

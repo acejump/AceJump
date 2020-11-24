@@ -6,8 +6,9 @@ import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 plugins {
   idea apply true
   kotlin("jvm") version "1.3.72"
-  id("org.jetbrains.intellij") version "0.6.1"
+  id("org.jetbrains.intellij") version "0.6.4"
   id("org.jetbrains.changelog") version "0.6.2"
+  id("com.github.ben-manes.versions") version "0.36.0"
 }
 
 tasks {
@@ -45,6 +46,7 @@ changelog {
 dependencies {
   // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
   compileOnly(kotlin("stdlib-jdk8"))
+  // https://github.com/promeG/TinyPinyin
   implementation("com.github.promeg:tinypinyin:2.0.3")
 }
 
