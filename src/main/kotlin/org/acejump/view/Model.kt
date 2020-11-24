@@ -54,7 +54,8 @@ object Model {
     get() = fontHeight + 3
   val rectVOffset
     get() = lineHeight - (editor as EditorImpl).descent - fontHeight
-  val arcD = rectHeight - 6
+  val arcD
+    get() = if (AceConfig.roundedTagCorners) rectHeight - 6 else 1
   var viewBounds = 0..0
   const val DEFAULT_BUFFER = 30000
   val LONG_DOCUMENT

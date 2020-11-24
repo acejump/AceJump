@@ -38,5 +38,6 @@ data class AceSettings(
   var tagBackgroundColor: Color = Color.YELLOW,
 
   var displayQuery: Boolean = false,
+  var roundedTagCorners: Boolean = true,
   var supportPinyin: Boolean = false
 )
