@@ -26,13 +26,10 @@ import kotlin.math.min
 object Jumper: Resettable {
   private val logger = Logger.getInstance(Jumper::class.java)
 
-  fun toggleMode() = toggleMode(null)
+  fun cycleMode() =
+    logger.info("Entering ${JumpMode.cycle()} mode")
 
-  fun toggleTargetMode() = toggleMode(TARGET)
-
-  fun toggleDeclarationMode() = toggleMode(DEFINE)
-
-  private fun toggleMode(mode: JumpMode? = null) =
+  fun toggleMode(mode: JumpMode) =
     logger.info("Entering ${JumpMode.toggle(mode)} mode")
 
   fun jumpTo(newOffset: Int, done: Boolean = true) =

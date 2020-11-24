@@ -7,6 +7,7 @@ import com.intellij.openapi.project.DumbAwareAction
 import org.acejump.control.Handler.regexSearch
 import org.acejump.label.Pattern
 import org.acejump.label.Pattern.ALL_WORDS
+import org.acejump.search.JumpMode
 import org.acejump.search.Jumper
 import org.acejump.search.getNameOfFileInEditor
 import org.acejump.view.Boundary.*
@@ -33,7 +34,7 @@ open class AceAction: DumbAwareAction() {
     customize()
   }
 
-  open fun customize() = Jumper.toggleMode()
+  open fun customize() = Jumper.cycleMode()
 }
 
 /**
@@ -41,7 +42,7 @@ open class AceAction: DumbAwareAction() {
  */
 
 class AceTargetAction: AceAction() {
-  override fun customize() = Jumper.toggleTargetMode()
+  override fun customize() = Jumper.toggleMode(JumpMode.TARGET)
 }
 
 /*
@@ -61,7 +62,7 @@ class AceLineAction: AceAction() {
  */
 
 class AceDefinitionAction: AceAction() {
-  override fun customize() = Jumper.toggleDeclarationMode()
+  override fun customize() = Jumper.toggleMode(JumpMode.DEFINE)
 }
 
 /**

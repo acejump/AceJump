@@ -17,6 +17,10 @@ class AceConfigurable: Configurable {
   override fun isModified() =
     panel.allowedChars != settings.allowedChars ||
       panel.keyboardLayout != settings.layout ||
+      panel.cycleMode1 != settings.cycleMode1 ||
+      panel.cycleMode2 != settings.cycleMode2 ||
+      panel.cycleMode3 != settings.cycleMode3 ||
+      panel.cycleMode4 != settings.cycleMode4 ||
       panel.jumpModeColor != settings.jumpModeColor ||
       panel.targetModeColor != settings.targetModeColor ||
       panel.definitionModeColor != settings.definitionModeColor ||
@@ -36,6 +40,10 @@ class AceConfigurable: Configurable {
     }
 
     settings.layout = panel.keyboardLayout
+    settings.cycleMode1 = panel.cycleMode1
+    settings.cycleMode2 = panel.cycleMode2
+    settings.cycleMode3 = panel.cycleMode3
+    settings.cycleMode4 = panel.cycleMode4
     panel.jumpModeColor ?.let { settings.jumpModeColor = it }
     panel.targetModeColor ?.let { settings.targetModeColor = it }
     panel.definitionModeColor ?.let { settings.definitionModeColor = it }
