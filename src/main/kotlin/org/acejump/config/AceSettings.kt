@@ -17,10 +17,13 @@ data class AceSettings(
   var cycleMode1: JumpMode = JumpMode.JUMP,
   var cycleMode2: JumpMode = JumpMode.DEFINE,
   var cycleMode3: JumpMode = JumpMode.TARGET,
-  var cycleMode4: JumpMode = JumpMode.DISABLED,
+  var cycleMode4: JumpMode = JumpMode.JUMP_END,
 
   @OptionTag("jumpModeRGB", converter = ColorConverter::class)
   var jumpModeColor: Color = Color.BLUE,
+
+  @OptionTag("jumpEndModeRGB", converter = ColorConverter::class)
+  var jumpEndModeColor: Color = Color.CYAN,
 
   @OptionTag("targetModeRGB", converter = ColorConverter::class)
   var targetModeColor: Color = Color.RED,

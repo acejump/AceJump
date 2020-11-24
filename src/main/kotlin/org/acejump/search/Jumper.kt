@@ -11,8 +11,8 @@ import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.fileEditor.impl.IdeDocumentHistoryImpl
 import com.intellij.openapi.ui.playback.commands.ActionCommand
 import com.intellij.openapi.util.TextRange
-import org.acejump.search.JumpMode.DEFINE
-import org.acejump.search.JumpMode.TARGET
+import org.acejump.label.Tagger
+import org.acejump.search.JumpMode.*
 import org.acejump.view.Model.editor
 import org.acejump.view.Model.editorText
 import org.acejump.view.Model.project
@@ -38,7 +38,14 @@ object Jumper: Resettable {
       logger.debug("Jumping to line ${logPos.line}, column ${logPos.column}...")
 
       val oldOffset = caretModel.offset
-      moveCaretTo(newOffset)
+
+      when {
+        JumpMode.equals(JUMP_END) ->
+          moveCaretToEnd(newOffset + countMatchingCharacters(newOffset, Tagger.query))
+
+        else ->
+          moveCaretTo(newOffset)
+      }
 
       when {
         Finder.isShiftSelectEnabled && done -> selectRange(oldOffset, newOffset)
@@ -65,10 +72,30 @@ object Jumper: Resettable {
       aceJumpHistoryAppender, "AceJumpHistoryAppender",
       DocCommandGroupId.noneGroupId(document), document)
 
-  private fun moveCaretTo(offset: Int) = editor.run {
+  private fun Editor.moveCaretTo(offset: Int) {
     appendCaretPositionToEditorNavigationHistory()
     selectionModel.removeSelection()
     caretModel.moveToOffset(offset)
+  }
+
+  private fun Editor.moveCaretToEnd(offset: Int) {
+    val ranges = ArrayList<TextRange>()
+    addWordSelection(settings.isCamelWords, editorText, offset, ranges)
+
+    if (ranges.isEmpty()) {
+      moveCaretTo(offset)
+    }
+    else {
+      moveCaretTo(min(ranges[0].endOffset, editorText.length))
+    }
+  }
+
+  private fun countMatchingCharacters(offset: Int, query: String): Int {
+    var count = 0
+    while (offset + count < editorText.length && count < query.length && editorText[offset + count] == query[count]) {
+      count++
+    }
+    return count
   }
 
   /**

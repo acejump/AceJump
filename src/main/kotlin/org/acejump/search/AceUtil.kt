@@ -19,7 +19,8 @@ interface Resettable {
   fun reset()
 }
 
-fun aceString(s: String) = ResourceBundle.getBundle("AceResources").getString(s)
+fun aceString(s: String): String =
+  ResourceBundle.getBundle("AceResources").getString(s)
 
 fun <P> applyTo(vararg ps: P, fx: P.() -> Unit) = ps.forEach { it.fx() }
 
