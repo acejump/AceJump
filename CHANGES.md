@@ -1,8 +1,17 @@
 # Changelog
 
-### 3.6.4
+### 3.7
 
-- Improvements to tag latency. Thanks to @chylex for [the PR](https://github.com/acejump/AceJump/pull/339)!
+- Improvements to tag latency
+- Redesign settings panel
+  - Add missing configuration for definition mode color
+  - Adds option to switch between straight and rounded tag corners
+  - Adds option to only consider visible area
+  - Add customizable jump mode cycling 
+- Jump-to-End mode jumps to the end of a word
+- Fixes toggle keys not resetting mode when pressed twice
+- Increase limit for what is considered a large file
+- Thanks to @chylex for [all the PRs](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3Achylex)!
 
 ### 3.6.3
 
