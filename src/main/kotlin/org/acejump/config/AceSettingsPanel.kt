@@ -33,6 +33,7 @@ internal class AceSettingsPanel {
   private val cycleModeCombo3 = ComboBox<JumpMode>()
   private val cycleModeCombo4 = ComboBox<JumpMode>()
   private val jumpModeColorWheel = ColorPanel()
+  private val jumpEndModeColorWheel = ColorPanel()
   private val targetModeColorWheel = ColorPanel()
   private val definitionModeColorWheel = ColorPanel()
   private val textHighlightColorWheel = ColorPanel()
@@ -100,6 +101,7 @@ internal class AceSettingsPanel {
 
     titledRow(aceString("colorsHeading")) {
       row(aceString("jumpModeColorLabel")) { short(jumpModeColorWheel) }
+      row(aceString("jumpEndModeColorLabel")) { short(jumpEndModeColorWheel) }
       row(aceString("targetModeColorLabel")) { short(targetModeColorWheel) }
       row(aceString("definitionModeColorLabel")) { short(definitionModeColorWheel) }
       row(aceString("textHighlightColorLabel")) { short(textHighlightColorWheel) }
@@ -128,6 +130,7 @@ internal class AceSettingsPanel {
   internal var cycleMode3 by cycleModeCombo3
   internal var cycleMode4 by cycleModeCombo4
   internal var jumpModeColor by jumpModeColorWheel
+  internal var jumpEndModeColor by jumpEndModeColorWheel
   internal var targetModeColor by targetModeColorWheel
   internal var definitionModeColor by definitionModeColorWheel
   internal var textHighlightColor by textHighlightColorWheel
@@ -146,6 +149,7 @@ internal class AceSettingsPanel {
     cycleMode3 = settings.cycleMode3
     cycleMode4 = settings.cycleMode4
     jumpModeColor = settings.jumpModeColor
+    jumpEndModeColor = settings.jumpEndModeColor
     targetModeColor = settings.targetModeColor
     definitionModeColor = settings.definitionModeColor
     textHighlightColor = settings.textHighlightColor

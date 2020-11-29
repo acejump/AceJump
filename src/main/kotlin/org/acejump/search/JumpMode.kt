@@ -9,7 +9,7 @@ import org.acejump.view.Model.editor
 import java.awt.Color
 
 enum class JumpMode {
-  DISABLED, JUMP, TARGET, DEFINE;
+  DISABLED, JUMP, JUMP_END, TARGET, DEFINE;
 
   companion object: Resettable {
     private var modeIndex = 0
@@ -17,9 +17,10 @@ enum class JumpMode {
       set(value) {
         field = value
         setCaretColor(when (field) {
-          JUMP -> AceConfig.jumpModeColor
-          DEFINE -> AceConfig.definitionModeColor
-          TARGET -> AceConfig.targetModeColor
+          JUMP     -> AceConfig.jumpModeColor
+          JUMP_END -> AceConfig.jumpEndModeColor
+          DEFINE   -> AceConfig.definitionModeColor
+          TARGET   -> AceConfig.targetModeColor
           DISABLED -> Model.naturalCaretColor
         })
 
@@ -81,7 +82,8 @@ enum class JumpMode {
   override fun toString() = when(this) {
     DISABLED -> aceString("jumpModeDisabled")
     JUMP     -> aceString("jumpModeJump")
+    JUMP_END -> aceString("jumpModeJumpEnd")
     TARGET   -> aceString("jumpModeTarget")
     DEFINE   -> aceString("jumpModeDefine")
-  } ?: "Unknown"
+  }
 }

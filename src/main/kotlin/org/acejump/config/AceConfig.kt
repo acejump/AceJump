@@ -37,6 +37,7 @@ class AceConfig: PersistentStateComponent<AceSettings> {
     val cycleMode3: JumpMode get() = settings.cycleMode3
     val cycleMode4: JumpMode get() = settings.cycleMode4
     val jumpModeColor: Color get() = settings.jumpModeColor
+    val jumpEndModeColor: Color get() = settings.jumpEndModeColor
     val targetModeColor: Color get() = settings.targetModeColor
     val definitionModeColor: Color get() = settings.definitionModeColor
     val textHighlightColor: Color get() = settings.textHighlightColor

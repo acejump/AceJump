@@ -22,6 +22,7 @@ class AceConfigurable: Configurable {
       panel.cycleMode3 != settings.cycleMode3 ||
       panel.cycleMode4 != settings.cycleMode4 ||
       panel.jumpModeColor != settings.jumpModeColor ||
+      panel.jumpEndModeColor != settings.jumpEndModeColor ||
       panel.targetModeColor != settings.targetModeColor ||
       panel.definitionModeColor != settings.definitionModeColor ||
       panel.textHighlightColor != settings.textHighlightColor ||
@@ -47,6 +48,7 @@ class AceConfigurable: Configurable {
     settings.cycleMode3 = panel.cycleMode3
     settings.cycleMode4 = panel.cycleMode4
     panel.jumpModeColor ?.let { settings.jumpModeColor = it }
+    panel.jumpEndModeColor?.let { settings.jumpEndModeColor = it }
     panel.targetModeColor ?.let { settings.targetModeColor = it }
     panel.definitionModeColor ?.let { settings.definitionModeColor = it }
     panel.textHighlightColor ?.let { settings.textHighlightColor = it }
