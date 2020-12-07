@@ -28,7 +28,7 @@
     <editorActionHandler action="EditorEnter" order="first"
                          implementationClass="org.acejump.action.AceEditorAction$SelectForward"/>
     <editorActionHandler action="EditorUp" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$SearchCodeIndents"/>
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineIndents"/>
     <editorActionHandler action="EditorLeft" order="first"
                          implementationClass="org.acejump.action.AceEditorAction$SearchLineStarts"/>
     <editorActionHandler action="EditorLineStart" order="first"
@@ -64,21 +64,29 @@
             class="org.acejump.action.AceAction$ToggleDeclarationMode"
             text="Start AceJump in Declaration Mode"/>
     <action id="AceLineAction"
-            class="org.acejump.action.AceAction$ToggleAllLinesMode"
-            text="Start AceJump in All Lines Mode"
-            description="Targets line markers in AceJump">
+            class="org.acejump.action.AceAction$StartAllLineMarksMode"
+            text="Start AceJump in All Line Marks Mode">
       <keyboard-shortcut keymap="Mac OS X" first-keystroke="ctrl shift SEMICOLON"/>
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl shift SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift SEMICOLON"/>
     </action>
+    <action id="AceLineStartsAction"
+            class="org.acejump.action.AceAction$StartAllLineStartsMode"
+            text="Start AceJump in All Line Starts Mode"/>
+    <action id="AceLineEndsAction"
+            class="org.acejump.action.AceAction$StartAllLineEndsMode"
+            text="Start AceJump in All Line Ends Mode"/>
+    <action id="AceLineIndentsAction"
+            class="org.acejump.action.AceAction$StartAllLineIndentsMode"
+            text="Start AceJump in All Line Indents Mode"/>
     <action id="AceWordAction"
-            class="org.acejump.action.AceAction$ToggleAllWordsMode"
+            class="org.acejump.action.AceAction$StartAllWordsMode"
             text="Start AceJump in All Words Mode"/>
     <action id="AceWordForwardAction"
-            class="org.acejump.action.AceAction$ToggleAllWordsForwardMode"
-            text="Start in All Words After Caret Mode"/>
+            class="org.acejump.action.AceAction$StartAllWordsForwardMode"
+            text="Start AceJump in All Words After Caret Mode"/>
     <action id="AceWordBackwardsAction"
-            class="org.acejump.action.AceAction$ToggleAllWordsBackwardsMode"
-            text="Start in All Words Before Caret Mode"/>
+            class="org.acejump.action.AceAction$StartAllWordsBackwardsMode"
+            text="Start AceJump in All Words Before Caret Mode"/>
   </actions>
 </idea-plugin>

@@ -71,7 +71,7 @@ class AceTest : BaseTest() {
   fun `test words before caret action`() {
     makeEditor("test words <caret> before caret is two")
 
-    takeAction(AceAction.ToggleAllWordsBackwardsMode)
+    takeAction(AceAction.StartAllWordsBackwardsMode)
 
     assertEquals(2, session.tags.size)
   }
@@ -79,7 +79,7 @@ class AceTest : BaseTest() {
   fun `test words after caret action`() {
     makeEditor("test words <caret> after caret is four")
 
-    takeAction(AceAction.ToggleAllWordsForwardMode)
+    takeAction(AceAction.StartAllWordsForwardMode)
 
     assertEquals(4, session.tags.size)
   }
@@ -87,7 +87,7 @@ class AceTest : BaseTest() {
   fun `test word mode`() {
     makeEditor("test word action")
 
-    takeAction(AceAction.ToggleAllWordsMode)
+    takeAction(AceAction.StartAllWordsMode)
 
     assertEquals(3, session.tags.size)
 
@@ -108,7 +108,7 @@ class AceTest : BaseTest() {
   fun `test line mode`() {
     makeEditor("    test\n    three\n    lines\n")
 
-    takeAction(AceAction.ToggleAllLinesMode)
+    takeAction(AceAction.StartAllLineMarksMode)
 
     assertEquals(8, session.tags.size) // last empty line does not count
   }

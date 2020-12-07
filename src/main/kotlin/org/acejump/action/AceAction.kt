@@ -52,10 +52,13 @@ sealed class AceAction : DumbAwareAction() {
   object ToggleTargetMode      : BaseToggleJumpModeAction(JumpMode.TARGET)
   object ToggleDeclarationMode : BaseToggleJumpModeAction(JumpMode.DEFINE)
   
-  object ToggleAllLinesMode          : BaseRegexSearchAction(Pattern.LINE_MARK, StandardBoundaries.WHOLE_FILE)
-  object ToggleAllWordsMode          : BaseRegexSearchAction(Pattern.ALL_WORDS, StandardBoundaries.WHOLE_FILE)
-  object ToggleAllWordsBackwardsMode : BaseRegexSearchAction(Pattern.ALL_WORDS, StandardBoundaries.BEFORE_CARET)
-  object ToggleAllWordsForwardMode   : BaseRegexSearchAction(Pattern.ALL_WORDS, StandardBoundaries.AFTER_CARET)
+  object StartAllWordsMode          : BaseRegexSearchAction(Pattern.ALL_WORDS, StandardBoundaries.WHOLE_FILE)
+  object StartAllWordsBackwardsMode : BaseRegexSearchAction(Pattern.ALL_WORDS, StandardBoundaries.BEFORE_CARET)
+  object StartAllWordsForwardMode   : BaseRegexSearchAction(Pattern.ALL_WORDS, StandardBoundaries.AFTER_CARET)
+  object StartAllLineStartsMode     : BaseRegexSearchAction(Pattern.LINE_STARTS, StandardBoundaries.WHOLE_FILE)
+  object StartAllLineEndsMode       : BaseRegexSearchAction(Pattern.LINE_ENDS, StandardBoundaries.WHOLE_FILE)
+  object StartAllLineIndentsMode    : BaseRegexSearchAction(Pattern.LINE_INDENTS, StandardBoundaries.WHOLE_FILE)
+  object StartAllLineMarksMode      : BaseRegexSearchAction(Pattern.LINE_ALL_MARKS, StandardBoundaries.WHOLE_FILE)
   
   // @formatter:on
 }
