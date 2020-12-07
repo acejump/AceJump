@@ -131,8 +131,15 @@ class Session(private val editor: Editor) {
   /**
    * See [JumpModeTracker.cycle].
    */
-  fun cycleJumpMode() {
-    jumpMode = jumpModeTracker.cycle()
+  fun cycleNextJumpMode() {
+    jumpMode = jumpModeTracker.cycle(forward = true)
+  }
+  
+  /**
+   * See [JumpModeTracker.cycle].
+   */
+  fun cyclePreviousJumpMode() {
+    jumpMode = jumpModeTracker.cycle(forward = false)
   }
   
   /**

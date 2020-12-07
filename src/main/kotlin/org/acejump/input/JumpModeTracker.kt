@@ -11,16 +11,21 @@ internal class JumpModeTracker {
   private var currentIndex = 0
   
   /**
-   * Switches to the next [JumpMode] defined in configuration, skipping any [JumpMode]s that are not assigned. If already at the last
-   * [JumpMode] in the cycle order, it resets to [JumpMode.DISABLED].
+   * Switches to the next/previous [JumpMode] defined in configuration, skipping any [JumpMode]s that are not assigned. If at least two
+   * [JumpMode]s are assigned in the cycle order, then cycling will wrap around. If only one [JumpMode] is assigned, then cycling will
+   * toggle that one mode.
    */
-  fun cycle(): JumpMode {
+  fun cycle(forward: Boolean): JumpMode {
     val cycleModes = AceConfig.cycleModes
+    val direction = if (forward) 1 else -1
+    val start = if (currentIndex == 0 && !forward) 0 else currentIndex - 1
     
-    for (testModeIndex in (currentIndex + 1)..(cycleModes.size)) {
-      if (cycleModes[testModeIndex - 1] != JumpMode.DISABLED) {
-        currentMode = cycleModes[testModeIndex - 1]
-        currentIndex = testModeIndex
+    for (offset in 1 until cycleModes.size) {
+      val index = (start + cycleModes.size + (offset * direction)) % cycleModes.size
+      
+      if (cycleModes[index] != JumpMode.DISABLED) {
+        currentMode = cycleModes[index]
+        currentIndex = index + 1
         return currentMode
       }
     }

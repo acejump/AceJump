@@ -42,7 +42,14 @@ sealed class AceAction : DumbAwareAction() {
    * Initiates an AceJump session in the first [JumpMode], or cycles to the next [JumpMode] as defined in configuration.
    */
   object ActivateOrCycleMode : AceAction() {
-    override fun invoke(session: Session) = session.cycleJumpMode()
+    override fun invoke(session: Session) = session.cycleNextJumpMode()
+  }
+  
+  /**
+   * Initiates an AceJump session in the last [JumpMode], or cycles to the previous [JumpMode] as defined in configuration.
+   */
+  object ActivateOrReverseCycleMode : AceAction() {
+    override fun invoke(session: Session) = session.cyclePreviousJumpMode()
   }
   
   // @formatter:off

@@ -47,6 +47,9 @@
       <keyboard-shortcut keymap="Mac OS X 10.5+" first-keystroke="ctrl SEMICOLON"/>
       <keyboard-shortcut keymap="$default" first-keystroke="ctrl SEMICOLON"/>
     </action>
+    <action id="AceReverseAction"
+            class="org.acejump.action.AceAction$ActivateOrReverseCycleMode"
+            text="Activate / Reverse Cycle AceJump Mode"/>
     <action id="AceWordStartAction"
             class="org.acejump.action.AceAction$ToggleJumpMode"
             text="Start AceJump in Jump Mode"/>
