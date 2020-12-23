@@ -52,18 +52,25 @@ import kotlin.math.max
  * at any time during the selection process, so as not to confuse the user.
  */
 
-internal class Solver private constructor(private val editor: Editor, private val queryLength: Int, private val results: IntList) {
+internal class Solver private constructor(
+  private val editor: Editor,
+  private val queryLength: Int,
+  private val newResults: IntList,
+  private val allResults: IntList
+) {
   companion object {
-    fun solve(editor: Editor, query: SearchQuery, results: IntList, tags: List<String>, cache: EditorOffsetCache): Map<String, Int> {
-      return Solver(editor, max(1, query.rawText.length), results).map(tags, cache)
+    fun solve(
+      editor: Editor, query: SearchQuery, newResults: IntList, allResults: IntList, tags: List<String>, cache: EditorOffsetCache
+    ): Map<String, Int> {
+      return Solver(editor, max(1, query.rawText.length), newResults, allResults).map(tags, cache)
     }
   }
   
   private var newTags = Object2IntOpenHashMap<String>(KeyLayoutCache.allPossibleTags.size)
   private val newTagIndices = IntOpenHashSet()
   
-  private var allWordFragments = HashSet<String>(results.size).apply {
-    val iter = results.iterator()
+  private var allWordFragments = HashSet<String>(allResults.size).apply {
+    val iter = allResults.iterator()
     while (iter.hasNext()) {
       forEachWordFragment(iter.nextInt()) { add(it) }
     }
@@ -73,7 +80,7 @@ internal class Solver private constructor(private val editor: Editor, private va
     val eligibleSitesByTag = HashMap<String, IntList>(100)
     val tagsByFirstLetter = availableTags.groupBy { it[0] }
     
-    val iter = results.iterator()
+    val iter = newResults.iterator()
     while (iter.hasNext()) {
       val site = iter.nextInt()
       
@@ -107,7 +114,7 @@ internal class Solver private constructor(private val editor: Editor, private va
     var totalAssigned = 0
     
     for (tag in sortedTags) {
-      if (totalAssigned == results.size) {
+      if (totalAssigned == newResults.size) {
         break
       }
       

@@ -103,7 +103,7 @@ internal class Tagger(private val editor: Editor) {
     }
     
     allAssignedTags.putAll(oldCompatibleTags)
-    allAssignedTags.putAll(Solver.solve(editor, query, vacantResults, availableTags, cache))
+    allAssignedTags.putAll(Solver.solve(editor, query, vacantResults, results, availableTags, cache))
     
     return allAssignedTags.mapKeysTo(HashBiMap.create(allAssignedTags.size)) { (tag, _) ->
       // Avoid matching query - will trigger a jump.
