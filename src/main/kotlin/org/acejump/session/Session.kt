@@ -68,6 +68,7 @@ class Session(private val editor: Editor) {
     EditorKeyListener.attach(editor, object : TypedActionHandler {
       override fun execute(editor: Editor, charTyped: Char, context: DataContext) {
         var processor = searchProcessor
+        val hadTags = tagger.hasTags
         
         if (processor == null) {
           processor = SearchProcessor.fromChar(editor, charTyped, defaultBoundaries).also { searchProcessor = it }
@@ -76,7 +77,7 @@ class Session(private val editor: Editor) {
           return
         }
         
-        updateSearch(processor, shiftMode = charTyped.isUpperCase())
+        updateSearch(processor, markImmediately = hadTags, shiftMode = charTyped.isUpperCase())
       }
     })
   }
@@ -85,11 +86,15 @@ class Session(private val editor: Editor) {
    * Updates text highlights and tag markers according to the current search state. Dispatches jumps if the search query matches a tag.
    * If all tags are outside view, scrolls to the closest one.
    */
-  private fun updateSearch(processor: SearchProcessor, shiftMode: Boolean = false) {
+  private fun updateSearch(processor: SearchProcessor, markImmediately: Boolean, shiftMode: Boolean = false) {
     val query = processor.query
     val results = processor.results
     
     textHighlighter.render(results, query, jumpMode)
+    
+    if (!markImmediately && query.rawText.let { it.length < AceConfig.minQueryLength && it.all(Char::isLetterOrDigit) }) {
+      return
+    }
     
     when (val result = tagger.markOrJump(query, results.clone())) {
       is TaggingResult.Jump -> {
@@ -118,7 +123,9 @@ class Session(private val editor: Editor) {
   fun startRegexSearch(pattern: String, boundaries: Boundaries) {
     tagger = Tagger(editor)
     tagCanvas.setMarkers(emptyList(), isRegex = true)
-    updateSearch(SearchProcessor.fromRegex(editor, pattern, boundaries.intersection(defaultBoundaries)).also { searchProcessor = it })
+    
+    val processor = SearchProcessor.fromRegex(editor, pattern, boundaries.intersection(defaultBoundaries)).also { searchProcessor = it }
+    updateSearch(processor, markImmediately = true)
   }
   
   /**

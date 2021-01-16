@@ -20,6 +20,7 @@ class AceConfig : PersistentStateComponent<AceSettings> {
     
     val layout get() = settings.layout
     val cycleModes get() = settings.let { arrayOf(it.cycleMode1, it.cycleMode2, it.cycleMode3, it.cycleMode4) }
+    val minQueryLength get() = settings.minQueryLength
     val jumpModeColor get() = settings.jumpModeColor
     val jumpEndModeColor get() = settings.jumpEndModeColor
     val targetModeColor get() = settings.targetModeColor

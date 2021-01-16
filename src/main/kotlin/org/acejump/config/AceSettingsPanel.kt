@@ -31,6 +31,7 @@ internal class AceSettingsPanel {
   private val cycleModeCombo2 = ComboBox<JumpMode>()
   private val cycleModeCombo3 = ComboBox<JumpMode>()
   private val cycleModeCombo4 = ComboBox<JumpMode>()
+  private val minQueryLengthField = JBTextField()
   private val jumpModeColorWheel = ColorPanel()
   private val jumpEndModeColorWheel = ColorPanel()
   private val targetModeColorWheel = ColorPanel()
@@ -88,6 +89,7 @@ internal class AceSettingsPanel {
     
     titledRow("Behavior") {
       row { short(searchWholeFileCheckBox.apply { text = "Search whole file" }) }
+      row("Minimum typed characters (1-10):") { short(minQueryLengthField) }
     }
   }
   
@@ -99,6 +101,7 @@ internal class AceSettingsPanel {
   internal var cycleMode2 by cycleModeCombo2
   internal var cycleMode3 by cycleModeCombo3
   internal var cycleMode4 by cycleModeCombo4
+  internal var minQueryLength by minQueryLengthField
   internal var jumpModeColor by jumpModeColorWheel
   internal var jumpEndModeColor by jumpEndModeColorWheel
   internal var targetModeColor by targetModeColorWheel
@@ -109,6 +112,10 @@ internal class AceSettingsPanel {
   internal var roundedTagCorners by roundedTagCornersCheckBox
   internal var searchWholeFile by searchWholeFileCheckBox
   
+  internal var minQueryLengthInt
+    get() = minQueryLength.toIntOrNull()?.coerceIn(1, 10)
+    set(value) { minQueryLength = value.toString() }
+  
   fun reset(settings: AceSettings) {
     allowedChars = settings.allowedChars
     keyboardLayout = settings.layout
@@ -116,6 +123,7 @@ internal class AceSettingsPanel {
     cycleMode2 = settings.cycleMode2
     cycleMode3 = settings.cycleMode3
     cycleMode4 = settings.cycleMode4
+    minQueryLength = settings.minQueryLength.toString()
     jumpModeColor = settings.jumpModeColor
     jumpEndModeColor = settings.jumpEndModeColor
     targetModeColor = settings.targetModeColor

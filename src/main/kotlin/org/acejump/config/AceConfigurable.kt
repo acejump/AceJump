@@ -18,6 +18,7 @@ class AceConfigurable : Configurable {
       panel.cycleMode2 != settings.cycleMode2 ||
       panel.cycleMode3 != settings.cycleMode3 ||
       panel.cycleMode4 != settings.cycleMode4 ||
+      panel.minQueryLengthInt != settings.minQueryLength ||
       panel.jumpModeColor != settings.jumpModeColor ||
       panel.jumpEndModeColor != settings.jumpEndModeColor ||
       panel.targetModeColor != settings.targetModeColor ||
@@ -35,6 +36,7 @@ class AceConfigurable : Configurable {
     settings.cycleMode2 = panel.cycleMode2
     settings.cycleMode3 = panel.cycleMode3
     settings.cycleMode4 = panel.cycleMode4
+    settings.minQueryLength = panel.minQueryLengthInt ?: settings.minQueryLength
     panel.jumpModeColor?.let { settings.jumpModeColor = it }
     panel.jumpEndModeColor?.let { settings.jumpEndModeColor = it }
     panel.targetModeColor?.let { settings.targetModeColor = it }
