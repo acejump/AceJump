@@ -27,6 +27,8 @@ internal class Tag(
   private val length = tag.length
   
   companion object {
+    const val ARC = 1
+    
     /**
      * Creates a new tag, precomputing some information about the nearby characters to reduce rendering overhead. If the last typed
      * character ([literalQueryText]) matches the first [tag] character, only the second [tag] character is displayed.
@@ -47,9 +49,9 @@ internal class Tag(
     /**
      * Renders the tag background.
      */
-    private fun drawHighlight(g: Graphics2D, rect: Rectangle, color: Color, arc: Int) {
+    private fun drawHighlight(g: Graphics2D, rect: Rectangle, color: Color) {
       g.color = color
-      g.fillRoundRect(rect.x, rect.y + 1, rect.width, rect.height - 1, arc, arc)
+      g.fillRoundRect(rect.x, rect.y + 1, rect.width, rect.height - 1, ARC, ARC)
     }
     
     /**
@@ -92,7 +94,7 @@ internal class Tag(
       else                                                        -> ColorUtil.darker(AceConfig.tagBackgroundColor, 3)
     }
     
-    drawHighlight(g, rect, highlightColor, font.tagCornerArc)
+    drawHighlight(g, rect, highlightColor)
     drawForeground(g, font, rect.location, tag)
     
     occupied.add(JBUIScale.scale(2).let { Rectangle(rect.x - it, rect.y, rect.width + (2 * it), rect.height) })

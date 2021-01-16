@@ -95,7 +95,7 @@ internal class TagCanvas(private val editor: Editor) : JComponent(), CaretListen
     if (caretRect != null) {
       g.color = ColorUtil.brighter(AceConfig.tagBackgroundColor, 10)
       // Only adding 1 to width because it seems the right side of the tag highlight is slightly off.
-      g.drawRoundRect(caretRect.x - 1, caretRect.y, caretRect.width + 1, caretRect.height, font.tagCornerArc, font.tagCornerArc)
+      g.drawRoundRect(caretRect.x - 1, caretRect.y, caretRect.width + 1, caretRect.height, Tag.ARC, Tag.ARC)
     }
   }
 }

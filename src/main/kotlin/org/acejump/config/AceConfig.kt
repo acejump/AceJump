@@ -28,7 +28,6 @@ class AceConfig : PersistentStateComponent<AceSettings> {
     val textHighlightColor get() = settings.textHighlightColor
     val tagForegroundColor get() = settings.tagForegroundColor
     val tagBackgroundColor get() = settings.tagBackgroundColor
-    val roundedTagCorners get() = settings.roundedTagCorners
     val searchWholeFile get() = settings.searchWholeFile
   }
   

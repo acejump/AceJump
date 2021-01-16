@@ -26,7 +26,6 @@ class AceConfigurable : Configurable {
       panel.textHighlightColor != settings.textHighlightColor ||
       panel.tagForegroundColor != settings.tagForegroundColor ||
       panel.tagBackgroundColor != settings.tagBackgroundColor ||
-      panel.roundedTagCorners != settings.roundedTagCorners ||
       panel.searchWholeFile != settings.searchWholeFile
   
   override fun apply() {
@@ -44,7 +43,6 @@ class AceConfigurable : Configurable {
     panel.textHighlightColor?.let { settings.textHighlightColor = it }
     panel.tagForegroundColor?.let { settings.tagForegroundColor = it }
     panel.tagBackgroundColor?.let { settings.tagBackgroundColor = it }
-    settings.roundedTagCorners = panel.roundedTagCorners
     settings.searchWholeFile = panel.searchWholeFile
     KeyLayoutCache.reset(settings)
   }

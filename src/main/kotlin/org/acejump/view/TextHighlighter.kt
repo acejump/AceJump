@@ -25,7 +25,6 @@ import kotlin.math.max
 internal class TextHighlighter(private val editor: Editor) {
   private companion object {
     private const val LAYER = HighlighterLayer.LAST + 1
-    private var ARC = 0
   }
   
   private var previousHighlights: Array<RangeHighlighter>? = null
@@ -36,8 +35,6 @@ internal class TextHighlighter(private val editor: Editor) {
   fun render(offsets: IntList, query: SearchQuery, jumpMode: JumpMode) {
     val markup = editor.markupModel
     val chars = editor.immutableText
-    
-    ARC = TagFont(editor).tagCornerArc
     
     val renderer = when {
       query is SearchQuery.RegularExpression -> RegexRenderer
@@ -89,7 +86,7 @@ internal class TextHighlighter(private val editor: Editor) {
       val end = EditorOffsetCache.Uncached.offsetToXY(editor, endOffset)
       
       g.color = AceConfig.textHighlightColor
-      g.fillRoundRect(start.x, start.y + 1, end.x - start.x, editor.lineHeight - 1, ARC, ARC)
+      g.fillRoundRect(start.x, start.y + 1, end.x - start.x, editor.lineHeight - 1, Tag.ARC, Tag.ARC)
     }
   }
   
@@ -114,7 +111,7 @@ internal class TextHighlighter(private val editor: Editor) {
       val end = EditorOffsetCache.Uncached.offsetToXY(editor, endOffset)
       
       g.color = AceConfig.targetModeColor
-      g.drawRoundRect(max(0, start.x - JBUI.scale(1)), start.y, end.x - start.x + JBUI.scale(2), editor.lineHeight, ARC, ARC)
+      g.drawRoundRect(max(0, start.x - JBUI.scale(1)), start.y, end.x - start.x + JBUI.scale(2), editor.lineHeight, Tag.ARC, Tag.ARC)
     }
   }
   
@@ -133,7 +130,7 @@ internal class TextHighlighter(private val editor: Editor) {
       val lastCharWidth = editor.component.getFontMetrics(font).charWidth(char)
       
       g.color = AceConfig.textHighlightColor
-      g.fillRoundRect(pos.x, pos.y + 1, lastCharWidth, editor.lineHeight - 1, ARC, ARC)
+      g.fillRoundRect(pos.x, pos.y + 1, lastCharWidth, editor.lineHeight - 1, Tag.ARC, Tag.ARC)
     }
   }
 }

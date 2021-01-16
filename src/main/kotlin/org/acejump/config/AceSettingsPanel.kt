@@ -39,7 +39,6 @@ internal class AceSettingsPanel {
   private val textHighlightColorWheel = ColorPanel()
   private val tagForegroundColorWheel = ColorPanel()
   private val tagBackgroundColorWheel = ColorPanel()
-  private val roundedTagCornersCheckBox = JBCheckBox()
   private val searchWholeFileCheckBox = JBCheckBox()
   
   init {
@@ -83,10 +82,6 @@ internal class AceSettingsPanel {
       row("Tag background:") { short(tagBackgroundColorWheel) }
     }
     
-    titledRow("Appearance") {
-      row { short(roundedTagCornersCheckBox.apply { text = "Rounded tag corners" }) }
-    }
-    
     titledRow("Behavior") {
       row { short(searchWholeFileCheckBox.apply { text = "Search whole file" }) }
       row("Minimum typed characters (1-10):") { short(minQueryLengthField) }
@@ -109,7 +104,6 @@ internal class AceSettingsPanel {
   internal var textHighlightColor by textHighlightColorWheel
   internal var tagForegroundColor by tagForegroundColorWheel
   internal var tagBackgroundColor by tagBackgroundColorWheel
-  internal var roundedTagCorners by roundedTagCornersCheckBox
   internal var searchWholeFile by searchWholeFileCheckBox
   
   internal var minQueryLengthInt
@@ -131,7 +125,6 @@ internal class AceSettingsPanel {
     textHighlightColor = settings.textHighlightColor
     tagForegroundColor = settings.tagForegroundColor
     tagBackgroundColor = settings.tagBackgroundColor
-    roundedTagCorners = settings.roundedTagCorners
     searchWholeFile = settings.searchWholeFile
   }
   
