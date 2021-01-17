@@ -28,11 +28,11 @@
     <editorActionHandler action="EditorEnter" order="first"
                          implementationClass="org.acejump.action.AceEditorAction$SelectForward"/>
     <editorActionHandler action="EditorUp" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$SearchLineIndents"/>
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineStarts"/>
     <editorActionHandler action="EditorLeft" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$SearchLineStarts"/>
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineIndents"/>
     <editorActionHandler action="EditorLineStart" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$SearchLineStarts"/>
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineIndents"/>
     <editorActionHandler action="EditorRight" order="first"
                          implementationClass="org.acejump.action.AceEditorAction$SearchLineEnds"/>
     <editorActionHandler action="EditorLineEnd" order="first"
