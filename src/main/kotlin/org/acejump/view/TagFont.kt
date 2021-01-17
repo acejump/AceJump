@@ -10,7 +10,7 @@ import java.awt.FontMetrics
  */
 internal class TagFont(editor: Editor) {
   val tagFont: Font = editor.colorsScheme.getFont(EditorFontType.BOLD)
-  val tagCharWidth = editor.component.getFontMetrics(tagFont).charWidth('w')
+  val tagCharWidth = editor.component.getFontMetrics(tagFont).charWidth('W')
   
   val editorFontMetrics: FontMetrics = editor.component.getFontMetrics(editor.colorsScheme.getFont(EditorFontType.PLAIN))
   val lineHeight = editor.lineHeight

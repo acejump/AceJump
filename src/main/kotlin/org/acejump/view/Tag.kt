@@ -27,7 +27,7 @@ internal class Tag(
   private val length = tag.length
   
   companion object {
-    const val ARC = 1
+    private const val ARC = 1
     
     /**
      * Creates a new tag, precomputing some information about the nearby characters to reduce rendering overhead. If the last typed
@@ -51,16 +51,25 @@ internal class Tag(
      */
     private fun drawHighlight(g: Graphics2D, rect: Rectangle, color: Color) {
       g.color = color
-      g.fillRoundRect(rect.x, rect.y + 1, rect.width, rect.height - 1, ARC, ARC)
+      g.fillRoundRect(rect.x, rect.y, rect.width, rect.height + 1, ARC, ARC)
     }
     
     /**
      * Renders the tag text.
      */
     private fun drawForeground(g: Graphics2D, font: TagFont, point: Point, text: String) {
+      val x = point.x + 2
+      val y = point.y + font.baselineDistance
+  
       g.font = font.tagFont
+      
+      if (!ColorUtil.isDark(AceConfig.tagForegroundColor)) {
+        g.color = Color(0F, 0F, 0F, 0.35F)
+        g.drawString(text, x + 1, y + 1)
+      }
+      
       g.color = AceConfig.tagForegroundColor
-      g.drawString(text, point.x, point.y + font.baselineDistance)
+      g.drawString(text, x, y)
     }
   }
   
@@ -73,55 +82,35 @@ internal class Tag(
   }
   
   /**
-   * Determines on which side of the target character the tag is positioned.
-   */
-  enum class TagAlignment {
-    LEFT,
-    RIGHT
-  }
-  
-  /**
    * Paints the tag, taking into consideration visual space around characters in the editor, as well as all other previously painted tags.
    * Returns a rectangle indicating the area where the tag was rendered, or null if the tag could not be rendered due to overlap.
    */
-  fun paint(
-    g: Graphics2D, editor: Editor, cache: EditorOffsetCache, font: TagFont, occupied: MutableList<Rectangle>, isRegex: Boolean
-  ): Rectangle? {
-    val (rect, alignment) = alignTag(editor, cache, font, occupied) ?: return null
+  fun paint(g: Graphics2D, editor: Editor, cache: EditorOffsetCache, font: TagFont, occupied: MutableList<Rectangle>): Rectangle? {
+    val rect = alignTag(editor, cache, font, occupied) ?: return null
     
-    val highlightColor = when {
-      alignment != TagAlignment.RIGHT || hasSpaceRight || isRegex -> AceConfig.tagBackgroundColor
-      else                                                        -> ColorUtil.darker(AceConfig.tagBackgroundColor, 3)
-    }
-    
-    drawHighlight(g, rect, highlightColor)
+    drawHighlight(g, rect, AceConfig.tagBackgroundColor)
     drawForeground(g, font, rect.location, tag)
     
     occupied.add(JBUIScale.scale(2).let { Rectangle(rect.x - it, rect.y, rect.width + (2 * it), rect.height) })
     return rect
   }
   
-  private fun alignTag(editor: Editor, cache: EditorOffsetCache, font: TagFont, occupied: List<Rectangle>): Pair<Rectangle, TagAlignment>? {
+  private fun alignTag(editor: Editor, cache: EditorOffsetCache, font: TagFont, occupied: List<Rectangle>): Rectangle? {
     val boundaries = StandardBoundaries.VISIBLE_ON_SCREEN
     
     if (hasSpaceRight || offsetL == 0 || editor.immutableText[offsetL - 1].let { it == '\n' || it == '\r' }) {
       val rectR = createRightAlignedTagRect(editor, cache, font)
-      
-      return (rectR to TagAlignment.RIGHT).takeIf {
-        boundaries.isOffsetInside(editor, offsetR, cache) && occupied.none(rectR::intersects)
-      }
+      return rectR.takeIf { boundaries.isOffsetInside(editor, offsetR, cache) && occupied.none(rectR::intersects) }
     }
     
     val rectL = createLeftAlignedTagRect(editor, cache, font)
-    
     if (occupied.none(rectL::intersects)) {
-      return (rectL to TagAlignment.LEFT).takeIf { boundaries.isOffsetInside(editor, offsetL, cache) }
+      return rectL.takeIf { boundaries.isOffsetInside(editor, offsetL, cache) }
     }
     
     val rectR = createRightAlignedTagRect(editor, cache, font)
-    
     if (occupied.none(rectR::intersects)) {
-      return (rectR to TagAlignment.RIGHT).takeIf { boundaries.isOffsetInside(editor, offsetR, cache) }
+      return rectR.takeIf { boundaries.isOffsetInside(editor, offsetR, cache) }
     }
     
     return null
@@ -130,12 +119,12 @@ internal class Tag(
   private fun createRightAlignedTagRect(editor: Editor, cache: EditorOffsetCache, font: TagFont): Rectangle {
     val pos = cache.offsetToXY(editor, offsetR)
     val shift = font.editorFontMetrics.charWidth(editor.immutableText[offsetR]) + (font.tagCharWidth * shiftR)
-    return Rectangle(pos.x + shift, pos.y, font.tagCharWidth * length, font.lineHeight)
+    return Rectangle(pos.x + shift, pos.y, (font.tagCharWidth * length) + 4, font.lineHeight)
   }
   
   private fun createLeftAlignedTagRect(editor: Editor, cache: EditorOffsetCache, font: TagFont): Rectangle {
     val pos = cache.offsetToXY(editor, offsetL)
     val shift = -(font.tagCharWidth * length)
-    return Rectangle(pos.x + shift, pos.y, font.tagCharWidth * length, font.lineHeight)
+    return Rectangle(pos.x + shift - 4, pos.y, (font.tagCharWidth * length) + 4, font.lineHeight)
   }
 }

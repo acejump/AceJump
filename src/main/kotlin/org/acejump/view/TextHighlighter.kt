@@ -86,7 +86,10 @@ internal class TextHighlighter(private val editor: Editor) {
       val end = EditorOffsetCache.Uncached.offsetToXY(editor, endOffset)
       
       g.color = AceConfig.textHighlightColor
-      g.fillRoundRect(start.x, start.y + 1, end.x - start.x, editor.lineHeight - 1, Tag.ARC, Tag.ARC)
+      g.fillRect(start.x, start.y + 1, end.x - start.x, editor.lineHeight - 1)
+  
+      g.color = AceConfig.tagBackgroundColor
+      g.drawRect(start.x, start.y, end.x - start.x, editor.lineHeight)
     }
   }
   
@@ -111,7 +114,7 @@ internal class TextHighlighter(private val editor: Editor) {
       val end = EditorOffsetCache.Uncached.offsetToXY(editor, endOffset)
       
       g.color = AceConfig.targetModeColor
-      g.drawRoundRect(max(0, start.x - JBUI.scale(1)), start.y, end.x - start.x + JBUI.scale(2), editor.lineHeight, Tag.ARC, Tag.ARC)
+      g.drawRect(max(0, start.x - JBUI.scale(1)), start.y, end.x - start.x + JBUI.scale(2), editor.lineHeight)
     }
   }
   
@@ -130,7 +133,10 @@ internal class TextHighlighter(private val editor: Editor) {
       val lastCharWidth = editor.component.getFontMetrics(font).charWidth(char)
       
       g.color = AceConfig.textHighlightColor
-      g.fillRoundRect(pos.x, pos.y + 1, lastCharWidth, editor.lineHeight - 1, Tag.ARC, Tag.ARC)
+      g.fillRect(pos.x, pos.y + 1, lastCharWidth, editor.lineHeight - 1)
+      
+      g.color = AceConfig.tagBackgroundColor
+      g.drawRect(pos.x, pos.y, lastCharWidth, editor.lineHeight)
     }
   }
 }

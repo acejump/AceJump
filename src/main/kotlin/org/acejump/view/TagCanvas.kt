@@ -4,10 +4,8 @@ import com.intellij.openapi.application.ApplicationInfo
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.CaretEvent
 import com.intellij.openapi.editor.event.CaretListener
-import com.intellij.ui.ColorUtil
 import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries
-import org.acejump.config.AceConfig
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Rectangle
@@ -20,7 +18,6 @@ import javax.swing.SwingUtilities
  */
 internal class TagCanvas(private val editor: Editor) : JComponent(), CaretListener {
   private var markers: List<Tag>? = null
-  private var isRegex = false
   
   init {
     val contentComponent = editor.contentComponent
@@ -48,9 +45,8 @@ internal class TagCanvas(private val editor: Editor) : JComponent(), CaretListen
     repaint()
   }
   
-  fun setMarkers(markers: List<Tag>, isRegex: Boolean) {
+  fun setMarkers(markers: List<Tag>) {
     this.markers = markers
-    this.isRegex = isRegex
     repaint()
   }
   
@@ -84,18 +80,12 @@ internal class TagCanvas(private val editor: Editor) : JComponent(), CaretListen
     
     val caretOffset = editor.caretModel.offset
     val caretMarker = markers.find { it.offsetL == caretOffset || it.offsetR == caretOffset }
-    val caretRect = caretMarker?.paint(g, editor, cache, font, occupied, isRegex)
+    caretMarker?.paint(g, editor, cache, font, occupied)
     
     for (marker in markers) {
       if (marker.isOffsetInRange(viewRange) && marker !== caretMarker) {
-        marker.paint(g, editor, cache, font, occupied, isRegex)
+        marker.paint(g, editor, cache, font, occupied)
       }
-    }
-    
-    if (caretRect != null) {
-      g.color = ColorUtil.brighter(AceConfig.tagBackgroundColor, 10)
-      // Only adding 1 to width because it seems the right side of the tag highlight is slightly off.
-      g.drawRoundRect(caretRect.x - 1, caretRect.y, caretRect.width + 1, caretRect.height, Tag.ARC, Tag.ARC)
     }
   }
 }
