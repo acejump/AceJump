@@ -16,25 +16,25 @@ data class AceSettings(
   var minQueryLength: Int = 1,
   
   @OptionTag("jumpModeRGB", converter = ColorConverter::class)
-  var jumpModeColor: Color = Color.BLUE,
+  var jumpModeColor: Color = Color(0xFFFFFF),
   
   @OptionTag("jumpEndModeRGB", converter = ColorConverter::class)
-  var jumpEndModeColor: Color = Color.CYAN,
+  var jumpEndModeColor: Color = Color(0x33E78A),
   
   @OptionTag("targetModeRGB", converter = ColorConverter::class)
-  var targetModeColor: Color = Color.RED,
+  var targetModeColor: Color = Color(0xFFB700),
   
   @OptionTag("definitionModeRGB", converter = ColorConverter::class)
-  var definitionModeColor: Color = Color.MAGENTA,
+  var definitionModeColor: Color = Color(0x6FC5FF),
   
   @OptionTag("textHighlightRGB", converter = ColorConverter::class)
-  var textHighlightColor: Color = Color.GREEN,
+  var textHighlightColor: Color = Color(0x394B58),
   
   @OptionTag("tagForegroundRGB", converter = ColorConverter::class)
-  var tagForegroundColor: Color = Color.BLACK,
+  var tagForegroundColor: Color = Color(0xFFFFFF),
   
   @OptionTag("tagBackgroundRGB", converter = ColorConverter::class)
-  var tagBackgroundColor: Color = Color.YELLOW,
+  var tagBackgroundColor: Color = Color(0x008299),
   
   var roundedTagCorners: Boolean = true,
   var searchWholeFile: Boolean = true
