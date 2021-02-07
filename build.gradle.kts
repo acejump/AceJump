@@ -5,16 +5,20 @@ import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.3.72"
-  id("org.jetbrains.intellij") version "0.6.4"
-  id("org.jetbrains.changelog") version "0.6.2"
+  kotlin("jvm") version "1.4.30"
+  id("org.jetbrains.intellij") version "0.6.5"
+  id("org.jetbrains.changelog") version "1.0.1"
   id("com.github.ben-manes.versions") version "0.36.0"
 }
 
 tasks {
   withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
-    kotlinOptions.freeCompilerArgs += "-progressive"
+    kotlinOptions {
+      languageVersion = "1.5"
+      apiVersion = "1.5"
+      jvmTarget = JavaVersion.VERSION_1_8.toString()
+      freeCompilerArgs += "-progressive"
+    }
   }
 
   named<Zip>("buildPlugin") {
