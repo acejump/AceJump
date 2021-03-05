@@ -13,12 +13,7 @@ plugins {
 
 tasks {
   withType<KotlinCompile> {
-    kotlinOptions {
-      languageVersion = "1.5"
-      apiVersion = "1.5"
-      jvmTarget = JavaVersion.VERSION_1_8.toString()
-      freeCompilerArgs += "-progressive"
-    }
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
   }
 
   named<Zip>("buildPlugin") {
