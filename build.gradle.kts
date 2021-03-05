@@ -5,10 +5,10 @@ import org.jetbrains.intellij.tasks.PatchPluginXmlTask
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.4.30"
-  id("org.jetbrains.intellij") version "0.6.5"
-  id("org.jetbrains.changelog") version "1.0.1"
-  id("com.github.ben-manes.versions") version "0.36.0"
+  kotlin("jvm") version "1.5.0-M1"
+  id("org.jetbrains.intellij") version "0.7.2"
+  id("org.jetbrains.changelog") version "1.1.2"
+  id("com.github.ben-manes.versions") version "0.38.0"
 }
 
 tasks {
