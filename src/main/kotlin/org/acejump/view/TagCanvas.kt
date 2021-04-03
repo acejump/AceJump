@@ -24,9 +24,9 @@ internal class TagCanvas(private val editor: Editor): JComponent(), CaretListene
     contentComponent.add(this)
     setBounds(0, 0, contentComponent.width, contentComponent.height)
 
-    if (ApplicationInfo.getInstance().build.components.first() < 173) {
-      SwingUtilities.convertPoint(this, location, editor.component.rootPane).let { setLocation(-it.x, -it.y) }
-    }
+    if (ApplicationInfo.getInstance().build.components.first() < 173)
+      SwingUtilities.convertPoint(this, location, editor.component.rootPane)
+        .let { setLocation(-it.x, -it.y) }
 
     editor.caretModel.addCaretListener(this)
   }
@@ -38,7 +38,8 @@ internal class TagCanvas(private val editor: Editor): JComponent(), CaretListene
   }
 
   /**
-   * Ensures that all tags and the outline around the selected tag are repainted. It should not be necessary to repaint the entire tag
+   * Ensures that all tags and the outline around the selected tag are
+   * repainted. It should not be necessary to repaint the entire tag
    * canvas, but the cost of repainting visible tags is negligible.
    */
   override fun caretPositionChanged(event: CaretEvent) = repaint()

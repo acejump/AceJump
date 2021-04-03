@@ -20,7 +20,8 @@ object SessionManager {
    * Starts a new [Session], or returns an existing [Session]
    * if the specified [Editor] already has one.
    */
-  fun start(editor: Editor) = sessions.getOrPut(editor) { cleanup(); Session(editor) }
+  fun start(editor: Editor) =
+    sessions.getOrPut(editor) { cleanup(); Session(editor) }
 
   /**
    * Returns the active [Session] in the specified [Editor],

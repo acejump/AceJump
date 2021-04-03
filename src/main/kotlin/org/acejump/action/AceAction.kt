@@ -18,9 +18,8 @@ sealed class AceAction: DumbAwareAction() {
     action.presentation.isEnabled = action.getData(EDITOR) != null
   }
 
-  final override fun actionPerformed(e: AnActionEvent) {
-    invoke(SessionManager.start(e.getData(EDITOR) ?: return))
-  }
+  final override fun actionPerformed(e: AnActionEvent) =
+    e.getData(EDITOR)?.let { invoke(SessionManager.start(it)) } ?: Unit
 
   abstract operator fun invoke(session: Session)
 

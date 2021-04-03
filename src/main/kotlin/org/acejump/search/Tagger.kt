@@ -37,9 +37,10 @@ internal class Tagger(private val editor: Editor) {
   }
 
   /**
-   * Assigns tags to as many results as possible, keeping previously assigned tags. Returns a [TaggingResult.Jump] if the current search
-   * query matches any existing tag and we should jump to it and end the session, or [TaggingResult.Mark] to continue the session with
-   * updated tag markers.
+   * Assigns tags to as many results as possible, keeping previously assigned
+   * tags. Returns a [TaggingResult.Jump] if the current search query matches
+   * any existing tag and we should jump to it and end the session, or
+   * [TaggingResult.Mark] to continue the session with updated tag markers.
    *
    * Note that the [results] collection will be mutated.
    */
@@ -50,9 +51,8 @@ internal class Tagger(private val editor: Editor) {
     val availableTags = allPossibleTags.filter { !queryText.endsWith(it[0]) && it !in tagMap }
 
     if (!isRegex) {
-      for (entry in tagMap.entries) {
+      for (entry in tagMap.entries)
         if (entry solves queryText) return TaggingResult.Jump(entry.value)
-      }
 
       if (queryText.length == 1) removeResultsWithOverlappingTags(results)
     }
@@ -64,7 +64,8 @@ internal class Tagger(private val editor: Editor) {
   }
 
   /**
-   * Assigns as many unassigned tags as possible, and merges them with the existing compatible tags.
+   * Assigns as many unassigned tags as possible, and merges them with
+   * the existing compatible tags.
    */
   private fun assignTagsAndMerge(
     results: IntList,
@@ -149,10 +150,14 @@ internal class Tagger(private val editor: Editor) {
       if (!chars.canTagWithoutOverlap(iter.nextInt())) iter.remove()
   }
 
-  private fun createTagMarkers(results: IntList, literalQueryText: String?): List<Tag> {
-    val tagMapInv = tagMap.inverse()
-    return results.mapNotNull { index -> tagMapInv[index]?.let { tag -> Tag.create(editor, tag, index, literalQueryText) } }
-  }
+  private fun createTagMarkers(results: IntList, literalQueryText: String?) =
+    tagMap.inverse().let { tagMapInv ->
+      results.mapNotNull { index ->
+        tagMapInv[index]?.let { tag ->
+          Tag.create(editor, tag, index, literalQueryText)
+        }
+      }
+    }
 
   private companion object {
     private fun CharSequence.canTagWithoutOverlap(loc: Int) = when {
@@ -168,9 +173,9 @@ internal class Tagger(private val editor: Editor) {
       else -> false
     }
 
-    private infix fun Char.isUnlike(other: Char): Boolean {
-      return this.isWordPart xor other.isWordPart || this.isWhitespace() xor other.isWhitespace()
-    }
+    private infix fun Char.isUnlike(other: Char) =
+      this.isWordPart xor other.isWordPart ||
+        this.isWhitespace() xor other.isWhitespace()
 
     private fun getPlaintextPortion(query: String, tag: String) = when {
       query.endsWith(tag, true) -> query.dropLast(tag.length)
@@ -185,9 +190,9 @@ internal class Tagger(private val editor: Editor) {
     }
 
     private fun canShortenTag(tag: String, tagMap: Map<String, Int>): Boolean {
-      for (other in tagMap.keys) {
-        if (tag != other && tag[0] == other[0]) return false
-      }
+      for (other in tagMap.keys)
+        if (tag != other && tag[0] == other[0])
+          return false
 
       return true
     }

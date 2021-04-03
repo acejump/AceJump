@@ -157,9 +157,8 @@ class Session(private val editor: Editor) {
    * Starts a regular expression search. If a search was already active,
    * it will be reset alongside its tags and highlights.
    */
-  fun startRegexSearch(pattern: Pattern, boundaries: Boundaries) {
+  fun startRegexSearch(pattern: Pattern, boundaries: Boundaries) =
     startRegexSearch(pattern.regex, boundaries)
-  }
 
   /**
    * See [JumpModeTracker.cycle].

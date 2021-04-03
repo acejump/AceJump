@@ -12,25 +12,25 @@ import java.awt.Color
  */
 enum class JumpMode {
   /**
-   * Default value at the start of a session. If the session does not
-   * get assigned a proper [JumpMode] by the time the user requests a
-   * jump, the results of the jump are undefined.
+   * Default value at the start of a session. If the session does not get
+   * assigned a proper [JumpMode] by the time the user requests a jump, the
+   * results of the jump are undefined.
    */
   DISABLED,
   
   /**
-   * On default jump, places the caret at the first character of the
-   * search query. On shift jump, does the above but also selects all
-   * text between the original and new caret positions.
+   * On default jump, places the caret at the first character of the search
+   * query. On shift jump, does the above but also selects all text between
+   * the original and new caret positions.
    */
   JUMP,
   
   /**
-   * On default jump, places the caret at the end of a word. Word
-   * detection uses [Character.isJavaIdentifierPart] to count some
-   * special characters, such as underscores, as part of a word. If
-   * there is no word at the first character of the search query, then
-   * the caret is placed after the last character of the search query.
+   * On default jump, places the caret at the end of a word. Word detection
+   * uses [Character.isJavaIdentifierPart] to count some special characters,
+   * such as underscores, as part of a word. If there is no word at the first
+   * character of the search query, then the caret is placed after the last
+   * character of the search query.
    *
    * On shift jump, does the above but also selects all text between
    * the original and new caret positions.

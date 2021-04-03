@@ -29,9 +29,7 @@ internal class SearchProcessor private constructor(
     private set
 
   init {
-    val regex = query.toRegex()
-
-    if (regex != null) {
+    query.toRegex()?.let { regex ->
       val offsetRange = boundaries.getOffsetRange(editor)
       var result = regex.find(editor.immutableText, offsetRange.first)
 

@@ -4,6 +4,12 @@ import com.github.promeg.pinyinhelper.Pinyin
 import com.intellij.openapi.editor.Editor
 import org.acejump.config.AceConfig
 
+/**
+ * This annotation is a marker which means that the annotated function is
+ *   used in external plugins.
+ */
+
+@Retention(AnnotationRetention.SOURCE)
 annotation class ExternalUsage
 
 /**

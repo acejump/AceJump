@@ -72,12 +72,11 @@ internal class Solver private constructor(
   private var newTags = Object2IntOpenHashMap<String>(KeyLayoutCache.allPossibleTags.size)
   private val newTagIndices = IntOpenHashSet()
 
-  private var allWordFragments = HashSet<String>(allResults.size).apply {
-    val iter = allResults.iterator()
-    while (iter.hasNext()) {
-      forEachWordFragment(iter.nextInt()) { add(it) }
+  private var allWordFragments =
+    HashSet<String>(allResults.size).apply {
+      val iter = allResults.iterator()
+      while (iter.hasNext()) forEachWordFragment(iter.nextInt()) { add(it) }
     }
-  }
 
   fun map(availableTags: List<String>, cache: EditorOffsetCache): Map<String, Int> {
     val eligibleSitesByTag = HashMap<String, IntList>(100)
@@ -87,13 +86,10 @@ internal class Solver private constructor(
     while (iter.hasNext()) {
       val site = iter.nextInt()
 
-      for ((firstLetter, tags) in tagsByFirstLetter.entries) {
-        if (canTagBeginWithChar(site, firstLetter)) {
-          for (tag in tags) {
+      for ((firstLetter, tags) in tagsByFirstLetter.entries)
+        if (canTagBeginWithChar(site, firstLetter))
+          for (tag in tags)
             eligibleSitesByTag.getOrPut(tag) { IntArrayList(10) }.add(site)
-          }
-        }
-      }
     }
 
     val matchingSites = HashMap<IntList, IntArray>()

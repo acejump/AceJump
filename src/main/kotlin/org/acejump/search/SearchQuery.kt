@@ -32,9 +32,8 @@ internal sealed class SearchQuery {
       require(rawText.isNotEmpty())
     }
 
-    override fun getHighlightLength(text: CharSequence, offset: Int): Int {
-      return text.countMatchingCharacters(offset, rawText)
-    }
+    override fun getHighlightLength(text: CharSequence, offset: Int): Int =
+      text.countMatchingCharacters(offset, rawText)
 
     override fun toRegex(): Regex {
       val options = mutableSetOf(RegexOption.MULTILINE)
