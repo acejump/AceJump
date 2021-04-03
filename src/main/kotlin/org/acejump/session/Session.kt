@@ -4,14 +4,16 @@ import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.actionSystem.TypedActionHandler
-import com.intellij.openapi.editor.colors.EditorColors
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
+import com.intellij.util.containers.ContainerUtil
+import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.acejump.*
 import org.acejump.action.TagJumper
 import org.acejump.action.TagVisitor
 import org.acejump.boundaries.Boundaries
 import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries
+import org.acejump.boundaries.StandardBoundaries.*
 import org.acejump.config.AceConfig
 import org.acejump.input.EditorKeyListener
 import org.acejump.input.JumpMode
@@ -23,6 +25,7 @@ import org.acejump.search.Tagger
 import org.acejump.search.TaggingResult
 import org.acejump.view.TagCanvas
 import org.acejump.view.TextHighlighter
+import java.util.*
 
 /**
  * Manages an AceJump session for a single [Editor].
@@ -30,7 +33,7 @@ import org.acejump.view.TextHighlighter
 class Session(private val editor: Editor) {
   private companion object {
     private val defaultBoundaries
-      get() = if (AceConfig.searchWholeFile) StandardBoundaries.WHOLE_FILE else StandardBoundaries.VISIBLE_ON_SCREEN
+      get() = if (AceConfig.searchWholeFile) WHOLE_FILE else VISIBLE_ON_SCREEN
   }
 
   private val originalSettings = EditorSettings.setup(editor)
@@ -126,22 +129,33 @@ class Session(private val editor: Editor) {
         tagCanvas.setMarkers(tags)
 
         val cache = EditorOffsetCache.new()
-        val boundaries = StandardBoundaries.VISIBLE_ON_SCREEN
+        val boundaries = VISIBLE_ON_SCREEN
 
         if (tags.none {
             boundaries.isOffsetInside(editor, it.offsetL, cache) ||
               boundaries.isOffsetInside(editor, it.offsetR, cache)
-          }) {
-          tagVisitor?.scrollToClosest()
-        }
+          }) tagVisitor?.scrollToClosest()
       }
     }
+  }
+
+  @ExternalUsage
+  fun markResults(resultsToMark: SortedSet<Int>) {
+    tagger = Tagger(editor)
+    tagCanvas.setMarkers(emptyList())
+
+    val processor = SearchProcessor.fromRegex(editor, "", defaultBoundaries)
+      .apply { results = IntArrayList(resultsToMark) }
+
+    updateSearch(processor, markImmediately = true)
   }
 
   /**
    * Starts a regular expression search. If a search was already active,
    * it will be reset alongside its tags and highlights.
    */
+
+  @ExternalUsage
   fun startRegexSearch(pattern: String, boundaries: Boundaries) {
     tagger = Tagger(editor)
     tagCanvas.setMarkers(emptyList())
@@ -157,6 +171,8 @@ class Session(private val editor: Editor) {
    * Starts a regular expression search. If a search was already active,
    * it will be reset alongside its tags and highlights.
    */
+
+  @ExternalUsage
   fun startRegexSearch(pattern: Pattern, boundaries: Boundaries) =
     startRegexSearch(pattern.regex, boundaries)
 

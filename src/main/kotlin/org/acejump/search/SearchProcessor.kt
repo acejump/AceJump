@@ -26,7 +26,7 @@ internal class SearchProcessor private constructor(
     private set
 
   var results = IntArrayList(0)
-    private set
+    internal set
 
   init {
     query.toRegex()?.let { regex ->

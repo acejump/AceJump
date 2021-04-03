@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.event.CaretEvent
 import com.intellij.openapi.editor.event.CaretListener
 import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries
+import org.acejump.boundaries.StandardBoundaries.*
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Rectangle
@@ -63,7 +64,7 @@ internal class TagCanvas(private val editor: Editor): JComponent(), CaretListene
     val font = TagFont(editor)
 
     val cache = EditorOffsetCache.new()
-    val viewRange = StandardBoundaries.VISIBLE_ON_SCREEN.getOffsetRange(editor, cache)
+    val viewRange = VISIBLE_ON_SCREEN.getOffsetRange(editor, cache)
     val occupied = mutableListOf<Rectangle>()
 
     (g as Graphics2D).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)

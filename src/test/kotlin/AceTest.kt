@@ -12,7 +12,9 @@ import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.psi.PsiFile
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.ui.UIUtil
+import junit.framework.TestCase
 import org.acejump.config.AceConfig
+import org.acejump.session.SessionManager
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
 import java.io.File
@@ -137,5 +139,14 @@ class AceTest : BaseTest() {
     typeAndWaitForResults(session.tags[0].key)
 
     myFixture.checkResult("test <selection>拼音<caret></selection> selection")
+  }
+
+  fun `test external usage`() {
+    makeEditor("test externally annotated fragment")
+
+    SessionManager.start(myFixture.editor)
+      .markResults(sortedSetOf(4, 10, 15))
+
+    TestCase.assertEquals(3, session.tags.size)
   }
 }

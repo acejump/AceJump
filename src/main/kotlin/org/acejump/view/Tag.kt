@@ -4,7 +4,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.ui.ColorUtil
 import com.intellij.ui.scale.JBUIScale
 import org.acejump.boundaries.EditorOffsetCache
-import org.acejump.boundaries.StandardBoundaries
+import org.acejump.boundaries.StandardBoundaries.*
 import org.acejump.config.AceConfig
 import org.acejump.countMatchingCharacters
 import org.acejump.immutableText
@@ -94,7 +94,7 @@ internal class Tag(
   }
 
   private fun alignTag(editor: Editor, cache: EditorOffsetCache, font: TagFont, occupied: List<Rectangle>): Rectangle? {
-    val boundaries = StandardBoundaries.VISIBLE_ON_SCREEN
+    val boundaries = VISIBLE_ON_SCREEN
 
     if (hasSpaceRight || offsetL == 0 || editor.immutableText[offsetL - 1].let { it == '\n' || it == '\r' }) {
       val rectR = createRightAlignedTagRect(editor, cache, font)

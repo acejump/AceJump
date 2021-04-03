@@ -5,7 +5,9 @@ import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
 import org.acejump.boundaries.StandardBoundaries
+import org.acejump.boundaries.StandardBoundaries.*
 import org.acejump.search.Pattern
+import org.acejump.search.Pattern.*
 import org.acejump.session.Session
 import org.acejump.session.SessionManager
 
@@ -45,14 +47,14 @@ sealed class AceEditorAction(private val originalHandler: EditorActionHandler): 
   }
 
   class SearchLineStarts(originalHandler: EditorActionHandler): AceEditorAction(originalHandler) {
-    override fun run(session: Session) = session.startRegexSearch(Pattern.LINE_STARTS, StandardBoundaries.WHOLE_FILE)
+    override fun run(session: Session) = session.startRegexSearch(LINE_STARTS, WHOLE_FILE)
   }
 
   class SearchLineEnds(originalHandler: EditorActionHandler): AceEditorAction(originalHandler) {
-    override fun run(session: Session) = session.startRegexSearch(Pattern.LINE_ENDS, StandardBoundaries.WHOLE_FILE)
+    override fun run(session: Session) = session.startRegexSearch(LINE_ENDS, WHOLE_FILE)
   }
 
   class SearchLineIndents(originalHandler: EditorActionHandler): AceEditorAction(originalHandler) {
-    override fun run(session: Session) = session.startRegexSearch(Pattern.LINE_INDENTS, StandardBoundaries.WHOLE_FILE)
+    override fun run(session: Session) = session.startRegexSearch(LINE_INDENTS, WHOLE_FILE)
   }
 }

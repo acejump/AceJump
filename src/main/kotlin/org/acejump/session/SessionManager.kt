@@ -1,6 +1,7 @@
 package org.acejump.session
 
 import com.intellij.openapi.editor.Editor
+import org.acejump.ExternalUsage
 
 /**
  * Manages active [Session]s in [Editor]s. There may only be
@@ -13,6 +14,7 @@ import com.intellij.openapi.editor.Editor
  * [SessionManager.cleanup] method will purge disposed [Editor]s.
  */
 
+@ExternalUsage
 object SessionManager {
   private val sessions = HashMap<Editor, Session>(4)
 
@@ -20,7 +22,7 @@ object SessionManager {
    * Starts a new [Session], or returns an existing [Session]
    * if the specified [Editor] already has one.
    */
-  fun start(editor: Editor) =
+  fun start(editor: Editor): Session =
     sessions.getOrPut(editor) { cleanup(); Session(editor) }
 
   /**

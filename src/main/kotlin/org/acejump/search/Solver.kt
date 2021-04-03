@@ -5,6 +5,7 @@ import it.unimi.dsi.fastutil.ints.*
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
 import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries
+import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
 import org.acejump.config.AceConfig
 import org.acejump.immutableText
 import org.acejump.input.KeyLayoutCache
@@ -138,8 +139,8 @@ internal class Solver private constructor(
   }
 
   private fun siteOrder(cache: EditorOffsetCache) = IntComparator { a, b ->
-    val aIsVisible = StandardBoundaries.VISIBLE_ON_SCREEN.isOffsetInside(editor, a, cache)
-    val bIsVisible = StandardBoundaries.VISIBLE_ON_SCREEN.isOffsetInside(editor, b, cache)
+    val aIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, a, cache)
+    val bIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, b, cache)
 
     if (aIsVisible != bIsVisible) {
       // Sites in immediate view should come first.

@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.ints.IntList
 import org.acejump.ExternalUsage
 import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries
+import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
 import org.acejump.immutableText
 import org.acejump.input.KeyLayoutCache.allPossibleTags
 import org.acejump.isWordPart
@@ -76,8 +77,8 @@ internal class Tagger(private val editor: Editor) {
     val cache = EditorOffsetCache.new()
 
     results.sort { a, b ->
-      val aIsVisible = StandardBoundaries.VISIBLE_ON_SCREEN.isOffsetInside(editor, a, cache)
-      val bIsVisible = StandardBoundaries.VISIBLE_ON_SCREEN.isOffsetInside(editor, b, cache)
+      val aIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, a, cache)
+      val bIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, b, cache)
 
       when {
         aIsVisible && !bIsVisible -> -1

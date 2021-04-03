@@ -5,8 +5,11 @@ import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.project.DumbAwareAction
 import org.acejump.boundaries.Boundaries
 import org.acejump.boundaries.StandardBoundaries
+import org.acejump.boundaries.StandardBoundaries.*
 import org.acejump.input.JumpMode
+import org.acejump.input.JumpMode.*
 import org.acejump.search.Pattern
+import org.acejump.search.Pattern.*
 import org.acejump.session.Session
 import org.acejump.session.SessionManager
 
@@ -53,18 +56,19 @@ sealed class AceAction: DumbAwareAction() {
 
   // @formatter:off
 
-  object ToggleJumpMode        : BaseToggleJumpModeAction(JumpMode.JUMP)
-  object ToggleJumpEndMode     : BaseToggleJumpModeAction(JumpMode.JUMP_END)
-  object ToggleTargetMode      : BaseToggleJumpModeAction(JumpMode.TARGET)
-  object ToggleDeclarationMode : BaseToggleJumpModeAction(JumpMode.DEFINE)
+  object ToggleJumpMode        : BaseToggleJumpModeAction(JUMP)
+  object ToggleJumpEndMode     : BaseToggleJumpModeAction(JUMP_END)
+  object ToggleTargetMode      : BaseToggleJumpModeAction(TARGET)
+  object ToggleDeclarationMode : BaseToggleJumpModeAction(DEFINE)
 
-  object StartAllWordsMode          : BaseRegexSearchAction(Pattern.ALL_WORDS, StandardBoundaries.WHOLE_FILE)
-  object StartAllWordsBackwardsMode : BaseRegexSearchAction(Pattern.ALL_WORDS, StandardBoundaries.BEFORE_CARET)
-  object StartAllWordsForwardMode   : BaseRegexSearchAction(Pattern.ALL_WORDS, StandardBoundaries.AFTER_CARET)
-  object StartAllLineStartsMode     : BaseRegexSearchAction(Pattern.LINE_STARTS, StandardBoundaries.WHOLE_FILE)
-  object StartAllLineEndsMode       : BaseRegexSearchAction(Pattern.LINE_ENDS, StandardBoundaries.WHOLE_FILE)
-  object StartAllLineIndentsMode    : BaseRegexSearchAction(Pattern.LINE_INDENTS, StandardBoundaries.WHOLE_FILE)
-  object StartAllLineMarksMode      : BaseRegexSearchAction(Pattern.LINE_ALL_MARKS, StandardBoundaries.WHOLE_FILE)
+
+  object StartAllWordsMode          : BaseRegexSearchAction(ALL_WORDS, WHOLE_FILE)
+  object StartAllWordsBackwardsMode : BaseRegexSearchAction(ALL_WORDS, BEFORE_CARET)
+  object StartAllWordsForwardMode   : BaseRegexSearchAction(ALL_WORDS, AFTER_CARET)
+  object StartAllLineStartsMode     : BaseRegexSearchAction(LINE_STARTS, WHOLE_FILE)
+  object StartAllLineEndsMode       : BaseRegexSearchAction(LINE_ENDS, WHOLE_FILE)
+  object StartAllLineIndentsMode    : BaseRegexSearchAction(LINE_INDENTS, WHOLE_FILE)
+  object StartAllLineMarksMode      : BaseRegexSearchAction(LINE_ALL_MARKS, WHOLE_FILE)
 
   // @formatter:on
 }
