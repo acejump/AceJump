@@ -14,7 +14,7 @@ import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.ui.UIUtil
 import junit.framework.TestCase
 import org.acejump.config.AceConfig
-import org.acejump.session.SessionManager
+import org.acejump.session.*
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
 import java.io.File
@@ -148,5 +148,16 @@ class AceTest : BaseTest() {
       .markResults(sortedSetOf(4, 10, 15))
 
     TestCase.assertEquals(3, session.tags.size)
+
+    var shouldBeTrueAfterFinished = false
+    session.addAceJumpListener(object: AceJumpListener {
+      override fun finished() {
+        shouldBeTrueAfterFinished = true
+      }
+    })
+
+    typeAndWaitForResults(session.tags[0].key)
+
+    TestCase.assertTrue(shouldBeTrueAfterFinished)
   }
 }
