@@ -1,7 +1,21 @@
 import com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_ENTER
 import com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_START_NEW_LINE
 import org.acejump.action.AceAction
+import org.acejump.config.*
+import org.acejump.config.AceConfig.Companion.enablePinyin
 import org.acejump.test.util.BaseTest
+
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.IdeActions.*
+import com.intellij.openapi.components.ServiceManager
+import com.intellij.openapi.fileTypes.PlainTextFileType
+import com.intellij.psi.PsiFile
+import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.util.ui.UIUtil
+import org.acejump.config.AceConfig
+import kotlin.random.Random
+import kotlin.system.measureTimeMillis
+import java.io.File
 
 /**
  * Functional test cases and end-to-end performance tests.
@@ -111,5 +125,17 @@ class AceTest : BaseTest() {
     takeAction(AceAction.StartAllLineMarksMode)
 
     assertEquals(8, session.tags.size) // last empty line does not count
+  }
+
+  fun `test pinyin selection`() {
+    AceConfig.settings.enablePinyin = true
+
+    "test 拼音 selection".search("py")
+
+    takeAction(AceAction.ToggleTargetMode)
+
+    typeAndWaitForResults(session.tags[0].key)
+
+    myFixture.checkResult("test <selection>拼音<caret></selection> selection")
   }
 }

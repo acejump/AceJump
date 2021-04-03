@@ -65,12 +65,9 @@ internal object KeyLayoutCache {
   /**
    * Called before any lazily initialized properties are used, to ensure that they are initialized even if the settings are missing.
    */
-  fun ensureInitialized(settings: AceSettings) {
-    if (!::tagOrder.isInitialized) {
-      reset(settings)
-    }
-  }
-  
+  fun ensureInitialized(settings: AceSettings) =
+    if (!::tagOrder.isInitialized) reset(settings) else Unit
+
   /**
    * Re-initializes cached data according to updated settings.
    */
@@ -88,6 +85,8 @@ internal object KeyLayoutCache {
       .joinToString("")
       .ifEmpty(settings.layout::allChars)
     
-    allPossibleTags = allPossibleChars.flatMap { a -> allPossibleChars.map { b -> "$a$b".intern() } }.sortedWith(tagOrder)
+    allPossibleTags = allPossibleChars.flatMap { a ->
+      allPossibleChars.map { b -> "$a$b".intern() }
+    }.sortedWith(tagOrder)
   }
 }

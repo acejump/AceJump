@@ -40,7 +40,8 @@ internal class AceSettingsPanel {
   private val tagForegroundColorWheel = ColorPanel()
   private val tagBackgroundColorWheel = ColorPanel()
   private val searchWholeFileCheckBox = JBCheckBox()
-  
+  private val enablePinyinCheckBox = JBCheckBox()
+
   init {
     tagCharsField.apply { font = Font("monospaced", font.style, font.size) }
     keyboardLayoutArea.apply { font = Font("monospaced", font.style, font.size) }
@@ -50,17 +51,17 @@ internal class AceSettingsPanel {
     cycleModeCombo3.setupEnumItems { cycleMode3 = it }
     cycleModeCombo4.setupEnumItems { cycleMode4 = it }
   }
-  
+
   internal val rootPanel: JPanel = panel {
     fun Cell.short(component: JComponent) = component(growPolicy = SHORT_TEXT)
     fun Cell.medium(component: JComponent) = component(growPolicy = MEDIUM_TEXT)
-    
+
     titledRow("Characters and Layout") {
       row("Allowed characters in tags:") { medium(tagCharsField) }
       row("Keyboard layout:") { short(keyboardLayoutCombo) }
       row("Keyboard design:") { short(keyboardLayoutArea) }
     }
-    
+
     titledRow("Modes") {
       row("Cycle order:") {
         cell(isVerticalFlow = false, isFullWidth = false) {
@@ -71,7 +72,7 @@ internal class AceSettingsPanel {
         }
       }
     }
-    
+
     titledRow("Colors") {
       row("Jump mode caret background:") { short(jumpModeColorWheel) }
       row("Jump to End mode caret background:") { short(jumpEndModeColorWheel) }
@@ -81,13 +82,16 @@ internal class AceSettingsPanel {
       row("Tag foreground:") { short(tagForegroundColorWheel) }
       row("Tag background:") { short(tagBackgroundColorWheel) }
     }
-    
+
     titledRow("Behavior") {
       row { short(searchWholeFileCheckBox.apply { text = "Search whole file" }) }
       row("Minimum typed characters (1-10):") { short(minQueryLengthField) }
     }
+    titledRow("Language Settings") {
+      row { short(enablePinyinCheckBox.apply { text = "Enable Pinyin selection" }) }
+    }
   }
-  
+
   // Property-to-property delegation: https://stackoverflow.com/q/45074596/1772342
   internal var allowedChars by tagCharsField
   internal var keyboardLayout by keyboardLayoutCombo
@@ -105,11 +109,14 @@ internal class AceSettingsPanel {
   internal var tagForegroundColor by tagForegroundColorWheel
   internal var tagBackgroundColor by tagBackgroundColorWheel
   internal var searchWholeFile by searchWholeFileCheckBox
-  
+  internal var enablePinyin by enablePinyinCheckBox
+
   internal var minQueryLengthInt
     get() = minQueryLength.toIntOrNull()?.coerceIn(1, 10)
-    set(value) { minQueryLength = value.toString() }
-  
+    set(value) {
+      minQueryLength = value.toString()
+    }
+
   fun reset(settings: AceSettings) {
     allowedChars = settings.allowedChars
     keyboardLayout = settings.layout
@@ -126,23 +133,24 @@ internal class AceSettingsPanel {
     tagForegroundColor = settings.tagForegroundColor
     tagBackgroundColor = settings.tagBackgroundColor
     searchWholeFile = settings.searchWholeFile
+    enablePinyin = settings.enablePinyin
   }
-  
+
   // Removal pending support for https://youtrack.jetbrains.com/issue/KT-8575
-  
+
   private operator fun JTextComponent.getValue(a: AceSettingsPanel, p: KProperty<*>) = text.toLowerCase()
   private operator fun JTextComponent.setValue(a: AceSettingsPanel, p: KProperty<*>, s: String) = setText(s)
-  
+
   private operator fun ColorPanel.getValue(a: AceSettingsPanel, p: KProperty<*>) = selectedColor
   private operator fun ColorPanel.setValue(a: AceSettingsPanel, p: KProperty<*>, c: Color?) = setSelectedColor(c)
-  
+
   private operator fun JCheckBox.getValue(a: AceSettingsPanel, p: KProperty<*>) = isSelected
   private operator fun JCheckBox.setValue(a: AceSettingsPanel, p: KProperty<*>, selected: Boolean) = setSelected(selected)
-  
+
   private operator fun <T> ComboBox<T>.getValue(a: AceSettingsPanel, p: KProperty<*>) = selectedItem as T
   private operator fun <T> ComboBox<T>.setValue(a: AceSettingsPanel, p: KProperty<*>, item: T) = setSelectedItem(item)
-  
-  private inline fun <reified T : Enum<T>> ComboBox<T>.setupEnumItems(crossinline onChanged: (T) -> Unit) {
+
+  private inline fun <reified T: Enum<T>> ComboBox<T>.setupEnumItems(crossinline onChanged: (T) -> Unit) {
     T::class.java.enumConstants.forEach(this::addItem)
     addActionListener { onChanged(selectedItem as T) }
   }

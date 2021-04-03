@@ -9,6 +9,7 @@ import org.acejump.config.AceConfig
 import org.acejump.immutableText
 import org.acejump.input.KeyLayoutCache
 import org.acejump.isWordPart
+import org.acejump.session.Session
 import org.acejump.wordEndPlus
 import java.util.*
 import kotlin.collections.HashMap
@@ -60,30 +61,32 @@ internal class Solver private constructor(
 ) {
   companion object {
     fun solve(
-      editor: Editor, query: SearchQuery, newResults: IntList, allResults: IntList, tags: List<String>, cache: EditorOffsetCache
-    ): Map<String, Int> {
-      return Solver(editor, max(1, query.rawText.length), newResults, allResults).map(tags, cache)
-    }
+      editor: Editor, query: SearchQuery,
+      newResults: IntList, allResults: IntList,
+      tags: List<String>, cache: EditorOffsetCache
+    ): Map<String, Int> =
+      Solver(editor, max(1, query.rawText.length), newResults, allResults)
+        .map(tags, cache)
   }
-  
+
   private var newTags = Object2IntOpenHashMap<String>(KeyLayoutCache.allPossibleTags.size)
   private val newTagIndices = IntOpenHashSet()
-  
+
   private var allWordFragments = HashSet<String>(allResults.size).apply {
     val iter = allResults.iterator()
     while (iter.hasNext()) {
       forEachWordFragment(iter.nextInt()) { add(it) }
     }
   }
-  
+
   fun map(availableTags: List<String>, cache: EditorOffsetCache): Map<String, Int> {
     val eligibleSitesByTag = HashMap<String, IntList>(100)
     val tagsByFirstLetter = availableTags.groupBy { it[0] }
-    
+
     val iter = newResults.iterator()
     while (iter.hasNext()) {
       val site = iter.nextInt()
-      
+
       for ((firstLetter, tags) in tagsByFirstLetter.entries) {
         if (canTagBeginWithChar(site, firstLetter)) {
           for (tag in tags) {
@@ -92,99 +95,92 @@ internal class Solver private constructor(
         }
       }
     }
-    
+
     val matchingSites = HashMap<IntList, IntArray>()
-    val matchingSitesAsArrays = IdentityHashMap<String, IntArray>() // Keys are guaranteed to be from a single collection.
-    
+    // Keys are guaranteed to be from a single collection.
+    val matchingSitesAsArrays = IdentityHashMap<String, IntArray>()
+
     val siteOrder = siteOrder(cache)
     val tagOrder = KeyLayoutCache.tagOrder
       .thenComparingInt { eligibleSitesByTag.getValue(it).size }
       .thenBy(AceConfig.layout.priority(String::last))
-    
+
     val sortedTags = eligibleSitesByTag.keys.toMutableList().apply {
       sortWith(tagOrder)
     }
-    
+
     for ((key, value) in eligibleSitesByTag.entries) {
       matchingSitesAsArrays[key] = matchingSites.getOrPut(value) {
         value.toIntArray().apply { IntArrays.mergeSort(this, siteOrder) }
       }
     }
-    
+
     var totalAssigned = 0
-    
+
     for (tag in sortedTags) {
       if (totalAssigned == newResults.size) {
         break
       }
-      
+
       if (tryToAssignTag(tag, matchingSitesAsArrays.getValue(tag))) {
         totalAssigned++
       }
     }
-    
+
     return newTags
   }
-  
+
   private fun tryToAssignTag(tag: String, sites: IntArray): Boolean {
-    if (newTags.containsKey(tag)) {
-      return false
-    }
-    
+    if (newTags.containsKey(tag)) return false
+
     val index = sites.firstOrNull { it !in newTagIndices } ?: return false
-    
+
     @Suppress("ReplacePutWithAssignment")
     newTags.put(tag, index)
     newTagIndices.add(index)
     return true
   }
-  
+
   private fun siteOrder(cache: EditorOffsetCache) = IntComparator { a, b ->
     val aIsVisible = StandardBoundaries.VISIBLE_ON_SCREEN.isOffsetInside(editor, a, cache)
     val bIsVisible = StandardBoundaries.VISIBLE_ON_SCREEN.isOffsetInside(editor, b, cache)
-    
+
     if (aIsVisible != bIsVisible) {
       // Sites in immediate view should come first.
       return@IntComparator if (aIsVisible) -1 else 1
     }
-    
+
     val chars = editor.immutableText
     val aIsNotWordStart = chars[max(0, a - 1)].isWordPart
     val bIsNotWordStart = chars[max(0, b - 1)].isWordPart
-    
+
     if (aIsNotWordStart != bIsNotWordStart) {
       // Ensure that the first letter of a word is prioritized for tagging.
       return@IntComparator if (bIsNotWordStart) -1 else 1
     }
-    
+
     when {
       a < b -> -1
       a > b -> 1
-      else  -> 0
+      else -> 0
     }
   }
-  
+
   private fun canTagBeginWithChar(site: Int, char: Char): Boolean {
-    if (char.toString() in allWordFragments) {
-      return false
-    }
-    
-    forEachWordFragment(site) {
-      if (it + char in allWordFragments) {
-        return false
-      }
-    }
-    
+    if (char.toString() in allWordFragments) return false
+
+    forEachWordFragment(site) { if (it + char in allWordFragments) return false }
+
     return true
   }
-  
+
   private inline fun forEachWordFragment(site: Int, callback: (String) -> Unit) {
     val chars = editor.immutableText
     val left = max(0, site + queryLength - 1)
     val right = chars.wordEndPlus(site)
-    
+
     val builder = StringBuilder(1 + right - left)
-    
+
     for (i in left..right) {
       builder.append(chars[i].toLowerCase())
       callback(builder.toString())

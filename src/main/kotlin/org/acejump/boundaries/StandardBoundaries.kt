@@ -4,13 +4,11 @@ import com.intellij.openapi.editor.Editor
 
 enum class StandardBoundaries : Boundaries {
   WHOLE_FILE {
-    override fun getOffsetRange(editor: Editor, cache: EditorOffsetCache): IntRange {
-      return 0 until editor.document.textLength
-    }
+    override fun getOffsetRange(editor: Editor, cache: EditorOffsetCache) =
+      0 until editor.document.textLength
     
-    override fun isOffsetInside(editor: Editor, offset: Int, cache: EditorOffsetCache): Boolean {
-      return offset in (0 until editor.document.textLength)
-    }
+    override fun isOffsetInside(editor: Editor, offset: Int, cache: EditorOffsetCache) =
+      offset in (0 until editor.document.textLength)
   },
   
   VISIBLE_ON_SCREEN {
@@ -30,9 +28,7 @@ enum class StandardBoundaries : Boundaries {
       // However, if we are using a cache, it's likely that the topmost and bottommost positions are already cached whereas the provided
       // offset isn't, so we save a lookup for every offset outside the range.
       
-      if (cache !== EditorOffsetCache.Uncached && offset !in getOffsetRange(editor, cache)) {
-        return false
-      }
+      if (cache !== EditorOffsetCache.Uncached && offset !in getOffsetRange(editor, cache)) return false
       
       val (topLeft, bottomRight) = cache.visibleArea(editor)
       val pos = cache.offsetToXY(editor, offset)
@@ -44,22 +40,18 @@ enum class StandardBoundaries : Boundaries {
   },
   
   BEFORE_CARET {
-    override fun getOffsetRange(editor: Editor, cache: EditorOffsetCache): IntRange {
-      return 0..(editor.caretModel.offset)
-    }
+    override fun getOffsetRange(editor: Editor, cache: EditorOffsetCache) =
+      0..(editor.caretModel.offset)
     
-    override fun isOffsetInside(editor: Editor, offset: Int, cache: EditorOffsetCache): Boolean {
-      return offset <= editor.caretModel.offset
-    }
+    override fun isOffsetInside(editor: Editor, offset: Int, cache: EditorOffsetCache): Boolean =
+      offset <= editor.caretModel.offset
   },
   
   AFTER_CARET {
-    override fun getOffsetRange(editor: Editor, cache: EditorOffsetCache): IntRange {
-      return editor.caretModel.offset until editor.document.textLength
-    }
+    override fun getOffsetRange(editor: Editor, cache: EditorOffsetCache) =
+      editor.caretModel.offset until editor.document.textLength
     
-    override fun isOffsetInside(editor: Editor, offset: Int, cache: EditorOffsetCache): Boolean {
-      return offset >= editor.caretModel.offset
-    }
+    override fun isOffsetInside(editor: Editor, offset: Int, cache: EditorOffsetCache): Boolean =
+      offset >= editor.caretModel.offset
   }
 }

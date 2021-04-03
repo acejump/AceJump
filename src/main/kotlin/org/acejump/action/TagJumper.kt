@@ -31,78 +31,78 @@ internal class TagJumper(private val editor: Editor, private val mode: JumpMode,
       val targetOffset = offset + matchingChars
       val isInsideWord = matchingChars > 0 && chars[targetOffset - 1].isWordPart && chars[targetOffset].isWordPart
       val finalTargetOffset = if (isInsideWord) chars.wordEnd(targetOffset) + 1 else targetOffset
-      
+
       if (mode === JUMP_END) {
         moveCaretTo(editor, finalTargetOffset)
-      }
-      else if (mode === TARGET) {
+      } else if (mode === TARGET) {
         if (isInsideWord) {
           selectRange(editor, chars.wordStart(targetOffset), finalTargetOffset)
-        }
-        else {
+        } else {
           selectRange(editor, offset, finalTargetOffset)
         }
       }
-    }
-    else {
+    } else {
       moveCaretTo(editor, offset)
     }
   }
-  
+
   /**
    * Updates caret and selection by [visit]ing a specific offset in the editor, and applying session-finalizing [JumpMode] actions such as
    * using the Go To Declaration action, or selecting text between caret and target offset/word if Shift was held during the jump.
    */
   fun jump(offset: Int, shiftMode: Boolean) {
     val oldOffset = editor.caretModel.offset
-    
+
     visit(offset)
-    
+
     if (mode === DEFINE) {
       performAction(if (shiftMode) GotoTypeDeclarationAction() else GotoDeclarationAction())
       return
     }
-    
+
     if (shiftMode) {
       val newOffset = editor.caretModel.offset
-      
+
       if (mode === TARGET) {
-        selectRange(editor, oldOffset, when {
-          newOffset < oldOffset -> editor.selectionModel.selectionStart
-          else                  -> editor.selectionModel.selectionEnd
-        })
-      }
-      else {
+        selectRange(
+          editor, oldOffset, when {
+            newOffset < oldOffset -> editor.selectionModel.selectionStart
+            else -> editor.selectionModel.selectionEnd
+          }
+        )
+      } else {
         selectRange(editor, oldOffset, newOffset)
       }
     }
   }
-  
+
   private companion object {
     private fun moveCaretTo(editor: Editor, offset: Int) = with(editor) {
       project?.let { addCurrentPositionToHistory(it, document) }
       selectionModel.removeSelection(true)
       caretModel.moveToOffset(offset)
     }
-    
+
     private fun selectRange(editor: Editor, fromOffset: Int, toOffset: Int) = with(editor) {
       selectionModel.removeSelection(true)
       selectionModel.setSelection(fromOffset, toOffset)
       caretModel.moveToOffset(toOffset)
     }
-    
+
     private fun addCurrentPositionToHistory(project: Project, document: Document) {
-      CommandProcessor.getInstance().executeCommand(project, {
-        with(IdeDocumentHistory.getInstance(project)) {
-          setCurrentCommandHasMoves()
-          includeCurrentCommandAsNavigation()
-          includeCurrentPlaceAsChangePlace()
-        }
-      }, "AceJumpHistoryAppender", DocCommandGroupId.noneGroupId(document), UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION, document)
+      CommandProcessor.getInstance().executeCommand(
+        project, {
+          with(IdeDocumentHistory.getInstance(project)) {
+            setCurrentCommandHasMoves()
+            includeCurrentCommandAsNavigation()
+            includeCurrentPlaceAsChangePlace()
+          }
+        }, "AceJumpHistoryAppender", DocCommandGroupId.noneGroupId(document),
+        UndoConfirmationPolicy.DO_NOT_REQUEST_CONFIRMATION, document
+      )
     }
-    
-    private fun performAction(action: AnAction) {
-      ActionManager.getInstance().tryToExecute(action, ActionCommand.getInputEvent(null), null, null, true)
-    }
+
+    private fun performAction(action: AnAction) = ActionManager.getInstance()
+      .tryToExecute(action, ActionCommand.getInputEvent(null), null, null, true)
   }
 }

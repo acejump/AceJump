@@ -1,8 +1,9 @@
 package org.acejump.input
 
 /**
- * Defines common keyboard layouts. Each layout has a key priority order, based on each key's distance from the home row and how
- * ergonomically difficult they are to press.
+ * Defines common keyboard layouts. Each layout has a key priority order,
+ * based on each key's distance from the home row and how  ergonomically
+ * difficult they are to press.
  */
 @Suppress("unused")
 enum class KeyLayout(internal val rows: Array<String>, priority: String) {
@@ -18,7 +19,5 @@ enum class KeyLayout(internal val rows: Array<String>, priority: String) {
   internal val allChars = rows.joinToString("").toCharArray().apply(CharArray::sort).joinToString("")
   internal val allPriorities = priority.mapIndexed { index, char -> char to index }.toMap()
   
-  internal inline fun priority(crossinline tagToChar: (String) -> Char): (String) -> Int? {
-    return { allPriorities[tagToChar(it)] }
-  }
+  internal inline fun priority(crossinline tagToChar: (String) -> Char): (String) -> Int? = { allPriorities[tagToChar(it)] }
 }

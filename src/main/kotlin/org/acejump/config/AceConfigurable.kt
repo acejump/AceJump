@@ -4,13 +4,13 @@ import com.intellij.openapi.options.Configurable
 import org.acejump.config.AceConfig.Companion.settings
 import org.acejump.input.KeyLayoutCache
 
-class AceConfigurable : Configurable {
+class AceConfigurable: Configurable {
   private val panel by lazy(::AceSettingsPanel)
-  
+
   override fun getDisplayName() = "AceJump"
-  
+
   override fun createComponent() = panel.rootPanel
-  
+
   override fun isModified() =
     panel.allowedChars != settings.allowedChars ||
       panel.keyboardLayout != settings.layout ||
@@ -26,8 +26,9 @@ class AceConfigurable : Configurable {
       panel.textHighlightColor != settings.textHighlightColor ||
       panel.tagForegroundColor != settings.tagForegroundColor ||
       panel.tagBackgroundColor != settings.tagBackgroundColor ||
-      panel.searchWholeFile != settings.searchWholeFile
-  
+      panel.searchWholeFile != settings.searchWholeFile ||
+      panel.enablePinyin != settings.enablePinyin
+
   override fun apply() {
     settings.allowedChars = panel.allowedChars
     settings.layout = panel.keyboardLayout
@@ -44,8 +45,9 @@ class AceConfigurable : Configurable {
     panel.tagForegroundColor?.let { settings.tagForegroundColor = it }
     panel.tagBackgroundColor?.let { settings.tagBackgroundColor = it }
     settings.searchWholeFile = panel.searchWholeFile
+    settings.enablePinyin= panel.enablePinyin
     KeyLayoutCache.reset(settings)
   }
-  
+
   override fun reset() = panel.reset(settings)
 }
