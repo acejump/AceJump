@@ -31,6 +31,9 @@ import java.util.*
  * Manages an AceJump session for a single [Editor].
  */
 class Session(private val editor: Editor) {
+  private val listeners: MutableList<AceJumpListener> =
+    ContainerUtil.createLockFreeCopyOnWriteList()
+
   private companion object {
     private val defaultBoundaries
       get() = if (AceConfig.searchWholeFile) WHOLE_FILE else VISIBLE_ON_SCREEN
@@ -234,11 +237,22 @@ class Session(private val editor: Editor) {
     tagCanvas.unbind()
     textHighlighter.reset()
     EditorCache.invalidate()
+    listeners.forEach(AceJumpListener::finished)
 
     if (!editor.isDisposed) {
       originalSettings.restore(editor)
       editor.colorsScheme.setColor(CARET_COLOR, JumpMode.DISABLED.caretColor)
       editor.scrollingModel.scrollToCaret(ScrollType.MAKE_VISIBLE)
     }
+  }
+
+  @ExternalUsage
+  fun addAceJumpListener(listener: AceJumpListener) {
+    listeners += listener
+  }
+
+  @ExternalUsage
+  fun removeAceJumpListener(listener: AceJumpListener) {
+    listeners -= listener
   }
 }
