@@ -1,19 +1,16 @@
 package org.acejump.config
 
-import com.intellij.openapi.diagnostic.Logger
 import com.intellij.openapi.options.Configurable
-import org.acejump.config.AceConfig.Companion.bigrams
 import org.acejump.config.AceConfig.Companion.settings
+import org.acejump.input.KeyLayoutCache
 
-class AceConfigurable: Configurable {
-  private val logger = Logger.getInstance(AceConfigurable::class.java)
-
-  private val panel by lazy { AceSettingsPanel() }
-
+class AceConfigurable : Configurable {
+  private val panel by lazy(::AceSettingsPanel)
+  
   override fun getDisplayName() = "AceJump"
-
+  
   override fun createComponent() = panel.rootPanel
-
+  
   override fun isModified() =
     panel.allowedChars != settings.allowedChars ||
       panel.keyboardLayout != settings.layout ||
@@ -21,6 +18,7 @@ class AceConfigurable: Configurable {
       panel.cycleMode2 != settings.cycleMode2 ||
       panel.cycleMode3 != settings.cycleMode3 ||
       panel.cycleMode4 != settings.cycleMode4 ||
+      panel.minQueryLengthInt != settings.minQueryLength ||
       panel.jumpModeColor != settings.jumpModeColor ||
       panel.jumpEndModeColor != settings.jumpEndModeColor ||
       panel.targetModeColor != settings.targetModeColor ||
@@ -28,38 +26,26 @@ class AceConfigurable: Configurable {
       panel.textHighlightColor != settings.textHighlightColor ||
       panel.tagForegroundColor != settings.tagForegroundColor ||
       panel.tagBackgroundColor != settings.tagBackgroundColor ||
-      panel.roundedTagCorners != settings.roundedTagCorners ||
-      panel.searchWholeFile != settings.searchWholeFile ||
-      panel.supportPinyin != settings.supportPinyin
-
-  private fun String.distinctAlphanumerics() =
-    if (isEmpty()) settings.layout.text
-    else toList().distinct().filter(Char::isLetterOrDigit).joinToString("")
-
+      panel.searchWholeFile != settings.searchWholeFile
+  
   override fun apply() {
-    panel.allowedChars.distinctAlphanumerics().let {
-      settings.allowedChars = it
-      AceConfig.allPossibleTags = it.bigrams()
-    }
-
+    settings.allowedChars = panel.allowedChars
     settings.layout = panel.keyboardLayout
     settings.cycleMode1 = panel.cycleMode1
     settings.cycleMode2 = panel.cycleMode2
     settings.cycleMode3 = panel.cycleMode3
     settings.cycleMode4 = panel.cycleMode4
-    panel.jumpModeColor ?.let { settings.jumpModeColor = it }
+    settings.minQueryLength = panel.minQueryLengthInt ?: settings.minQueryLength
+    panel.jumpModeColor?.let { settings.jumpModeColor = it }
     panel.jumpEndModeColor?.let { settings.jumpEndModeColor = it }
-    panel.targetModeColor ?.let { settings.targetModeColor = it }
-    panel.definitionModeColor ?.let { settings.definitionModeColor = it }
-    panel.textHighlightColor ?.let { settings.textHighlightColor = it }
-    panel.tagForegroundColor ?.let { settings.tagForegroundColor = it }
-    panel.tagBackgroundColor ?.let { settings.tagBackgroundColor = it }
-    settings.roundedTagCorners = panel.roundedTagCorners
+    panel.targetModeColor?.let { settings.targetModeColor = it }
+    panel.definitionModeColor?.let { settings.definitionModeColor = it }
+    panel.textHighlightColor?.let { settings.textHighlightColor = it }
+    panel.tagForegroundColor?.let { settings.tagForegroundColor = it }
+    panel.tagBackgroundColor?.let { settings.tagBackgroundColor = it }
     settings.searchWholeFile = panel.searchWholeFile
-    settings.supportPinyin = panel.supportPinyin
-
-    logger.info("User applied new settings: $settings")
+    KeyLayoutCache.reset(settings)
   }
-
+  
   override fun reset() = panel.reset(settings)
 }

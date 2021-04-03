@@ -1,11 +1,12 @@
 import org.jetbrains.changelog.closure
-import org.jetbrains.intellij.tasks.*
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.intellij.tasks.PatchPluginXmlTask
+import org.jetbrains.intellij.tasks.PublishTask
+import org.jetbrains.intellij.tasks.RunIdeTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.5.0-M1"
+  kotlin("jvm") version "1.3.72"
   id("org.jetbrains.intellij") version "0.7.2"
   id("org.jetbrains.changelog") version "1.1.2"
   id("com.github.ben-manes.versions") version "0.38.0"

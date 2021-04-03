@@ -1,47 +1,40 @@
 package org.acejump.config
 
 import com.intellij.util.xmlb.annotations.OptionTag
-import org.acejump.label.Pattern.Companion.KeyLayout
-import org.acejump.label.Pattern.Companion.KeyLayout.QWERTY
-import org.acejump.search.JumpMode
+import org.acejump.input.JumpMode
+import org.acejump.input.KeyLayout
+import org.acejump.input.KeyLayout.QWERTY
 import java.awt.Color
 
-/**
- * Settings model located for [AceSettingsPanel].
- */
-
-// TODO: https://github.com/acejump/AceJump/issues/215
 data class AceSettings(
   var layout: KeyLayout = QWERTY,
-  var allowedChars: String = layout.text,
+  var allowedChars: String = layout.allChars,
   var cycleMode1: JumpMode = JumpMode.JUMP,
   var cycleMode2: JumpMode = JumpMode.DEFINE,
   var cycleMode3: JumpMode = JumpMode.TARGET,
   var cycleMode4: JumpMode = JumpMode.JUMP_END,
-
+  var minQueryLength: Int = 1,
+  
   @OptionTag("jumpModeRGB", converter = ColorConverter::class)
-  var jumpModeColor: Color = Color.BLUE,
-
+  var jumpModeColor: Color = Color(0xFFFFFF),
+  
   @OptionTag("jumpEndModeRGB", converter = ColorConverter::class)
-  var jumpEndModeColor: Color = Color.CYAN,
-
+  var jumpEndModeColor: Color = Color(0x33E78A),
+  
   @OptionTag("targetModeRGB", converter = ColorConverter::class)
-  var targetModeColor: Color = Color.RED,
-
+  var targetModeColor: Color = Color(0xFFB700),
+  
   @OptionTag("definitionModeRGB", converter = ColorConverter::class)
-  var definitionModeColor: Color = Color.MAGENTA,
-
+  var definitionModeColor: Color = Color(0x6FC5FF),
+  
   @OptionTag("textHighlightRGB", converter = ColorConverter::class)
-  var textHighlightColor: Color = Color.GREEN,
-
+  var textHighlightColor: Color = Color(0x394B58),
+  
   @OptionTag("tagForegroundRGB", converter = ColorConverter::class)
-  var tagForegroundColor: Color = Color.BLACK,
-
+  var tagForegroundColor: Color = Color(0xFFFFFF),
+  
   @OptionTag("tagBackgroundRGB", converter = ColorConverter::class)
-  var tagBackgroundColor: Color = Color.YELLOW,
-
-  var displayQuery: Boolean = false,
-  var roundedTagCorners: Boolean = true,
-  var searchWholeFile: Boolean = true,
-  var supportPinyin: Boolean = false
+  var tagBackgroundColor: Color = Color(0x008299),
+  
+  var searchWholeFile: Boolean = true
 )
