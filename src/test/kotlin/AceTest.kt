@@ -3,6 +3,7 @@ import com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_START_NEW_LINE
 import org.acejump.action.AceAction
 import org.acejump.config.AceConfig
 import org.acejump.test.util.BaseTest
+import org.junit.Ignore
 
 /**
  * Functional test cases and end-to-end performance tests.
@@ -124,5 +125,16 @@ class AceTest : BaseTest() {
     typeAndWaitForResults(session.tags[0].key)
 
     myFixture.checkResult("test <selection>拼音<caret></selection> selection")
+  }
+
+  // https://github.com/acejump/AceJump/issues/355
+  fun `ignore test a word that is difficult to tag`() {
+    makeEditor("aaCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
+
+    takeAction(AceAction.ActivateOrCycleMode)
+
+    typeAndWaitForResults("c")
+
+    assertEquals(2, session.tags.size)
   }
 }
