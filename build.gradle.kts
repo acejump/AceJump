@@ -1,7 +1,5 @@
-import org.jetbrains.changelog.closure
-import org.jetbrains.intellij.tasks.PatchPluginXmlTask
-import org.jetbrains.intellij.tasks.PublishTask
-import org.jetbrains.intellij.tasks.RunIdeTask
+import org.jetbrains.changelog.*
+import org.jetbrains.intellij.tasks.*
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
@@ -32,15 +30,20 @@ tasks {
     token(intellijPublishToken)
   }
 
-  withType<PatchPluginXmlTask> {
-    sinceBuild("201.6668.0")
-    changeNotes({ changelog.getLatest().toHTML() })
+  patchPluginXml {
+    sinceBuild("203.7717.56")
+    changeNotes(closure {
+      changelog.getAll().values.take(2).last().toHTML()
+    })
   }
 }
 
 changelog {
+  version = "3.7.0"
   path = "${project.projectDir}/CHANGES.md"
-  header = closure { "${project.version}" }
+  header = closure { "[${project.version}] - ${date()}" }
+  itemPrefix = "-"
+  unreleasedTerm = "Unreleased"
 }
 
 dependencies {
@@ -64,4 +67,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.7"
+version = "3.7.0"
