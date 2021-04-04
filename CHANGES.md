@@ -11,7 +11,9 @@
 - Jump-to-End mode jumps to the end of a word
 - Fixes toggle keys not resetting mode when pressed twice
 - Increase limit for what is considered a large file
-- Thanks to @chylex for [all the PRs](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3Achylex)!
+- Major refactoring, [#350](https://github.com/acejump/AceJump/pull/353)
+- [Many bug fixes](https://github.com/acejump/AceJump/issues/348#issuecomment-739454920): [#338](https://github.com/acejump/AceJump/issues/338), [#336](https://github.com/acejump/AceJump/issues/336), [#329](https://github.com/acejump/AceJump/issues/329), [#327](https://github.com/acejump/AceJump/issues/327), [#310](https://github.com/acejump/AceJump/issues/310), [#233](https://github.com/acejump/AceJump/issues/233), [#228](https://github.com/acejump/AceJump/issues/228), [#187](https://github.com/acejump/AceJump/issues/187), [#147](https://github.com/acejump/AceJump/issues/147), [#132](https://github.com/acejump/AceJump/issues/132), [#71](https://github.com/acejump/AceJump/issues/71)
+- Huge thanks to @chylex for [all the PRs](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3Achylex)!
 
 ### 3.6.3
 

@@ -132,7 +132,7 @@ Custom boundaries for search (i.e. current line before caret etc.) can also be d
 
 AceJump is supported by community members like you. Contributions are highly welcome!
 
-If you would like to [contribute](https://github.com/acejump/AceJump/pulls), here are a few of the ways you can help improve AceJump:
+If you would like to [contribute](https://github.com/acejump/AceJump/pulls?q=is%3Apr), here are a few of the ways you can help improve AceJump:
 
 * [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
 * [Add option to place the caret after the search text](https://github.com/acejump/AceJump/issues/225)
@@ -207,8 +207,8 @@ The following individuals have significantly improved AceJump through their cont
 
 * [John Lindquist](https://github.com/johnlindquist) for creating AceJump and supporting it for many years.
 * [Breandan Considine](https://github.com/breandan) for maintaining the project and adding some new features.
+* [Daniel Chýlek](https://github.com/chylex) for numerous [performance optimizations](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3Achylex), [bug fixes](https://github.com/acejump/AceJump/issues/348#issuecomment-739454920) and [refactoring](https://github.com/acejump/AceJump/pull/353).
 * [Alex Plate](https://github.com/AlexPl292) for submitting [several PRs](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3AAlexPl292).
-* [Daniel Chýlek](https://github.com/chylex) for several [performance optimizations](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3Achylex).
 * [Sven Speckmaier](https://github.com/svensp) for [improving](https://github.com/acejump/AceJump/pull/214) search latency.
 * [Stefan Monnier](https://www.iro.umontreal.ca/~monnier/) for algorithmic advice and maintaining Emacs for several years.
 * [Fool's Mate](https://www.fools-mate.de/) for the [icon](https://github.com/acejump/AceJump/issues/313) and graphic design.
