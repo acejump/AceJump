@@ -1,23 +1,8 @@
 import com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_ENTER
 import com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_START_NEW_LINE
 import org.acejump.action.AceAction
-import org.acejump.config.*
-import org.acejump.config.AceConfig.Companion.enablePinyin
-import org.acejump.test.util.BaseTest
-
-import com.intellij.openapi.actionSystem.AnAction
-import com.intellij.openapi.actionSystem.IdeActions.*
-import com.intellij.openapi.components.ServiceManager
-import com.intellij.openapi.fileTypes.PlainTextFileType
-import com.intellij.psi.PsiFile
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import com.intellij.util.ui.UIUtil
-import junit.framework.TestCase
 import org.acejump.config.AceConfig
-import org.acejump.session.*
-import kotlin.random.Random
-import kotlin.system.measureTimeMillis
-import java.io.File
+import org.acejump.test.util.BaseTest
 
 /**
  * Functional test cases and end-to-end performance tests.
@@ -139,25 +124,5 @@ class AceTest : BaseTest() {
     typeAndWaitForResults(session.tags[0].key)
 
     myFixture.checkResult("test <selection>拼音<caret></selection> selection")
-  }
-
-  fun `test external usage`() {
-    makeEditor("test externally annotated fragment")
-
-    SessionManager.start(myFixture.editor)
-      .markResults(sortedSetOf(4, 10, 15))
-
-    TestCase.assertEquals(3, session.tags.size)
-
-    var shouldBeTrueAfterFinished = false
-    session.addAceJumpListener(object: AceJumpListener {
-      override fun finished() {
-        shouldBeTrueAfterFinished = true
-      }
-    })
-
-    typeAndWaitForResults(session.tags[0].key)
-
-    TestCase.assertTrue(shouldBeTrueAfterFinished)
   }
 }
