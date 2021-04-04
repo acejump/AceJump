@@ -91,6 +91,43 @@ The build artifact will be placed in `build/distributions/`.
 
 *Miscellaneous: AceJump is built using [Gradle](https://gradle.com/) with the [Gradle Kotlin DSL](https://docs.gradle.org/5.1/userguide/kotlin_dsl.html) and the [gradle-intellij-plugin](https://github.com/JetBrains/gradle-intellij-plugin).*
 
+## Extending
+
+AceJump can be used by other [IntelliJ Platform](https://plugins.jetbrains.com/docs/intellij/welcome.html) plugins. To do so, add the following snippet to your `build.gradle.kts` file:
+
+```kotlin
+intellij {
+  setPlugins("AceJump:<VERSION>")
+}
+```
+
+Callers who pass an instance of [`Editor`](https://github.com/JetBrains/intellij-community/blob/master/platform/editor-ui-api/src/com/intellij/openapi/editor/Editor.java) into `SessionManager.start(editor)` will receive a [`Session`](src/main/kotlin/org/acejump/session/Session.kt) instance in return. Sessions are disposed after use.
+
+To use AceJump externally, please see the following example:
+
+```kotlin
+import org.acejump.session.SessionManager
+import org.acejump.session.AceJumpListener
+import org.acejump.boundaries.StandardBoundaries.*
+import org.acejump.search.Pattern.*
+
+val aceJumpSession = SessionManager.start(editorInstance)
+
+aceJumpSession.addAceJumpListener(object: AceJumpListener {
+  override fun finished() {
+    // ...
+  }
+})
+
+// Sessions provide these endpoints for external consumers:
+
+/*1.*/ aceJumpSession.markResults(sortedSetOf(/*...*/)) // Pass a set of offsets
+/*2.*/ aceJumpSession.startRegexSearch("[aeiou]+", WHOLE_FILE) // Search for regex
+/*3.*/ aceJumpSession.startRegexSearch(ALL_WORDS, VISIBLE_ON_SCREEN) // Search for Pattern
+```
+
+Custom boundaries for search (i.e. current line before caret etc.) can also be defined using the [Boundaries](src/main/kotlin/org/acejump/boundaries/Boundaries.kt) interface.
+
 ## Contributing
 
 AceJump is supported by community members like you. Contributions are highly welcome!

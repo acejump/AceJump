@@ -1,9 +1,8 @@
 import junit.framework.TestCase
-import org.acejump.boundaries.StandardBoundaries
-import org.acejump.search.Pattern
+import org.acejump.boundaries.StandardBoundaries.*
+import org.acejump.search.Pattern.*
 import org.acejump.session.*
 import org.acejump.test.util.BaseTest
-
 
 /**
  * Test [org.acejump.ExternalUsage] endpoints.
@@ -34,7 +33,7 @@ class ExternalUsageTest: BaseTest() {
     makeEditor("test external pattern usage")
 
     SessionManager.start(myFixture.editor)
-      .startRegexSearch(Pattern.ALL_WORDS, StandardBoundaries.WHOLE_FILE)
+      .startRegexSearch(ALL_WORDS, WHOLE_FILE)
 
     TestCase.assertEquals(4, session.tags.size)
   }
@@ -43,7 +42,7 @@ class ExternalUsageTest: BaseTest() {
     makeEditor("test external regex usage")
 
     SessionManager.start(myFixture.editor)
-      .startRegexSearch("[aeiou]+", StandardBoundaries.WHOLE_FILE)
+      .startRegexSearch("[aeiou]+", WHOLE_FILE)
 
     TestCase.assertEquals(8, session.tags.size)
   }

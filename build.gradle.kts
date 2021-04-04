@@ -60,6 +60,7 @@ intellij {
   pluginName = "AceJump"
   updateSinceUntilBuild = false
   setPlugins("java")
+
 }
 
 group = "org.acejump"
