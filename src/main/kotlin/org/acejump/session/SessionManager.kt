@@ -35,8 +35,8 @@ object SessionManager {
    * Ends the active [Session] in the specified [Editor],
    * or does nothing if the [Editor] has no active session.
    */
-  fun end(editor: Editor) = sessions.remove(editor)?.dispose() ?: Unit
+  fun end(editor: Editor, jumpPerformed: Boolean) = sessions.remove(editor)?.dispose(jumpPerformed) ?: Unit
 
   private fun cleanup() = sessions.keys.filter { it.isDisposed }
-    .forEach { disposedEditor -> sessions.remove(disposedEditor)?.dispose() }
+    .forEach { disposedEditor -> sessions.remove(disposedEditor)?.dispose(false) }
 }

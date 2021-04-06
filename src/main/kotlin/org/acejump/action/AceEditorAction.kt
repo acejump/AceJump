@@ -31,7 +31,7 @@ sealed class AceEditorAction(private val originalHandler: EditorActionHandler): 
   // Actions
 
   class Reset(originalHandler: EditorActionHandler): AceEditorAction(originalHandler) {
-    override fun run(session: Session) = session.end()
+    override fun run(session: Session) = session.end(false)
   }
 
   class ClearSearch(originalHandler: EditorActionHandler): AceEditorAction(originalHandler) {

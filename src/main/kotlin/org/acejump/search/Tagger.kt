@@ -37,6 +37,10 @@ internal class Tagger(private val editor: Editor) {
     tagMap = HashBiMap.create()
   }
 
+  fun getMarkByOffset(offset: Int): String? {
+    return tagMap.inverse()[offset]
+  }
+
   /**
    * Assigns tags to as many results as possible, keeping previously assigned
    * tags. Returns a [TaggingResult.Jump] if the current search query matches

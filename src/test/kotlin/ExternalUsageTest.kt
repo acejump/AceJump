@@ -1,4 +1,6 @@
+import com.intellij.util.ui.UIUtil
 import junit.framework.TestCase
+import org.acejump.action.AceAction
 import org.acejump.boundaries.StandardBoundaries.*
 import org.acejump.search.Pattern.*
 import org.acejump.session.*
@@ -19,7 +21,7 @@ class ExternalUsageTest: BaseTest() {
 
     var shouldBeTrueAfterFinished = false
     session.addAceJumpListener(object: AceJumpListener {
-      override fun finished() {
+      override fun finished(mark: String?, query: String?) {
         shouldBeTrueAfterFinished = true
       }
     })
@@ -45,5 +47,64 @@ class ExternalUsageTest: BaseTest() {
       .startRegexSearch("[aeiou]+", WHOLE_FILE)
 
     TestCase.assertEquals(8, session.tags.size)
+  }
+
+  fun `test listener query and mark`() {
+    "<caret>testing 1234".search("g")
+
+    var detectedMark: String? = null
+    var detectedQuery: String? = null
+    session.addAceJumpListener(object: AceJumpListener {
+      override fun finished(mark: String?, query: String?) {
+        detectedMark = mark
+        detectedQuery = query
+      }
+    })
+
+    val mark = session.tags[0].key
+    typeAndWaitForResults(mark)
+
+    TestCase.assertEquals(mark, detectedMark)
+    TestCase.assertEquals("g", detectedQuery)
+  }
+
+  fun `test listener after escape`() {
+    "<caret>testing 1234".search("g")
+
+    var detectedMark: String? = null
+    var detectedQuery: String? = null
+    session.addAceJumpListener(object: AceJumpListener {
+      override fun finished(mark: String?, query: String?) {
+        detectedMark = mark
+        detectedQuery = query
+      }
+    })
+
+    myFixture.performEditorAction("EditorEscape")
+    UIUtil.dispatchAllInvocationEvents()
+
+    TestCase.assertEquals(null, detectedMark)
+    TestCase.assertEquals(null, detectedQuery)
+  }
+
+  fun `test listener for word motion`() {
+    makeEditor("test word action")
+
+    takeAction(AceAction.StartAllWordsMode)
+
+    var detectedMark: String? = null
+    var detectedQuery: String? = null
+    session.addAceJumpListener(object: AceJumpListener {
+      override fun finished(mark: String?, query: String?) {
+        detectedMark = mark
+        detectedQuery = query
+      }
+    })
+
+    val mark = session.tags[1].key
+    typeAndWaitForResults(mark)
+
+    TestCase.assertEquals(mark, detectedMark)
+    TestCase.assertEquals("", detectedQuery)
   }
 }
