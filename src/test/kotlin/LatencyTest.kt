@@ -15,7 +15,7 @@ class LatencyTest: BaseTest() {
 
       for (query in chars) {
         makeEditor(editorText)
-        myFixture.testAction(AceAction.ActivateOrCycleMode)
+        myFixture.testAction(AceAction.ActivateOrCycleMode())
         time += measureTimeMillis { typeAndWaitForResults("$query") }
         // TODO assert(Tagger.markers.isNotEmpty()) { "Should be tagged: $query" }
         resetEditor()
