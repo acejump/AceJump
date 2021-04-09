@@ -34,6 +34,8 @@ class Session(private val editor: Editor) {
   private val listeners: MutableList<AceJumpListener> =
     ContainerUtil.createLockFreeCopyOnWriteList()
 
+  private var boundaries: Boundaries = defaultBoundaries
+
   private companion object {
     private val defaultBoundaries
       get() = if (AceConfig.searchWholeFile) WHOLE_FILE else VISIBLE_ON_SCREEN
@@ -82,7 +84,7 @@ class Session(private val editor: Editor) {
         if (processor == null) {
           processor = SearchProcessor.fromChar(
             editor,
-            charTyped, defaultBoundaries
+            charTyped, boundaries
           ).also { searchProcessor = it }
         } else if (!processor.type(charTyped, tagger)) {
           return
@@ -197,6 +199,12 @@ class Session(private val editor: Editor) {
    * See [JumpModeTracker.toggle]
    */
   fun toggleJumpMode(newMode: JumpMode) {
+    jumpMode = jumpModeTracker.toggle(newMode)
+  }
+
+  @ExternalUsage
+  fun toggleJumpMode(newMode: JumpMode, boundaries: Boundaries) {
+    this.boundaries = this.boundaries.intersection(boundaries)
     jumpMode = jumpModeTracker.toggle(newMode)
   }
 
