@@ -46,7 +46,7 @@ abstract class BaseTest: BasePlatformTestCase() {
 
   fun String.executeQuery(query: String) = myFixture.run {
     makeEditor(this@executeQuery)
-    testAction(AceAction.ActivateOrCycleMode)
+    testAction(AceAction.ActivateOrCycleMode())
     typeAndWaitForResults(query)
   }
 
