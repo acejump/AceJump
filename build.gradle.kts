@@ -59,11 +59,10 @@ repositories {
 }
 
 intellij {
-  version = "211.6693-EAP-CANDIDATE-SNAPSHOT"
+  version = "2021.1"
   pluginName = "AceJump"
   updateSinceUntilBuild = false
   setPlugins("java")
-
 }
 
 group = "org.acejump"
