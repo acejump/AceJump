@@ -43,32 +43,32 @@ sealed class AceAction: DumbAwareAction() {
   /**
    * Initiates an AceJump session in the first [JumpMode], or cycles to the next [JumpMode] as defined in configuration.
    */
-  object ActivateOrCycleMode: AceAction() {
+  class ActivateOrCycleMode: AceAction() {
     override fun invoke(session: Session) = session.cycleNextJumpMode()
   }
 
   /**
    * Initiates an AceJump session in the last [JumpMode], or cycles to the previous [JumpMode] as defined in configuration.
    */
-  object ActivateOrReverseCycleMode: AceAction() {
+  class ActivateOrReverseCycleMode: AceAction() {
     override fun invoke(session: Session) = session.cyclePreviousJumpMode()
   }
 
   // @formatter:off
 
-  object ToggleJumpMode        : BaseToggleJumpModeAction(JUMP)
-  object ToggleJumpEndMode     : BaseToggleJumpModeAction(JUMP_END)
-  object ToggleTargetMode      : BaseToggleJumpModeAction(TARGET)
-  object ToggleDeclarationMode : BaseToggleJumpModeAction(DEFINE)
+  class ToggleJumpMode        : BaseToggleJumpModeAction(JUMP)
+  class ToggleJumpEndMode     : BaseToggleJumpModeAction(JUMP_END)
+  class ToggleTargetMode      : BaseToggleJumpModeAction(TARGET)
+  class ToggleDeclarationMode : BaseToggleJumpModeAction(DEFINE)
 
 
-  object StartAllWordsMode          : BaseRegexSearchAction(ALL_WORDS, WHOLE_FILE)
-  object StartAllWordsBackwardsMode : BaseRegexSearchAction(ALL_WORDS, BEFORE_CARET)
-  object StartAllWordsForwardMode   : BaseRegexSearchAction(ALL_WORDS, AFTER_CARET)
-  object StartAllLineStartsMode     : BaseRegexSearchAction(LINE_STARTS, WHOLE_FILE)
-  object StartAllLineEndsMode       : BaseRegexSearchAction(LINE_ENDS, WHOLE_FILE)
-  object StartAllLineIndentsMode    : BaseRegexSearchAction(LINE_INDENTS, WHOLE_FILE)
-  object StartAllLineMarksMode      : BaseRegexSearchAction(LINE_ALL_MARKS, WHOLE_FILE)
+  class StartAllWordsMode          : BaseRegexSearchAction(ALL_WORDS, WHOLE_FILE)
+  class StartAllWordsBackwardsMode : BaseRegexSearchAction(ALL_WORDS, BEFORE_CARET)
+  class StartAllWordsForwardMode   : BaseRegexSearchAction(ALL_WORDS, AFTER_CARET)
+  class StartAllLineStartsMode     : BaseRegexSearchAction(LINE_STARTS, WHOLE_FILE)
+  class StartAllLineEndsMode       : BaseRegexSearchAction(LINE_ENDS, WHOLE_FILE)
+  class StartAllLineIndentsMode    : BaseRegexSearchAction(LINE_INDENTS, WHOLE_FILE)
+  class StartAllLineMarksMode      : BaseRegexSearchAction(LINE_ALL_MARKS, WHOLE_FILE)
 
   // @formatter:on
 }

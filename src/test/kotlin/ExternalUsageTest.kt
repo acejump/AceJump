@@ -1,7 +1,12 @@
+import com.intellij.openapi.editor.Editor
 import junit.framework.TestCase
-import org.acejump.boundaries.StandardBoundaries.*
-import org.acejump.search.Pattern.*
-import org.acejump.session.*
+import org.acejump.boundaries.Boundaries
+import org.acejump.boundaries.EditorOffsetCache
+import org.acejump.boundaries.StandardBoundaries.WHOLE_FILE
+import org.acejump.input.JumpMode
+import org.acejump.search.Pattern.ALL_WORDS
+import org.acejump.session.AceJumpListener
+import org.acejump.session.SessionManager
 import org.acejump.test.util.BaseTest
 
 /**
@@ -45,5 +50,25 @@ class ExternalUsageTest: BaseTest() {
       .startRegexSearch("[aeiou]+", WHOLE_FILE)
 
     TestCase.assertEquals(8, session.tags.size)
+  }
+
+  fun `test external jump with bounds`() {
+    makeEditor("test word and word usage")
+
+    SessionManager.start(myFixture.editor)
+      .toggleJumpMode(JumpMode.JUMP, object : Boundaries {
+        override fun getOffsetRange(editor: Editor, cache: EditorOffsetCache): IntRange {
+          return 14..18
+        }
+
+        override fun isOffsetInside(editor: Editor, offset: Int, cache: EditorOffsetCache): Boolean {
+          return offset in 14..18
+        }
+      })
+
+    typeAndWaitForResults("word")
+
+    TestCase.assertEquals(1, session.tags.size)
+    TestCase.assertEquals(14, session.tags.single().value)
   }
 }

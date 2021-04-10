@@ -73,7 +73,7 @@ class AceTest : BaseTest() {
   fun `test words before caret action`() {
     makeEditor("test words <caret> before caret is two")
 
-    takeAction(AceAction.StartAllWordsBackwardsMode)
+    takeAction(AceAction.StartAllWordsBackwardsMode())
 
     assertEquals(2, session.tags.size)
   }
@@ -81,7 +81,7 @@ class AceTest : BaseTest() {
   fun `test words after caret action`() {
     makeEditor("test words <caret> after caret is four")
 
-    takeAction(AceAction.StartAllWordsForwardMode)
+    takeAction(AceAction.StartAllWordsForwardMode())
 
     assertEquals(4, session.tags.size)
   }
@@ -89,7 +89,7 @@ class AceTest : BaseTest() {
   fun `test word mode`() {
     makeEditor("test word action")
 
-    takeAction(AceAction.StartAllWordsMode)
+    takeAction(AceAction.StartAllWordsMode())
 
     assertEquals(3, session.tags.size)
 
@@ -101,7 +101,7 @@ class AceTest : BaseTest() {
   fun `test target mode`() {
     "<caret>test target action".search("target")
 
-    takeAction(AceAction.ToggleTargetMode)
+    takeAction(AceAction.ToggleTargetMode())
     typeAndWaitForResults(session.tags[0].key)
 
     myFixture.checkResult("test <selection>target<caret></selection> action")
@@ -110,7 +110,7 @@ class AceTest : BaseTest() {
   fun `test line mode`() {
     makeEditor("    test\n    three\n    lines\n")
 
-    takeAction(AceAction.StartAllLineMarksMode)
+    takeAction(AceAction.StartAllLineMarksMode())
 
     assertEquals(8, session.tags.size) // last empty line does not count
   }
@@ -120,7 +120,7 @@ class AceTest : BaseTest() {
 
     "test 拼音 selection".search("py")
 
-    takeAction(AceAction.ToggleTargetMode)
+    takeAction(AceAction.ToggleTargetMode())
 
     typeAndWaitForResults(session.tags[0].key)
 
@@ -131,7 +131,7 @@ class AceTest : BaseTest() {
   fun `ignore test a word that is difficult to tag`() {
     makeEditor("aaCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")
 
-    takeAction(AceAction.ActivateOrCycleMode)
+    takeAction(AceAction.ActivateOrCycleMode())
 
     typeAndWaitForResults("c")
 
