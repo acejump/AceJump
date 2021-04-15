@@ -135,7 +135,6 @@ AceJump is supported by community members like you. Contributions are highly wel
 If you would like to [contribute](https://github.com/acejump/AceJump/pulls?q=is%3Apr), here are a few of the ways you can help improve AceJump:
 
 * [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
-* [Add option to place the caret after the search text](https://github.com/acejump/AceJump/issues/225)
 * [Support user-configurable keyboard layouts](https://github.com/acejump/AceJump/issues/172)
 * [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/217)
 * [Animated documentation](https://github.com/acejump/AceJump/issues/145)
