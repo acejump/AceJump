@@ -135,13 +135,13 @@ AceJump is supported by community members like you. Contributions are highly wel
 If you would like to [contribute](https://github.com/acejump/AceJump/pulls?q=is%3Apr), here are a few of the ways you can help improve AceJump:
 
 * [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
+* [Colour scheme improvements](https://github.com/acejump/AceJump/issues/331)
+* [Add action to repeat last search](https://github.com/acejump/AceJump/issues/316)
 * [Support user-configurable keyboard layouts](https://github.com/acejump/AceJump/issues/172)
-* [Speed up tagging on large files](https://github.com/acejump/AceJump/issues/217)
+* [Add configurable RegEx modes](https://github.com/acejump/AceJump/issues/215)
 * [Animated documentation](https://github.com/acejump/AceJump/issues/145)
 * [Display current search text](https://github.com/acejump/AceJump/issues/227)
-* [Support for full screen tagging](https://github.com/acejump/AceJump/issues/144)
 * [Fold text between matches](https://github.com/acejump/AceJump/issues/255)
-* [Multi-platform support](https://github.com/acejump/AceJump/issues/229)
 
 To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -PluginDev [-x test]`.
 
