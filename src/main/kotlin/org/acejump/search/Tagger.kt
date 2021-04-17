@@ -53,7 +53,8 @@ internal class Tagger(private val editor: Editor) {
 
     if (!isRegex) {
       for (entry in tagMap.entries)
-        if (entry solves queryText) return TaggingResult.Jump(entry.value)
+        if (entry solves queryText)
+          return TaggingResult.Jump(query = queryText.substringBefore(entry.key), tag = entry.key, offset = entry.value)
 
       if (queryText.length == 1) removeResultsWithOverlappingTags(results)
     }

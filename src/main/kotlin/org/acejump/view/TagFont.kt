@@ -9,7 +9,7 @@ import java.awt.FontMetrics
 /**
  * Stores font metrics for aligning and rendering [Tag]s.
  */
-internal class TagFont(editor: Editor) {
+class TagFont(editor: Editor) {
   val tagFont: Font = editor.colorsScheme.getFont(BOLD)
   val tagCharWidth = editor.component.getFontMetrics(tagFont).charWidth('W')
 

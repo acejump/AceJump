@@ -2,6 +2,7 @@ package org.acejump.session
 
 import com.intellij.openapi.editor.Editor
 import org.acejump.ExternalUsage
+import org.acejump.search.TaggingResult
 
 /**
  * Manages active [Session]s in [Editor]s. There may only be
@@ -35,8 +36,9 @@ object SessionManager {
    * Ends the active [Session] in the specified [Editor],
    * or does nothing if the [Editor] has no active session.
    */
-  fun end(editor: Editor) = sessions.remove(editor)?.dispose() ?: Unit
+  fun end(editor: Editor, taggingResult: TaggingResult?) =
+    sessions.remove(editor)?.dispose(taggingResult) ?: Unit
 
   private fun cleanup() = sessions.keys.filter { it.isDisposed }
-    .forEach { disposedEditor -> sessions.remove(disposedEditor)?.dispose() }
+    .forEach { disposedEditor -> sessions.remove(disposedEditor)?.dispose(null) }
 }

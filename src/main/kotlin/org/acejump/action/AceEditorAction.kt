@@ -4,9 +4,7 @@ import com.intellij.openapi.actionSystem.DataContext
 import com.intellij.openapi.editor.Caret
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler
-import org.acejump.boundaries.StandardBoundaries
 import org.acejump.boundaries.StandardBoundaries.*
-import org.acejump.search.Pattern
 import org.acejump.search.Pattern.*
 import org.acejump.session.Session
 import org.acejump.session.SessionManager

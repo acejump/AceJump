@@ -12,7 +12,6 @@ import org.acejump.action.TagJumper
 import org.acejump.action.TagVisitor
 import org.acejump.boundaries.Boundaries
 import org.acejump.boundaries.EditorOffsetCache
-import org.acejump.boundaries.StandardBoundaries
 import org.acejump.boundaries.StandardBoundaries.*
 import org.acejump.config.AceConfig
 import org.acejump.input.EditorKeyListener
@@ -126,7 +125,7 @@ class Session(private val editor: Editor) {
       is TaggingResult.Jump -> {
         tagJumper.jump(result.offset, shiftMode)
         tagCanvas.removeMarkers()
-        end()
+        end(result)
       }
 
       is TaggingResult.Mark -> {
@@ -217,12 +216,14 @@ class Session(private val editor: Editor) {
   /**
    * See [TagVisitor.visitNext]. If there are no tags, nothing happens.
    */
-  fun visitNextTag() = if (tagVisitor?.visitNext() == true) end() else Unit
+  fun visitNextTag() =
+    if (tagVisitor?.visitNext() == true) end() else Unit
 
   /**
    * Ends this session.
    */
-  fun end() = SessionManager.end(editor)
+  fun end(taggingResult: TaggingResult? = null) =
+    SessionManager.end(editor, taggingResult)
 
   /**
    * Clears any currently active search, tags, and highlights.
@@ -239,13 +240,16 @@ class Session(private val editor: Editor) {
    * Should only be used from [SessionManager] to dispose a
    * successfully ended session.
    */
-  internal fun dispose() {
+  internal fun dispose(taggingResult: TaggingResult?) {
     tagger = Tagger(editor)
     EditorKeyListener.detach(editor)
     tagCanvas.unbind()
     textHighlighter.reset()
     EditorCache.invalidate()
-    listeners.forEach(AceJumpListener::finished)
+
+    val (tag, query) = (taggingResult as TaggingResult.Jump?)
+      .let { it?.tag to it?.query }
+    listeners.forEach { it.finished(tag, query) }
 
     if (!editor.isDisposed) {
       originalSettings.restore(editor)

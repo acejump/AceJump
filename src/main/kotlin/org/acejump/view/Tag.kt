@@ -17,7 +17,7 @@ import kotlin.math.max
 /**
  * Describes a 1 or 2 character shortcut that points to a specific character in the editor.
  */
-internal class Tag(
+class Tag(
   private val tag: String,
   val offsetL: Int,
   val offsetR: Int,

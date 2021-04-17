@@ -1,5 +1,5 @@
 package org.acejump.session
 
 interface AceJumpListener {
-  fun finished()
+  fun finished(mark: String?, query: String?)
 }
