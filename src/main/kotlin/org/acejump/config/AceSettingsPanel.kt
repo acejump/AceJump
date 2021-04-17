@@ -63,9 +63,9 @@ internal class AceSettingsPanel {
     }
 
     titledRow("Modes") {
-      row("Cycle order:") {
-        cell(isVerticalFlow = false, isFullWidth = false) {
-          cycleModeCombo1()
+      row("Cycle order:") { cell { cycleModeCombo1() } }
+      row("") {
+        cell(isVerticalFlow = true) {
           cycleModeCombo2()
           cycleModeCombo3()
           cycleModeCombo4()
