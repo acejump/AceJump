@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 3.7.1
+- Fix settings display issue, [#363](https://github.com/acejump/AceJump/issues/363)
+- Update AceJump extension API to include tag information, [#357](https://github.com/acejump/AceJump/pull/357)
+- Allow defining jump mode with boundaries, [#358](https://github.com/acejump/AceJump/pull/358)
+- Use Kotlin classes for actions, [#359](https://github.com/acejump/AceJump/pull/359)
+- Thanks to @AlexPl292 for the PRs!
+
 ## 3.7.0
 - Improvements to tag latency
 - Redesign settings panel
