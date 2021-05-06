@@ -134,6 +134,7 @@ AceJump is supported by community members like you. Contributions are highly wel
 
 If you would like to [contribute](https://github.com/acejump/AceJump/pulls?q=is%3Apr), here are a few of the ways you can help improve AceJump:
 
+* [Support for Japanese](https://github.com/acejump/AceJump/issues/368)
 * [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
 * [Colour scheme improvements](https://github.com/acejump/AceJump/issues/331)
 * [Add action to repeat last search](https://github.com/acejump/AceJump/issues/316)
