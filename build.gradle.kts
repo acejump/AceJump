@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.5.0-RC"
-  id("org.jetbrains.intellij") version "0.7.2"
+  kotlin("jvm") version "1.5.0"
+  id("org.jetbrains.intellij") version "0.7.3"
   id("org.jetbrains.changelog") version "1.1.2"
   id("com.github.ben-manes.versions") version "0.38.0"
 }
@@ -46,16 +46,13 @@ changelog {
   unreleasedTerm = "Unreleased"
 }
 
+repositories.mavenCentral()
+
 dependencies {
   // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
   compileOnly(kotlin("stdlib-jdk8"))
-  // https://github.com/promeG/TinyPinyin
-  implementation("com.github.promeg:tinypinyin:2.0.3")
-}
-
-repositories {
-  mavenCentral()
-  jcenter()
+  // https://github.com/promeG/TinyPinyin/issues/58
+  implementation("io.github.biezhi:TinyPinyin:2.0.3.RELEASE")
 }
 
 intellij {
