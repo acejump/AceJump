@@ -1,35 +1,36 @@
 package org.acejump.search
 
+import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.HashBiMap
 import com.intellij.openapi.editor.Editor
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import it.unimi.dsi.fastutil.ints.IntList
 import org.acejump.ExternalUsage
 import org.acejump.boundaries.EditorOffsetCache
-import org.acejump.boundaries.StandardBoundaries
 import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
 import org.acejump.immutableText
 import org.acejump.input.KeyLayoutCache.allPossibleTags
 import org.acejump.isWordPart
 import org.acejump.matchesAt
-import org.acejump.view.Tag
+import org.acejump.view.TagMarker
 import java.util.AbstractMap.SimpleImmutableEntry
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.math.min
 
 /**
  * Assigns tags to search occurrences, updates them when the search query changes, and requests a jump if the search query matches a tag.
+ * The ordering of [editors] may be used to prioritize tagging editors earlier in the list in case of conflicts.
  */
-internal class Tagger(private val editor: Editor) {
-  private var tagMap = HashBiMap.create<String, Int>()
-
+internal class Tagger(private val editors: List<Editor>) {
+  private var tagMap = HashBiMap.create<String, Tag>()
   val hasTags
     get() = tagMap.isNotEmpty()
 
   @ExternalUsage
   val tags
-    get() = tagMap.map { SimpleImmutableEntry(it.key, it.value) }.sortedBy { it.value }
-
+    get() = tagMap.map { SimpleImmutableEntry(it.key, it.value) }.sortedBy { it.value.offset }
+  
   /**
    * Removes all markers, allowing them to be regenerated from scratch.
    */
@@ -45,24 +46,31 @@ internal class Tagger(private val editor: Editor) {
    *
    * Note that the [results] collection will be mutated.
    */
-  fun markOrJump(query: SearchQuery, results: IntList): TaggingResult {
+  fun markOrJump(query: SearchQuery, results: Map<Editor, IntList>): TaggingResult {
     val isRegex = query is SearchQuery.RegularExpression
     val queryText = if (isRegex) " ${query.rawText}" else query.rawText[0] + query.rawText.drop(1).toLowerCase()
 
     val availableTags = allPossibleTags.filter { !queryText.endsWith(it[0]) && it !in tagMap }
 
     if (!isRegex) {
-      for (entry in tagMap.entries)
-        if (entry solves queryText)
-          return TaggingResult.Jump(query = queryText.substringBefore(entry.key), tag = entry.key, offset = entry.value)
-
-      if (queryText.length == 1) removeResultsWithOverlappingTags(results)
+      for (entry in tagMap.entries) {
+        if (entry solves queryText) {
+          return TaggingResult.Jump(query = queryText.substringBefore(entry.key), mark = entry.key, tag = entry.value)
+        }
+      }
+      
+      if (queryText.length == 1) {
+        for ((editor, offsets) in results) {
+          removeResultsWithOverlappingTags(editor, offsets)
+        }
+      }
     }
 
     if (!isRegex || tagMap.isEmpty())
       tagMap = assignTagsAndMerge(results, availableTags, query, queryText)
 
-    return TaggingResult.Mark(createTagMarkers(results, query.rawText.ifEmpty { null }))
+    val resultTags = results.flatMap { (editor, offsets) -> offsets.map { Tag(editor, it) } }
+    return TaggingResult.Mark(createTagMarkers(resultTags, query.rawText.ifEmpty { null }))
   }
 
   /**
@@ -70,97 +78,115 @@ internal class Tagger(private val editor: Editor) {
    * the existing compatible tags.
    */
   private fun assignTagsAndMerge(
-    results: IntList,
+    results: Map<Editor, IntList>,
     availableTags: List<String>,
     query: SearchQuery,
     queryText: String
-  ): HashBiMap<String, Int> {
-    val cache = EditorOffsetCache.new()
+  ): HashBiMap<String, Tag> {
+    val caches = results.keys.associateWith { EditorOffsetCache.new() }
 
-    results.sort { a, b ->
-      val aIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, a, cache)
-      val bIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, b, cache)
+    for ((editor, offsets) in results) {
+      val cache = caches.getValue(editor)
+      
+      offsets.sort { a, b ->
+        val aIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, a, cache)
+        val bIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, b, cache)
 
       when {
         aIsVisible && !bIsVisible -> -1
         bIsVisible && !aIsVisible -> 1
-        else -> 0
+        else -> 0}
       }
     }
 
-    val allAssignedTags = mutableMapOf<String, Int>()
-    val oldCompatibleTags = tagMap.filter { isTagCompatibleWithQuery(it.key, it.value, queryText) || it.value in results }
-    val vacantResults: IntList
-
+    val allAssignedTags = mutableMapOf<String, Tag>()
+    val oldCompatibleTags = tagMap.filter { (mark, tag) ->
+      isTagCompatibleWithQuery(mark, tag, queryText) || results[tag.editor]?.contains(tag.offset) == true
+    }
+    
+    val vacantResults: Map<Editor, IntList>
     if (oldCompatibleTags.isEmpty()) {
       vacantResults = results
     } else {
-      vacantResults = IntArrayList()
+      val vacant = mutableMapOf<Editor, IntList>()
+      
+      for ((editor, offsets) in results) {
+        val list = IntArrayList()
+        val iter = offsets.iterator()
+        
+        while (iter.hasNext()) {
+          val tag = Tag(editor, iter.nextInt())
 
-      val iter = results.iterator()
-      while (iter.hasNext()) {
-        val offset = iter.nextInt()
-
-        if (offset !in oldCompatibleTags.values) {
-          vacantResults.add(offset)
+        if (tag !in oldCompatibleTags.values) {
+            list.add(tag.offset)
+          }
         }
+        
+        vacant[editor] = list
       }
+      
+      vacantResults = vacant
     }
 
     allAssignedTags.putAll(oldCompatibleTags)
-    val newTags = Solver.solve(
-      editor, query, vacantResults,
-      results, availableTags, cache
-    )
-    allAssignedTags.putAll(newTags)
-
+    allAssignedTags.putAll(Solver.solve(editors, query, vacantResults, results, availableTags, caches))
+    
     return allAssignedTags.mapKeysTo(HashBiMap.create(allAssignedTags.size)) { (tag, _) ->
       // Avoid matching query - will trigger a jump.
       // TODO: lift this constraint.
       val queryEndsWith = queryText.endsWith(tag[0]) || queryText.endsWith(tag)
 
-      if (!queryEndsWith && canShortenTag(tag, allAssignedTags))
+      if (!queryEndsWith && canShortenTag(tag, allAssignedTags.keys))
         tag[0].toString()
       else
         tag
     }
   }
-
-  private infix fun Map.Entry<String, Int>.solves(query: String): Boolean =
-    query.endsWith(key, true) && isTagCompatibleWithQuery(key, value, query)
-
-  private fun isTagCompatibleWithQuery(tag: String, offset: Int, query: String): Boolean =
-    editor.immutableText.matchesAt(offset, getPlaintextPortion(query, tag), ignoreCase = true)
-
-  fun isQueryCompatibleWithTagAt(query: String, offset: Int): Boolean =
-    tagMap.inverse()[offset].let { it != null && isTagCompatibleWithQuery(it, offset, query) }
-
-  fun canQueryMatchAnyTag(query: String): Boolean =
-    tagMap.any { (tag, offset) ->
-    val tagPortion = getTagPortion(query, tag)
-    tagPortion.isNotEmpty() &&
-      tag.startsWith(tagPortion, ignoreCase = true) &&
-      isTagCompatibleWithQuery(tag, offset, query)
+  
+  private infix fun Map.Entry<String, Tag>.solves(query: String): Boolean {
+    return query.endsWith(key, true) && isTagCompatibleWithQuery(key, value, query)
+  }
+  
+  private fun isTagCompatibleWithQuery(marker: String, tag: Tag, query: String): Boolean {
+    return tag.editor.immutableText.matchesAt(tag.offset, getPlaintextPortion(query, marker), ignoreCase = true)
+  }
+  
+  fun isQueryCompatibleWithTagAt(query: String, tag: Tag): Boolean {
+    return tagMap.inverse()[tag].let { it != null && isTagCompatibleWithQuery(it, tag, query) }
+  }
+  
+  fun canQueryMatchAnyTag(query: String): Boolean {
+    return tagMap.any { (tag, offset) ->
+      val tagPortion = getTagPortion(query, tag)
+      tagPortion.isNotEmpty() && tag.startsWith(tagPortion, ignoreCase = true) && isTagCompatibleWithQuery(tag, offset, query)
+    }
   }
 
-  private fun removeResultsWithOverlappingTags(results: IntList) {
-    val iter = results.iterator()
+  private fun removeResultsWithOverlappingTags(editor: Editor, offsets: IntList) {
+    val iter = offsets.iterator()
     val chars = editor.immutableText
-
-    // Very uncommon, so slow removal is fine.
-    while (iter.hasNext())
-      if (!chars.canTagWithoutOverlap(iter.nextInt())) iter.remove()
-  }
-
-  private fun createTagMarkers(results: IntList, literalQueryText: String?) =
-    tagMap.inverse().let { tagMapInv ->
-      results.mapNotNull { index ->
-        tagMapInv[index]?.let { tag ->
-          Tag.create(editor, tag, index, literalQueryText)
-        }
+    
+    while (iter.hasNext()) {
+      if (!chars.canTagWithoutOverlap(iter.nextInt())) {
+        iter.remove() // Very uncommon, so slow removal is fine.
       }
     }
-
+  }
+  
+  private fun createTagMarkers(tags: Collection<Tag>, literalQueryText: String?): MutableMap<Editor, Collection<TagMarker>> {
+    val tagMapInv = tagMap.inverse()
+    val markers = ArrayListMultimap.create<Editor, TagMarker>(editors.size, min(tags.size, 50))
+    
+    for (tag in tags) {
+      val mark = tagMapInv[tag] ?: continue
+      val editor = tag.editor
+      val marker = TagMarker.create(editor, mark, tag.offset, literalQueryText)
+      markers.put(editor, marker)
+    }
+    
+    return markers.asMap()
+  }
+  
   private companion object {
     private fun CharSequence.canTagWithoutOverlap(loc: Int) = when {
       loc - 1 < 0 -> true
@@ -179,21 +205,21 @@ internal class Tagger(private val editor: Editor) {
       this.isWordPart xor other.isWordPart ||
         this.isWhitespace() xor other.isWhitespace()
 
-    private fun getPlaintextPortion(query: String, tag: String) = when {
-      query.endsWith(tag, true) -> query.dropLast(tag.length)
-      query.endsWith(tag.first(), true) -> query.dropLast(1)
+    private fun getPlaintextPortion(query: String, marker: String) = when {
+      query.endsWith(marker, true) -> query.dropLast(marker.length)
+      query.endsWith(marker.first(), true) -> query.dropLast(1)
       else -> query
     }
 
-    private fun getTagPortion(query: String, tag: String) = when {
-      query.endsWith(tag, true) -> query.takeLast(tag.length)
-      query.endsWith(tag.first(), true) -> query.takeLast(1)
+    private fun getTagPortion(query: String, marker: String) = when {
+      query.endsWith(marker, true) -> query.takeLast(marker.length)
+      query.endsWith(marker.first(), true) -> query.takeLast(1)
       else -> ""
     }
 
-    private fun canShortenTag(tag: String, tagMap: Map<String, Int>): Boolean {
-      for (other in tagMap.keys)
-        if (tag != other && tag[0] == other[0])
+    private fun canShortenTag(marker: String, markers: Collection<String>): Boolean {
+      for (other in markers)
+        if (marker != other && marker[0] == other[0])
           return false
 
       return true

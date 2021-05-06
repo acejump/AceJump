@@ -5,8 +5,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.CaretEvent
 import com.intellij.openapi.editor.event.CaretListener
 import org.acejump.boundaries.EditorOffsetCache
-import org.acejump.boundaries.StandardBoundaries
-import org.acejump.boundaries.StandardBoundaries.*
+import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Rectangle
@@ -18,8 +17,7 @@ import javax.swing.SwingUtilities
  * Holds all active tag markers and renders them on top of the editor.
  */
 internal class TagCanvas(private val editor: Editor): JComponent(), CaretListener {
-  private var markers: List<Tag>? = null
-
+  private var markers: Collection<TagMarker>? = null
   init {
     val contentComponent = editor.contentComponent
     contentComponent.add(this)
@@ -45,11 +43,11 @@ internal class TagCanvas(private val editor: Editor): JComponent(), CaretListene
    */
   override fun caretPositionChanged(event: CaretEvent) = repaint()
 
-  fun setMarkers(newMarkers: List<Tag>) {
-    markers = newMarkers
+  fun setMarkers(markers: Collection<TagMarker>) {
+    this.markers = markers
     repaint()
   }
-
+  
   fun removeMarkers() {
     markers = emptyList()
   }
@@ -61,13 +59,14 @@ internal class TagCanvas(private val editor: Editor): JComponent(), CaretListene
     super.paintChildren(g)
 
     val markers = markers ?: return
+    
+    (g as Graphics2D).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+    
     val font = TagFont(editor)
 
     val cache = EditorOffsetCache.new()
     val viewRange = VISIBLE_ON_SCREEN.getOffsetRange(editor, cache)
     val occupied = mutableListOf<Rectangle>()
-
-    (g as Graphics2D).setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
 
     // If there is a tag at the caret location, prioritize its rendering over
     // all other tags. This is helpful for seeing which tag is currently
@@ -77,7 +76,7 @@ internal class TagCanvas(private val editor: Editor): JComponent(), CaretListene
     // TODO: instead of immediately painting, we could calculate the layout
     //  of everything first, and then remove tags that interfere with
     //  the caret tag to avoid changing the alignment of the caret tag
-
+    
     val caretOffset = editor.caretModel.offset
     val caretMarker = markers.find { it.offsetL == caretOffset || it.offsetR == caretOffset }
     caretMarker?.paint(g, editor, cache, font, occupied)

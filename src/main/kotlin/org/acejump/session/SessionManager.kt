@@ -23,9 +23,18 @@ object SessionManager {
    * Starts a new [Session], or returns an existing [Session]
    * if the specified [Editor] already has one.
    */
-  fun start(editor: Editor): Session =
-    sessions.getOrPut(editor) { cleanup(); Session(editor) }
+  fun start(editor: Editor): Session = start(editor, listOf(editor))
 
+  /**
+   * Starts a new multi-editor [Session], or returns an existing [Session] if the specified main [Editor] already has one.
+   * The [mainEditor] is used for typing the search query and tag.
+   * The [jumpEditors] are all editors that will be searched and tagged. The list is ordered so that editors earlier in the list will be
+   * prioritized for tagging in case of conflicts.
+   */
+  fun start(mainEditor: Editor, jumpEditors: List<Editor>): Session {
+    return sessions.getOrPut(mainEditor) { cleanup(); Session(mainEditor, jumpEditors) }
+  }
+  
   /**
    * Returns the active [Session] in the specified [Editor],
    * or null if the [Editor] has no active session.
