@@ -2,11 +2,13 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.util.ui.UIUtil
 import junit.framework.TestCase
 import org.acejump.action.AceAction
-import org.acejump.boundaries.*
+import org.acejump.boundaries.Boundaries
+import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries.WHOLE_FILE
 import org.acejump.input.JumpMode
 import org.acejump.search.Pattern.ALL_WORDS
-import org.acejump.session.*
+import org.acejump.session.AceJumpListener
+import org.acejump.session.SessionManager
 import org.acejump.test.util.BaseTest
 
 /**
@@ -69,7 +71,7 @@ class ExternalUsageTest: BaseTest() {
     typeAndWaitForResults("word")
 
     TestCase.assertEquals(1, session.tags.size)
-    TestCase.assertEquals(14, session.tags.single().value)
+    TestCase.assertEquals(14, session.tags.single().value.offset)
   }
 
   fun `test listener query and mark`() {

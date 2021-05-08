@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.project.DumbAwareAction
+import com.intellij.util.IncorrectOperationException
 import org.acejump.boundaries.Boundaries
 import org.acejump.boundaries.StandardBoundaries.*
 import org.acejump.input.JumpMode
@@ -27,10 +28,14 @@ sealed class AceAction: DumbAwareAction() {
     val project = e.project
   
     if (project != null) {
-      val openEditors = FileEditorManagerEx.getInstanceEx(project).splitters.selectedEditors
-        .mapNotNull { (it as? TextEditor)?.editor }
-        .sortedBy { if (it === editor) 0 else 1 }
-      invoke(SessionManager.start(editor, openEditors))
+      try {
+        val openEditors = FileEditorManagerEx.getInstanceEx(project).splitters.selectedEditors
+          .mapNotNull { (it as? TextEditor)?.editor }
+          .sortedBy { if (it === editor) 0 else 1 }
+        invoke(SessionManager.start(editor, openEditors))
+      } catch (e: IncorrectOperationException) {
+        invoke(SessionManager.start(editor))
+      }
     }
     else {
       invoke(SessionManager.start(editor))
