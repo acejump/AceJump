@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## 3.8.0
+- Allow jumping between splitters in the editor, [#371](https://github.com/acejump/AceJump/pull/371)
+
 ## 3.7.1
 - Fix settings display issue, [#363](https://github.com/acejump/AceJump/issues/363)
 - Update AceJump extension API to include tag information, [#357](https://github.com/acejump/AceJump/pull/357)

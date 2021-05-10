@@ -39,7 +39,7 @@ tasks {
 }
 
 changelog {
-  version = "3.7.1"
+  version = "3.8.0"
   path = "${project.projectDir}/CHANGES.md"
   header = closure { "[${project.version}] - ${date()}" }
   itemPrefix = "-"
@@ -63,4 +63,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.7.1"
+version = "3.8.0"
