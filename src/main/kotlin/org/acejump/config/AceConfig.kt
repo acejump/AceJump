@@ -30,7 +30,7 @@ class AceConfig: PersistentStateComponent<AceSettings> {
     val tagForegroundColor get()  = settings.tagForegroundColor
     val tagBackgroundColor get()  = settings.tagBackgroundColor
     val searchWholeFile get()     = settings.searchWholeFile
-    val enablePinyin get()        = settings.enablePinyin
+    val mapToASCII get()        = settings.mapToASCII
     // @formatter:on
   }
 

@@ -134,7 +134,6 @@ AceJump is supported by community members like you. Contributions are highly wel
 
 If you would like to [contribute](https://github.com/acejump/AceJump/pulls?q=is%3Apr), here are a few of the ways you can help improve AceJump:
 
-* [Support for Japanese](https://github.com/acejump/AceJump/issues/368)
 * [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
 * [Colour scheme improvements](https://github.com/acejump/AceJump/issues/331)
 * [Add action to repeat last search](https://github.com/acejump/AceJump/issues/316)
@@ -165,7 +164,7 @@ AceJump is inspired by prior work, but adds several improvements, including:
 * **Line Mode**: Jump to the first, last, or first non-whitespace character of any line on-screen (<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>;</kbd>).
 * **Word Mode**: Jump to the first character of any visible word on-screen in two keystrokes or less.
 * **Declaration Mode**: Jump to the declaration of a token (if it is available) rather than the token itself.
-* **Pinyin support**: Pinyin search and selection, e.g. to search for "拼音", activate AceJump and type: <kbd>p</kbd><kbd>y</kbd>
+* **Unicode support**: Unicode search and selection, e.g. to search for "拼音", activate AceJump and type: <kbd>p</kbd><kbd>y</kbd>
 
 The following plugins have a similar UI for navigating text and web browsing:
 

@@ -4,6 +4,7 @@
 
 ## 3.8.0
 - Allow jumping between splitters in the editor, [#371](https://github.com/acejump/AceJump/pull/371)
+- Adds support for unicode search and selection, [#368](https://github.com/acejump/AceJump/issues/368)
 
 ## 3.7.1
 - Fix settings display issue, [#363](https://github.com/acejump/AceJump/issues/363)

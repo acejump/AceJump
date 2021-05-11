@@ -40,7 +40,7 @@ internal class AceSettingsPanel {
   private val tagForegroundColorWheel = ColorPanel()
   private val tagBackgroundColorWheel = ColorPanel()
   private val searchWholeFileCheckBox = JBCheckBox()
-  private val enablePinyinCheckBox = JBCheckBox()
+  private val mapToASCIICheckBox = JBCheckBox()
 
   init {
     tagCharsField.apply { font = Font("monospaced", font.style, font.size) }
@@ -88,7 +88,7 @@ internal class AceSettingsPanel {
       row("Minimum typed characters (1-10):") { short(minQueryLengthField) }
     }
     titledRow("Language Settings") {
-      row { short(enablePinyinCheckBox.apply { text = "Enable Pinyin selection" }) }
+      row { short(mapToASCIICheckBox.apply { text = "Map unicode to ASCII" }) }
     }
   }
 
@@ -109,7 +109,7 @@ internal class AceSettingsPanel {
   internal var tagForegroundColor by tagForegroundColorWheel
   internal var tagBackgroundColor by tagBackgroundColorWheel
   internal var searchWholeFile by searchWholeFileCheckBox
-  internal var enablePinyin by enablePinyinCheckBox
+  internal var mapToASCII by mapToASCIICheckBox
 
   internal var minQueryLengthInt
     get() = minQueryLength.toIntOrNull()?.coerceIn(1, 10)
@@ -133,7 +133,7 @@ internal class AceSettingsPanel {
     tagForegroundColor = settings.tagForegroundColor
     tagBackgroundColor = settings.tagBackgroundColor
     searchWholeFile = settings.searchWholeFile
-    enablePinyin = settings.enablePinyin
+    mapToASCII = settings.mapToASCII
   }
 
   // Removal pending support for https://youtrack.jetbrains.com/issue/KT-8575

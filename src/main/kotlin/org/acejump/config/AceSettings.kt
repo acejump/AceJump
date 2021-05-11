@@ -39,7 +39,7 @@ data class AceSettings(
 
   var searchWholeFile: Boolean = true,
 
-  var enablePinyin : Boolean = false
+  var mapToASCII : Boolean = false
 )
 
 internal class ColorConverter: Converter<Color>() {

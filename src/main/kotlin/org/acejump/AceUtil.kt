@@ -1,6 +1,6 @@
 package org.acejump
 
-import com.github.promeg.pinyinhelper.Pinyin
+import com.anyascii.AnyAscii
 import com.intellij.openapi.editor.Editor
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.acejump.config.AceConfig
@@ -26,7 +26,7 @@ object EditorCache {
   fun getText(editor: Editor): CharSequence {
     if (this.editor?.get() !== editor) {
       this.text = editor.document.immutableCharSequence
-        .let { if (AceConfig.enablePinyin) it.mapToPinyin() else it }
+        .let { if (AceConfig.mapToASCII) it.mapToASCII() else it }
       this.editor = WeakReference(editor)
     }
     
@@ -34,8 +34,8 @@ object EditorCache {
   }
 }
 
-private fun CharSequence.mapToPinyin() =
-  map { Pinyin.toPinyin(it).first() }.joinToString("")
+fun CharSequence.mapToASCII() =
+  map { AnyAscii.transliterate("$it").first() }.joinToString("")
 
 /**
  * Returns true if [this] contains [otherText] at the specified offset.

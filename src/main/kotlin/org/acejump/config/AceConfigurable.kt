@@ -27,7 +27,7 @@ class AceConfigurable: Configurable {
       panel.tagForegroundColor != settings.tagForegroundColor ||
       panel.tagBackgroundColor != settings.tagBackgroundColor ||
       panel.searchWholeFile != settings.searchWholeFile ||
-      panel.enablePinyin != settings.enablePinyin
+      panel.mapToASCII != settings.mapToASCII
 
   override fun apply() {
     settings.allowedChars = panel.allowedChars
@@ -45,7 +45,7 @@ class AceConfigurable: Configurable {
     panel.tagForegroundColor?.let { settings.tagForegroundColor = it }
     panel.tagBackgroundColor?.let { settings.tagBackgroundColor = it }
     settings.searchWholeFile = panel.searchWholeFile
-    settings.enablePinyin= panel.enablePinyin
+    settings.mapToASCII = panel.mapToASCII
     KeyLayoutCache.reset(settings)
   }
 

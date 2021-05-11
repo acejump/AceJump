@@ -46,13 +46,15 @@ changelog {
   unreleasedTerm = "Unreleased"
 }
 
-repositories.mavenCentral()
+repositories {
+  mavenCentral()
+  maven("https://jitpack.io")
+}
 
 dependencies {
   // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
   compileOnly(kotlin("stdlib-jdk8"))
-  // https://github.com/promeG/TinyPinyin/issues/58
-  implementation("io.github.biezhi:TinyPinyin:2.0.3.RELEASE")
+  implementation("com.anyascii:anyascii:0.2.0")
 }
 
 intellij {

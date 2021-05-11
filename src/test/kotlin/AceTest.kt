@@ -3,7 +3,6 @@ import com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_START_NEW_LINE
 import org.acejump.action.AceAction
 import org.acejump.config.AceConfig
 import org.acejump.test.util.BaseTest
-import org.junit.Ignore
 
 /**
  * Functional test cases and end-to-end performance tests.
@@ -115,8 +114,8 @@ class AceTest : BaseTest() {
     assertEquals(8, session.tags.size) // last empty line does not count
   }
 
-  fun `test pinyin selection`() {
-    AceConfig.settings.enablePinyin = true
+  fun `test chinese selection`() {
+    AceConfig.settings.mapToASCII = true
 
     "test 拼音 selection".search("py")
 
@@ -125,6 +124,18 @@ class AceTest : BaseTest() {
     typeAndWaitForResults(session.tags[0].key)
 
     myFixture.checkResult("test <selection>拼音<caret></selection> selection")
+  }
+
+  fun `test japanese selection`() {
+    AceConfig.settings.mapToASCII = true
+
+    "あみだにょらい".search("am")
+
+    takeAction(AceAction.ToggleTargetMode())
+
+    typeAndWaitForResults(session.tags[0].key)
+
+    myFixture.checkResult("<selection>あみだにょらい<caret></selection>")
   }
 
   // https://github.com/acejump/AceJump/issues/355
