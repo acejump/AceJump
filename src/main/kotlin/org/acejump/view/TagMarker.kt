@@ -4,7 +4,7 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.ui.ColorUtil
 import com.intellij.ui.scale.JBUIScale
 import org.acejump.boundaries.EditorOffsetCache
-import org.acejump.boundaries.StandardBoundaries.*
+import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
 import org.acejump.config.AceConfig
 import org.acejump.countMatchingCharacters
 import org.acejump.immutableText
@@ -17,7 +17,7 @@ import kotlin.math.max
 /**
  * Describes a 1 or 2 character shortcut that points to a specific character in the editor.
  */
-class Tag(
+class TagMarker(
   private val tag: String,
   val offsetL: Int,
   val offsetR: Int,
@@ -33,7 +33,7 @@ class Tag(
      * Creates a new tag, precomputing some information about the nearby characters to reduce rendering overhead. If the last typed
      * character ([literalQueryText]) matches the first [tag] character, only the second [tag] character is displayed.
      */
-    fun create(editor: Editor, tag: String, offset: Int, literalQueryText: String?): Tag {
+    fun create(editor: Editor, tag: String, offset: Int, literalQueryText: String?): TagMarker {
       val chars = editor.immutableText
       val matching = literalQueryText?.let { chars.countMatchingCharacters(offset, it) } ?: 0
       val hasSpaceRight = offset + 1 >= chars.length || chars[offset + 1].isWhitespace()
@@ -43,7 +43,7 @@ class Tag(
       else
         tag.toUpperCase()
 
-      return Tag(displayedTag, offset, offset + max(0, matching - 1), tag.length - displayedTag.length, hasSpaceRight)
+      return TagMarker(displayedTag, offset, offset + max(0, matching - 1), tag.length - displayedTag.length, hasSpaceRight)
     }
 
     /**

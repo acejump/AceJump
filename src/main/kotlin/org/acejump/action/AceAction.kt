@@ -2,9 +2,11 @@ package org.acejump.action
 
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
+import com.intellij.openapi.fileEditor.TextEditor
+import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.project.DumbAwareAction
+import com.intellij.util.IncorrectOperationException
 import org.acejump.boundaries.Boundaries
-import org.acejump.boundaries.StandardBoundaries
 import org.acejump.boundaries.StandardBoundaries.*
 import org.acejump.input.JumpMode
 import org.acejump.input.JumpMode.*
@@ -21,9 +23,25 @@ sealed class AceAction: DumbAwareAction() {
     action.presentation.isEnabled = action.getData(EDITOR) != null
   }
 
-  final override fun actionPerformed(e: AnActionEvent) =
-    e.getData(EDITOR)?.let { invoke(SessionManager.start(it)) } ?: Unit
-
+  final override fun actionPerformed(e: AnActionEvent) {
+    val editor = e.getData(EDITOR) ?: return
+    val project = e.project
+  
+    if (project != null) {
+      try {
+        val openEditors = FileEditorManagerEx.getInstanceEx(project).splitters.selectedEditors
+          .mapNotNull { (it as? TextEditor)?.editor }
+          .sortedBy { if (it === editor) 0 else 1 }
+        invoke(SessionManager.start(editor, openEditors))
+      } catch (e: IncorrectOperationException) {
+        invoke(SessionManager.start(editor))
+      }
+    }
+    else {
+      invoke(SessionManager.start(editor))
+    }
+  }
+  
   abstract operator fun invoke(session: Session)
 
   /**

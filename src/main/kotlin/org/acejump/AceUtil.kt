@@ -2,7 +2,9 @@ package org.acejump
 
 import com.github.promeg.pinyinhelper.Pinyin
 import com.intellij.openapi.editor.Editor
+import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.acejump.config.AceConfig
+import java.lang.ref.WeakReference
 
 /**
  * This annotation is a marker which means that the annotated function is
@@ -18,17 +20,18 @@ annotation class ExternalUsage
 val Editor.immutableText get() = EditorCache.getText(this)
 
 object EditorCache {
-  private var stale = true
   private var text: CharSequence = ""
+  private var editor: WeakReference<Editor>? = null
 
-  fun invalidate() { stale = true }
-
-  fun getText(editor: Editor) =
-    if (stale)
-      editor.document.immutableCharSequence
+  fun getText(editor: Editor): CharSequence {
+    if (this.editor?.get() !== editor) {
+      this.text = editor.document.immutableCharSequence
         .let { if (AceConfig.enablePinyin) it.mapToPinyin() else it }
-        .also { text = it; stale = false }
-    else text
+      this.editor = WeakReference(editor)
+    }
+    
+    return text
+  }
 }
 
 private fun CharSequence.mapToPinyin() =
@@ -102,4 +105,14 @@ inline fun CharSequence.wordEndPlus(
   if (end < length - 1 && isPartOfWord(this[end + 1])) ++end
 
   return end
+}
+
+fun MutableMap<Editor, IntArrayList>.clone(): MutableMap<Editor, IntArrayList> {
+  val clone = HashMap<Editor, IntArrayList>(size)
+  
+  for ((editor, offsets) in this) {
+    clone[editor] = offsets.clone()
+  }
+  
+  return clone
 }

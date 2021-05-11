@@ -1,10 +1,10 @@
 package org.acejump.action
 
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.ScrollType
 import com.intellij.openapi.editor.ScrollType.RELATIVE
 import com.intellij.openapi.editor.SelectionModel
 import org.acejump.search.SearchProcessor
+import org.acejump.search.Tag
 import kotlin.math.abs
 
 /**
@@ -34,7 +34,7 @@ internal class TagVisitor(private val editor: Editor, private val searchProcesso
    */
   fun scrollToClosest() {
     val caret = editor.caretModel.offset
-    val results = searchProcessor.results.takeUnless { it.isEmpty } ?: return
+    val results = searchProcessor.results[editor].takeUnless { it.isNullOrEmpty() } ?: return
     val index = results.binarySearch(caret).let { if (it < 0) -it - 1 else it }
 
     val targetOffset = listOfNotNull(
@@ -49,7 +49,7 @@ internal class TagVisitor(private val editor: Editor, private val searchProcesso
   }
 
   private inline fun visit(caretPosition: SelectionModel.() -> Int, indexModifier: (Int) -> Int): Boolean {
-    val results = searchProcessor.results.takeUnless { it.isEmpty } ?: return false
+    val results = searchProcessor.results[editor].takeUnless { it.isNullOrEmpty() } ?: return false
     val nextIndex = indexModifier(results.binarySearch(caretPosition(editor.selectionModel)))
 
     val targetOffset = results.getInt(
@@ -62,8 +62,8 @@ internal class TagVisitor(private val editor: Editor, private val searchProcesso
 
     val onlyResult = results.size == 1
 
-    if (onlyResult) tagJumper.jump(targetOffset, shiftMode = false)
-    else tagJumper.visit(targetOffset)
+    if (onlyResult) tagJumper.jump(Tag(editor, targetOffset), shiftMode = false, isCrossEditor = false)
+    else tagJumper.visit(Tag(editor, targetOffset))
 
     editor.scrollingModel.scrollToCaret(RELATIVE)
     return onlyResult

@@ -1,20 +1,16 @@
 package org.acejump.search
 
 import com.intellij.openapi.editor.Editor
-import it.unimi.dsi.fastutil.ints.*
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import it.unimi.dsi.fastutil.ints.IntList
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet
 import org.acejump.boundaries.EditorOffsetCache
-import org.acejump.boundaries.StandardBoundaries
 import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
 import org.acejump.config.AceConfig
 import org.acejump.immutableText
 import org.acejump.input.KeyLayoutCache
 import org.acejump.isWordPart
-import org.acejump.session.Session
 import org.acejump.wordEndPlus
 import java.util.*
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 import kotlin.math.max
 
 /*
@@ -55,49 +51,59 @@ import kotlin.math.max
  */
 
 internal class Solver private constructor(
-  private val editor: Editor,
+  private val editorPriority: List<Editor>,
   private val queryLength: Int,
-  private val newResults: IntList,
-  private val allResults: IntList
+  private val newResults: Map<Editor, IntList>,
+  private val allResults: Map<Editor, IntList>
 ) {
   companion object {
     fun solve(
-      editor: Editor, query: SearchQuery,
-      newResults: IntList, allResults: IntList,
-      tags: List<String>, cache: EditorOffsetCache
-    ): Map<String, Int> =
-      Solver(editor, max(1, query.rawText.length), newResults, allResults)
-        .map(tags, cache)
+      editorPriority: List<Editor>,
+      query: SearchQuery,
+      newResults: Map<Editor, IntList>,
+      allResults: Map<Editor, IntList>,
+      tags: List<String>,
+      caches: Map<Editor, EditorOffsetCache>
+    ): Map<String, Tag> =
+      Solver(editorPriority, max(1, query.rawText.length), newResults, allResults)
+        .map(tags, caches)
   }
 
-  private var newTags = Object2IntOpenHashMap<String>(KeyLayoutCache.allPossibleTags.size)
-  private val newTagIndices = IntOpenHashSet()
+  private var newTags = HashMap<String, Tag>(KeyLayoutCache.allPossibleTags.size)
+  private val newTagIndices = newResults.keys.associateWith { IntOpenHashSet() }
 
   private var allWordFragments =
-    HashSet<String>(allResults.size).apply {
-      val iter = allResults.iterator()
-      while (iter.hasNext()) forEachWordFragment(iter.nextInt()) { add(it) }
+    HashSet<String>(allResults.values.sumBy(IntList::size)).apply {
+      for ((editor, offsets) in allResults) {
+        val iter = offsets.iterator()
+        while (iter.hasNext()) forEachWordFragment(editor, iter.nextInt()) { add(it) }
+      }
     }
 
-  fun map(availableTags: List<String>, cache: EditorOffsetCache): Map<String, Int> {
-    val eligibleSitesByTag = HashMap<String, IntList>(100)
+  fun map(availableTags: List<String>, caches: Map<Editor, EditorOffsetCache>): Map<String, Tag> {
+    val eligibleSitesByTag = HashMap<String, MutableList<Tag>>(100)
     val tagsByFirstLetter = availableTags.groupBy { it[0] }
-
-    val iter = newResults.iterator()
-    while (iter.hasNext()) {
-      val site = iter.nextInt()
-
-      for ((firstLetter, tags) in tagsByFirstLetter.entries)
-        if (canTagBeginWithChar(site, firstLetter))
-          for (tag in tags)
-            eligibleSitesByTag.getOrPut(tag) { IntArrayList(10) }.add(site)
+    
+    for ((editor, offsets) in newResults) {
+      val iter = offsets.iterator()
+      while (iter.hasNext()) {
+        val site = iter.nextInt()
+        
+        for ((firstLetter, tags) in tagsByFirstLetter.entries) {
+          if (canTagBeginWithChar(editor, site, firstLetter)) {
+            for (tag in tags) {
+              eligibleSitesByTag.getOrPut(tag, ::mutableListOf).add(Tag(editor, site))
+            }
+          }
+        }
+      }
     }
-
-    val matchingSites = HashMap<IntList, IntArray>()
+    
+    val matchingSites = HashMap<MutableList<Tag>, MutableList<Tag>>()
     // Keys are guaranteed to be from a single collection.
-    val matchingSitesAsArrays = IdentityHashMap<String, IntArray>()
-
-    val siteOrder = siteOrder(cache)
+    val matchingSitesAsArrays = IdentityHashMap<String, MutableList<Tag>>()
+    
+    val siteOrder = siteOrder(caches)
     val tagOrder = KeyLayoutCache.tagOrder
       .thenComparingInt { eligibleSitesByTag.getValue(it).size }
       .thenBy(AceConfig.layout.priority(String::last))
@@ -106,16 +112,17 @@ internal class Solver private constructor(
       sortWith(tagOrder)
     }
 
-    for ((key, value) in eligibleSitesByTag.entries) {
-      matchingSitesAsArrays[key] = matchingSites.getOrPut(value) {
-        value.toIntArray().apply { IntArrays.mergeSort(this, siteOrder) }
+    for ((mark, tags) in eligibleSitesByTag.entries) {
+      matchingSitesAsArrays[mark] = matchingSites.getOrPut(tags) {
+        tags.toMutableList().apply { sortWith(siteOrder) }
       }
     }
 
     var totalAssigned = 0
-
+    val totalResults = newResults.values.sumBy(IntList::size)
+    
     for (tag in sortedTags) {
-      if (totalAssigned == newResults.size) {
+      if (totalAssigned == totalResults) {
         break
       }
 
@@ -127,51 +134,56 @@ internal class Solver private constructor(
     return newTags
   }
 
-  private fun tryToAssignTag(tag: String, sites: IntArray): Boolean {
-    if (newTags.containsKey(tag)) return false
+  private fun tryToAssignTag(mark: String, tags: List<Tag>): Boolean {
+    if (newTags.containsKey(mark)) return false
 
-    val index = sites.firstOrNull { it !in newTagIndices } ?: return false
-
+    val tag = tags.firstOrNull { it.offset !in newTagIndices.getValue(it.editor) } ?: return false
     @Suppress("ReplacePutWithAssignment")
-    newTags.put(tag, index)
-    newTagIndices.add(index)
+    newTags.put(mark, tag)
+    newTagIndices.getValue(tag.editor).add(tag.offset)
     return true
   }
 
-  private fun siteOrder(cache: EditorOffsetCache) = IntComparator { a, b ->
-    val aIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, a, cache)
-    val bIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, b, cache)
-
+  private fun siteOrder(caches: Map<Editor, EditorOffsetCache>) = Comparator<Tag> { a, b ->
+    val aEditor = a.editor
+    val bEditor = b.editor
+  
+    if (aEditor !== bEditor) {
+      val aEditorIndex = editorPriority.indexOf(aEditor)
+      val bEditorIndex = editorPriority.indexOf(bEditor)
+      // For multiple editors, prioritize them based on the provided order.
+      return@Comparator if (aEditorIndex < bEditorIndex) -1 else 1
+    }
+  
+    val aIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(aEditor, a.offset, caches.getValue(aEditor))
+    val bIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(bEditor, b.offset, caches.getValue(bEditor))
     if (aIsVisible != bIsVisible) {
       // Sites in immediate view should come first.
-      return@IntComparator if (aIsVisible) -1 else 1
+      return@Comparator if (aIsVisible) -1 else 1
     }
-
-    val chars = editor.immutableText
-    val aIsNotWordStart = chars[max(0, a - 1)].isWordPart
-    val bIsNotWordStart = chars[max(0, b - 1)].isWordPart
-
+  
+    val aIsNotWordStart = aEditor.immutableText[max(0, a.offset - 1)].isWordPart
+    val bIsNotWordStart = bEditor.immutableText[max(0, b.offset - 1)].isWordPart
     if (aIsNotWordStart != bIsNotWordStart) {
       // Ensure that the first letter of a word is prioritized for tagging.
-      return@IntComparator if (bIsNotWordStart) -1 else 1
+      return@Comparator if (bIsNotWordStart) -1 else 1
     }
-
+  
     when {
-      a < b -> -1
-      a > b -> 1
-      else -> 0
+      a.offset < b.offset -> -1
+      a.offset > b.offset -> 1
+      else                -> 0
     }
   }
 
-  private fun canTagBeginWithChar(site: Int, char: Char): Boolean {
+  private fun canTagBeginWithChar(editor: Editor, site: Int, char: Char): Boolean {
     if (char.toString() in allWordFragments) return false
 
-    forEachWordFragment(site) { if (it + char in allWordFragments) return false }
-
+    forEachWordFragment(editor, site) { if (it + char in allWordFragments) return false }
     return true
   }
 
-  private inline fun forEachWordFragment(site: Int, callback: (String) -> Unit) {
+  private inline fun forEachWordFragment(editor: Editor, site: Int, callback: (String) -> Unit) {
     val chars = editor.immutableText
     val left = max(0, site + queryLength - 1)
     val right = chars.wordEndPlus(site)

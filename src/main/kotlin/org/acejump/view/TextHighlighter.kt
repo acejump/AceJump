@@ -22,51 +22,63 @@ import kotlin.math.max
 /**
  * Renders highlights for search occurrences.
  */
-internal class TextHighlighter(private val editor: Editor) {
+internal class TextHighlighter {
   private companion object {
     private const val LAYER = HighlighterLayer.LAST + 1
   }
 
-  private var previousHighlights: Array<RangeHighlighter>? = null
-
+  private var previousHighlights = mutableMapOf<Editor, Array<RangeHighlighter>>()
+  
   /**
    * Removes all current highlights and re-creates them from scratch. Must be called whenever any of the method parameters change.
    */
-  fun render(offsets: IntList, query: SearchQuery, jumpMode: JumpMode) {
-    val markup = editor.markupModel
-    val chars = editor.immutableText
+  fun render(results: Map<Editor, IntList>, query: SearchQuery, jumpMode: JumpMode) {
 
     val renderer = when {
       query is SearchQuery.RegularExpression -> RegexRenderer
       jumpMode === JumpMode.TARGET -> SearchedWordWithOutlineRenderer
       else -> SearchedWordRenderer
     }
-
-    val modifications = (previousHighlights?.size ?: 0) + offsets.size
-    val enableBulkEditing = modifications > 1000
-
-    val document = editor.document
-
-    try {
-      if (enableBulkEditing) document.isInBulkUpdate = true
-
-      previousHighlights?.forEach(markup::removeHighlighter)
-      previousHighlights = Array(offsets.size) { index ->
-        val start = offsets.getInt(index)
-        val end = start + query.getHighlightLength(chars, start)
-
-        markup.addRangeHighlighter(start, end, LAYER, null, HighlighterTargetArea.EXACT_RANGE).apply {
-          customRenderer = renderer
+    
+    for ((editor, offsets) in results) {
+      val highlights = previousHighlights[editor]
+    
+      val markup = editor.markupModel
+      val document = editor.document
+      val chars = editor.immutableText
+    
+      val modifications = (highlights?.size ?: 0) + offsets.size
+      val enableBulkEditing = modifications > 1000
+    
+      try {
+        if (enableBulkEditing) {
+          document.isInBulkUpdate = true
         }
+    
+        highlights?.forEach(markup::removeHighlighter)
+        previousHighlights[editor] = Array(offsets.size) { index ->
+          val start = offsets.getInt(index)
+          val end = start + query.getHighlightLength(chars, start)
+      
+          markup.addRangeHighlighter(start, end, LAYER, null, HighlighterTargetArea.EXACT_RANGE).apply {
+            customRenderer = renderer
+          }
+        }
+      } finally {
+        if (enableBulkEditing) document.isInBulkUpdate = false
       }
-    } finally {
-      if (enableBulkEditing) document.isInBulkUpdate = false
+    }
+    
+    for (editor in previousHighlights.keys.toList()) {
+      if (!results.containsKey(editor)) {
+        previousHighlights.remove(editor)?.forEach(editor.markupModel::removeHighlighter)
+      }
     }
   }
 
   fun reset() {
-    editor.markupModel.removeAllHighlighters()
-    previousHighlights = null
+    previousHighlights.keys.forEach { it.markupModel.removeAllHighlighters() }
+    previousHighlights.clear()
   }
 
   /**

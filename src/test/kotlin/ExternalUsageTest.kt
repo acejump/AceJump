@@ -1,12 +1,17 @@
+import com.intellij.mock.MockVirtualFile
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.util.ui.UIUtil
+import it.unimi.dsi.fastutil.ints.IntArrayList
 import junit.framework.TestCase
 import org.acejump.action.AceAction
-import org.acejump.boundaries.*
+import org.acejump.boundaries.Boundaries
+import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries.WHOLE_FILE
 import org.acejump.input.JumpMode
 import org.acejump.search.Pattern.ALL_WORDS
-import org.acejump.session.*
+import org.acejump.session.AceJumpListener
+import org.acejump.session.SessionManager
 import org.acejump.test.util.BaseTest
 
 /**
@@ -32,6 +37,38 @@ class ExternalUsageTest: BaseTest() {
     typeAndWaitForResults(session.tags[0].key)
 
     TestCase.assertTrue(shouldBeTrueAfterFinished)
+  }
+  
+  fun `test externally tagged results with multiple editors`() {
+    val fileA = MockVirtualFile("a.txt", "first file")
+    val fileB = MockVirtualFile("b.txt", "second file with more markers")
+    myManager.openFile(fileA, true)
+    myManager.openFile(fileB, false)
+    
+    val mainEditor = (myManager.selectedEditor as TextEditor).editor
+    val editorA = (myManager.getEditors(fileA).single() as TextEditor).editor
+    val editorB = (myManager.getEditors(fileB).single() as TextEditor).editor
+    
+    val session = SessionManager.start(mainEditor, listOf(editorA, editorB))
+    
+    session.markResults(mapOf(
+      editorA to IntArrayList(intArrayOf(0, 6)),
+      editorB to IntArrayList(intArrayOf(0, 7, 22))
+    ))
+  
+    TestCase.assertEquals(5, session.tags.size)
+    TestCase.assertEquals(2, session.tags.count { it.value.editor === editorA })
+    TestCase.assertEquals(3, session.tags.count { it.value.editor === editorB })
+    
+    TestCase.assertEquals(listOf(0, 6), session.tags
+      .filter { it.value.editor === editorA }
+      .map { it.value.offset }
+      .sorted())
+    
+    TestCase.assertEquals(listOf(0, 7, 22), session.tags
+      .filter { it.value.editor === editorB }
+      .map { it.value.offset }
+      .sorted())
   }
 
   fun `test external pattern usage`() {
@@ -69,7 +106,7 @@ class ExternalUsageTest: BaseTest() {
     typeAndWaitForResults("word")
 
     TestCase.assertEquals(1, session.tags.size)
-    TestCase.assertEquals(14, session.tags.single().value)
+    TestCase.assertEquals(14, session.tags.single().value.offset)
   }
 
   fun `test listener query and mark`() {

@@ -7,12 +7,14 @@ import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.util.containers.ContainerUtil
 import it.unimi.dsi.fastutil.ints.IntArrayList
-import org.acejump.*
+import org.acejump.ExternalUsage
 import org.acejump.action.TagJumper
 import org.acejump.action.TagVisitor
 import org.acejump.boundaries.Boundaries
 import org.acejump.boundaries.EditorOffsetCache
-import org.acejump.boundaries.StandardBoundaries.*
+import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
+import org.acejump.boundaries.StandardBoundaries.WHOLE_FILE
+import org.acejump.clone
 import org.acejump.config.AceConfig
 import org.acejump.input.EditorKeyListener
 import org.acejump.input.JumpMode
@@ -27,9 +29,9 @@ import org.acejump.view.TextHighlighter
 import java.util.*
 
 /**
- * Manages an AceJump session for a single [Editor].
+ * Manages an AceJump session for one or more [Editor]s.
  */
-class Session(private val editor: Editor) {
+class Session(private val mainEditor: Editor, private val jumpEditors: List<Editor>) {
   private val listeners: MutableList<AceJumpListener> =
     ContainerUtil.createLockFreeCopyOnWriteList()
 
@@ -40,7 +42,7 @@ class Session(private val editor: Editor) {
       get() = if (AceConfig.searchWholeFile) WHOLE_FILE else VISIBLE_ON_SCREEN
   }
 
-  private val originalSettings = EditorSettings.setup(editor)
+  private val originalSettings = EditorSettings.setup(mainEditor)
 
   private val jumpModeTracker = JumpModeTracker()
   private var jumpMode = JumpMode.DISABLED
@@ -51,22 +53,22 @@ class Session(private val editor: Editor) {
         end()
       } else {
         searchProcessor?.let { textHighlighter.render(it.results, it.query, jumpMode) }
-        editor.colorsScheme.setColor(CARET_COLOR, value.caretColor)
-        editor.contentComponent.repaint()
+        mainEditor.colorsScheme.setColor(CARET_COLOR, value.caretColor)
+        mainEditor.contentComponent.repaint()
       }
     }
 
   private var searchProcessor: SearchProcessor? = null
-  private var tagger = Tagger(editor)
+  private var tagger = Tagger(jumpEditors)
 
   private val tagJumper
-    get() = TagJumper(editor, jumpMode, searchProcessor)
+    get() = TagJumper(jumpMode, searchProcessor)
 
   private val tagVisitor
-    get() = searchProcessor?.let { TagVisitor(editor, it, tagJumper) }
-
-  private val textHighlighter = TextHighlighter(editor)
-  private val tagCanvas = TagCanvas(editor)
+    get() = searchProcessor?.let { TagVisitor(mainEditor, it, tagJumper) }
+  
+  private val textHighlighter = TextHighlighter()
+  private val tagCanvases = jumpEditors.associateWith(::TagCanvas)
 
   @ExternalUsage
   val tags
@@ -75,15 +77,14 @@ class Session(private val editor: Editor) {
   init {
     KeyLayoutCache.ensureInitialized(AceConfig.settings)
 
-    EditorKeyListener.attach(editor, object: TypedActionHandler {
+    EditorKeyListener.attach(mainEditor, object: TypedActionHandler {
       override fun execute(editor: Editor, charTyped: Char, context: DataContext) {
         var processor = searchProcessor
         val hadTags = tagger.hasTags
 
         if (processor == null) {
           processor = SearchProcessor.fromChar(
-            editor,
-            charTyped, boundaries
+            jumpEditors, charTyped, boundaries
           ).also { searchProcessor = it }
         } else if (!processor.type(charTyped, tagger)) {
           return
@@ -123,34 +124,51 @@ class Session(private val editor: Editor) {
 
     when (val result = tagger.markOrJump(query, results.clone())) {
       is TaggingResult.Jump -> {
-        tagJumper.jump(result.offset, shiftMode)
-        tagCanvas.removeMarkers()
+        tagJumper.jump(result.tag, shiftMode, isCrossEditor = mainEditor !== result.tag.editor)
+        tagCanvases.values.forEach(TagCanvas::removeMarkers)
         end(result)
       }
 
       is TaggingResult.Mark -> {
-        val tags = result.tags
-        tagCanvas.setMarkers(tags)
-
-        val cache = EditorOffsetCache.new()
-        val boundaries = VISIBLE_ON_SCREEN
-
-        if (tags.none {
-            boundaries.isOffsetInside(editor, it.offsetL, cache) ||
-              boundaries.isOffsetInside(editor, it.offsetR, cache)
-          }) tagVisitor?.scrollToClosest()
+        val markers = result.markers
+        
+        for ((editor, canvas) in tagCanvases) {
+          canvas.setMarkers(markers[editor].orEmpty())
+        }
+        
+        if (jumpEditors.all { editor ->
+            val cache = EditorOffsetCache.new()
+            markers[editor].let { it == null || it.none { marker ->
+              VISIBLE_ON_SCREEN.isOffsetInside(editor, marker.offsetL, cache) ||
+              VISIBLE_ON_SCREEN.isOffsetInside(editor, marker.offsetR, cache) } }
+        }) {
+          tagVisitor?.scrollToClosest()
+        }
       }
     }
   }
 
   @ExternalUsage
   fun markResults(resultsToMark: SortedSet<Int>) {
-    tagger = Tagger(editor)
-    tagCanvas.setMarkers(emptyList())
-
-    val processor = SearchProcessor.fromRegex(editor, "", defaultBoundaries)
-      .apply { results = IntArrayList(resultsToMark) }
-
+    val jumpEditor = jumpEditors.singleOrNull() ?: return
+    markResults(mapOf(jumpEditor to resultsToMark))
+  }
+  
+  @ExternalUsage
+  fun markResults(resultsToMark: Map<Editor, Collection<Int>>) {
+    tagger = Tagger(jumpEditors)
+    tagCanvases.values.forEach { it.setMarkers(emptyList()) }
+  
+    val processor = SearchProcessor.fromRegex(jumpEditors, "", defaultBoundaries)
+      .apply {
+        results.clear()
+        for ((editor, offsets) in resultsToMark) {
+          if (editor in jumpEditors) {
+            results[editor] = IntArrayList(offsets)
+          }
+        }
+      }
+  
     updateSearch(processor, markImmediately = true)
   }
 
@@ -161,11 +179,11 @@ class Session(private val editor: Editor) {
 
   @ExternalUsage
   fun startRegexSearch(pattern: String, boundaries: Boundaries) {
-    tagger = Tagger(editor)
-    tagCanvas.setMarkers(emptyList())
+    tagger = Tagger(jumpEditors)
+    tagCanvases.values.forEach { it.setMarkers(emptyList()) }
 
     val processor = SearchProcessor.fromRegex(
-      editor, pattern,
+      jumpEditors, pattern,
       boundaries.intersection(defaultBoundaries)
     ).also { searchProcessor = it }
     updateSearch(processor, markImmediately = true)
@@ -223,16 +241,16 @@ class Session(private val editor: Editor) {
    * Ends this session.
    */
   fun end(taggingResult: TaggingResult? = null) =
-    SessionManager.end(editor, taggingResult)
+    SessionManager.end(mainEditor, taggingResult)
 
   /**
    * Clears any currently active search, tags, and highlights.
    * Does not reset [JumpMode].
    */
   fun restart() {
-    tagger = Tagger(editor)
+    tagger = Tagger(jumpEditors)
     searchProcessor = null
-    tagCanvas.removeMarkers()
+    tagCanvases.values.forEach(TagCanvas::removeMarkers)
     textHighlighter.reset()
   }
 
@@ -241,20 +259,24 @@ class Session(private val editor: Editor) {
    * successfully ended session.
    */
   internal fun dispose(taggingResult: TaggingResult?) {
-    tagger = Tagger(editor)
-    EditorKeyListener.detach(editor)
-    tagCanvas.unbind()
+    tagger = Tagger(jumpEditors)
+    EditorKeyListener.detach(mainEditor)
+    tagCanvases.values.forEach(TagCanvas::unbind)
     textHighlighter.reset()
-    EditorCache.invalidate()
 
-    val (tag, query) = (taggingResult as TaggingResult.Jump?)
-      .let { it?.tag to it?.query }
-    listeners.forEach { it.finished(tag, query) }
+    val jumpResult = taggingResult as? TaggingResult.Jump
+    val mark = jumpResult?.mark
+    val query = jumpResult?.query
+    listeners.forEach { it.finished(mark, query) }
 
-    if (!editor.isDisposed) {
-      originalSettings.restore(editor)
-      editor.colorsScheme.setColor(CARET_COLOR, JumpMode.DISABLED.caretColor)
-      editor.scrollingModel.scrollToCaret(ScrollType.MAKE_VISIBLE)
+    if (!mainEditor.isDisposed) {
+      originalSettings.restore(mainEditor)
+      mainEditor.colorsScheme.setColor(CARET_COLOR, JumpMode.DISABLED.caretColor)
+    }
+
+    val focusedEditor = jumpResult?.tag?.editor ?: mainEditor
+    if (!focusedEditor.isDisposed) {
+      focusedEditor.scrollingModel.scrollToCaret(ScrollType.MAKE_VISIBLE)
     }
   }
 

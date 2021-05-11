@@ -4,12 +4,12 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.psi.PsiFile
-import com.intellij.testFramework.fixtures.BasePlatformTestCase
+import com.intellij.testFramework.FileEditorManagerTestCase
 import com.intellij.util.ui.UIUtil
 import org.acejump.action.AceAction
 import org.acejump.session.SessionManager
 
-abstract class BaseTest: BasePlatformTestCase() {
+abstract class BaseTest: FileEditorManagerTestCase() {
   companion object {
     inline fun averageTimeWithWarmup(warmupRuns: Int, timedRuns: Int, action: () -> Long): Long {
       repeat(warmupRuns) { action() }
@@ -34,9 +34,12 @@ abstract class BaseTest: BasePlatformTestCase() {
     myFixture.configureByText(PlainTextFileType.INSTANCE, contents)
 
   fun resetEditor() {
-    takeAction(IdeActions.ACTION_EDITOR_ESCAPE)
-    UIUtil.dispatchAllInvocationEvents()
-    assertEmpty(myFixture.editor.markupModel.allHighlighters)
+    myFixture.editor?.let {
+      takeAction(IdeActions.ACTION_EDITOR_ESCAPE)
+      UIUtil.dispatchAllInvocationEvents()
+      assertEmpty(it.markupModel.allHighlighters)
+    }
+    myManager.closeAllFiles()
   }
 
   fun typeAndWaitForResults(string: String) {

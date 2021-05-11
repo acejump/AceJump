@@ -1,13 +1,13 @@
 package org.acejump.view
 
 import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.colors.EditorFontType
-import com.intellij.openapi.editor.colors.EditorFontType.*
+import com.intellij.openapi.editor.colors.EditorFontType.BOLD
+import com.intellij.openapi.editor.colors.EditorFontType.PLAIN
 import java.awt.Font
 import java.awt.FontMetrics
 
 /**
- * Stores font metrics for aligning and rendering [Tag]s.
+ * Stores font metrics for aligning and rendering [TagMarker]s.
  */
 class TagFont(editor: Editor) {
   val tagFont: Font = editor.colorsScheme.getFont(BOLD)
