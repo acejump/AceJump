@@ -7,14 +7,13 @@ import com.intellij.openapi.editor.actionSystem.TypedActionHandler
 import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.util.containers.ContainerUtil
 import it.unimi.dsi.fastutil.ints.IntArrayList
-import org.acejump.ExternalUsage
+import org.acejump.*
 import org.acejump.action.TagJumper
 import org.acejump.action.TagVisitor
 import org.acejump.boundaries.Boundaries
 import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
 import org.acejump.boundaries.StandardBoundaries.WHOLE_FILE
-import org.acejump.clone
 import org.acejump.config.AceConfig
 import org.acejump.input.EditorKeyListener
 import org.acejump.input.JumpMode
@@ -263,6 +262,7 @@ class Session(private val mainEditor: Editor, private val jumpEditors: List<Edit
     EditorKeyListener.detach(mainEditor)
     tagCanvases.values.forEach(TagCanvas::unbind)
     textHighlighter.reset()
+    EditorsCache.invalidate()
 
     val jumpResult = taggingResult as? TaggingResult.Jump
     val mark = jumpResult?.mark

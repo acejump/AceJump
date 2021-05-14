@@ -4,7 +4,6 @@ import com.anyascii.AnyAscii
 import com.intellij.openapi.editor.Editor
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.acejump.config.AceConfig
-import java.lang.ref.WeakReference
 
 /**
  * This annotation is a marker which means that the annotated function is
@@ -17,21 +16,23 @@ annotation class ExternalUsage
 /**
  * Returns an immutable version of the currently edited document.
  */
-val Editor.immutableText get() = EditorCache.getText(this)
+val Editor.immutableText get() = EditorsCache.getText(this)
 
-object EditorCache {
-  private var text: CharSequence = ""
-  private var editor: WeakReference<Editor>? = null
-
-  fun getText(editor: Editor): CharSequence {
-    if (this.editor?.get() !== editor) {
-      this.text = editor.document.immutableCharSequence
-        .let { if (AceConfig.mapToASCII) it.mapToASCII() else it }
-      this.editor = WeakReference(editor)
-    }
-    
-    return text
+object EditorsCache {
+  private var stale = true
+  fun invalidate() {
+    stale = true
+    editorTexts.clear()
   }
+
+  private val editorTexts = mutableMapOf<Editor, CharSequence>()
+
+  fun getText(editor: Editor) =
+    if (stale || editor !in editorTexts)
+      editor.document.immutableCharSequence
+        .let { if (AceConfig.mapToASCII) it.mapToASCII() else it }
+        .also { editorTexts[editor] = it; stale = false }
+    else editorTexts[editor]!!
 }
 
 fun CharSequence.mapToASCII() =
@@ -109,10 +110,10 @@ inline fun CharSequence.wordEndPlus(
 
 fun MutableMap<Editor, IntArrayList>.clone(): MutableMap<Editor, IntArrayList> {
   val clone = HashMap<Editor, IntArrayList>(size)
-  
+
   for ((editor, offsets) in this) {
     clone[editor] = offsets.clone()
   }
-  
+
   return clone
 }

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.1
+
+- Hotfix for stale cache, [#373](https://github.com/acejump/AceJump/issues/373)
+
 ## 3.8.0
 - Allow jumping between splitters in the editor, [#371](https://github.com/acejump/AceJump/pull/371)
 - Adds support for unicode search and selection, [#368](https://github.com/acejump/AceJump/issues/368)

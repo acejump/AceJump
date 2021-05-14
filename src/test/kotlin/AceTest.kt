@@ -1,5 +1,6 @@
 import com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_ENTER
 import com.intellij.openapi.actionSystem.IdeActions.ACTION_EDITOR_START_NEW_LINE
+import com.intellij.openapi.editor.actions.EnterAction
 import org.acejump.action.AceAction
 import org.acejump.config.AceConfig
 import org.acejump.test.util.BaseTest
@@ -104,6 +105,19 @@ class AceTest : BaseTest() {
     typeAndWaitForResults(session.tags[0].key)
 
     myFixture.checkResult("test <selection>target<caret></selection> action")
+  }
+
+  fun `test cache invalidation`() {
+    "first line".search("first")
+    typeAndWaitForResults(session.tags[0].key)
+
+    repeat(3) { takeAction(EnterAction()) }
+
+    takeAction(AceAction.ToggleTargetMode())
+    typeAndWaitForResults("first")
+    typeAndWaitForResults(session.tags[0].key)
+
+    myFixture.checkResult("\n\n\n<selection>first<caret></selection> line")
   }
 
   fun `test line mode`() {
