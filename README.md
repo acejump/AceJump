@@ -135,10 +135,11 @@ AceJump is supported by community members like you. Contributions are highly wel
 If you would like to [contribute](https://github.com/acejump/AceJump/pulls?q=is%3Apr), here are a few of the ways you can help improve AceJump:
 
 * [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
-* [Colour scheme improvements](https://github.com/acejump/AceJump/issues/331)
 * [Add action to repeat last search](https://github.com/acejump/AceJump/issues/316)
 * [Support user-configurable keyboard layouts](https://github.com/acejump/AceJump/issues/172)
 * [Add configurable RegEx modes](https://github.com/acejump/AceJump/issues/215)
+* [Add font family and size options](https://github.com/acejump/AceJump/issues/192)
+* [Tag placement and visibility improvements](https://github.com/acejump/AceJump/issues/323)
 * [Animated documentation](https://github.com/acejump/AceJump/issues/145)
 * [Display current search text](https://github.com/acejump/AceJump/issues/227)
 * [Fold text between matches](https://github.com/acejump/AceJump/issues/255)
