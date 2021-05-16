@@ -41,6 +41,7 @@ internal class AceSettingsPanel {
   private val tagBackgroundColorWheel = ColorPanel()
   private val searchWholeFileCheckBox = JBCheckBox()
   private val mapToASCIICheckBox = JBCheckBox()
+  private val showSearchNotificationCheckBox = JBCheckBox()
 
   init {
     tagCharsField.apply { font = Font("monospaced", font.style, font.size) }
@@ -90,6 +91,9 @@ internal class AceSettingsPanel {
     titledRow("Language Settings") {
       row { short(mapToASCIICheckBox.apply { text = "Map unicode to ASCII" }) }
     }
+    titledRow("Visual") {
+      row { short(showSearchNotificationCheckBox.apply { text = "Show hint with search text" }) }
+    }
   }
 
   // Property-to-property delegation: https://stackoverflow.com/q/45074596/1772342
@@ -110,6 +114,7 @@ internal class AceSettingsPanel {
   internal var tagBackgroundColor by tagBackgroundColorWheel
   internal var searchWholeFile by searchWholeFileCheckBox
   internal var mapToASCII by mapToASCIICheckBox
+  internal var showSearchNotification by showSearchNotificationCheckBox
 
   internal var minQueryLengthInt
     get() = minQueryLength.toIntOrNull()?.coerceIn(1, 10)
@@ -134,6 +139,7 @@ internal class AceSettingsPanel {
     tagBackgroundColor = settings.tagBackgroundColor
     searchWholeFile = settings.searchWholeFile
     mapToASCII = settings.mapToASCII
+    showSearchNotification = settings.showSearchNotification
   }
 
   // Removal pending support for https://youtrack.jetbrains.com/issue/KT-8575
