@@ -39,7 +39,7 @@ tasks {
 }
 
 changelog {
-  version = "3.8.1"
+  version = "3.8.2"
   path = "${project.projectDir}/CHANGES.md"
   header = closure { "[${project.version}] - ${date()}" }
   itemPrefix = "-"
@@ -53,6 +53,7 @@ repositories {
 
 dependencies {
   // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
+  implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
   compileOnly(kotlin("stdlib-jdk8"))
   implementation("com.anyascii:anyascii:0.2.0")
 }
@@ -65,4 +66,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.8.1"
+version = "3.8.2"

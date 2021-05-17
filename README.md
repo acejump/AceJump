@@ -141,7 +141,6 @@ If you would like to [contribute](https://github.com/acejump/AceJump/pulls?q=is%
 * [Add font family and size options](https://github.com/acejump/AceJump/issues/192)
 * [Tag placement and visibility improvements](https://github.com/acejump/AceJump/issues/323)
 * [Animated documentation](https://github.com/acejump/AceJump/issues/145)
-* [Display current search text](https://github.com/acejump/AceJump/issues/227)
 * [Fold text between matches](https://github.com/acejump/AceJump/issues/255)
 
 To start [IntelliJ IDEA CE](https://github.com/JetBrains/intellij-community) with AceJump installed, run `./gradlew runIde -PluginDev [-x test]`.

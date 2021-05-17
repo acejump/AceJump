@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 3.8.2
+
+- Add option to display current search text, [#375](https://github.com/acejump/AceJump/issues/375)
+- Fixes a bug where editor was not focused, [#374](https://github.com/acejump/AceJump/issues/374)
+- Thanks to @SaiKai for the PRs!
+
 ## 3.8.1
 
 - Hotfix for stale cache, [#373](https://github.com/acejump/AceJump/issues/373)
