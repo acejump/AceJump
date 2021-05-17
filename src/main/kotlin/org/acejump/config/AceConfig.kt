@@ -7,7 +7,7 @@ import com.intellij.openapi.components.Storage
 import org.acejump.input.KeyLayoutCache
 
 /**
- * Ensures consistiency between [AceSettings] and [AceSettingsPanel].
+ * Ensures consistency between [AceSettings] and [AceSettingsPanel].
  * Persists the state of the AceJump IDE settings across IDE restarts.
  * [https://www.jetbrains.org/intellij/sdk/docs/basics/persisting_state_of_components.html]
  */
@@ -31,6 +31,7 @@ class AceConfig: PersistentStateComponent<AceSettings> {
     val tagBackgroundColor get()  = settings.tagBackgroundColor
     val searchWholeFile get()     = settings.searchWholeFile
     val mapToASCII get()        = settings.mapToASCII
+    val showSearchNotification get()          = settings.showSearchNotification
     // @formatter:on
   }
 

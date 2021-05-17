@@ -27,7 +27,8 @@ class AceConfigurable: Configurable {
       panel.tagForegroundColor != settings.tagForegroundColor ||
       panel.tagBackgroundColor != settings.tagBackgroundColor ||
       panel.searchWholeFile != settings.searchWholeFile ||
-      panel.mapToASCII != settings.mapToASCII
+      panel.mapToASCII != settings.mapToASCII ||
+      panel.showSearchNotification != settings.showSearchNotification
 
   override fun apply() {
     settings.allowedChars = panel.allowedChars
@@ -46,6 +47,7 @@ class AceConfigurable: Configurable {
     panel.tagBackgroundColor?.let { settings.tagBackgroundColor = it }
     settings.searchWholeFile = panel.searchWholeFile
     settings.mapToASCII = panel.mapToASCII
+    settings.showSearchNotification = panel.showSearchNotification
     KeyLayoutCache.reset(settings)
   }
 

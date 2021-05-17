@@ -1,12 +1,19 @@
 package org.acejump.view
 
+import com.intellij.codeInsight.CodeInsightBundle
+import com.intellij.codeInsight.hint.HintManagerImpl
+import com.intellij.codeInsight.hint.HintUtil
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.colors.EditorFontType
 import com.intellij.openapi.editor.markup.CustomHighlighterRenderer
 import com.intellij.openapi.editor.markup.HighlighterLayer
 import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.editor.markup.RangeHighlighter
+import com.intellij.ui.HintHint
+import com.intellij.ui.JBColor
+import com.intellij.ui.LightweightHint
 import com.intellij.util.ui.JBUI
+import com.intellij.util.ui.UIUtil
 import it.unimi.dsi.fastutil.ints.IntList
 import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.config.AceConfig
@@ -16,7 +23,8 @@ import org.acejump.isWordPart
 import org.acejump.search.SearchQuery
 import org.acejump.wordEnd
 import org.acejump.wordStart
-import java.awt.Graphics
+import java.awt.*
+import javax.swing.*
 import kotlin.math.max
 
 /**
@@ -28,6 +36,18 @@ internal class TextHighlighter {
   }
 
   private var previousHighlights = mutableMapOf<Editor, Array<RangeHighlighter>>()
+  private var previousHint : LightweightHint? = null
+
+  /**
+   * Label for the search notification.
+   */
+  private class NotificationLabel constructor(text: String?) : JLabel(text) {
+    init {
+      background = HintUtil.getInformationColor()
+      foreground = JBColor.foreground()
+      this.isOpaque = true
+    }
+  }
   
   /**
    * Removes all current highlights and re-creates them from scratch. Must be called whenever any of the method parameters change.
@@ -68,7 +88,11 @@ internal class TextHighlighter {
         if (enableBulkEditing) document.isInBulkUpdate = false
       }
     }
-    
+
+    if (AceConfig.showSearchNotification) {
+      showSearchNotification(results, query, jumpMode)
+    }
+
     for (editor in previousHighlights.keys.toList()) {
       if (!results.containsKey(editor)) {
         previousHighlights.remove(editor)?.forEach(editor.markupModel::removeHighlighter)
@@ -76,9 +100,63 @@ internal class TextHighlighter {
     }
   }
 
+  /**
+   * Show a notification with the current search text.
+   */
+  private fun showSearchNotification(results: Map<Editor, IntList>, query: SearchQuery, jumpMode: JumpMode) {
+    // clear previous hint
+    previousHint?.hide()
+
+    // add notification hint to first editor
+    results.keys.first().let {
+      val component: JComponent = it.component
+
+      val label1: JLabel = NotificationLabel(" " + CodeInsightBundle.message("incremental.search.tooltip.prefix"))
+      label1.font = UIUtil.getLabelFont().deriveFont(Font.BOLD)
+
+      val isRegex = query is SearchQuery.RegularExpression
+      val queryText =
+        if (isRegex) " ${query.rawText}" else query.rawText[0] + query.rawText.drop(1).toLowerCase()
+      val label2: JLabel = NotificationLabel(queryText)
+
+      val label3: JLabel =
+        NotificationLabel("Found ${results.values.flatMap { it.asIterable() }.size} results in ${results.keys.size} editors.")
+
+      val panel = JPanel(BorderLayout())
+      panel.add(label1, BorderLayout.WEST)
+      panel.add(label2, BorderLayout.CENTER)
+      panel.add(label3, BorderLayout.EAST)
+      panel.border = BorderFactory.createLineBorder(jumpMode.caretColor)
+
+      panel.background = jumpMode.caretColor
+      panel.preferredSize = Dimension(
+        it.contentComponent.width + label1.preferredSize.width,
+        panel.preferredSize.height
+      )
+
+      val hint = LightweightHint(panel)
+
+      val x = SwingUtilities.convertPoint(component, 0, 0, component).x
+      val y: Int = -hint.component.preferredSize.height
+      val p = SwingUtilities.convertPoint(component, x, y, component.rootPane.layeredPane)
+
+      HintManagerImpl.getInstanceImpl().showEditorHint(
+        hint,
+        it,
+        p,
+        HintManagerImpl.HIDE_BY_ESCAPE or HintManagerImpl.HIDE_BY_TEXT_CHANGE,
+        0,
+        false,
+        HintHint(it, p).setAwtTooltip(false)
+      )
+      previousHint = hint
+    }
+  }
+
   fun reset() {
     previousHighlights.keys.forEach { it.markupModel.removeAllHighlighters() }
     previousHighlights.clear()
+    previousHint?.hide()
   }
 
   /**
