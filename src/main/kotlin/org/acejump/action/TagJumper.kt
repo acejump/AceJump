@@ -92,6 +92,7 @@ internal class TagJumper(private val mode: JumpMode, private val searchProcessor
     }
 
     private fun selectRange(editor: Editor, fromOffset: Int, toOffset: Int) = with(editor) {
+      ensureEditorFocused(this)
       selectionModel.removeSelection(true)
       selectionModel.setSelection(fromOffset, toOffset)
       caretModel.moveToOffset(toOffset)
