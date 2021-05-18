@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 3.8.3
+
+- Displays regular expression for regex-based queries
+- Fixes a bug when current search text was enabled causing word and line mode tags to not be displayed, [#376](https://github.com/acejump/AceJump/issues/376)
+
 ## 3.8.2
 
 - Add option to display current search text, [#375](https://github.com/acejump/AceJump/issues/375)
