@@ -117,9 +117,13 @@ internal class TextHighlighter {
       panel.add(label1, BorderLayout.WEST)
       panel.add(label2, BorderLayout.CENTER)
       panel.add(label3, BorderLayout.EAST)
-      panel.border = BorderFactory.createLineBorder(jumpMode.caretColor)
 
-      panel.background = jumpMode.caretColor
+      if (jumpMode == JumpMode.DISABLED) {
+        panel.border = BorderFactory.createLineBorder(Color.BLACK)
+      } else {
+        panel.border = BorderFactory.createLineBorder(jumpMode.caretColor)
+      }
+
       panel.preferredSize = Dimension(it.contentComponent.width +
           label1.preferredSize.width, panel.preferredSize.height)
 
