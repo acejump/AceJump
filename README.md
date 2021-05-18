@@ -136,7 +136,6 @@ If you would like to [contribute](https://github.com/acejump/AceJump/pulls?q=is%
 
 * [Improve test coverage](https://github.com/acejump/AceJump/issues/139)
 * [Add action to repeat last search](https://github.com/acejump/AceJump/issues/316)
-* [Support user-configurable keyboard layouts](https://github.com/acejump/AceJump/issues/172)
 * [Add configurable RegEx modes](https://github.com/acejump/AceJump/issues/215)
 * [Add font family and size options](https://github.com/acejump/AceJump/issues/192)
 * [Tag placement and visibility improvements](https://github.com/acejump/AceJump/issues/323)
