@@ -103,29 +103,28 @@ internal class TextHighlighter {
         CodeInsightBundle.message("incremental.search.tooltip.prefix"))
       label1.font = UIUtil.getLabelFont().deriveFont(Font.BOLD)
 
-      val isRegex = query is SearchQuery.RegularExpression
-      val queryText = " " + if (isRegex) query.rawText
-      else query.rawText[0] + query.rawText.drop(1).toLowerCase()
+      val queryText = " " +
+        if (query is SearchQuery.RegularExpression) query.toRegex().toString()
+        else query.rawText[0] + query.rawText.drop(1).toLowerCase()
       val label2 = NotificationLabel(queryText)
 
       val label3 = NotificationLabel(
         "Found ${results.values.flatMap { it.asIterable() }.size}" +
-        "results in ${results.keys.size} editors."
+        " results in ${results.keys.size}" +
+        " editor" + if(1 != results.keys.size) "s" else "."
       )
 
-      val panel = JPanel(BorderLayout())
-      panel.add(label1, BorderLayout.WEST)
-      panel.add(label2, BorderLayout.CENTER)
-      panel.add(label3, BorderLayout.EAST)
+      val panel = JPanel(BorderLayout()).apply {
+        add(label1, BorderLayout.WEST)
+        add(label2, BorderLayout.CENTER)
+        add(label3, BorderLayout.EAST)
+        border = BorderFactory.createLineBorder(
+          if (jumpMode == JumpMode.DISABLED) Color.BLACK else jumpMode.caretColor
+        )
 
-      if (jumpMode == JumpMode.DISABLED) {
-        panel.border = BorderFactory.createLineBorder(Color.BLACK)
-      } else {
-        panel.border = BorderFactory.createLineBorder(jumpMode.caretColor)
+        preferredSize = Dimension(it.contentComponent.width +
+          label1.preferredSize.width, preferredSize.height)
       }
-
-      panel.preferredSize = Dimension(it.contentComponent.width +
-          label1.preferredSize.width, panel.preferredSize.height)
 
       val hint = LightweightHint(panel)
 
