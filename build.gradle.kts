@@ -36,6 +36,10 @@ tasks {
       changelog.getAll().values.take(2).last().toHTML()
     })
   }
+
+  runPluginVerifier {
+    ideVersions.set(listOf("2021.1.1"))
+  }
 }
 
 changelog {
