@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.5.0"
-  id("org.jetbrains.intellij") version "0.7.3"
+  kotlin("jvm") version "1.5.20-M1"
+  id("org.jetbrains.intellij") version "1.0"
   id("org.jetbrains.changelog") version "1.1.2"
   id("com.github.ben-manes.versions") version "0.38.0"
 }
@@ -25,14 +25,14 @@ tasks {
     findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
   }
 
-  withType<PublishTask> {
+  publishPlugin {
     val intellijPublishToken: String? by project
-    token(intellijPublishToken)
+    token.set(intellijPublishToken)
   }
 
   patchPluginXml {
-    sinceBuild("203.7717.56")
-    changeNotes(closure {
+    sinceBuild.set("203.7717.56")
+    changeNotes.set(provider {
       changelog.getAll().values.take(2).last().toHTML()
     })
   }
@@ -59,10 +59,10 @@ dependencies {
 }
 
 intellij {
-  version = "2021.1.1"
-  pluginName = "AceJump"
-  updateSinceUntilBuild = false
-  setPlugins("java")
+  version.set("2021.1.1")
+  pluginName.set("AceJump")
+  updateSinceUntilBuild.set(false)
+  plugins.set(listOf("java"))
 }
 
 group = "org.acejump"
