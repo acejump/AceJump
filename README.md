@@ -97,7 +97,7 @@ AceJump can be used by other [IntelliJ Platform](https://plugins.jetbrains.com/d
 
 ```kotlin
 intellij {
-  setPlugins("AceJump:<VERSION>")
+  plugins.set("AceJump:<LATEST_VERSION>")
 }
 ```
 
