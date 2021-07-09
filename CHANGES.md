@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 3.8.4
+
+- Fixes Declaration Mode in Rider, [#379](https://github.com/acejump/AceJump/issues/379)
+- Thanks to @igor-akhmetov for the help diagnosing!
+
 ## 3.8.3
 
 - Displays regular expression for regex-based queries

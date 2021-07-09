@@ -77,7 +77,7 @@ sealed class AceAction: DumbAwareAction() {
   class ToggleJumpMode        : BaseToggleJumpModeAction(JUMP)
   class ToggleJumpEndMode     : BaseToggleJumpModeAction(JUMP_END)
   class ToggleTargetMode      : BaseToggleJumpModeAction(TARGET)
-  class ToggleDeclarationMode : BaseToggleJumpModeAction(DEFINE)
+  class ToggleDeclarationMode : BaseToggleJumpModeAction(DECLARATION)
 
 
   class StartAllWordsMode          : BaseRegexSearchAction(ALL_WORDS, WHOLE_FILE)

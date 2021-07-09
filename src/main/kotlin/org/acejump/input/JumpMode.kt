@@ -59,15 +59,15 @@ enum class JumpMode {
    *
    * Always places the caret at the first character of the search query.
    */
-  DEFINE;
+  DECLARATION;
   
   val caretColor: Color
     get() = when (this) {
-      JUMP     -> AceConfig.jumpModeColor
-      JUMP_END -> AceConfig.jumpEndModeColor
-      DEFINE   -> AceConfig.definitionModeColor
-      TARGET   -> AceConfig.targetModeColor
-      DISABLED -> AbstractColorsScheme.INHERITED_COLOR_MARKER
+      JUMP        -> AceConfig.jumpModeColor
+      JUMP_END    -> AceConfig.jumpEndModeColor
+      DECLARATION -> AceConfig.definitionModeColor
+      TARGET      -> AceConfig.targetModeColor
+      DISABLED    -> AbstractColorsScheme.INHERITED_COLOR_MARKER
     }
   
   override fun toString() = when (this) {
@@ -75,6 +75,6 @@ enum class JumpMode {
     JUMP     -> "Jump"
     JUMP_END -> "Jump to End"
     TARGET   -> "Target"
-    DEFINE   -> "Definition"
+    DECLARATION   -> "Definition"
   }
 }

@@ -1,7 +1,5 @@
 package org.acejump.action
 
-import com.intellij.codeInsight.navigation.actions.GotoDeclarationAction
-import com.intellij.codeInsight.navigation.actions.GotoTypeDeclarationAction
 import com.intellij.openapi.actionSystem.ActionManager
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.command.CommandProcessor
@@ -62,8 +60,8 @@ internal class TagJumper(private val mode: JumpMode, private val searchProcessor
 
     visit(tag)
 
-    if (mode === DEFINE) {
-      performAction(if (shiftMode) GotoTypeDeclarationAction() else GotoDeclarationAction())
+    if (mode === DECLARATION) {
+      performAction(ActionManager.getInstance().getAction(if (shiftMode) "GotoTypeDeclaration" else "GotoDeclaration"))
       return
     }
 

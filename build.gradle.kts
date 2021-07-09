@@ -5,8 +5,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   idea apply true
   kotlin("jvm") version "1.5.20"
-  id("org.jetbrains.intellij") version "1.0"
-  id("org.jetbrains.changelog") version "1.1.2"
+  id("org.jetbrains.intellij") version "1.1.2"
+  id("org.jetbrains.changelog") version "1.2.0"
   id("com.github.ben-manes.versions") version "0.39.0"
 }
 
@@ -43,11 +43,11 @@ tasks {
 }
 
 changelog {
-  version = "3.8.3"
-  path = "${project.projectDir}/CHANGES.md"
-  header = closure { "[${project.version}] - ${date()}" }
-  itemPrefix = "-"
-  unreleasedTerm = "Unreleased"
+  version.set("3.8.4")
+  path.set("${project.projectDir}/CHANGES.md")
+  header.set(provider { "[${project.version}] - ${date()}" })
+  itemPrefix.set("-")
+  unreleasedTerm.set("Unreleased")
 }
 
 repositories {
@@ -70,4 +70,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.8.3"
+version = "3.8.4"

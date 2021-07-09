@@ -11,7 +11,7 @@ data class AceSettings(
   var layout: KeyLayout = QWERTY,
   var allowedChars: String = layout.allChars,
   var cycleMode1: JumpMode = JumpMode.JUMP,
-  var cycleMode2: JumpMode = JumpMode.DEFINE,
+  var cycleMode2: JumpMode = JumpMode.DECLARATION,
   var cycleMode3: JumpMode = JumpMode.TARGET,
   var cycleMode4: JumpMode = JumpMode.JUMP_END,
   var minQueryLength: Int = 1,
