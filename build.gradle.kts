@@ -4,9 +4,9 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.5.20"
-  id("org.jetbrains.intellij") version "1.1.2"
-  id("org.jetbrains.changelog") version "1.2.0"
+  kotlin("jvm") version "1.5.30"
+  id("org.jetbrains.intellij") version "1.1.4"
+  id("org.jetbrains.changelog") version "1.3.0"
   id("com.github.ben-manes.versions") version "0.39.0"
 }
 
@@ -38,7 +38,7 @@ tasks {
   }
 
   runPluginVerifier {
-    ideVersions.set(listOf("2021.1.1"))
+    ideVersions.set(listOf("2021.2.1"))
   }
 }
 
