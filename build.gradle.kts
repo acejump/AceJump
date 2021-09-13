@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
   idea apply true
   kotlin("jvm") version "1.5.30"
-  id("org.jetbrains.intellij") version "1.1.4"
+  id("org.jetbrains.intellij") version "1.1.6"
   id("org.jetbrains.changelog") version "1.3.0"
   id("com.github.ben-manes.versions") version "0.39.0"
 }
@@ -59,11 +59,11 @@ dependencies {
   // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
   implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
   compileOnly(kotlin("stdlib-jdk8"))
-  implementation("com.anyascii:anyascii:0.2.0")
+  implementation("com.anyascii:anyascii:0.3.0")
 }
 
 intellij {
-  version.set("2021.1.1")
+  version.set("2021.2.1")
   pluginName.set("AceJump")
   updateSinceUntilBuild.set(false)
   plugins.set(listOf("java"))
