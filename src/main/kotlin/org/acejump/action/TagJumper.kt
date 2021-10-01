@@ -1,7 +1,7 @@
 package org.acejump.action
 
-import com.intellij.openapi.actionSystem.ActionManager
-import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.actionSystem.IdeActions.*
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.Document
@@ -61,7 +61,7 @@ internal class TagJumper(private val mode: JumpMode, private val searchProcessor
     visit(tag)
 
     if (mode === DECLARATION) {
-      performAction(ActionManager.getInstance().getAction(if (shiftMode) "GotoTypeDeclaration" else "GotoDeclaration"))
+      performAction(ActionManager.getInstance().getAction(if (shiftMode) ACTION_GOTO_TYPE_DECLARATION else ACTION_GOTO_DECLARATION))
       return
     }
 
