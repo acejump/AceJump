@@ -164,7 +164,7 @@ internal class TextHighlighter {
       val end = EditorOffsetCache.Uncached.offsetToXY(editor, endOffset)
 
       g.color = AceConfig.textHighlightColor
-      g.fillRect(start.x, start.y + 1, end.x - start.x, editor.lineHeight - 1)
+      g.fillRect(start.x, start.y, end.x - start.x, editor.lineHeight)
 
       g.color = AceConfig.tagBackgroundColor
       g.drawRect(start.x, start.y, end.x - start.x, editor.lineHeight)
@@ -213,7 +213,7 @@ internal class TextHighlighter {
       val lastCharWidth = editor.component.getFontMetrics(font).charWidth(char)
 
       g.color = AceConfig.textHighlightColor
-      g.fillRect(pos.x, pos.y + 1, lastCharWidth, editor.lineHeight - 1)
+      g.fillRect(pos.x, pos.y, lastCharWidth, editor.lineHeight)
 
       g.color = AceConfig.tagBackgroundColor
       g.drawRect(pos.x, pos.y, lastCharWidth, editor.lineHeight)
