@@ -205,7 +205,8 @@ The following individuals have significantly improved AceJump through their cont
 
 * [John Lindquist](https://github.com/johnlindquist) for creating AceJump and supporting it for many years.
 * [Breandan Considine](https://github.com/breandan) for maintaining the project and adding some new features.
-* [Daniel Chýlek](https://github.com/chylex) for numerous [performance optimizations](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3Achylex), [bug fixes](https://github.com/acejump/AceJump/issues/348#issuecomment-739454920) and [refactoring](https://github.com/acejump/AceJump/pull/353).
+* [chylex](https://github.com/chylex) for numerous [performance optimizations](https://github.com/acejump/AceJump/pulls?
+* q=is%3Apr+author%3Achylex), [bug fixes](https://github.com/acejump/AceJump/issues/348#issuecomment-739454920) and [refactoring](https://github.com/acejump/AceJump/pull/353).
 * [Alex Plate](https://github.com/AlexPl292) for submitting [several PRs](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3AAlexPl292).
 * [Sven Speckmaier](https://github.com/svensp) for [improving](https://github.com/acejump/AceJump/pull/214) search latency.
 * [Stefan Monnier](https://www.iro.umontreal.ca/~monnier/) for algorithmic advice and maintaining Emacs for several years.
