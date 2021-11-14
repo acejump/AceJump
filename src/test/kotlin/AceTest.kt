@@ -65,7 +65,7 @@ class AceTest : BaseTest() {
   fun `test shift selection`() {
     "<caret>testing 1234".search("4")
 
-    typeAndWaitForResults(session.tags[0].key.toUpperCase())
+    typeAndWaitForResults(session.tags[0].key.uppercase())
 
     myFixture.checkResult("<selection>testing 123<caret></selection>4")
   }

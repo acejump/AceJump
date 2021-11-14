@@ -4,8 +4,8 @@
 
 ## 3.8.4
 
-- Fixes Declaration Mode in Rider, [#379](https://github.com/acejump/AceJump/issues/379)
-- Thanks to @igor-akhmetov for the help diagnosing!
+- Fixes Declaration Mode in Rider, [#379](https://github.com/acejump/AceJump/issues/379), thanks to @igor-akhmetov for helping diagnose!
+- Fixes highlight offset on high-DPI screens, [#362](https://github.com/acejump/AceJump/issues/362), thanks to @chylex for [the PR](https://github.com/acejump/AceJump/pull/384)!
 
 ## 3.8.3
 

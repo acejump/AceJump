@@ -48,7 +48,7 @@ internal class Tagger(private val editors: List<Editor>) {
    */
   fun markOrJump(query: SearchQuery, results: Map<Editor, IntList>): TaggingResult {
     val isRegex = query is SearchQuery.RegularExpression
-    val queryText = if (isRegex) " ${query.rawText}" else query.rawText[0] + query.rawText.drop(1).toLowerCase()
+    val queryText = if (isRegex) " ${query.rawText}" else query.rawText[0] + query.rawText.drop(1).lowercase()
 
     val availableTags = allPossibleTags.filter { !queryText.endsWith(it[0]) && it !in tagMap }
 

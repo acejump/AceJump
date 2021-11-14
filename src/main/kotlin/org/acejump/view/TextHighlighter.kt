@@ -105,7 +105,7 @@ internal class TextHighlighter {
 
       val queryText = " " +
         if (query is SearchQuery.RegularExpression) query.toRegex().toString()
-        else query.rawText[0] + query.rawText.drop(1).toLowerCase()
+        else query.rawText[0] + query.rawText.drop(1).lowercase()
       val label2 = NotificationLabel(queryText)
 
       val label3 = NotificationLabel(

@@ -40,9 +40,7 @@ internal class TagVisitor(private val editor: Editor, private val searchProcesso
     val targetOffset = listOfNotNull(
       results.getOrNull(index - 1),
       results.getOrNull(index)
-    ).minBy {
-      abs(it - caret)
-    }
+    ).minByOrNull { abs(it - caret) }
 
     if (targetOffset != null)
       editor.scrollingModel.scrollTo(editor.offsetToLogicalPosition(targetOffset), RELATIVE)

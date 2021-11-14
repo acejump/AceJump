@@ -40,9 +40,9 @@ class TagMarker(
       val hasSpaceRight = offset + 1 >= chars.length || chars[offset + 1].isWhitespace()
 
       val displayedTag = if (literalQueryText != null && literalQueryText.last().equals(tag.first(), ignoreCase = true))
-        tag.drop(1).toUpperCase()
+        tag.drop(1).uppercase()
       else
-        tag.toUpperCase()
+        tag.uppercase()
 
       return TagMarker(displayedTag, offset, offset + max(0, matching - 1), tag.length - displayedTag.length, hasSpaceRight)
     }

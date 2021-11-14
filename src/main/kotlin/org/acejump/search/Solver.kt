@@ -73,7 +73,7 @@ internal class Solver private constructor(
   private val newTagIndices = newResults.keys.associateWith { IntOpenHashSet() }
 
   private var allWordFragments =
-    HashSet<String>(allResults.values.sumBy(IntList::size)).apply {
+    HashSet<String>(allResults.values.sumOf(IntList::size)).apply {
       for ((editor, offsets) in allResults) {
         val iter = offsets.iterator()
         while (iter.hasNext()) forEachWordFragment(editor, iter.nextInt()) { add(it) }
@@ -119,7 +119,7 @@ internal class Solver private constructor(
     }
 
     var totalAssigned = 0
-    val totalResults = newResults.values.sumBy(IntList::size)
+    val totalResults = newResults.values.sumOf(IntList::size)
     
     for (tag in sortedTags) {
       if (totalAssigned == totalResults) {
@@ -191,7 +191,7 @@ internal class Solver private constructor(
     val builder = StringBuilder(1 + right - left)
 
     for (i in left..right) {
-      builder.append(chars[i].toLowerCase())
+      builder.append(chars[i].lowercase())
       callback(builder.toString())
     }
   }
