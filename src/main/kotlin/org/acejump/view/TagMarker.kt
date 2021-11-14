@@ -2,6 +2,7 @@ package org.acejump.view
 
 import com.intellij.openapi.editor.Editor
 import com.intellij.ui.ColorUtil
+import com.intellij.ui.JreHiDpiUtil
 import com.intellij.ui.scale.JBUIScale
 import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
@@ -51,7 +52,16 @@ class TagMarker(
      */
     private fun drawHighlight(g: Graphics2D, rect: Rectangle, color: Color) {
       g.color = color
-      g.fillRoundRect(rect.x, rect.y, rect.width, rect.height + 1, ARC, ARC)
+      
+      // Workaround for misalignment on high DPI screens.
+      if (JreHiDpiUtil.isJreHiDPI(g)) {
+        g.translate(0.0, -0.5)
+        g.fillRoundRect(rect.x, rect.y, rect.width, rect.height + 1, ARC, ARC)
+        g.translate(0.0, 0.5)
+      }
+      else {
+        g.fillRoundRect(rect.x, rect.y, rect.width, rect.height + 1, ARC, ARC)
+      }
     }
 
     /**
