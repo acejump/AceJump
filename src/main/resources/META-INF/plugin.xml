@@ -27,6 +27,10 @@
                          implementationClass="org.acejump.action.AceEditorAction$SelectBackward"/>
     <editorActionHandler action="EditorEnter" order="first"
                          implementationClass="org.acejump.action.AceEditorAction$SelectForward"/>
+    <editorActionHandler action="EditorTab" order="first"
+                         implementationClass="org.acejump.action.AceEditorAction$ScrollToNextScreenful"/>
+    <editorActionHandler action="EditorUnindentSelection" order="first"
+                         implementationClass="org.acejump.action.AceEditorAction$ScrollToPreviousScreenful"/>
     <editorActionHandler action="EditorUp" order="first"
                          implementationClass="org.acejump.action.AceEditorAction$SearchLineStarts"/>
     <editorActionHandler action="EditorLeft" order="first"
@@ -37,6 +41,7 @@
                          implementationClass="org.acejump.action.AceEditorAction$SearchLineEnds"/>
     <editorActionHandler action="EditorLineEnd" order="first"
                          implementationClass="org.acejump.action.AceEditorAction$SearchLineEnds"/>
+
   </extensions>
 
   <actions>

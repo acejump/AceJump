@@ -38,8 +38,6 @@ class LatencyTest: BaseTest() {
   )
 
   fun `test lorem ipsum latency`() = `test tag latency`(
-    File(
-      javaClass.classLoader.getResource("lipsum.txt")!!.file
-    ).readText()
+    File(javaClass.classLoader.getResource("lipsum.txt")!!.file).readText()
   )
 }

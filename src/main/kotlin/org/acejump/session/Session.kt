@@ -8,6 +8,7 @@ import com.intellij.openapi.editor.colors.EditorColors.CARET_COLOR
 import com.intellij.util.containers.ContainerUtil
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.acejump.*
+import org.acejump.action.TagScroller
 import org.acejump.action.TagJumper
 import org.acejump.action.TagVisitor
 import org.acejump.boundaries.Boundaries
@@ -65,7 +66,10 @@ class Session(private val mainEditor: Editor, private val jumpEditors: List<Edit
 
   private val tagVisitor
     get() = searchProcessor?.let { TagVisitor(mainEditor, it, tagJumper) }
-  
+
+  private val tagScroller
+    get() = searchProcessor?.let { TagScroller(mainEditor, it) }
+
   private val textHighlighter = TextHighlighter()
   private val tagCanvases = jumpEditors.associateWith(::TagCanvas)
 
@@ -235,6 +239,16 @@ class Session(private val mainEditor: Editor, private val jumpEditors: List<Edit
    */
   fun visitNextTag() =
     if (tagVisitor?.visitNext() == true) end() else Unit
+
+  /**
+   * See [TagVisitor.visitPrevious]. If there are no tags, nothing happens.
+   */
+  fun scrollToNextScreenful() = tagScroller?.scroll(true)
+
+  /**
+   * See [TagVisitor.visitNext]. If there are no tags, nothing happens.
+   */
+  fun scrollToPreviousScreenful() = tagScroller?.scroll(false)
 
   /**
    * Ends this session.

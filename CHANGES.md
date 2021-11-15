@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.5
+
+- Restores <kbd>Tab</kbd>/<kbd>Shift</kbd>+<kbd>Tab</kbd> functionality, [#356](https://github.com/acejump/AceJump/issues/356)
+
 ## 3.8.4
 
 - Fixes Declaration Mode in Rider, [#379](https://github.com/acejump/AceJump/issues/379), thanks to @igor-akhmetov for helping diagnose!

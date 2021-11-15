@@ -1,9 +1,11 @@
 package org.acejump
 
 import com.anyascii.AnyAscii
-import com.intellij.openapi.editor.Editor
+import com.intellij.diff.util.DiffUtil.getLineCount
+import com.intellij.openapi.editor.*
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.acejump.config.AceConfig
+import kotlin.math.*
 
 /**
  * This annotation is a marker which means that the annotated function is
@@ -117,3 +119,137 @@ fun MutableMap<Editor, IntArrayList>.clone(): MutableMap<Editor, IntArrayList> {
 
   return clone
 }
+
+fun Editor.offsetCenter(first: Int, second: Int): LogicalPosition {
+  val firstIndexLine = offsetToLogicalPosition(first).line
+  val lastIndexLine = offsetToLogicalPosition(second).line
+  val center = (firstIndexLine + lastIndexLine) / 2
+  return offsetToLogicalPosition(getLineStartOffset(center))
+}
+
+fun Editor.getView(): IntRange {
+  val firstVisibleLine = max(0, getVisualLineAtTopOfScreen() - 1)
+  val firstLine = visualLineToLogicalLine(firstVisibleLine)
+  val startOffset = getLineStartOffset(firstLine)
+
+  val height = getScreenHeight() + 2
+  val lastLine = visualLineToLogicalLine(firstVisibleLine + height)
+  var endOffset = getLineEndOffset(lastLine, true)
+  endOffset = normalizeOffset(lastLine, endOffset)
+  endOffset = min(max(0, document.textLength - 1), endOffset + 1)
+
+  return startOffset..endOffset
+}
+
+/**
+ * Returns the offset of the start of the requested line.
+ *
+ * @param line   The logical line to get the start offset for.
+ *
+ * @return 0 if line is &lt 0, file size of line is bigger than file, else the
+ *         start offset for the line
+ */
+
+fun Editor.getLineStartOffset(line: Int) =
+  when {
+    line < 0 -> 0
+    line >= getLineCount(document) -> getFileSize()
+    else -> document.getLineStartOffset(line)
+  }
+
+/**
+ * Returns the offset of the end of the requested line.
+ *
+ * @param line     The logical line to get the end offset for
+ *
+ * @param allowEnd True include newline
+ *
+ * @return 0 if line is &lt 0, file size of line is bigger than file, else the
+ * end offset for the line
+ */
+
+fun Editor.getLineEndOffset(line: Int, allowEnd: Boolean = true) =
+  when {
+    line < 0 -> 0
+    line >= getLineCount(document) -> getFileSize(allowEnd)
+    else -> document.getLineEndOffset(line) - if (allowEnd) 0 else 1
+  }
+
+/**
+ * Gets the number of lines than can be displayed on the screen at one time.
+ * This is rounded down to the nearest whole line if there is a partial line
+ * visible at the bottom of the screen.
+ *
+ * @return The number of screen lines
+ */
+
+fun Editor.getScreenHeight() =
+  (scrollingModel.visibleArea.y + scrollingModel.visibleArea.height -
+    getVisualLineAtTopOfScreen() * lineHeight) / lineHeight
+
+
+/**
+ * This is a set of helper methods for working with editors.
+ * All line and column values are zero based.
+ */
+
+fun Editor.getVisualLineAtTopOfScreen() =
+  (scrollingModel.verticalScrollOffset + lineHeight - 1) / lineHeight
+
+/**
+ * Gets the actual number of characters in the file
+ *
+ * @param countNewLines True include newline
+ *
+ * @return The file's character count
+ */
+
+fun Editor.getFileSize(countNewLines: Boolean = false): Int {
+  val len = document.textLength
+  val doc = document.charsSequence
+  return if (countNewLines || len == 0 || doc[len - 1] != '\n') len else len - 1
+}
+
+/**
+ * Ensures that the supplied logical line is within the range 0 (incl) and the
+ * number of logical lines in the file (excl).
+ *
+ * @param line   The logical line number to normalize
+ *
+ * @return The normalized logical line number
+ */
+
+fun Editor.normalizeLine(line: Int) = max(0, min(line, getLineCount(document) - 1))
+
+/**
+ * Converts a visual line number to a logical line number.
+ *
+ * @param line   The visual line number to convert
+ *
+ * @return The logical line number
+ */
+
+fun Editor.visualLineToLogicalLine(line: Int) =
+  normalizeLine(visualToLogicalPosition(
+    VisualPosition(line.coerceAtLeast(0), 0)).line)
+
+
+/**
+ * Ensures that the supplied offset for the given logical line is within the
+ * range for the line. If allowEnd is true, the range will allow for the offset
+ * to be one past the last character on the line.
+ *
+ * @param line     The logical line number
+ *
+ * @param offset   The offset to normalize
+ *
+ * @param allowEnd true if the offset can be one past the last character on the
+ *                 line, false if not
+ *
+ * @return The normalized column number
+ */
+
+fun Editor.normalizeOffset(line: Int, offset: Int, allowEnd: Boolean = true) =
+  if (getFileSize(allowEnd) == 0) 0 else
+    max(min(offset, getLineEndOffset(line, allowEnd)), getLineStartOffset(line))
+

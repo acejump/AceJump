@@ -1,8 +1,8 @@
 package org.acejump.action
 
-import com.intellij.openapi.editor.Editor
-import com.intellij.openapi.editor.ScrollType.RELATIVE
-import com.intellij.openapi.editor.SelectionModel
+import com.intellij.openapi.editor.*
+import com.intellij.openapi.editor.ScrollType.*
+import org.acejump.*
 import org.acejump.search.SearchProcessor
 import org.acejump.search.Tag
 import kotlin.math.abs
@@ -66,4 +66,5 @@ internal class TagVisitor(private val editor: Editor, private val searchProcesso
     editor.scrollingModel.scrollToCaret(RELATIVE)
     return onlyResult
   }
+
 }

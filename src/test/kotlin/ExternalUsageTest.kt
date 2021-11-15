@@ -22,8 +22,7 @@ class ExternalUsageTest: BaseTest() {
   fun `test externally tagged results and listener notification`() {
     makeEditor("test externally tagged results")
 
-    SessionManager.start(myFixture.editor)
-      .markResults(sortedSetOf(4, 10, 15))
+    SessionManager.start(myFixture.editor).markResults(sortedSetOf(4, 10, 15))
 
     TestCase.assertEquals(3, session.tags.size)
 

@@ -44,6 +44,14 @@ sealed class AceEditorAction(private val originalHandler: EditorActionHandler): 
     override fun run(session: Session) = session.visitNextTag()
   }
 
+  class ScrollToNextScreenful(originalHandler: EditorActionHandler): AceEditorAction(originalHandler) {
+    override fun run(session: Session) { session.scrollToNextScreenful() }
+  }
+
+  class ScrollToPreviousScreenful(originalHandler: EditorActionHandler): AceEditorAction(originalHandler) {
+    override fun run(session: Session) { session.scrollToPreviousScreenful() }
+  }
+
   class SearchLineStarts(originalHandler: EditorActionHandler): AceEditorAction(originalHandler) {
     override fun run(session: Session) = session.startRegexSearch(LINE_STARTS, WHOLE_FILE)
   }

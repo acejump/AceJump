@@ -28,7 +28,7 @@ AceJump search is [smart case](http://ideavim.sourceforge.net/vim/usr_27.html#vi
 
 ## Tips
 
-- Press <kbd>Tab</kbd> when searching to jump to the next group of matches in the editor. *This feature is supported in `3.6.3` and currently unavailable in `3.7.0`.*
+- Press <kbd>Tab</kbd> when searching to jump to the next group of matches in the editor. *This feature is unavailable in `3.6.4-3.8.4`.*
 
 - If you make a mistake searching, just press <kbd>Backspace</kbd> to restart from scratch.
 

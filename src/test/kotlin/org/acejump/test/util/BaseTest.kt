@@ -19,8 +19,7 @@ abstract class BaseTest: FileEditorManagerTestCase() {
     }
   }
 
-  protected val session
-    get() = SessionManager[myFixture.editor]!!
+  protected val session get() = SessionManager[myFixture.editor]!!
 
   override fun tearDown() {
     resetEditor()

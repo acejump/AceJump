@@ -55,10 +55,10 @@ internal class SearchProcessor private constructor(
     }
   }
   
-  var query = query
+  var query: SearchQuery = query
     private set
   
-  var results = results
+  var results: MutableMap<Editor, IntArrayList> = results
     private set
   
   /**
