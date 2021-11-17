@@ -1,8 +1,13 @@
 package org.acejump.input
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import java.awt.geom.Point2D
+import kotlin.math.floor
+
 /**
  * Defines common keyboard layouts. Each layout has a key priority order,
- * based on each key's distance from the home row and how  ergonomically
+ * based on each key's distance from the home row and how ergonomically
  * difficult they are to press.
  */
 @Suppress("unused")
@@ -19,5 +24,38 @@ enum class KeyLayout(internal val rows: Array<String>, priority: String) {
   internal val allChars = rows.joinToString("").toCharArray().apply(CharArray::sort).joinToString("")
   internal val allPriorities = priority.mapIndexed { index, char -> char to index }.toMap()
   
-  internal inline fun priority(crossinline tagToChar: (String) -> Char): (String) -> Int? = { allPriorities[tagToChar(it)] }
+  private val keyDistances: Map<Char, Object2IntMap<Char>> by lazy {
+    val keyDistanceMap = mutableMapOf<Char, Object2IntMap<Char>>()
+    val keyLocations = mutableMapOf<Char, Point2D>()
+    
+    for ((rowIndex, rowChars) in rows.withIndex()) {
+      val keyY = rowIndex * 1.2F // Slightly increase cost of traveling between rows.
+      
+      for ((columnIndex, char) in rowChars.withIndex()) {
+        val keyX = columnIndex + (0.25F * rowIndex) // Assume a 1/4-key uniform stagger.
+        keyLocations[char] = Point2D.Float(keyX, keyY)
+      }
+    }
+    
+    for (fromChar in allChars) {
+      val distances = Object2IntOpenHashMap<Char>()
+      val fromLocation = keyLocations.getValue(fromChar)
+      
+      for (toChar in allChars) {
+        distances[toChar] = floor(2F * fromLocation.distanceSq(keyLocations.getValue(toChar))).toInt()
+      }
+      
+      keyDistanceMap[fromChar] = distances
+    }
+    
+    keyDistanceMap
+  }
+  
+  internal inline fun priority(crossinline tagToChar: (String) -> Char): (String) -> Int? {
+    return { allPriorities[tagToChar(it)] }
+  }
+  
+  internal fun distanceBetweenKeys(char1: Char, char2: Char): Int {
+    return keyDistances.getValue(char1).getValue(char2)
+  }
 }
