@@ -81,6 +81,10 @@ class TagMarker(
       g.color = AceConfig.tagForegroundColor
       g.drawString(text, x, y)
     }
+    
+    private fun isLineEnding(char: Char): Boolean {
+      return char == '\n' || char == '\r'
+    }
   }
 
   /**
@@ -106,7 +110,7 @@ class TagMarker(
   private fun alignTag(editor: Editor, cache: EditorOffsetCache, font: TagFont, occupied: List<Rectangle>): Rectangle? {
     val boundaries = VISIBLE_ON_SCREEN
 
-    if (hasSpaceRight || offsetL == 0 || editor.immutableText[offsetL - 1].let { it == '\n' || it == '\r' }) {
+    if (hasSpaceRight || offsetL !in 1 until editor.document.textLength || isLineEnding(editor.immutableText[offsetL - 1])) {
       val rectR = createRightAlignedTagRect(editor, cache, font)
       return rectR.takeIf { boundaries.isOffsetInside(editor, offsetR, cache) && occupied.none(rectR::intersects) }
     }
@@ -124,7 +128,15 @@ class TagMarker(
 
   private fun createRightAlignedTagRect(editor: Editor, cache: EditorOffsetCache, font: TagFont): Rectangle {
     val pos = cache.offsetToXY(editor, offsetR)
-    val shift = font.editorFontMetrics.charWidth(editor.immutableText[offsetR]) + (font.tagCharWidth * shiftR)
+  
+    val char = if (offsetR >= editor.document.textLength)
+      ' ' // Use the width of a space on the last line.
+    else editor.immutableText[offsetR].let {
+      // Use the width of a space on empty lines.
+      if (isLineEnding(it)) ' ' else it
+    }
+  
+    val shift = font.editorFontMetrics.charWidth(char) + (font.tagCharWidth * shiftR)
     return Rectangle(pos.x + shift, pos.y, (font.tagCharWidth * length) + 4, font.lineHeight)
   }
 

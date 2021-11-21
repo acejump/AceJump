@@ -85,7 +85,7 @@ class ExternalUsageTest: BaseTest() {
     SessionManager.start(myFixture.editor)
       .startRegexSearch("[aeiou]+", WHOLE_FILE)
 
-    TestCase.assertEquals(8, session.tags.size)
+    TestCase.assertEquals(9, session.tags.size)
   }
 
   fun `test external jump with bounds`() {

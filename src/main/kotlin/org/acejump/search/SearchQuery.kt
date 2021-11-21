@@ -51,7 +51,7 @@ internal sealed class SearchQuery {
   class RegularExpression(private var pattern: String): SearchQuery() {
     override val rawText = ""
 
-    override fun getHighlightLength(text: CharSequence, offset: Int) = 1
+    override fun getHighlightLength(text: CharSequence, offset: Int) = 0
 
     override fun toRegex(): Regex =
       Regex(pattern, setOf(RegexOption.MULTILINE, RegexOption.IGNORE_CASE))

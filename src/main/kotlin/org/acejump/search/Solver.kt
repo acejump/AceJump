@@ -187,7 +187,10 @@ internal class Solver private constructor(
     val chars = editor.immutableText
     val left = max(0, site + queryLength - 1)
     val right = chars.wordEndPlus(site)
-
+    if (right >= chars.length) {
+      return
+    }
+  
     val builder = StringBuilder(1 + right - left)
 
     for (i in left..right) {

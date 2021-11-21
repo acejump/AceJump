@@ -121,11 +121,11 @@ class AceTest : BaseTest() {
   }
 
   fun `test line mode`() {
-    makeEditor("    test\n    three\n    lines\n")
+    makeEditor("    test\n    three\n    lines")
 
     takeAction(AceAction.StartAllLineMarksMode())
 
-    assertEquals(8, session.tags.size) // last empty line does not count
+    assertEquals(9, session.tags.size)
   }
 
   fun `test chinese selection`() {

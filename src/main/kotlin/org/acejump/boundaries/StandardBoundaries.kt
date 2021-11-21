@@ -5,10 +5,10 @@ import com.intellij.openapi.editor.Editor
 enum class StandardBoundaries : Boundaries {
   WHOLE_FILE {
     override fun getOffsetRange(editor: Editor, cache: EditorOffsetCache) =
-      0 until editor.document.textLength
+      0..editor.document.textLength
     
     override fun isOffsetInside(editor: Editor, offset: Int, cache: EditorOffsetCache) =
-      offset in (0 until editor.document.textLength)
+      offset in (0..editor.document.textLength)
   },
   
   VISIBLE_ON_SCREEN {
