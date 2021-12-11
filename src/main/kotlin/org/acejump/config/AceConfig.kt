@@ -1,9 +1,9 @@
 package org.acejump.config
 
 import com.intellij.openapi.components.PersistentStateComponent
-import com.intellij.openapi.components.ServiceManager
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
+import com.intellij.util.application
 import org.acejump.input.KeyLayoutCache
 
 /**
@@ -16,7 +16,7 @@ class AceConfig: PersistentStateComponent<AceSettings> {
   private var aceSettings = AceSettings()
 
   companion object {
-    val settings get() = ServiceManager.getService(AceConfig::class.java).aceSettings
+    val settings get() = application.getService(AceConfig::class.java).aceSettings
 
     // @formatter:off
     val layout get()              = settings.layout

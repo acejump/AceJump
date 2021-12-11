@@ -61,20 +61,19 @@ enum class JumpMode {
    */
   DECLARATION;
   
-  val caretColor: Color
-    get() = when (this) {
-      JUMP        -> AceConfig.jumpModeColor
-      JUMP_END    -> AceConfig.jumpEndModeColor
-      DECLARATION -> AceConfig.definitionModeColor
-      TARGET      -> AceConfig.targetModeColor
-      DISABLED    -> AbstractColorsScheme.INHERITED_COLOR_MARKER
-    }
+  val caretColor: Color get() = when (this) {
+    DISABLED    -> AbstractColorsScheme.INHERITED_COLOR_MARKER
+    JUMP        -> AceConfig.jumpModeColor
+    JUMP_END    -> AceConfig.jumpEndModeColor
+    TARGET      -> AceConfig.targetModeColor
+    DECLARATION -> AceConfig.definitionModeColor
+  }
   
   override fun toString() = when (this) {
-    DISABLED -> "(Skip)"
-    JUMP     -> "Jump"
-    JUMP_END -> "Jump to End"
-    TARGET   -> "Target"
-    DECLARATION   -> "Definition"
+    DISABLED    -> "(Skip)"
+    JUMP        -> "Jump"
+    JUMP_END    -> "Jump to End"
+    TARGET      -> "Target"
+    DECLARATION -> "Definition"
   }
 }

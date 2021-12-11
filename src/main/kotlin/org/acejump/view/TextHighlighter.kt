@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.colors.EditorFontType
 import com.intellij.openapi.editor.markup.*
 import com.intellij.openapi.editor.markup.HighlighterTargetArea.EXACT_RANGE
 import com.intellij.ui.*
+import com.intellij.util.DocumentUtil
 import com.intellij.util.ui.*
 import it.unimi.dsi.fastutil.ints.IntList
 import org.acejump.*
@@ -61,9 +62,7 @@ internal class TextHighlighter {
       val modifications = (highlights?.size ?: 0) + offsets.size
       val enableBulkEditing = modifications > 1000
 
-      try {
-        if (enableBulkEditing) document.isInBulkUpdate = true
-
+      DocumentUtil.executeInBulk(document, enableBulkEditing) {
         highlights?.forEach(markup::removeHighlighter)
         previousHighlights[editor] = Array(offsets.size) { index ->
           val start = offsets.getInt(index)
@@ -72,8 +71,6 @@ internal class TextHighlighter {
           markup.addRangeHighlighter(start, end, LAYER, null, EXACT_RANGE)
             .apply { customRenderer = renderer }
         }
-      } finally {
-        if (enableBulkEditing) document.isInBulkUpdate = false
       }
     }
 
@@ -96,54 +93,58 @@ internal class TextHighlighter {
     previousHint?.hide()
 
     // add notification hint to first editor
-    results.keys.first().let {
-      val component: JComponent = it.component
+    val editor = results.keys.first()
+    val component: JComponent = editor.component
 
-      val label1: JLabel = NotificationLabel(" " +
-        CodeInsightBundle.message("incremental.search.tooltip.prefix"))
-      label1.font = UIUtil.getLabelFont().deriveFont(Font.BOLD)
+    val label1 = NotificationLabel(
+      " " +
+        CodeInsightBundle.message("incremental.search.tooltip.prefix")
+    ).apply { font = UIUtil.getLabelFont().deriveFont(Font.BOLD) }
 
-      val queryText = " " +
-        if (query is SearchQuery.RegularExpression) query.toRegex().toString()
-        else query.rawText[0] + query.rawText.drop(1).lowercase()
-      val label2 = NotificationLabel(queryText)
+    val queryText = " " +
+      if (query is SearchQuery.RegularExpression) query.toRegex().toString()
+      else query.rawText[0] + query.rawText.drop(1).lowercase()
+    val label2 = NotificationLabel(queryText)
 
-      val label3 = NotificationLabel(
-        "Found ${results.values.flatMap { it.asIterable() }.size}" +
+    val label3 = NotificationLabel(
+      "Found ${results.values.flatMap { it.asIterable() }.size}" +
         " results in ${results.keys.size}" +
-        " editor" + if(1 != results.keys.size) "s" else "."
+        " editor" + if (1 != results.keys.size) "s" else "."
+    )
+
+    val panel = JPanel(BorderLayout()).apply {
+      add(label1, BorderLayout.WEST)
+      add(label2, BorderLayout.CENTER)
+      add(label3, BorderLayout.EAST)
+      border = BorderFactory.createLineBorder(
+        if (jumpMode == JumpMode.DISABLED) Color.BLACK else jumpMode.caretColor
       )
 
-      val panel = JPanel(BorderLayout()).apply {
-        add(label1, BorderLayout.WEST)
-        add(label2, BorderLayout.CENTER)
-        add(label3, BorderLayout.EAST)
-        border = BorderFactory.createLineBorder(
-          if (jumpMode == JumpMode.DISABLED) Color.BLACK else jumpMode.caretColor
-        )
-
-        preferredSize = Dimension(it.contentComponent.width +
-          label1.preferredSize.width, preferredSize.height)
-      }
-
-      val hint = LightweightHint(panel)
-
-      val x = SwingUtilities.convertPoint(component, 0, 0, component).x
-      val y: Int = -hint.component.preferredSize.height
-      val p = SwingUtilities.convertPoint(component, x, y,
-        component.rootPane.layeredPane)
-
-      HintManagerImpl.getInstanceImpl().showEditorHint(
-        hint,
-        it,
-        p,
-        HIDE_BY_ESCAPE or HIDE_BY_TEXT_CHANGE,
-        0,
-        false,
-        HintHint(it, p).setAwtTooltip(false)
+      preferredSize = Dimension(
+        editor.contentComponent.width +
+          label1.preferredSize.width, preferredSize.height
       )
-      previousHint = hint
     }
+
+    val hint = LightweightHint(panel)
+
+    val x = SwingUtilities.convertPoint(component, 0, 0, component).x
+    val y: Int = -hint.component.preferredSize.height
+    val p = SwingUtilities.convertPoint(
+      component, x, y,
+      component.rootPane.layeredPane
+    )
+
+    HintManagerImpl.getInstanceImpl().showEditorHint(
+      hint,
+      editor,
+      p,
+      HIDE_BY_ESCAPE or HIDE_BY_TEXT_CHANGE,
+      0,
+      false,
+      HintHint(editor, p).setAwtTooltip(false)
+    )
+    previousHint = hint
   }
 
   fun reset() {

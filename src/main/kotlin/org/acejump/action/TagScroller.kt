@@ -5,10 +5,10 @@ import org.acejump.*
 import org.acejump.search.SearchProcessor
 
 internal class TagScroller(private val editor: Editor, private val searchProcessor: SearchProcessor) {
-  fun scroll(forward: Boolean = true): Boolean {
-    val position = if (forward) findNextPosition() else findPreviousPosition()
-    return if (position != null) true.also { scrollTo(position) } else false
-  }
+  fun scroll(
+    forward: Boolean = true,
+    position: LogicalPosition? = if (forward) findNextPosition() else findPreviousPosition()
+  ) = if (position != null) true.also { scrollTo(position) } else false
 
   private fun scrollTo(position: LogicalPosition) = editor.run {
     scrollingModel.disableAnimation()

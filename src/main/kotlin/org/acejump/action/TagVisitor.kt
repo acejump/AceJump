@@ -2,7 +2,6 @@ package org.acejump.action
 
 import com.intellij.openapi.editor.*
 import com.intellij.openapi.editor.ScrollType.*
-import org.acejump.*
 import org.acejump.search.SearchProcessor
 import org.acejump.search.Tag
 import kotlin.math.abs
