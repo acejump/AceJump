@@ -6,7 +6,7 @@
 
 - Improves tag order for non-QWERTY layouts, [#385](https://github.com/acejump/AceJump/issues/385)
 - Restores <kbd>Tab</kbd>/<kbd>Shift</kbd>+<kbd>Tab</kbd> functionality, [#356](https://github.com/acejump/AceJump/issues/356)
-- Fixes tag cycling with <kbd>Enter</kbd>/<kbd>Shift</kbd>+<kbd>Enter</kbd>, [#380](https://github.com/acejump/AceJump/issues/380)
+- Fixes tag cycling with <kbd>Enter</kbd>/<kbd>Shift</kbd>+<kbd>Enter</kbd>, [#380](https://github.com/acejump/AceJump/issues/380), thanks @AlexPl292
 
 ## 3.8.4
 
