@@ -36,8 +36,7 @@ sealed class AceAction: DumbAwareAction() {
       } catch (e: IncorrectOperationException) {
         invoke(SessionManager.start(editor))
       }
-    }
-    else {
+    } else {
       invoke(SessionManager.start(editor))
     }
   }

@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.6.10-RC"
+  kotlin("jvm") version "1.6.10"
   id("org.jetbrains.intellij") version "1.3.0"
   id("org.jetbrains.changelog") version "1.3.1"
   id("com.github.ben-manes.versions") version "0.39.0"
@@ -40,7 +40,18 @@ tasks {
   runPluginVerifier {
     ideVersions.set(listOf("2021.2.1"))
   }
+
+  // Remove pending: https://youtrack.jetbrains.com/issue/IDEA-278926
+  val test by getting(Test::class) {
+    isScanForTestClasses = false
+    // Only run tests from classes that end with "Test"
+    include("**/AceTest.class")
+    include("**/ExternalUsageTest.class")
+    include("**/LatencyTest.class")
+  }
 }
+
+java.toolchain.languageVersion.set(JavaLanguageVersion.of(15))
 
 changelog {
   version.set("3.8.5")
