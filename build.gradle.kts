@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.6.20-M1"
+  kotlin("jvm") version "1.6.20-RC"
   id("org.jetbrains.intellij") version "1.4.0"
   id("org.jetbrains.changelog") version "1.3.1"
   id("com.github.ben-manes.versions") version "0.42.0"
@@ -81,4 +81,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.8.5"
+version = "3.8.6"

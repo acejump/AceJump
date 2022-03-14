@@ -2,16 +2,20 @@
 
 ## Unreleased
 
+## 3.8.6
+
+- Adds AZERTY keyboard layout, [#398](https://github.com/acejump/AceJump/pull/398), thanks to [@delphinaubin](https://github.com/delphinaubin)
+
 ## 3.8.5
 
 - Improves tag order for non-QWERTY layouts, [#385](https://github.com/acejump/AceJump/issues/385)
 - Restores <kbd>Tab</kbd>/<kbd>Shift</kbd>+<kbd>Tab</kbd> functionality, [#356](https://github.com/acejump/AceJump/issues/356)
-- Fixes tag cycling with <kbd>Enter</kbd>/<kbd>Shift</kbd>+<kbd>Enter</kbd>, [#380](https://github.com/acejump/AceJump/issues/380), thanks @AlexPl292
+- Fixes tag cycling with <kbd>Enter</kbd>/<kbd>Shift</kbd>+<kbd>Enter</kbd>, [#380](https://github.com/acejump/AceJump/issues/380), thanks [@AlexPl292](https://github.com/AlexPl292)
 
 ## 3.8.4
 
-- Fixes Declaration Mode in Rider, [#379](https://github.com/acejump/AceJump/issues/379), thanks to @igor-akhmetov for helping diagnose!
-- Fixes highlight offset on high-DPI screens, [#362](https://github.com/acejump/AceJump/issues/362), thanks to @chylex for [the PR](https://github.com/acejump/AceJump/pull/384)!
+- Fixes Declaration Mode in Rider, [#379](https://github.com/acejump/AceJump/issues/379), thanks to [@igor-akhmetov](https://github.com/igor-akhmetov) for helping diagnose!
+- Fixes highlight offset on high-DPI screens, [#362](https://github.com/acejump/AceJump/issues/362), thanks to [@chylex](https://github.com/chylex) for [the PR](https://github.com/acejump/AceJump/pull/384)!
 
 ## 3.8.3
 
@@ -22,7 +26,7 @@
 
 - Add option to display current search text, [#375](https://github.com/acejump/AceJump/issues/375)
 - Fixes a bug where editor was not focused, [#374](https://github.com/acejump/AceJump/issues/374)
-- Thanks to @SaiKai for the PRs!
+- Thanks to [@SaiKai](https://github.com/SaiKai) for the PRs!
 
 ## 3.8.1
 
@@ -37,7 +41,7 @@
 - Update AceJump extension API to include tag information, [#357](https://github.com/acejump/AceJump/pull/357)
 - Allow defining jump mode with boundaries, [#358](https://github.com/acejump/AceJump/pull/358)
 - Use Kotlin classes for actions, [#359](https://github.com/acejump/AceJump/pull/359)
-- Thanks to @AlexPl292 for the PRs!
+- Thanks to [@AlexPl292](https://github.com/AlexPl292) for the PRs!
 
 ## 3.7.0
 - Improvements to tag latency
@@ -51,7 +55,7 @@
 - Increase limit for what is considered a large file
 - Major refactoring, [#350](https://github.com/acejump/AceJump/pull/353)
 - [Many bug fixes](https://github.com/acejump/AceJump/issues/348#issuecomment-739454920): [#338](https://github.com/acejump/AceJump/issues/338), [#336](https://github.com/acejump/AceJump/issues/336), [#329](https://github.com/acejump/AceJump/issues/329), [#327](https://github.com/acejump/AceJump/issues/327), [#310](https://github.com/acejump/AceJump/issues/310), [#233](https://github.com/acejump/AceJump/issues/233), [#228](https://github.com/acejump/AceJump/issues/228), [#187](https://github.com/acejump/AceJump/issues/187), [#147](https://github.com/acejump/AceJump/issues/147), [#132](https://github.com/acejump/AceJump/issues/132), [#71](https://github.com/acejump/AceJump/issues/71)
-- Huge thanks to @chylex for [all the PRs](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3Achylex)!
+- Huge thanks to [@chylex](https://github.com/chylex) for [all the PRs](https://github.com/acejump/AceJump/pulls?q=is%3Apr+author%3Achylex)!
 
 ## 3.6.3
 
@@ -61,12 +65,12 @@
 
 ## 3.6.2
 
-- Fixes [#226](https://github.com/acejump/AceJump/issues/226). Thanks @AlexPl292!
+- Fixes [#226](https://github.com/acejump/AceJump/issues/226). Thanks [@AlexPl292](https://github.com/AlexPl292)!
 - Update Pinyin engine.
 
 ## 3.6.1
 
-- Fixes [#324](https://github.com/acejump/AceJump/issues/324). Thanks @AlexPl292!
+- Fixes [#324](https://github.com/acejump/AceJump/issues/324). Thanks [@AlexPl292](https://github.com/AlexPl292)!
 - Fixes [#325](https://github.com/acejump/AceJump/issues/325).
 - Fixes Pinyin support.
 
@@ -74,7 +78,7 @@
 
 - Adds support for Chinese [#314](https://github.com/acejump/AceJump/issues/314).
 - Fixes constantly loading settings page [#303](https://github.com/acejump/AceJump/issues/303).
-- Honor camel humps [#315](https://github.com/acejump/AceJump/issues/315). Thanks to @clojj.
+- Honor camel humps [#315](https://github.com/acejump/AceJump/issues/315). Thanks to [@clojj](https://github.com/clojj).
 - Support dynamic application reloading [#322](https://github.com/acejump/AceJump/issues/322).
 
 ## 3.5.9
