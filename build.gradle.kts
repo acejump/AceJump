@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.6.20-RC"
+  kotlin("jvm") version "1.6.20-RC2"
   id("org.jetbrains.intellij") version "1.4.0"
   id("org.jetbrains.changelog") version "1.3.1"
   id("com.github.ben-manes.versions") version "0.42.0"
@@ -12,7 +12,7 @@ plugins {
 
 tasks {
   withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_1_8.toString()
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
   }
 
   named<Zip>("buildPlugin") {
@@ -38,7 +38,7 @@ tasks {
   }
 
   runPluginVerifier {
-    ideVersions.set(listOf("2021.2.1"))
+    ideVersions.set(listOf("2021.3"))
   }
 
   // Remove pending: https://youtrack.jetbrains.com/issue/IDEA-278926
@@ -51,7 +51,11 @@ tasks {
   }
 }
 
-java.toolchain.languageVersion.set(JavaLanguageVersion.of(15))
+kotlin.jvmToolchain {
+  (this as JavaToolchainSpec).run {
+    languageVersion.set(JavaLanguageVersion.of(11))
+  }
+}
 
 changelog {
   version.set("3.8.5")
@@ -74,7 +78,7 @@ dependencies {
 }
 
 intellij {
-  version.set("2021.3")
+  version.set("221.5080-EAP-CANDIDATE-SNAPSHOT")
   pluginName.set("AceJump")
   updateSinceUntilBuild.set(false)
   plugins.set(listOf("java"))

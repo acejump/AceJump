@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.7
+
+- Fixes Unicode-ASCII regression, [#399](https://github.com/acejump/AceJump/issues/398)
+
 ## 3.8.6
 
 - Adds AZERTY keyboard layout, [#398](https://github.com/acejump/AceJump/pull/398), thanks to [@delphinaubin](https://github.com/delphinaubin)
