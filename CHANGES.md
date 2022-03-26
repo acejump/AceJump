@@ -4,7 +4,7 @@
 
 ## 3.8.7
 
-- Fixes Unicode-ASCII regression, [#399](https://github.com/acejump/AceJump/issues/398)
+- Fixes Unicode-ASCII regression, [#399](https://github.com/acejump/AceJump/issues/399)
 
 ## 3.8.6
 
