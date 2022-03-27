@@ -55,6 +55,12 @@
     <action id="AceReverseAction"
             class="org.acejump.action.AceAction$ActivateOrReverseCycleMode"
             text="Activate / Reverse Cycle AceJump Mode"/>
+    <action id="AceForwardAction"
+            class="org.acejump.action.AceAction$ToggleForwardJumpMode"
+            text="Start AceJump in Jump After Caret Mode"/>
+    <action id="AceBackwardAction"
+            class="org.acejump.action.AceAction$ToggleBackwardJumpMode"
+            text="Start AceJump in Jump Before Caret Mode"/>
     <action id="AceWordStartAction"
             class="org.acejump.action.AceAction$ToggleJumpMode"
             text="Start AceJump in Jump Mode"/>

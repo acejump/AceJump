@@ -51,6 +51,13 @@ sealed class AceAction: DumbAwareAction() {
   }
 
   /**
+   * Generic action type that toggles a specific [JumpMode] with [Boundaries].
+   */
+  abstract class BaseToggleBoundedJumpModeAction(private val mode: JumpMode, private val boundaries: Boundaries): AceAction() {
+    final override fun invoke(session: Session) = session.toggleJumpMode(mode, boundaries)
+  }
+
+  /**
    * Generic action type that starts a regex search.
    */
   abstract class BaseRegexSearchAction(private val pattern: Pattern, private val boundaries: Boundaries): AceAction() {
@@ -73,12 +80,17 @@ sealed class AceAction: DumbAwareAction() {
 
   // @formatter:off
 
+  // Unbounded Toggle Modes
   class ToggleJumpMode        : BaseToggleJumpModeAction(JUMP)
   class ToggleJumpEndMode     : BaseToggleJumpModeAction(JUMP_END)
   class ToggleTargetMode      : BaseToggleJumpModeAction(TARGET)
   class ToggleDeclarationMode : BaseToggleJumpModeAction(DECLARATION)
 
+  // Bounded Toggle Modes
+  class ToggleBackwardJumpMode : BaseToggleBoundedJumpModeAction(JUMP, BEFORE_CARET)
+  class ToggleForwardJumpMode  : BaseToggleBoundedJumpModeAction(JUMP, AFTER_CARET)
 
+  // Regex Modes
   class StartAllWordsMode          : BaseRegexSearchAction(ALL_WORDS, WHOLE_FILE)
   class StartAllWordsBackwardsMode : BaseRegexSearchAction(ALL_WORDS, BEFORE_CARET)
   class StartAllWordsForwardMode   : BaseRegexSearchAction(ALL_WORDS, AFTER_CARET)
