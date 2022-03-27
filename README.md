@@ -71,6 +71,16 @@ map g :action AceLineAction<CR>
 ' >> ~/.ideavimrc
 ```
 
+To customize AceJump's behavior further with additional actions, see the `<action>` tags in [plugin.xml](src/main/resources/META-INF/plugin.xml). The following example shows how to activate AceJump before or after the caret.
+
+```
+" Press `S` to activate AceJump mode before the caret
+map S :action AceBackwardAction<CR>
+
+" Press `s` to activate AceJump mode after the caret
+map s :action AceForwardAction<CR>
+```
+
 To change the default keyboard shortcuts, open **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter⏎</kbd>.
 
 ![Keymap](https://cloud.githubusercontent.com/assets/175716/11760350/911aed4c-a065-11e5-8f17-49bc97ad1dad.png)
