@@ -67,14 +67,13 @@ changelog {
 
 repositories {
   mavenCentral()
-  maven("https://jitpack.io")
 }
 
 dependencies {
   // gradle-intellij-plugin doesn't attach sources properly for Kotlin :(
   implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
   compileOnly(kotlin("stdlib-jdk8"))
-  implementation("com.anyascii:anyascii:0.3.0")
+  implementation("com.anyascii:anyascii:0.3.1")
 }
 
 intellij {
