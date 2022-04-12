@@ -38,7 +38,7 @@ tasks {
   }
 
   runPluginVerifier {
-    ideVersions.set(listOf("2021.3"))
+    ideVersions.set(listOf("2022.1"))
   }
 
   // Remove pending: https://youtrack.jetbrains.com/issue/IDEA-278926
@@ -77,7 +77,7 @@ dependencies {
 }
 
 intellij {
-  version.set("221.5080-EAP-CANDIDATE-SNAPSHOT")
+  version.set("2022.1")
   pluginName.set("AceJump")
   updateSinceUntilBuild.set(false)
   plugins.set(listOf("java"))
