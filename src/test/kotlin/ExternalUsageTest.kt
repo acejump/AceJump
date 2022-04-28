@@ -1,5 +1,7 @@
 import com.intellij.mock.MockVirtualFile
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.markup.HighlighterLayer
+import com.intellij.openapi.editor.markup.HighlighterTargetArea
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.util.ui.UIUtil
 import it.unimi.dsi.fastutil.ints.IntArrayList
@@ -165,5 +167,22 @@ class ExternalUsageTest: BaseTest() {
 
     TestCase.assertEquals(mark, detectedMark)
     TestCase.assertEquals("", detectedQuery)
+  }
+
+  fun `test do not remove other highlights when the session ends`() {
+    makeEditor("test do not remove other highlights when the session ends")
+
+    val markupModel = myFixture.editor.markupModel
+    val layer = HighlighterLayer.SELECTION - 1
+    val existedHighlighter = markupModel.addRangeHighlighter(0, 1, layer, null, HighlighterTargetArea.EXACT_RANGE)
+
+    takeAction(AceAction.StartAllWordsMode())
+    val mark = session.tags[0].key
+    typeAndWaitForResults(mark)
+
+    TestCase.assertEquals("last session should be disposed", null, SessionManager[myFixture.editor])
+    TestCase.assertTrue("existed highlighter should not be removed", existedHighlighter.isValid)
+
+    existedHighlighter.dispose()
   }
 }
