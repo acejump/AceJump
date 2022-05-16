@@ -148,7 +148,9 @@ internal class TextHighlighter {
   }
 
   fun reset() {
-    previousHighlights.keys.forEach { it.markupModel.removeAllHighlighters() }
+    previousHighlights.forEach { (editor, highlighters) ->
+      highlighters.forEach(editor.markupModel::removeHighlighter)
+    }
     previousHighlights.clear()
     previousHint?.hide()
   }
