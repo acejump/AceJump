@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.7.0-Beta"
-  id("org.jetbrains.intellij") version "1.5.3"
+  kotlin("jvm") version "1.7.0-RC"
+  id("org.jetbrains.intellij") version "1.6.0"
   id("org.jetbrains.changelog") version "1.3.1"
   id("com.github.ben-manes.versions") version "0.42.0"
 }
@@ -52,7 +52,7 @@ tasks {
 }
 
 kotlin.jvmToolchain {
-  (this as JavaToolchainSpec).run {
+  run {
     languageVersion.set(JavaLanguageVersion.of(11))
   }
 }
