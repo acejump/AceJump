@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 3.8.8
+
+- Add AZERTY keyboard layout, [#398](https://github.com/acejump/AceJump/pull/398), thanks to [@delphinaubin](https://github.com/delphinaubin)
+- Add bounded toggle mode to start jump mode before or after the caret, [#401](https://github.com/acejump/AceJump/pull/401), thanks to [@colossatr0n](https://github.com/colossatr0n)
+- Remove only the highlighters added by AceJump when jump session ends, [#407](https://github.com/acejump/AceJump/pull/407), thanks to [@huoguangjin](https://github.com/huoguangjin)
+
 ## 3.8.7
 
 - Fixes Unicode-ASCII regression, [#399](https://github.com/acejump/AceJump/issues/399)
