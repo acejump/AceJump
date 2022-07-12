@@ -62,11 +62,11 @@ AceJump can be [installed directly from the IDE](https://www.jetbrains.com/help/
 echo -e '
 
 " Press `f` to activate AceJump
-map f :action AceAction<CR>
+map f <Action>(AceAction)
 " Press `F` to activate Target Mode
-map F :action AceTargetAction<CR>
+map F <Action>(AceTargetAction)
 " Press `g` to activate Line Mode
-map g :action AceLineAction<CR>
+map g <Action>(AceLineAction)
 
 ' >> ~/.ideavimrc
 ```
@@ -74,11 +74,11 @@ map g :action AceLineAction<CR>
 To customize AceJump's behavior further with additional actions, see the `<action>` tags in [plugin.xml](src/main/resources/META-INF/plugin.xml). The following example shows how to activate AceJump before or after the caret.
 
 ```
-" Press `S` to activate AceJump mode before the caret
-map S :action AceBackwardAction<CR>
+" Press `S` in normal mode to activate AceJump mode before the caret
+nmap S <Action>(AceBackwardAction)
 
-" Press `s` to activate AceJump mode after the caret
-map s :action AceForwardAction<CR>
+" Press `s` in normal mode to activate AceJump mode after the caret
+nmap s <Action>(AceForwardAction)
 ```
 
 To change the default keyboard shortcuts, open **File \| Settings \| Keymap \| 🔍 "AceJump" \| AceJump \|** <kbd>Enter⏎</kbd>.
