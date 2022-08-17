@@ -20,27 +20,38 @@
                              id="preferences.AceConfigurable" dynamic="true"/>
 
     <editorActionHandler action="EditorEscape" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$Reset"/>
+                         implementationClass="org.acejump.action.AceEditorAction$Reset"
+                         id="AceHandlerEscape"/>
     <editorActionHandler action="EditorBackSpace" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$ClearSearch"/>
+                         implementationClass="org.acejump.action.AceEditorAction$ClearSearch"
+                         id="AceHandlerBackSpace"/>
     <editorActionHandler action="EditorStartNewLine" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$SelectBackward"/>
+                         implementationClass="org.acejump.action.AceEditorAction$SelectBackward"
+                         id="AceHandlerStartNewLine"/>
     <editorActionHandler action="EditorEnter" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$SelectForward"/>
+                         implementationClass="org.acejump.action.AceEditorAction$SelectForward"
+                         id="AceHandlerEnter"/>
     <editorActionHandler action="EditorTab" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$ScrollToNextScreenful"/>
+                         implementationClass="org.acejump.action.AceEditorAction$ScrollToNextScreenful"
+                         id="AceHandlerTab"/>
     <editorActionHandler action="EditorUnindentSelection" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$ScrollToPreviousScreenful"/>
+                         implementationClass="org.acejump.action.AceEditorAction$ScrollToPreviousScreenful"
+                         id="AceHandlerUnindentSelection"/>
     <editorActionHandler action="EditorUp" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$SearchLineStarts"/>
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineStarts"
+                         id="AceHandlerUp"/>
     <editorActionHandler action="EditorLeft" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$SearchLineIndents"/>
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineIndents"
+                         id="AceHandlerLeft"/>
     <editorActionHandler action="EditorLineStart" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$SearchLineIndents"/>
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineIndents"
+                         id="AceHandlerLineStart"/>
     <editorActionHandler action="EditorRight" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$SearchLineEnds"/>
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineEnds"
+                         id="AceHandlerRight"/>
     <editorActionHandler action="EditorLineEnd" order="first"
-                         implementationClass="org.acejump.action.AceEditorAction$SearchLineEnds"/>
+                         implementationClass="org.acejump.action.AceEditorAction$SearchLineEnds"
+                         id="AceHandlerLineEnd"/>
 
   </extensions>
 
