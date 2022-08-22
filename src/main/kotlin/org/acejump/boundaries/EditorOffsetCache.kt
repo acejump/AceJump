@@ -30,9 +30,7 @@ sealed class EditorOffsetCache {
    */
   abstract fun offsetToXY(editor: Editor, offset: Int): Point
 
-  companion object {
-    fun new(): EditorOffsetCache = Cache()
-  }
+  companion object { fun new(): EditorOffsetCache = Cache() }
 
   private class Cache: EditorOffsetCache() {
     private var visibleArea: Pair<Point, Point>? = null
@@ -45,17 +43,13 @@ sealed class EditorOffsetCache {
     override fun xyToOffset(editor: Editor, pos: Point): Int =
       pointToOffset.getInt(pos).let { offset ->
         if (offset != -1) offset
-        else Uncached.xyToOffset(editor, pos).also {
-          @Suppress("ReplacePutWithAssignment")
-          pointToOffset.put(pos, it)
-        }
+        else Uncached.xyToOffset(editor, pos)
+          .also { pointToOffset.put(pos, it) }
       }
 
     override fun offsetToXY(editor: Editor, offset: Int) =
-      offsetToPoint.get(offset) ?: Uncached.offsetToXY(editor, offset).also {
-        @Suppress("ReplacePutWithAssignment")
-        offsetToPoint.put(offset, it)
-      }
+      offsetToPoint.get(offset) ?: Uncached.offsetToXY(editor, offset)
+        .also { offsetToPoint.put(offset, it) }
   }
 
   object Uncached: EditorOffsetCache() {

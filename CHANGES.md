@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.9
+
+- Add ids to editor action handlers, [#410](https://github.com/acejump/AceJump/pull/410), thanks to [@AlexPl292](https://github.com/AlexPl292)
+
 ## 3.8.8
 
 - Add AZERTY keyboard layout, [#398](https://github.com/acejump/AceJump/pull/398), thanks to [@delphinaubin](https://github.com/delphinaubin)
