@@ -7,7 +7,6 @@ import kotlin.system.measureTimeMillis
 
 @Ignore
 class LatencyTest: BaseTest() {
-
   private fun `test tag latency`(editorText: String) {
     val chars = editorText.toCharArray().distinct().filter { !it.isWhitespace() }
     val avg = averageTimeWithWarmup(warmupRuns = 10, timedRuns = 10) {
