@@ -4,15 +4,15 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.7.20"
-  id("org.jetbrains.intellij") version "1.9.0"
+  kotlin("jvm") version "1.8.0-Beta"
+  id("org.jetbrains.intellij") version "1.10.0"
   id("org.jetbrains.changelog") version "1.3.1"
-  id("com.github.ben-manes.versions") version "0.42.0"
+  id("com.github.ben-manes.versions") version "0.44.0"
 }
 
 tasks {
-  withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_11.toString()
+  compileKotlin {
+    kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
   }
 
   named<Zip>("buildPlugin") {
@@ -20,7 +20,7 @@ tasks {
     archiveFileName.set("AceJump.zip")
   }
 
-  withType<RunIdeTask> {
+  runIde {
     dependsOn("test")
     findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
   }
@@ -54,7 +54,7 @@ tasks {
 
 kotlin.jvmToolchain {
   run {
-    languageVersion.set(JavaLanguageVersion.of(11))
+    languageVersion.set(JavaLanguageVersion.of(17))
   }
 }
 
@@ -71,6 +71,7 @@ repositories {
 }
 
 dependencies {
+  // https://github.com/anyascii/anyascii
   implementation("com.anyascii:anyascii:0.3.1")
 }
 
