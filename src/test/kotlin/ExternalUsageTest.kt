@@ -43,12 +43,12 @@ class ExternalUsageTest: BaseTest() {
   fun `test externally tagged results with multiple editors`() {
     val fileA = MockVirtualFile("a.txt", "first file")
     val fileB = MockVirtualFile("b.txt", "second file with more markers")
-    myManager.openFile(fileA, true)
-    myManager.openFile(fileB, false)
+    manager?.openFile(fileA, true)
+    manager?.openFile(fileB, false)
     
-    val mainEditor = (myManager.selectedEditor as TextEditor).editor
-    val editorA = (myManager.getEditors(fileA).single() as TextEditor).editor
-    val editorB = (myManager.getEditors(fileB).single() as TextEditor).editor
+    val mainEditor = (manager?.selectedEditor as TextEditor).editor
+    val editorA = (manager?.getEditors(fileA)?.single() as TextEditor).editor
+    val editorB = (manager?.getEditors(fileB)?.single() as TextEditor).editor
     
     val session = SessionManager.start(mainEditor, listOf(editorA, editorB))
     

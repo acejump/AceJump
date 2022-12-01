@@ -29,7 +29,7 @@ sealed class AceAction: DumbAwareAction() {
   
     if (project != null) {
       try {
-        val openEditors = FileEditorManagerEx.getInstanceEx(project).splitters.selectedEditors
+        val openEditors = FileEditorManagerEx.getInstanceEx(project).splitters.getSelectedEditors()
           .mapNotNull { (it as? TextEditor)?.editor }
           .sortedBy { if (it === editor) 0 else 1 }
         invoke(SessionManager.start(editor, openEditors))

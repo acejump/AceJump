@@ -5,6 +5,7 @@
 ## 3.8.9
 
 - Add ids to editor action handlers, [#410](https://github.com/acejump/AceJump/pull/410), thanks to [@AlexPl292](https://github.com/AlexPl292)
+- Update API to IJ-2022.3 and JDK to 17
 
 ## 3.8.8
 

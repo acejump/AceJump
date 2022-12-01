@@ -5,17 +5,14 @@ import com.intellij.ui.ColorPanel
 import com.intellij.ui.components.JBCheckBox
 import com.intellij.ui.components.JBTextArea
 import com.intellij.ui.components.JBTextField
-import com.intellij.ui.layout.Cell
-import com.intellij.ui.layout.GrowPolicy.MEDIUM_TEXT
-import com.intellij.ui.layout.GrowPolicy.SHORT_TEXT
-import com.intellij.ui.layout.panel
+import com.intellij.ui.dsl.builder.*
 import org.acejump.input.JumpMode
 import org.acejump.input.KeyLayout
 import java.awt.Color
 import java.awt.Font
 import javax.swing.JCheckBox
-import javax.swing.JComponent
 import javax.swing.JPanel
+import javax.swing.JTextArea
 import javax.swing.text.JTextComponent
 import kotlin.reflect.KProperty
 
@@ -54,45 +51,41 @@ internal class AceSettingsPanel {
   }
 
   internal val rootPanel: JPanel = panel {
-    fun Cell.short(component: JComponent) = component(growPolicy = SHORT_TEXT)
-    fun Cell.medium(component: JComponent) = component(growPolicy = MEDIUM_TEXT)
 
-    titledRow("Characters and Layout") {
-      row("Allowed characters in tags:") { medium(tagCharsField) }
-      row("Keyboard layout:") { short(keyboardLayoutCombo) }
-      row("Keyboard design:") { short(keyboardLayoutArea) }
+    group("Characters and Layout") {
+      row("Allowed characters in tags:") { cell(tagCharsField).columns(COLUMNS_LARGE) }
+      row("Keyboard layout:") { cell(keyboardLayoutCombo).columns(COLUMNS_SHORT) }
+      row("Keyboard design:") { cell(keyboardLayoutArea).columns(COLUMNS_SHORT) }
     }
 
-    titledRow("Modes") {
-      row("Cycle order:") { cell { cycleModeCombo1() } }
+    group("Modes") {
+      row("Cycle order:") { cycleModeCombo1 }
       row("") {
-        cell(isVerticalFlow = true) {
-          cycleModeCombo2()
-          cycleModeCombo3()
-          cycleModeCombo4()
-        }
+          cycleModeCombo2
+          cycleModeCombo3
+          cycleModeCombo4
       }
     }
 
-    titledRow("Colors") {
-      row("Jump mode caret background:") { short(jumpModeColorWheel) }
-      row("Jump to End mode caret background:") { short(jumpEndModeColorWheel) }
-      row("Target mode caret background:") { short(targetModeColorWheel) }
-      row("Definition mode caret background:") { short(definitionModeColorWheel) }
-      row("Searched text background:") { short(textHighlightColorWheel) }
-      row("Tag foreground:") { short(tagForegroundColorWheel) }
-      row("Tag background:") { short(tagBackgroundColorWheel) }
+    group("Colors") {
+      row("Jump mode caret background:") { cell(jumpModeColorWheel) }
+      row("Jump to End mode caret background:") { cell(jumpEndModeColorWheel) }
+      row("Target mode caret background:") { cell(targetModeColorWheel) }
+      row("Definition mode caret background:") { cell(definitionModeColorWheel) }
+      row("Searched text background:") { cell(textHighlightColorWheel) }
+      row("Tag foreground:") { cell(tagForegroundColorWheel) }
+      row("Tag background:") { cell(tagBackgroundColorWheel) }
     }
 
-    titledRow("Behavior") {
-      row { short(searchWholeFileCheckBox.apply { text = "Search whole file" }) }
-      row("Minimum typed characters (1-10):") { short(minQueryLengthField) }
+    group("Behavior") {
+      row { cell(searchWholeFileCheckBox.apply { text = "Search whole file" }) }
+      row("Minimum typed characters (1-10):") { cell(minQueryLengthField) }
     }
-    titledRow("Language Settings") {
-      row { short(mapToASCIICheckBox.apply { text = "Map unicode to ASCII" }) }
+    group("Language Settings") {
+      row { cell(mapToASCIICheckBox.apply { text = "Map unicode to ASCII" }) }
     }
-    titledRow("Visual") {
-      row { short(showSearchNotificationCheckBox.apply { text = "Show hint with search text" }) }
+    group("Visual") {
+      row { cell(showSearchNotificationCheckBox.apply { text = "Show hint with search text" }) }
     }
   }
 

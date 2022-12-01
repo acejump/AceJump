@@ -1,12 +1,12 @@
 import org.jetbrains.changelog.*
+import org.jetbrains.changelog.Changelog.OutputType.HTML
 import org.jetbrains.intellij.tasks.*
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
   idea apply true
   kotlin("jvm") version "1.8.0-Beta"
   id("org.jetbrains.intellij") version "1.10.0"
-  id("org.jetbrains.changelog") version "1.3.1"
+  id("org.jetbrains.changelog") version "2.0.0"
   id("com.github.ben-manes.versions") version "0.44.0"
 }
 
@@ -31,9 +31,9 @@ tasks {
   }
 
   patchPluginXml {
-    sinceBuild.set("213.5744.223")
+    sinceBuild.set("223.7571.182")
     changeNotes.set(provider {
-      changelog.getAll().values.take(2).last().toHTML()
+      changelog.renderItem(changelog.getAll().values.take(2).last(), HTML)
     })
   }
 
@@ -76,7 +76,7 @@ dependencies {
 }
 
 intellij {
-  version.set("2022.2")
+  version.set("2022.3")
   pluginName.set("AceJump")
   updateSinceUntilBuild.set(false)
   plugins.set(listOf("java"))

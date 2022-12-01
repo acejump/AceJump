@@ -38,7 +38,7 @@ abstract class BaseTest: FileEditorManagerTestCase() {
       UIUtil.dispatchAllInvocationEvents()
       assertEmpty(it.markupModel.allHighlighters)
     }
-    myManager.closeAllFiles()
+    manager?.closeAllFiles()
   }
 
   fun typeAndWaitForResults(string: String) {
