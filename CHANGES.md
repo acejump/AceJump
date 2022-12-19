@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.10
+
+- Fixes regression in 3.8.9 breaking cross-tab selection, [#417](https://github.com/acejump/AceJump/issues/417)
+
 ## 3.8.9
 
 - Add ids to editor action handlers, [#410](https://github.com/acejump/AceJump/pull/410), thanks to [@AlexPl292](https://github.com/AlexPl292)

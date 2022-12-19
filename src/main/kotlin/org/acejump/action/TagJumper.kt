@@ -99,8 +99,8 @@ internal class TagJumper(private val mode: JumpMode, private val searchProcessor
     private fun ensureEditorFocused(editor: Editor) {
       val project = editor.project ?: return
       val fem = FileEditorManagerEx.getInstanceEx(project)
-    
-      val window = fem.windows.firstOrNull { (it.getSelectedComposite(true)?.fileEditorManager?.selectedTextEditor) === editor }
+
+      val window = fem.windows.firstOrNull { (it.getSelectedComposite(false)?.selectedWithProvider?.fileEditor as? TextEditor)?.editor === editor }
       if (window != null && window !== fem.currentWindow) {
         fem.currentWindow = window
       }

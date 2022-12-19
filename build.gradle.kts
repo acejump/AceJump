@@ -59,7 +59,7 @@ kotlin.jvmToolchain {
 }
 
 changelog {
-  version.set("3.8.9")
+  version.set("3.8.10")
   path.set("${project.projectDir}/CHANGES.md")
   header.set(provider { "[${project.version}] - ${date()}" })
   itemPrefix.set("-")
@@ -83,4 +83,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.8.9"
+version = "3.8.10"
