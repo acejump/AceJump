@@ -51,7 +51,6 @@ internal class AceSettingsPanel {
   }
 
   internal val rootPanel: JPanel = panel {
-
     group("Characters and Layout") {
       row("Allowed characters in tags:") { cell(tagCharsField).columns(COLUMNS_LARGE) }
       row("Keyboard layout:") { cell(keyboardLayoutCombo).columns(COLUMNS_SHORT) }

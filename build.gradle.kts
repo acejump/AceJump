@@ -4,8 +4,8 @@ import org.jetbrains.intellij.tasks.*
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.8.0-Beta"
-  id("org.jetbrains.intellij") version "1.10.0"
+  kotlin("jvm") version "1.8.0"
+  id("org.jetbrains.intellij") version "1.11.0"
   id("org.jetbrains.changelog") version "2.0.0"
   id("com.github.ben-manes.versions") version "0.44.0"
 }
