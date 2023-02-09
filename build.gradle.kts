@@ -4,10 +4,10 @@ import org.jetbrains.intellij.tasks.*
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.8.0"
-  id("org.jetbrains.intellij") version "1.11.0"
+  kotlin("jvm") version "1.8.20-Beta"
+  id("org.jetbrains.intellij") version "1.12.0"
   id("org.jetbrains.changelog") version "2.0.0"
-  id("com.github.ben-manes.versions") version "0.44.0"
+  id("com.github.ben-manes.versions") version "0.45.0"
 }
 
 tasks {
@@ -38,7 +38,7 @@ tasks {
   }
 
   runPluginVerifier {
-    ideVersions.set(listOf("2022.2"))
+    ideVersions.set(listOf("2022.3"))
   }
 
   // Remove pending: https://youtrack.jetbrains.com/issue/IDEA-278926
@@ -76,7 +76,7 @@ dependencies {
 }
 
 intellij {
-  version.set("2022.3")
+  version.set("2022.3.2")
   pluginName.set("AceJump")
   updateSinceUntilBuild.set(false)
   plugins.set(listOf("java"))
