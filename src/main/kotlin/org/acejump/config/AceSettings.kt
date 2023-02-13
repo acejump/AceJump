@@ -1,11 +1,8 @@
 package org.acejump.config
 
-import com.intellij.util.xmlb.Converter
-import com.intellij.util.xmlb.annotations.OptionTag
-import org.acejump.input.JumpMode
-import org.acejump.input.KeyLayout
+import com.intellij.ui.JBColor
+import org.acejump.input.*
 import org.acejump.input.KeyLayout.QWERTY
-import java.awt.Color
 
 data class AceSettings(
   var layout: KeyLayout = QWERTY,
@@ -16,35 +13,23 @@ data class AceSettings(
   var cycleMode4: JumpMode = JumpMode.JUMP_END,
   var minQueryLength: Int = 1,
 
-  @OptionTag("jumpModeRGB", converter = ColorConverter::class)
-  var jumpModeColor: Color = Color(0xFFFFFF),
+  var jumpModeColor: JBColor = JBColor.namedColor("jumpModeRGB", 0xFFFFFF),
 
-  @OptionTag("jumpEndModeRGB", converter = ColorConverter::class)
-  var jumpEndModeColor: Color = Color(0x33E78A),
+  var jumpEndModeColor: JBColor = JBColor.namedColor("jumpEndModeRGB", 0x33E78A),
 
-  @OptionTag("targetModeRGB", converter = ColorConverter::class)
-  var targetModeColor: Color = Color(0xFFB700),
+  var targetModeColor: JBColor = JBColor.namedColor("targetModeRGB", 0xFFB700),
 
-  @OptionTag("definitionModeRGB", converter = ColorConverter::class)
-  var definitionModeColor: Color = Color(0x6FC5FF),
+  var definitionModeColor: JBColor = JBColor.namedColor("definitionModeRGB", 0x6FC5FF),
 
-  @OptionTag("textHighlightRGB", converter = ColorConverter::class)
-  var textHighlightColor: Color = Color(0x394B58),
+  var textHighlightColor: JBColor = JBColor.namedColor("textHighlightRGB", 0x394B58),
 
-  @OptionTag("tagForegroundRGB", converter = ColorConverter::class)
-  var tagForegroundColor: Color = Color(0xFFFFFF),
+  var tagForegroundColor: JBColor = JBColor.namedColor("tagForegroundRGB", 0xFFFFFF),
 
-  @OptionTag("tagBackgroundRGB", converter = ColorConverter::class)
-  var tagBackgroundColor: Color = Color(0x008299),
+  var tagBackgroundColor: JBColor = JBColor.namedColor("tagBackgroundRGB", 0x008299),
 
   var searchWholeFile: Boolean = true,
 
-  var mapToASCII : Boolean = false,
+  var mapToASCII: Boolean = false,
 
-  var showSearchNotification : Boolean = false
+  var showSearchNotification: Boolean = false
 )
-
-internal class ColorConverter: Converter<Color>() {
-  override fun toString(value: Color) = value.rgb.toString()
-  override fun fromString(value: String) = value.toIntOrNull()?.let(::Color)
-}

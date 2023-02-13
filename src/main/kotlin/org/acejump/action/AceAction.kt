@@ -1,6 +1,6 @@
 package org.acejump.action
 
-import com.intellij.openapi.actionSystem.AnActionEvent
+import com.intellij.openapi.actionSystem.*
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
@@ -19,6 +19,8 @@ import org.acejump.session.SessionManager
  * Base class for keyboard-activated actions that create or update an AceJump [Session].
  */
 sealed class AceAction: DumbAwareAction() {
+  override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
+
   final override fun update(action: AnActionEvent) {
     action.presentation.isEnabled = action.getData(EDITOR) != null
   }

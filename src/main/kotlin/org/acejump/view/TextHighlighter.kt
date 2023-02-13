@@ -32,7 +32,7 @@ internal class TextHighlighter {
   /**
    * Label for the search notification.
    */
-  private class NotificationLabel constructor(text: String?): JLabel(text) {
+  private class NotificationLabel(text: String?): JLabel(text) {
     init {
       background = HintUtil.getInformationColor()
       foreground = JBColor.foreground()
@@ -117,7 +117,7 @@ internal class TextHighlighter {
       add(label2, BorderLayout.CENTER)
       add(label3, BorderLayout.EAST)
       border = BorderFactory.createLineBorder(
-        if (jumpMode == JumpMode.DISABLED) Color.BLACK else jumpMode.caretColor
+        if (jumpMode == JumpMode.DISABLED) JBColor.BLACK else jumpMode.caretColor
       )
 
       preferredSize = Dimension(

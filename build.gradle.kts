@@ -1,6 +1,5 @@
-import org.jetbrains.changelog.*
 import org.jetbrains.changelog.Changelog.OutputType.HTML
-import org.jetbrains.intellij.tasks.*
+import org.jetbrains.changelog.date
 
 plugins {
   idea apply true
