@@ -5,7 +5,7 @@ import org.jetbrains.intellij.tasks.*
 plugins {
   idea apply true
   kotlin("jvm") version "1.8.20-Beta"
-  id("org.jetbrains.intellij") version "1.12.0"
+  id("org.jetbrains.intellij") version "1.13.0"
   id("org.jetbrains.changelog") version "2.0.0"
   id("com.github.ben-manes.versions") version "0.45.0"
 }
@@ -59,7 +59,7 @@ kotlin.jvmToolchain {
 }
 
 changelog {
-  version.set("3.8.10")
+  version.set("3.8.11")
   path.set("${project.projectDir}/CHANGES.md")
   header.set(provider { "[${project.version}] - ${date()}" })
   itemPrefix.set("-")
@@ -83,4 +83,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.8.10"
+version = "3.8.11"

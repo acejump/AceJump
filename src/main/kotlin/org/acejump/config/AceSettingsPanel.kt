@@ -2,17 +2,11 @@ package org.acejump.config
 
 import com.intellij.openapi.ui.ComboBox
 import com.intellij.ui.ColorPanel
-import com.intellij.ui.components.JBCheckBox
-import com.intellij.ui.components.JBTextArea
-import com.intellij.ui.components.JBTextField
+import com.intellij.ui.components.*
 import com.intellij.ui.dsl.builder.*
-import org.acejump.input.JumpMode
-import org.acejump.input.KeyLayout
-import java.awt.Color
-import java.awt.Font
-import javax.swing.JCheckBox
-import javax.swing.JPanel
-import javax.swing.JTextArea
+import org.acejump.input.*
+import java.awt.*
+import javax.swing.*
 import javax.swing.text.JTextComponent
 import kotlin.reflect.KProperty
 
@@ -58,11 +52,11 @@ internal class AceSettingsPanel {
     }
 
     group("Modes") {
-      row("Cycle order:") { cycleModeCombo1 }
-      row("") {
-          cycleModeCombo2
-          cycleModeCombo3
-          cycleModeCombo4
+      row("Cycle order:") {
+        cell(cycleModeCombo1).columns(10)
+        cell(cycleModeCombo2).columns(10)
+        cell(cycleModeCombo3).columns(10)
+        cell(cycleModeCombo4).columns(10)
       }
     }
 

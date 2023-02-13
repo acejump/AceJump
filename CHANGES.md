@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.11
+
+- Fixes UI issue affecting mode cycling order, [#426](https://github.com/acejump/AceJump/issues/426)
+
 ## 3.8.10
 
 - Fixes regression in 3.8.9 breaking cross-tab selection, [#417](https://github.com/acejump/AceJump/issues/417)
