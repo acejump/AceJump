@@ -51,9 +51,16 @@ tasks {
   }
 }
 
-kotlin.jvmToolchain {
-  run {
-    languageVersion.set(JavaLanguageVersion.of(17))
+kotlin {
+  jvmToolchain {
+    run {
+      languageVersion.set(JavaLanguageVersion.of(17))
+    }
+  }
+  sourceSets.all {
+    languageSettings.apply {
+      languageVersion = "2.0"
+    }
   }
 }
 
