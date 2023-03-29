@@ -3,8 +3,8 @@ import org.jetbrains.changelog.date
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.8.20-Beta"
-  id("org.jetbrains.intellij") version "1.13.0"
+  kotlin("jvm") version "1.8.20-RC2"
+  id("org.jetbrains.intellij") version "1.13.3"
   id("org.jetbrains.changelog") version "2.0.0"
   id("com.github.ben-manes.versions") version "0.46.0"
 }
@@ -78,11 +78,11 @@ repositories {
 
 dependencies {
   // https://github.com/anyascii/anyascii
-  implementation("com.anyascii:anyascii:0.3.1")
+  implementation("com.anyascii:anyascii:0.3.2")
 }
 
 intellij {
-  version.set("2022.3.2")
+  version.set("2023.1")
   pluginName.set("AceJump")
   updateSinceUntilBuild.set(false)
   plugins.set(listOf("java"))
