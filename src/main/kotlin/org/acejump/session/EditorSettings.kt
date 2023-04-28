@@ -10,7 +10,6 @@ import com.intellij.openapi.editor.Editor
 internal data class EditorSettings(
   private val isBlockCursor: Boolean,
   private val isBlinkCaret: Boolean,
-  private val isReadOnly: Boolean
 ) {
   companion object {
     fun setup(editor: Editor): EditorSettings {
@@ -20,12 +19,10 @@ internal data class EditorSettings(
       val original = EditorSettings(
         isBlockCursor = settings.isBlockCursor,
         isBlinkCaret = settings.isBlinkCaret,
-        isReadOnly = !document.isWritable
       )
 
       settings.isBlockCursor = true
       settings.isBlinkCaret = false
-      document.setReadOnly(true)
 
       return original
     }
@@ -37,6 +34,5 @@ internal data class EditorSettings(
 
     settings.isBlockCursor = isBlockCursor
     settings.isBlinkCaret = isBlinkCaret
-    document.setReadOnly(isReadOnly)
   }
 }

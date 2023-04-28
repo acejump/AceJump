@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.12
+
+- Fixes tag cycling issue with Enter/Shift+Enter, [#429](https://github.com/acejump/AceJump/issues/429)
+
 ## 3.8.11
 
 - Fixes UI issue affecting mode cycling order, [#426](https://github.com/acejump/AceJump/issues/426)
