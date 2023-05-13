@@ -13,23 +13,31 @@ data class AceSettings(
   var cycleMode4: JumpMode = JumpMode.JUMP_END,
   var minQueryLength: Int = 1,
 
-  var jumpModeColor: JBColor = JBColor.namedColor("jumpModeRGB", 0xFFFFFF),
+  var jumpModeColor: Int = 0xFFFFFF,
 
-  var jumpEndModeColor: JBColor = JBColor.namedColor("jumpEndModeRGB", 0x33E78A),
+  var jumpEndModeColor: Int = 0x33E78A,
 
-  var targetModeColor: JBColor = JBColor.namedColor("targetModeRGB", 0xFFB700),
+  var targetModeColor: Int = 0xFFB700,
 
-  var definitionModeColor: JBColor = JBColor.namedColor("definitionModeRGB", 0x6FC5FF),
+  var definitionModeColor: Int = 0x6FC5FF,
 
-  var textHighlightColor: JBColor = JBColor.namedColor("textHighlightRGB", 0x394B58),
+  var textHighlightColor: Int = 0x394B58,
 
-  var tagForegroundColor: JBColor = JBColor.namedColor("tagForegroundRGB", 0xFFFFFF),
+  var tagForegroundColor: Int = 0xFFFFFF,
 
-  var tagBackgroundColor: JBColor = JBColor.namedColor("tagBackgroundRGB", 0x008299),
+  var tagBackgroundColor: Int = 0x008299,
 
   var searchWholeFile: Boolean = true,
 
   var mapToASCII: Boolean = false,
 
   var showSearchNotification: Boolean = false
-)
+) {
+  fun getJumpModeJBC() = JBColor.namedColor("jumpModeRGB", jumpModeColor)
+  fun getJumpEndModeJBC() = JBColor.namedColor("jumpEndModeRGB", jumpEndModeColor)
+  fun getTargetModeJBC() = JBColor.namedColor("targetModeRGB", targetModeColor)
+  fun getDefinitionModeJBC() = JBColor.namedColor("definitionModeRGB", definitionModeColor)
+  fun getTextHighlightJBC() = JBColor.namedColor("textHighlightRGB", textHighlightColor)
+  fun getTagForegroundJBC() = JBColor.namedColor("tagForegroundRGB", tagForegroundColor)
+  fun getTagBackgroundJBC() = JBColor.namedColor("tagBackgroundRGB", tagBackgroundColor)
+}

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.13
+
+- Fixes for color settings not being persisted, [$431](https://github.com/acejump/AceJump/issues/431)
+
 ## 3.8.12
 
 - Fixes tag cycling issue with Enter/Shift+Enter, [#429](https://github.com/acejump/AceJump/issues/429)
