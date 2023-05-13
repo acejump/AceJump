@@ -41,7 +41,6 @@ tasks {
   }
 
   // Remove pending: https://youtrack.jetbrains.com/issue/IDEA-278926
-  @Suppress("UNUSED_VARIABLE")
   val test by getting(Test::class) {
     isScanForTestClasses = false
     // Only run tests from classes that end with "Test"
@@ -65,7 +64,7 @@ kotlin {
 }
 
 changelog {
-  version.set("3.8.12")
+  version.set("3.8.13")
   path.set("${project.projectDir}/CHANGES.md")
   header.set(provider { "[${project.version}] - ${date()}" })
   itemPrefix.set("-")
@@ -89,4 +88,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.8.12"
+version = "3.8.13"
