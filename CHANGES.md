@@ -4,7 +4,7 @@
 
 ## 3.8.13
 
-- Fixes for color settings not being persisted, [$431](https://github.com/acejump/AceJump/issues/431)
+- Fixes color settings not being persisted, [#431](https://github.com/acejump/AceJump/issues/431)
 
 ## 3.8.12
 
