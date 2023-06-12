@@ -1,22 +1,31 @@
 package org.acejump.action
 
-import com.intellij.openapi.actionSystem.*
-import com.intellij.openapi.actionSystem.IdeActions.*
+import com.intellij.openapi.actionSystem.ActionManager
+import com.intellij.openapi.actionSystem.AnAction
+import com.intellij.openapi.actionSystem.IdeActions.ACTION_GOTO_DECLARATION
+import com.intellij.openapi.actionSystem.IdeActions.ACTION_GOTO_TYPE_DECLARATION
 import com.intellij.openapi.command.CommandProcessor
 import com.intellij.openapi.command.UndoConfirmationPolicy
 import com.intellij.openapi.editor.Document
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.actionSystem.DocCommandGroupId
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.fileEditor.ex.IdeDocumentHistory
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.playback.commands.ActionCommand
-import org.acejump.*
+import org.acejump.countMatchingCharacters
+import org.acejump.immutableText
 import org.acejump.input.JumpMode
-import org.acejump.input.JumpMode.*
+import org.acejump.input.JumpMode.DECLARATION
+import org.acejump.input.JumpMode.JUMP_END
+import org.acejump.input.JumpMode.TARGET
+import org.acejump.isWordPart
 import org.acejump.search.SearchProcessor
 import org.acejump.search.Tag
+import org.acejump.wordEnd
+import org.acejump.wordStart
 
 /**
  * Performs [JumpMode] navigation and actions.
@@ -28,7 +37,7 @@ internal class TagJumper(private val mode: JumpMode, private val searchProcessor
   fun visit(tag: Tag) {
     val editor = tag.editor
     val offset = tag.offset
-    
+
     if (mode === JUMP_END || mode === TARGET) {
       val chars = editor.immutableText
       val matchingChars = searchProcessor?.let { chars.countMatchingCharacters(offset, it.query.rawText) } ?: 0
@@ -95,10 +104,10 @@ internal class TagJumper(private val mode: JumpMode, private val searchProcessor
       selectionModel.setSelection(fromOffset, toOffset)
       caretModel.moveToOffset(toOffset)
     }
-  
+
     private fun ensureEditorFocused(editor: Editor) {
       val project = editor.project ?: return
-      val fem = FileEditorManagerEx.getInstanceEx(project)
+      val fem = FileEditorManager.getInstance(project) as FileEditorManagerEx
 
       val window = fem.windows.firstOrNull { (it.getSelectedComposite(false)?.selectedWithProvider?.fileEditor as? TextEditor)?.editor === editor }
       if (window != null && window !== fem.currentWindow) {
