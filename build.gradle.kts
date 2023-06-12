@@ -4,9 +4,9 @@ import org.jetbrains.changelog.date
 plugins {
   idea apply true
   kotlin("jvm") version "1.9.0-Beta"
-  id("org.jetbrains.intellij") version "1.13.3"
-  id("org.jetbrains.changelog") version "2.0.0"
-  id("com.github.ben-manes.versions") version "0.46.0"
+  id("org.jetbrains.intellij") version "1.14.1"
+  id("org.jetbrains.changelog") version "2.1.0"
+  id("com.github.ben-manes.versions") version "0.47.0"
 }
 
 tasks {
@@ -16,7 +16,7 @@ tasks {
 
   named<Zip>("buildPlugin") {
     dependsOn("test")
-    archiveFileName.set("AceJump.zip")
+    archiveFileName = "AceJump.zip"
   }
 
   runIde {
@@ -26,18 +26,18 @@ tasks {
 
   publishPlugin {
     val intellijPublishToken: String? by project
-    token.set(intellijPublishToken)
+    token = intellijPublishToken
   }
 
   patchPluginXml {
-    sinceBuild.set("223.7571.182")
-    changeNotes.set(provider {
+    sinceBuild = "223.7571.182"
+    changeNotes = provider {
       changelog.renderItem(changelog.getAll().values.take(2).last(), HTML)
-    })
+    }
   }
 
   runPluginVerifier {
-    ideVersions.set(listOf("2023.1"))
+    ideVersions = listOf("2023.1")
   }
 
   // Remove pending: https://youtrack.jetbrains.com/issue/IDEA-278926
@@ -53,7 +53,7 @@ tasks {
 kotlin {
   jvmToolchain {
     run {
-      languageVersion.set(JavaLanguageVersion.of(17))
+      languageVersion = JavaLanguageVersion.of(17)
     }
   }
   sourceSets.all {
@@ -64,11 +64,11 @@ kotlin {
 }
 
 changelog {
-  version.set("3.8.13")
-  path.set("${project.projectDir}/CHANGES.md")
-  header.set(provider { "[${project.version}] - ${date()}" })
-  itemPrefix.set("-")
-  unreleasedTerm.set("Unreleased")
+  version = "3.8.13"
+  path = "${project.projectDir}/CHANGES.md"
+  header = provider { "[${project.version}] - ${date()}" }
+  itemPrefix = "-"
+  unreleasedTerm = "Unreleased"
 }
 
 repositories {
@@ -81,10 +81,10 @@ dependencies {
 }
 
 intellij {
-  version.set("2023.1")
-  pluginName.set("AceJump")
-  updateSinceUntilBuild.set(false)
-  plugins.set(listOf("java"))
+  version = "2023.1"
+  pluginName = "AceJump"
+  updateSinceUntilBuild = false
+  plugins = listOf("java")
 }
 
 group = "org.acejump"
