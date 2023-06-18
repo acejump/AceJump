@@ -16,12 +16,14 @@ interface Boundaries {
    * offsets outside the boundary, for ex. when the boundary is rectangular
    * and the file has long lines which are only partially visible.
    */
-  fun getOffsetRange(editor: Editor, cache: EditorOffsetCache = EditorOffsetCache.Uncached): IntRange
+  fun getOffsetRange(editor: Editor, cache: EditorOffsetCache = EditorOffsetCache.Uncached): IntRange =
+    StandardBoundaries.VISIBLE_ON_SCREEN.getOffsetRange(editor, cache)
 
   /**
    * Returns whether the editor offset is included within the boundary.
    */
-  fun isOffsetInside(editor: Editor, offset: Int, cache: EditorOffsetCache = EditorOffsetCache.Uncached): Boolean
+  fun isOffsetInside(editor: Editor, offset: Int, cache: EditorOffsetCache = EditorOffsetCache.Uncached): Boolean =
+    StandardBoundaries.VISIBLE_ON_SCREEN.isOffsetInside(editor, offset, cache)
 
   /**
    * Creates a boundary so that an offset/range is within the boundary
