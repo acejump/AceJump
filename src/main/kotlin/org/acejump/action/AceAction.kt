@@ -1,17 +1,28 @@
 package org.acejump.action
 
-import com.intellij.openapi.actionSystem.*
+import com.intellij.openapi.actionSystem.ActionUpdateThread
+import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.util.IncorrectOperationException
 import org.acejump.boundaries.Boundaries
-import org.acejump.boundaries.StandardBoundaries.*
+import org.acejump.boundaries.StandardBoundaries.AFTER_CARET
+import org.acejump.boundaries.StandardBoundaries.BEFORE_CARET
+import org.acejump.boundaries.StandardBoundaries.WHOLE_FILE
 import org.acejump.input.JumpMode
-import org.acejump.input.JumpMode.*
+import org.acejump.input.JumpMode.DECLARATION
+import org.acejump.input.JumpMode.JUMP
+import org.acejump.input.JumpMode.JUMP_END
+import org.acejump.input.JumpMode.TARGET
 import org.acejump.search.Pattern
-import org.acejump.search.Pattern.*
+import org.acejump.search.Pattern.ALL_WORDS
+import org.acejump.search.Pattern.LINE_ALL_MARKS
+import org.acejump.search.Pattern.LINE_ENDS
+import org.acejump.search.Pattern.LINE_INDENTS
+import org.acejump.search.Pattern.LINE_STARTS
 import org.acejump.session.Session
 import org.acejump.session.SessionManager
 
@@ -31,8 +42,8 @@ sealed class AceAction: DumbAwareAction() {
   
     if (project != null) {
       try {
-        val openEditors =
-          FileEditorManagerEx.getInstanceEx(project).splitters.getSelectedEditors()
+        val fem = FileEditorManager.getInstance(project) as FileEditorManagerEx
+        val openEditors = fem.splitters.getSelectedEditors()
           .mapNotNull { (it as? TextEditor)?.editor }
           .sortedBy { if (it === editor) 0 else 1 }
         invoke(SessionManager.start(editor, openEditors))
