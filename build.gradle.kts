@@ -64,7 +64,7 @@ kotlin {
 }
 
 changelog {
-  version = "3.8.13"
+  version = "3.8.14"
   path = "${project.projectDir}/CHANGES.md"
   header = provider { "[${project.version}] - ${date()}" }
   itemPrefix = "-"
@@ -88,4 +88,4 @@ intellij {
 }
 
 group = "org.acejump"
-version = "3.8.13"
+version = "3.8.14"

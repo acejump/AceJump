@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.14
+
+- Fixes NoSuchFieldError: Companion on older platform versions, [#432](https://github.com/acejump/AceJump/issues/432), [#434](https://github.com/acejump/AceJump/issues/434), [#435](https://github.com/acejump/AceJump/issues/432), [#437](https://github.com/acejump/AceJump/issues/437), [#438](https://github.com/acejump/AceJump/issues/438), thanks to [@wuruofan](https://github.com/wuruofan)
+
 ## 3.8.13
 
 - Fixes color settings not being persisted, [#431](https://github.com/acejump/AceJump/issues/431)
