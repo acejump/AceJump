@@ -35,11 +35,12 @@ sealed class AceAction: DumbAwareAction() {
   override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
   final override fun update(action: AnActionEvent) {
-    action.presentation.isEnabled = (action.getData(EDITOR) ?: action.getData(LAST_ACTIVE_FILE_EDITOR)) != null
+    action.presentation.isEnabled =
+      (action.getData(EDITOR) ?: (action.getData(LAST_ACTIVE_FILE_EDITOR) as? TextEditor)?.editor) != null
   }
 
   final override fun actionPerformed(e: AnActionEvent) {
-    val editor = e.getData(EDITOR) ?: e.getData(LAST_ACTIVE_FILE_EDITOR) as? Editor ?: return
+    val editor = e.getData(EDITOR) ?: (e.getData(LAST_ACTIVE_FILE_EDITOR) as? TextEditor)?.editor ?: return
     val project = e.project
   
     if (project != null) {
