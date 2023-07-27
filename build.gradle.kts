@@ -3,9 +3,9 @@ import org.jetbrains.changelog.date
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.9.0-Beta"
-  id("org.jetbrains.intellij") version "1.14.1"
-  id("org.jetbrains.changelog") version "2.1.0"
+  kotlin("jvm") version "1.9.0"
+  id("org.jetbrains.intellij") version "1.15.0"
+  id("org.jetbrains.changelog") version "2.1.2"
   id("com.github.ben-manes.versions") version "0.47.0"
 }
 

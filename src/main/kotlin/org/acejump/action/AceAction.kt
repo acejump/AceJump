@@ -3,6 +3,8 @@ package org.acejump.action
 import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys.EDITOR
+import com.intellij.openapi.actionSystem.PlatformDataKeys.LAST_ACTIVE_FILE_EDITOR
+import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.TextEditor
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
@@ -33,11 +35,11 @@ sealed class AceAction: DumbAwareAction() {
   override fun getActionUpdateThread(): ActionUpdateThread = ActionUpdateThread.BGT
 
   final override fun update(action: AnActionEvent) {
-    action.presentation.isEnabled = action.getData(EDITOR) != null
+    action.presentation.isEnabled = (action.getData(EDITOR) ?: action.getData(LAST_ACTIVE_FILE_EDITOR)) != null
   }
 
   final override fun actionPerformed(e: AnActionEvent) {
-    val editor = e.getData(EDITOR) ?: return
+    val editor = e.getData(EDITOR) ?: e.getData(LAST_ACTIVE_FILE_EDITOR) as? Editor ?: return
     val project = e.project
   
     if (project != null) {
