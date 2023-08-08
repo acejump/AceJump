@@ -81,7 +81,7 @@ dependencies {
 }
 
 intellij {
-  version = "2023.1"
+  version = "2023.2"
   pluginName = "AceJump"
   updateSinceUntilBuild = false
   plugins = listOf("java")
