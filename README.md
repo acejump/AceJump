@@ -8,12 +8,12 @@
  	<a href="https://twitter.com/search?q=AceJump&f=live" title="Twitter"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social"></a>
 </p>
 
-> **Note**: There is currently an outstanding issue with [settings deserialization](https://github.com/acejump/AceJump/issues/445). If the AceJump settings were changed in the past, they can become corrupted and may need to be manually deleted. The location varies depending on the operating system and platform version used. For IntelliJ IDEA, the plugin settings file is located in:
-> * Mac: `~/Library/Application Support/JetBrains/IntelliJIdea<VERSION>/plugins/AceJump.xml`
-> * Windows: `%APPDATA%\JetBrains\IntelliJIdea<VERSION>\plugins/AceJump.xml`
-> * Linux: `~/.local/share/JetBrains/IntelliJIdea<VERSION>/AceJump.xml`
+> **Note**: There is currently an outstanding issue with [settings deserialization](https://github.com/acejump/AceJump/issues/445). If the AceJump settings were changed in the past, they can become corrupted and may need to be manually deleted. The location varies depending on the operating system and platform version used. For IntelliJ IDEA, the plugin settings file is located in either `options` or `plugins` in the following directories:
+> * Mac: `~/Library/Application Support/JetBrains/IntelliJIdea<VERSION>`
+> * Windows: `%APPDATA%\JetBrains\IntelliJIdea<VERSION>`
+> * Linux: `~/.local/share/JetBrains/IntelliJIdea<VERSION>`
 > 
->  We apologize for any inconvenience this may have caused.
+>  If not found, you can locate this file via the command, `find . | grep AceJump.xml` under the `JetBrains` directory. We apologize for any inconvenience this may have caused.
 
 [AceJump](https://plugins.jetbrains.com/plugin/7086) is a plugin for the [IntelliJ Platform](https://github.com/JetBrains/intellij-community/) that lets you jump to any symbol in the editor with just a few keystrokes. Press the keyboard shortcut for `AceAction` (<kbd>Ctrl</kbd>+<kbd>;</kbd> by default) to activate AceJump. Type any string in the editor, followed by one of the illustrated tags, to jump its position:
 
