@@ -3,9 +3,9 @@ import org.jetbrains.changelog.date
 
 plugins {
   idea apply true
-  kotlin("jvm") version "1.9.0"
+  kotlin("jvm") version "1.9.10"
   id("org.jetbrains.intellij") version "1.15.0"
-  id("org.jetbrains.changelog") version "2.1.2"
+  id("org.jetbrains.changelog") version "2.2.0"
   id("com.github.ben-manes.versions") version "0.47.0"
 }
 
@@ -37,7 +37,7 @@ tasks {
   }
 
   runPluginVerifier {
-    ideVersions = listOf("2023.1")
+    ideVersions = listOf("2023.2")
   }
 
   // Remove pending: https://youtrack.jetbrains.com/issue/IDEA-278926

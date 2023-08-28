@@ -5,13 +5,10 @@ import com.google.common.collect.HashBiMap
 import com.intellij.openapi.editor.Editor
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import it.unimi.dsi.fastutil.ints.IntList
-import org.acejump.ExternalUsage
+import org.acejump.*
 import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
-import org.acejump.immutableText
 import org.acejump.input.KeyLayoutCache.allPossibleTags
-import org.acejump.isWordPart
-import org.acejump.matchesAt
 import org.acejump.view.TagMarker
 import java.util.AbstractMap.SimpleImmutableEntry
 import kotlin.collections.component1
@@ -143,24 +140,23 @@ internal class Tagger(private val editors: List<Editor>) {
     }
   }
   
-  private infix fun Map.Entry<String, Tag>.solves(query: String): Boolean {
-    return query.endsWith(key, true) && isTagCompatibleWithQuery(key, value, query)
-  }
+  private infix fun Map.Entry<String, Tag>.solves(query: String): Boolean =
+    query.endsWith(key, true) && isTagCompatibleWithQuery(key, value, query)
   
-  private fun isTagCompatibleWithQuery(marker: String, tag: Tag, query: String): Boolean {
-    return tag.editor.immutableText.matchesAt(tag.offset, getPlaintextPortion(query, marker), ignoreCase = true)
-  }
+  private fun isTagCompatibleWithQuery(marker: String, tag: Tag, query: String): Boolean =
+    tag.editor.immutableText.matchesAt(tag.offset, getPlaintextPortion(query, marker), ignoreCase = true)
   
-  fun isQueryCompatibleWithTagAt(query: String, tag: Tag): Boolean {
-    return tagMap.inverse()[tag].let { it != null && isTagCompatibleWithQuery(it, tag, query) }
-  }
+  fun isQueryCompatibleWithTagAt(query: String, tag: Tag): Boolean =
+    tagMap.inverse()[tag].let { it != null && isTagCompatibleWithQuery(it, tag, query) }
   
-  fun canQueryMatchAnyTag(query: String): Boolean {
-    return tagMap.any { (tag, offset) ->
-      val tagPortion = getTagPortion(query, tag)
-      tagPortion.isNotEmpty() && tag.startsWith(tagPortion, ignoreCase = true) && isTagCompatibleWithQuery(tag, offset, query)
+  fun canQueryMatchAnyVisibleTag(query: String): Boolean =
+    tagMap.any { (label, tag) ->
+      val tagPortion = getTagPortion(query, label)
+      tagPortion.isNotEmpty()
+        && label.startsWith(tagPortion, ignoreCase = true)
+        && isTagCompatibleWithQuery(label, tag, query)
+        && tag.offset in tag.editor.getView()
     }
-  }
 
   private fun removeResultsWithOverlappingTags(editor: Editor, offsets: IntList) {
     val iter = offsets.iterator()

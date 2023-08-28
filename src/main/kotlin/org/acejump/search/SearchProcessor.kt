@@ -70,7 +70,7 @@ internal class SearchProcessor private constructor(
    */
   fun type(char: Char, tagger: Tagger): Boolean {
     val newQuery = query.rawText + char
-    val canMatchTag = tagger.canQueryMatchAnyTag(newQuery)
+    val canMatchTag = tagger.canQueryMatchAnyVisibleTag(newQuery)
     
     // If the typed character is not compatible with any existing tag or as
     // a continuation of any previous occurrence, reject the query change
