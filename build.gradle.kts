@@ -63,8 +63,10 @@ kotlin {
   }
 }
 
+val acejumpVersion = "3.8.15"
+
 changelog {
-  version = "3.8.14"
+  version = acejumpVersion
   path = "${project.projectDir}/CHANGES.md"
   header = provider { "[${project.version}] - ${date()}" }
   itemPrefix = "-"
@@ -81,11 +83,11 @@ dependencies {
 }
 
 intellij {
-  version = "2023.2"
+  version = "2023.2.1"
   pluginName = "AceJump"
   updateSinceUntilBuild = false
   plugins = listOf("java")
 }
 
 group = "org.acejump"
-version = "3.8.14"
+version = acejumpVersion
