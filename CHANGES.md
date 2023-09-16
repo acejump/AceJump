@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.16
+
+- Fix issue with unselectable tags, [#446](https://github.com/acejump/AceJump/issues/446)
+
 ## 3.8.15
 
 - Forbid jumping to offscreen tags, [#442](https://github.com/acejump/AceJump/issues/442)

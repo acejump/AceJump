@@ -2,9 +2,11 @@ package org.acejump
 
 import com.anyascii.AnyAscii
 import com.intellij.diff.util.DiffUtil.getLineCount
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.*
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.acejump.config.AceConfig
+import java.awt.Point
 import kotlin.math.*
 
 /**
@@ -127,18 +129,15 @@ fun Editor.offsetCenter(first: Int, second: Int): LogicalPosition {
   return offsetToLogicalPosition(getLineStartOffset(center))
 }
 
+// Borrowed from Editor.calculateVisibleRange() but only available after 232.6095.10
 fun Editor.getView(): IntRange {
-  val firstVisibleLine = max(0, getVisualLineAtTopOfScreen() - 1)
-  val firstLine = visualLineToLogicalLine(firstVisibleLine)
-  val startOffset = getLineStartOffset(firstLine)
-
-  val height = getScreenHeight() + 2
-  val lastLine = visualLineToLogicalLine(firstVisibleLine + height)
-  var endOffset = getLineEndOffset(lastLine, true)
-  endOffset = normalizeOffset(lastLine, endOffset)
-  endOffset = min(max(0, document.textLength - 1), endOffset + 1)
-
-  return startOffset..endOffset
+  ApplicationManager.getApplication().assertIsDispatchThread()
+  val rect = scrollingModel.visibleArea
+  val startPosition = xyToLogicalPosition(Point(rect.x, rect.y))
+  val visibleStart = logicalPositionToOffset(startPosition)
+  val endPosition = xyToLogicalPosition(Point(rect.x + rect.width, rect.y + rect.height))
+  val visibleEnd = logicalPositionToOffset(LogicalPosition(endPosition.line + 1, 0))
+  return visibleStart..visibleEnd
 }
 
 /**
