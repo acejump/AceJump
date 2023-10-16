@@ -1,9 +1,11 @@
 package org.acejump.view
 
 import com.intellij.openapi.application.ApplicationInfo
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.event.CaretEvent
 import com.intellij.openapi.editor.event.CaretListener
+import com.intellij.openapi.util.Computable
 import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
 import java.awt.Graphics
@@ -53,7 +55,9 @@ internal class TagCanvas(private val editor: Editor): JComponent(), CaretListene
   }
 
   override fun paint(g: Graphics) =
-    if (!markers.isNullOrEmpty()) super.paint(g) else Unit
+    ApplicationManager.getApplication().runReadAction(Computable {
+      if (!markers.isNullOrEmpty()) super.paint(g) else Unit
+    })
 
   override fun paintChildren(g: Graphics) {
     super.paintChildren(g)
