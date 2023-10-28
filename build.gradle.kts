@@ -2,18 +2,14 @@ import org.jetbrains.changelog.Changelog.OutputType.HTML
 import org.jetbrains.changelog.date
 
 plugins {
-  idea apply true
-  kotlin("jvm") version "1.9.20-Beta"
+  idea
+  kotlin("jvm") version "1.8.20" // https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library
   id("org.jetbrains.intellij") version "1.15.0"
   id("org.jetbrains.changelog") version "2.2.0"
   id("com.github.ben-manes.versions") version "0.48.0"
 }
 
 tasks {
-  compileKotlin {
-    kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
-  }
-
   named<Zip>("buildPlugin") {
     dependsOn("test")
     archiveFileName = "AceJump.zip"
@@ -51,11 +47,7 @@ tasks {
 }
 
 kotlin {
-  jvmToolchain {
-    run {
-      languageVersion = JavaLanguageVersion.of(17)
-    }
-  }
+  jvmToolchain(17)
   sourceSets.all {
     languageSettings.apply {
       languageVersion = "2.0"
