@@ -1,10 +1,10 @@
 package org.acejump.config
 
 import com.intellij.openapi.ui.ComboBox
-import com.intellij.ui.ColorPanel
 import com.intellij.ui.components.*
 import com.intellij.ui.dsl.builder.*
-import org.acejump.input.*
+import org.acejump.input.JumpMode
+import org.acejump.input.KeyLayout
 import java.awt.*
 import javax.swing.*
 import javax.swing.text.JTextComponent
@@ -15,6 +15,8 @@ import kotlin.reflect.KProperty
  */
 @Suppress("UsePropertyAccessSyntax")
 internal class AceSettingsPanel {
+  private val defaults = AceSettings()
+  
   private val tagCharsField = JBTextField()
   private val keyboardLayoutCombo = ComboBox<KeyLayout>()
   private val keyboardLayoutArea = JBTextArea().apply { isEditable = false }
@@ -23,13 +25,13 @@ internal class AceSettingsPanel {
   private val cycleModeCombo3 = ComboBox<JumpMode>()
   private val cycleModeCombo4 = ComboBox<JumpMode>()
   private val minQueryLengthField = JBTextField()
-  private val jumpModeColorWheel = ColorPanel()
-  private val jumpEndModeColorWheel = ColorPanel()
-  private val targetModeColorWheel = ColorPanel()
-  private val definitionModeColorWheel = ColorPanel()
-  private val textHighlightColorWheel = ColorPanel()
-  private val tagForegroundColorWheel = ColorPanel()
-  private val tagBackgroundColorWheel = ColorPanel()
+  private val jumpModeColorWheel = ResettableColorPicker(defaults.getJumpModeJBC())
+  private val jumpEndModeColorWheel = ResettableColorPicker(defaults.getJumpEndModeJBC())
+  private val targetModeColorWheel = ResettableColorPicker(defaults.getTargetModeJBC())
+  private val definitionModeColorWheel = ResettableColorPicker(defaults.getDefinitionModeJBC())
+  private val textHighlightColorWheel = ResettableColorPicker(defaults.getTextHighlightJBC())
+  private val tagForegroundColorWheel = ResettableColorPicker(defaults.getTagForegroundJBC())
+  private val tagBackgroundColorWheel = ResettableColorPicker(defaults.getTagBackgroundJBC())
   private val searchWholeFileCheckBox = JBCheckBox()
   private val mapToASCIICheckBox = JBCheckBox()
   private val showSearchNotificationCheckBox = JBCheckBox()
@@ -133,8 +135,8 @@ internal class AceSettingsPanel {
   private operator fun JTextComponent.getValue(a: AceSettingsPanel, p: KProperty<*>) = text.lowercase()
   private operator fun JTextComponent.setValue(a: AceSettingsPanel, p: KProperty<*>, s: String) = setText(s)
 
-  private operator fun ColorPanel.getValue(a: AceSettingsPanel, p: KProperty<*>) = selectedColor
-  private operator fun ColorPanel.setValue(a: AceSettingsPanel, p: KProperty<*>, c: Color?) = setSelectedColor(c)
+  private operator fun ResettableColorPicker.getValue(a: AceSettingsPanel, p: KProperty<*>) = getSelectedColor()
+  private operator fun ResettableColorPicker.setValue(a: AceSettingsPanel, p: KProperty<*>, c: Color?) = setSelectedColor(c)
 
   private operator fun JCheckBox.getValue(a: AceSettingsPanel, p: KProperty<*>) = isSelected
   private operator fun JCheckBox.setValue(a: AceSettingsPanel, p: KProperty<*>, selected: Boolean) = setSelected(selected)

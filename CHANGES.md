@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add buttons to reset colors to default values in Settings, [#411](https://github.com/acejump/AceJump/issues/411)
+
 ## 3.8.16
 
 - Fix issue with unselectable tags, [#446](https://github.com/acejump/AceJump/issues/446)
