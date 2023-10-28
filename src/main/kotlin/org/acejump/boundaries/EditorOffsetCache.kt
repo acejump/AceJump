@@ -34,7 +34,8 @@ sealed class EditorOffsetCache {
 
   private class Cache: EditorOffsetCache() {
     private var visibleArea: Pair<Point, Point>? = null
-    private val pointToOffset = Object2IntOpenHashMap<Point>().apply { defaultReturnValue(-1) }
+    private val pointToOffset =
+      Object2IntOpenHashMap<Point>().apply { defaultReturnValue(-1) }
     private val offsetToPoint = Int2ObjectOpenHashMap<Point>()
 
     override fun visibleArea(editor: Editor): Pair<Point, Point> =

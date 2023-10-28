@@ -4,9 +4,9 @@ import org.jetbrains.changelog.date
 plugins {
   idea
   kotlin("jvm") version "1.8.20" // https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library
-  id("org.jetbrains.intellij") version "1.15.0"
+  id("org.jetbrains.intellij") version "1.16.0"
   id("org.jetbrains.changelog") version "2.2.0"
-  id("com.github.ben-manes.versions") version "0.48.0"
+  id("com.github.ben-manes.versions") version "0.49.0"
 }
 
 tasks {
@@ -33,7 +33,7 @@ tasks {
   }
 
   runPluginVerifier {
-    ideVersions = listOf("2023.2")
+    ideVersions = listOf("233.11361.10-EAP-SNAPSHOT")
   }
 
   // Remove pending: https://youtrack.jetbrains.com/issue/IDEA-278926

@@ -4,6 +4,7 @@ import com.anyascii.AnyAscii
 import com.intellij.diff.util.DiffUtil.getLineCount
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.*
+import com.intellij.openapi.util.Computable
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.acejump.config.AceConfig
 import java.awt.Point
@@ -252,3 +253,9 @@ fun Editor.normalizeOffset(line: Int, offset: Int, allowEnd: Boolean = true) =
   if (getFileSize(allowEnd) == 0) 0 else
     max(min(offset, getLineEndOffset(line, allowEnd)), getLineStartOffset(line))
 
+// https://plugins.jetbrains.com/docs/intellij/general-threading-rules.html#read-access
+fun <T> read(action: () -> T): T =
+  ApplicationManager.getApplication().runReadAction(Computable { action() })
+
+fun <T> write(action: () -> T): T =
+  ApplicationManager.getApplication().runWriteAction(Computable { action() })
