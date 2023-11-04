@@ -55,7 +55,7 @@ kotlin {
   }
 }
 
-val acejumpVersion = "3.8.16"
+val acejumpVersion = "3.8.17"
 
 changelog {
   version = acejumpVersion

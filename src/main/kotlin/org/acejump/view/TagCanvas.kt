@@ -6,6 +6,7 @@ import com.intellij.openapi.editor.event.CaretEvent
 import com.intellij.openapi.editor.event.CaretListener
 import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
+import org.acejump.read
 import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Rectangle
@@ -53,7 +54,7 @@ internal class TagCanvas(private val editor: Editor): JComponent(), CaretListene
   }
 
   override fun paint(g: Graphics) =
-    if (!markers.isNullOrEmpty()) super.paint(g) else Unit
+    read { if (!markers.isNullOrEmpty()) super.paint(g) else Unit }
 
   override fun paintChildren(g: Graphics) {
     super.paintChildren(g)

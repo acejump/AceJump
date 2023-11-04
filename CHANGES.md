@@ -2,7 +2,11 @@
 
 ## Unreleased
 
-- Add buttons to reset colors to default values in Settings, [#411](https://github.com/acejump/AceJump/issues/411)
+## 3.8.17
+
+- Add buttons to reset colors to default values in Settings, [#411](https://github.com/acejump/AceJump/issues/411), thanks to [@chylex](https://github.com/chylex)
+- Unbundle conflicting Kotlin Standard Library version, [#449](https://github.com/acejump/AceJump/issues/449), thanks to [@chylex](https://github.com/chylex)
+- Fix some instances of "Read access not allowed", [#447](https://github.com/acejump/AceJump/issues/447), thanks to [@h0tk3y](https://github.com/h0tk3y)
 
 ## 3.8.16
 

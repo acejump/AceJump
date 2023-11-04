@@ -3,6 +3,7 @@ package org.acejump.boundaries
 import com.intellij.openapi.editor.Editor
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap
+import org.acejump.read
 import java.awt.Point
 
 /**
@@ -64,7 +65,7 @@ sealed class EditorOffsetCache {
       }
 
     override fun xyToOffset(editor: Editor, pos: Point): Int =
-      editor.logicalPositionToOffset(editor.xyToLogicalPosition(pos))
+      read { editor.logicalPositionToOffset(editor.xyToLogicalPosition(pos)) }
 
     override fun offsetToXY(editor: Editor, offset: Int): Point =
       editor.offsetToXY(offset, true, false)
