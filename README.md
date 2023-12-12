@@ -31,8 +31,6 @@ Press the AceJump shortcut, followed by <kbd>→</kbd> to target the last, <kbd>
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
 
-AceJump search is [smart case](http://ideavim.sourceforge.net/vim/usr_27.html#vim.27%2E1) sensitive, however tag selection is *not* case sensitive. Holding down <kbd>Shift</kbd> when typing the last tag character will select all text from the current cursor position to that destination.
-
 ## Tips
 
 - Press <kbd>Tab</kbd> when searching to jump to the next group of matches in the editor.
@@ -40,6 +38,10 @@ AceJump search is [smart case](http://ideavim.sourceforge.net/vim/usr_27.html#vi
 - If you make a mistake searching, just press <kbd>Backspace</kbd> to restart from scratch.
 
 - If no matches can be found on-screen, AceJump will scroll to the next match it can find.
+  
+- Note that search is [smart case](http://ideavim.sourceforge.net/vim/usr_27.html#vim.27%2E1) sensitive, however tag selection is *not* case sensitive.
+
+- Holding down <kbd>Shift</kbd> when typing the last tag character will select all text from the current cursor position to that destination.
 
 - Pressing <kbd>Enter</kbd> or <kbd>Shift</kbd>+<kbd>Enter</kbd> during a search will cycle through tagged results on screen.
 
