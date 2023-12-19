@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.colors.EditorFontType
 import com.intellij.openapi.editor.markup.*
 import com.intellij.openapi.editor.markup.HighlighterTargetArea.EXACT_RANGE
 import com.intellij.ui.*
+import com.intellij.ui.util.preferredHeight
 import com.intellij.util.DocumentUtil
 import com.intellij.util.ui.*
 import it.unimi.dsi.fastutil.ints.IntList
@@ -96,20 +97,18 @@ internal class TextHighlighter {
     val editor = results.keys.first()
     val component: JComponent = editor.component
 
-    val label1 = NotificationLabel(
-      " " +
-        CodeInsightBundle.message("incremental.search.tooltip.prefix")
-    ).apply { font = UIUtil.getLabelFont().deriveFont(Font.BOLD) }
+    val label1 = NotificationLabel(" $jumpMode Mode:")
+      .apply { font = UIUtil.getLabelFont().deriveFont(Font.BOLD) }
 
     val queryText = " " +
-      if (query is SearchQuery.RegularExpression) query.toRegex().toString()
-      else query.rawText[0] + query.rawText.drop(1).lowercase()
+      (if (query is SearchQuery.RegularExpression) query.toRegex().toString()
+      else query.rawText[0] + query.rawText.drop(1).lowercase()) + "   "
     val label2 = NotificationLabel(queryText)
 
     val label3 = NotificationLabel(
       "Found ${results.values.flatMap { it.asIterable() }.size}" +
         " results in ${results.keys.size}" +
-        " editor" + if (1 != results.keys.size) "s" else "."
+        " editor" + if (1 != results.keys.size) "s" else ". "
     )
 
     val panel = JPanel(BorderLayout()).apply {
@@ -120,10 +119,7 @@ internal class TextHighlighter {
         if (jumpMode == JumpMode.DISABLED) JBColor.BLACK else jumpMode.caretColor
       )
 
-      preferredSize = Dimension(
-        editor.contentComponent.width +
-          label1.preferredSize.width, preferredSize.height
-      )
+      preferredHeight = label1.preferredSize.height + 10
     }
 
     val hint = LightweightHint(panel)
