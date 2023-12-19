@@ -41,7 +41,7 @@ object EditorsCache {
 }
 
 fun CharSequence.mapToASCII() =
-  map { AnyAscii.transliterate("$it").first() }.joinToString("")
+  map { AnyAscii.transliterate("$it").firstOrNull() ?: it }.joinToString("")
 
 /**
  * Returns true if [this] contains [otherText] at the specified offset.
