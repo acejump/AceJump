@@ -4,9 +4,9 @@ import org.jetbrains.changelog.date
 plugins {
   idea
   kotlin("jvm") version "1.8.20" // https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library
-  id("org.jetbrains.intellij") version "1.16.0"
+  id("org.jetbrains.intellij") version "1.16.1"
   id("org.jetbrains.changelog") version "2.2.0"
-  id("com.github.ben-manes.versions") version "0.49.0"
+  id("com.github.ben-manes.versions") version "0.50.0"
 }
 
 tasks {
@@ -55,7 +55,7 @@ kotlin {
   }
 }
 
-val acejumpVersion = "3.8.17"
+val acejumpVersion = "3.8.18"
 
 changelog {
   version = acejumpVersion

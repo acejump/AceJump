@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 3.8.18
+
+- Disable tagging and jumping to folded regions ([#453](https://github.com/acejump/AceJump/issues/453)), thanks to [@chylex](https://github.com/chylex)
+- Update hint styling and show mode ([#394](https://github.com/acejump/AceJump/issues/394)) when "Show hint with search text" is enabled
+- Fixes "Char sequence is empty" ([#404](https://github.com/acejump/AceJump/issues/404)) when "Map Unicode to ASCII" is enabled
+
 ## 3.8.17
 
 - Add buttons to reset colors to default values in Settings, [#411](https://github.com/acejump/AceJump/issues/411), thanks to [@chylex](https://github.com/chylex)
