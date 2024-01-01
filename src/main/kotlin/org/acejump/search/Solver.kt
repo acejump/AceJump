@@ -10,7 +10,7 @@ import org.acejump.immutableText
 import org.acejump.input.KeyLayoutCache
 import org.acejump.isWordPart
 import org.acejump.wordEndPlus
-import java.util.*
+import java.util.IdentityHashMap
 import kotlin.math.max
 
 /*
@@ -88,6 +88,10 @@ internal class Solver private constructor(
       val iter = offsets.iterator()
       while (iter.hasNext()) {
         val site = iter.nextInt()
+        
+        if (editor.foldingModel.isOffsetCollapsed(site)) {
+          continue
+        }
         
         for ((firstLetter, tags) in tagsByFirstLetter.entries) {
           if (canTagBeginWithChar(editor, site, firstLetter)) {

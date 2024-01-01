@@ -67,6 +67,7 @@ internal class TagCanvas(private val editor: Editor): JComponent(), CaretListene
 
     val cache = EditorOffsetCache.new()
     val viewRange = VISIBLE_ON_SCREEN.getOffsetRange(editor, cache)
+    val foldingModel = editor.foldingModel
     val occupied = mutableListOf<Rectangle>()
 
     // If there is a tag at the caret location, prioritize its rendering over
@@ -82,8 +83,9 @@ internal class TagCanvas(private val editor: Editor): JComponent(), CaretListene
     val caretMarker = markers.find { it.offsetL == caretOffset || it.offsetR == caretOffset }
     caretMarker?.paint(g, editor, cache, font, occupied)
 
-    for (marker in markers)
-      if (marker.isOffsetInRange(viewRange) && marker !== caretMarker)
+    for (marker in markers) {
+      if (marker.isOffsetInRange(viewRange) && !foldingModel.isOffsetCollapsed(marker.offsetL) && marker !== caretMarker)
         marker.paint(g, editor, cache, font, occupied)
+    }
   }
 }
