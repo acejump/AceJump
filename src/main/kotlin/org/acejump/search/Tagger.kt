@@ -155,7 +155,7 @@ internal class Tagger(private val editors: List<Editor>) {
       tagPortion.isNotEmpty()
         && label.startsWith(tagPortion, ignoreCase = true)
         && isTagCompatibleWithQuery(label, tag, query)
-        && tag.offset in tag.editor.getView()
+        && tag.isVisible()
     }
 
   private fun removeResultsWithOverlappingTags(editor: Editor, offsets: IntList) {
