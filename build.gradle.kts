@@ -4,9 +4,9 @@ import org.jetbrains.changelog.date
 plugins {
   idea
   kotlin("jvm") version "1.8.20" // https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library
-  id("org.jetbrains.intellij") version "1.16.1"
+  id("org.jetbrains.intellij") version "1.17.2"
   id("org.jetbrains.changelog") version "2.2.0"
-  id("com.github.ben-manes.versions") version "0.50.0"
+  id("com.github.ben-manes.versions") version "0.51.0"
 }
 
 tasks {
@@ -16,7 +16,6 @@ tasks {
   }
 
   runIde {
-    dependsOn("test")
     findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
   }
 
@@ -75,7 +74,7 @@ dependencies {
 }
 
 intellij {
-  version = "2023.2.1"
+  version = "2023.3.4"
   pluginName = "AceJump"
   updateSinceUntilBuild = false
   plugins = listOf("java")
