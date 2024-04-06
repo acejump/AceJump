@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.19
+
+- Enable support for 2024.1, fixing ([#457](https://github.com/acejump/AceJump/issues/457))
+
 ## 3.8.18
 
 - Disable tagging and jumping to folded regions ([#453](https://github.com/acejump/AceJump/issues/453)), thanks to [@chylex](https://github.com/chylex)

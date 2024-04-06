@@ -4,7 +4,7 @@ import org.jetbrains.changelog.date
 plugins {
   idea
   kotlin("jvm") version "1.8.20" // https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library
-  id("org.jetbrains.intellij") version "1.17.2"
+  id("org.jetbrains.intellij") version "1.17.3"
   id("org.jetbrains.changelog") version "2.2.0"
   id("com.github.ben-manes.versions") version "0.51.0"
 }
@@ -32,7 +32,7 @@ tasks {
   }
 
   runPluginVerifier {
-    ideVersions = listOf("233.11361.10-EAP-SNAPSHOT")
+    ideVersions = listOf("241.*")
   }
 
   // Remove pending: https://youtrack.jetbrains.com/issue/IDEA-278926
@@ -54,7 +54,7 @@ kotlin {
   }
 }
 
-val acejumpVersion = "3.8.18"
+val acejumpVersion = "3.8.19"
 
 changelog {
   version = acejumpVersion
@@ -74,7 +74,7 @@ dependencies {
 }
 
 intellij {
-  version = "2023.3.4"
+  version = "2024.1"
   pluginName = "AceJump"
   updateSinceUntilBuild = false
   plugins = listOf("java")
