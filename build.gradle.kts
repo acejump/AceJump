@@ -42,6 +42,11 @@ tasks {
     include("**/AceTest.class")
     include("**/ExternalUsageTest.class")
     include("**/LatencyTest.class")
+    afterTest(
+      KotlinClosure2({ desc: TestDescriptor, result: TestResult ->
+        println("Completed `${desc.displayName}` in ${result.endTime - result.startTime}ms")
+      })
+    )
   }
 }
 
