@@ -20,7 +20,8 @@ enum class KeyLayout(internal val rows: Array<String>, priority: String) {
   QGMLWY(arrayOf("1234567890", "qgmlwyfub", "dstnriaeoh", "zxcvjkp"), priority = "naterisodhvkcpjxzlfmuwygbq5849673210"),
   QGMLWB(arrayOf("1234567890", "qgmlwbyuv", "dstnriaeoh", "zxcfjkp"), priority = "naterisodhfkcpjxzlymuwbgvq5849673210"),
   NORMAN(arrayOf("1234567890", "qwdfkjurl", "asetgynioh", "zxcvbpm"), priority = "tneigysoahbvpcmxzjkufrdlwq5849673210"),
-  AZERTY(arrayOf("1234567890", "azertyuiop", "qsdfghjklm", "wxcvbn"), priority = "fjghdkslqvncmbxwrutyeizoap5849673210");
+  AZERTY(arrayOf("1234567890", "azertyuiop", "qsdfghjklm", "wxcvbn"), priority = "fjghdkslqvncmbxwrutyeizoap5849673210"),
+  CANARY(arrayOf("1234567890", "wlypbzfou", "crstgmneia", "qjvdkxh"), priority = "tngmseracidxvhkjqpfbzyoluw5849673210");
 
   internal val allChars = rows.joinToString("").toCharArray().apply(CharArray::sort).joinToString("")
   internal val allPriorities = priority.mapIndexed { index, char -> char to index }.toMap()
