@@ -7,6 +7,7 @@ plugins {
   id("org.jetbrains.intellij") version "1.17.3"
   id("org.jetbrains.changelog") version "2.2.0"
   id("com.github.ben-manes.versions") version "0.51.0"
+  id("org.jetbrains.kotlinx.kover") version "0.8.1" // https://github.com/Kotlin/kotlinx-kover
 }
 
 tasks {
