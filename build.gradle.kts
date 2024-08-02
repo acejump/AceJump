@@ -9,6 +9,7 @@ plugins {
   alias(libs.plugins.changelog) // Gradle Changelog Plugin
   alias(libs.plugins.kover) // Gradle Kover Plugin
   id("com.github.ben-manes.versions") version "0.51.0"
+  id("org.jetbrains.kotlinx.kover") version "0.8.1" // https://github.com/Kotlin/kotlinx-kover
 }
 
 tasks {
