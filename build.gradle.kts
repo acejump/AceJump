@@ -1,11 +1,13 @@
 import org.jetbrains.changelog.Changelog.OutputType.HTML
 import org.jetbrains.changelog.date
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 plugins {
   idea
-  kotlin("jvm") version "1.8.20" // https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library
-  id("org.jetbrains.intellij") version "1.17.3"
-  id("org.jetbrains.changelog") version "2.2.0"
+  alias(libs.plugins.kotlin) // Kotlin support
+  alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
+  alias(libs.plugins.changelog) // Gradle Changelog Plugin
+  alias(libs.plugins.kover) // Gradle Kover Plugin
   id("com.github.ben-manes.versions") version "0.51.0"
 }
 
@@ -29,10 +31,6 @@ tasks {
     changeNotes = provider {
       changelog.renderItem(changelog.getAll().values.take(2).last(), HTML)
     }
-  }
-
-  runPluginVerifier {
-    ideVersions = listOf("241.*")
   }
 
   // Remove pending: https://youtrack.jetbrains.com/issue/IDEA-278926
@@ -71,18 +69,31 @@ changelog {
 
 repositories {
   mavenCentral()
+  intellijPlatform.defaultRepositories()
+//  intellijPlatform.localPlatformArtifacts()
 }
 
 dependencies {
   // https://github.com/anyascii/anyascii
   implementation("com.anyascii:anyascii:0.3.2")
+  intellijPlatform{
+    testImplementation(libs.junit)
+
+    bundledPlugins("com.intellij.java")
+    create("IC", "2024.1.4")
+    pluginVerifier()
+    instrumentationTools()
+    testFramework(TestFrameworkType.Platform)
+  }
 }
 
-intellij {
-  version = "2024.1"
-  pluginName = "AceJump"
-  updateSinceUntilBuild = false
-  plugins = listOf("java")
+intellijPlatform {
+  pluginConfiguration {
+    version = acejumpVersion
+    name = "AceJump"
+  }
+
+  pluginVerification.ides.recommended()
 }
 
 group = "org.acejump"
