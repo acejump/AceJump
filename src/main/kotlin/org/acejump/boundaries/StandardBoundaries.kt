@@ -21,22 +21,7 @@ enum class StandardBoundaries : Boundaries {
     }
     
     override fun isOffsetInside(editor: Editor, offset: Int, cache: EditorOffsetCache): Boolean {
-      // If we are not using a cache, calling getOffsetRange will cause
-      // additional 1-2 pixel coordinate -> offset lookups, which is a lot
-      // more expensive than one lookup compared against the visible area.
-      
-      // However, if we are using a cache, it's likely that the topmost and
-      // bottommost positions are already cached whereas the provided offset
-      // isn't, so we save a lookup for every offset outside the range.
-      
-      if (cache !== EditorOffsetCache.Uncached && offset !in getOffsetRange(editor, cache)) return false
-      
-      val (topLeft, bottomRight) = cache.visibleArea(editor)
-      val pos = cache.offsetToXY(editor, offset)
-      val x = pos.x
-      val y = pos.y
-      
-      return x >= topLeft.x && y >= topLeft.y && x <= bottomRight.x && y <= bottomRight.y
+      return cache.isVisible(editor, offset)
     }
   },
   

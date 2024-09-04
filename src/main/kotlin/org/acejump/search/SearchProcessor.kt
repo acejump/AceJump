@@ -3,6 +3,7 @@ package org.acejump.search
 import com.intellij.openapi.editor.Editor
 import it.unimi.dsi.fastutil.ints.IntArrayList
 import org.acejump.boundaries.Boundaries
+import org.acejump.boundaries.EditorOffsetCache
 import org.acejump.immutableText
 import org.acejump.isWordPart
 import org.acejump.matchesAt
@@ -12,7 +13,6 @@ import org.acejump.matchesAt
  * previous results when the user [type]s a character.
  */
 internal class SearchProcessor private constructor(
-  private val editors: List<Editor>,
   query: SearchQuery,
   results: MutableMap<Editor, IntArrayList>
 ) {
@@ -24,14 +24,15 @@ internal class SearchProcessor private constructor(
       SearchProcessor(editors, SearchQuery.RegularExpression(pattern), boundaries)
   }
   
-  private constructor(editors: List<Editor>, query: SearchQuery, boundaries: Boundaries) : this(editors, query, mutableMapOf()) {
+  private constructor(editors: List<Editor>, query: SearchQuery, boundaries: Boundaries) : this(query, mutableMapOf()) {
     val regex = query.toRegex()
     
     if (regex != null) {
       for (editor in editors) {
+        val cache = EditorOffsetCache.new()
         val offsets = IntArrayList()
         
-        val offsetRange = boundaries.getOffsetRange(editor)
+        val offsetRange = boundaries.getOffsetRange(editor, cache)
         var result = regex.find(editor.immutableText, offsetRange.first)
         
         while (result != null) {
@@ -43,7 +44,7 @@ internal class SearchProcessor private constructor(
           if (highlightEnd > offsetRange.last) {
             break
           }
-          else if (boundaries.isOffsetInside(editor, index)) {
+          else if (boundaries.isOffsetInside(editor, index, cache)) {
             offsets.add(index)
           }
           
