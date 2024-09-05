@@ -11,7 +11,6 @@ import com.intellij.openapi.editor.actionSystem.TypedActionHandler
  * own handlers.
  */
 internal object EditorKeyListener: TypedActionHandler {
-  private val action = TypedAction.getInstance()
   private val attached = mutableMapOf<Editor, TypedActionHandler>()
   private var originalHandler: TypedActionHandler? = null
 
@@ -21,8 +20,9 @@ internal object EditorKeyListener: TypedActionHandler {
 
   fun attach(editor: Editor, callback: TypedActionHandler) {
     if (attached.isEmpty()) {
-      originalHandler = action.rawHandler
-      action.setupRawHandler(this)
+      val typedAction = TypedAction.getInstance()
+      originalHandler = typedAction.rawHandler
+      typedAction.setupRawHandler(this)
     }
 
     attached[editor] = callback
@@ -32,7 +32,7 @@ internal object EditorKeyListener: TypedActionHandler {
     attached.remove(editor)
 
     if (attached.isEmpty()) {
-      originalHandler?.let(action::setupRawHandler)
+      originalHandler?.let(TypedAction.getInstance()::setupRawHandler)
       originalHandler = null
     }
   }
