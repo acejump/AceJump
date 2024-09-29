@@ -2,8 +2,8 @@
 
 <p align="center">
  	<a href="https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub" title="JetBrains on GitHub"><img src="https://jb.gg/badges/team.svg"></a>
- 	<a href="https://teamcity.jetbrains.com/viewType.html?buildTypeId=acejump_buildplugin&guest=1" title="Build Plugin"><img src="https://teamcity.jetbrains.com/app/rest/builds/buildType:acejump_buildplugin/statusIcon.svg"></a>
- 	<a href="https://plugins.jetbrains.com/plugin/7086-acejump" title="Jetbrains Plugin"><img src="https://img.shields.io/jetbrains/plugin/v/7086-acejump.svg"></a>
+ 	<a href="https://github.com/acejump/AceJump/actions/workflows/build.yml" title="Build Plugin"><img src="https://github.com/acejump/AceJump/actions/workflows/build.yml/badge.svg"></a>
+ 	<a href="https://plugins.jetbrains.com/plugin/7086-acejump" title="JetBrains Plugin"><img src="https://img.shields.io/jetbrains/plugin/v/7086-acejump.svg"></a>
  	<a href="LICENSE" title="License"><img src="https://img.shields.io/badge/License-GPL%20v3-blue.svg"></a>
  	<a href="https://twitter.com/search?q=AceJump&f=live" title="Twitter"><img src="https://img.shields.io/twitter/url/http/shields.io.svg?style=social"></a>
 </p>
