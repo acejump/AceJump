@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+## 3.8.20
+
+- Add support for 2024.2, fixing [#463](https://github.com/acejump/AceJump/issues/463)
+- Speedup tagging when "Search whole file" is disabled, thanks to [@chylex](https://github.com/chylex)
+
 ## 3.8.19
 
 - Enable support for 2024.1, fixing ([#457](https://github.com/acejump/AceJump/issues/457))

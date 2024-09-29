@@ -152,6 +152,14 @@ class AceTest : BaseTest() {
     myFixture.checkResult("<selection>あみだにょらい<caret></selection>")
   }
 
+  fun `test query repitition`() {
+    "test test test".search("t")
+
+    typeAndWaitForResults("t")
+
+    myFixture.checkResult("tes<caret>t test test")
+  }
+
   // https://github.com/acejump/AceJump/issues/355
   fun `ignore test a word that is difficult to tag`() {
     makeEditor("aaCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789")

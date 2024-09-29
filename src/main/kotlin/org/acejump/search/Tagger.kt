@@ -89,10 +89,11 @@ internal class Tagger(private val editors: List<Editor>) {
         val aIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, a, cache)
         val bIsVisible = VISIBLE_ON_SCREEN.isOffsetInside(editor, b, cache)
 
-      when {
-        aIsVisible && !bIsVisible -> -1
-        bIsVisible && !aIsVisible -> 1
-        else -> 0}
+        when {
+          aIsVisible && !bIsVisible -> -1
+          bIsVisible && !aIsVisible -> 1
+          else -> 0
+        }
       }
     }
 

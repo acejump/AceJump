@@ -10,7 +10,7 @@ import org.acejump.search.TaggingResult
  * multiple [Editor]s may be active at once.
  *
  * It is possible for an [Editor] to be disposed with an active
- * [Session]. In such case, the reference to both will remain
+ * [Session]. In such a case, the reference to both will remain
  * until a new [Session] starts, at which point the
  * [SessionManager.cleanup] method will purge disposed [Editor]s.
  */

@@ -65,5 +65,4 @@ internal class TagVisitor(private val editor: Editor, private val searchProcesso
     editor.scrollingModel.scrollToCaret(RELATIVE)
     return onlyResult
   }
-
 }
