@@ -76,7 +76,8 @@ repositories {
 dependencies {
   // https://github.com/anyascii/anyascii
   implementation("com.anyascii:anyascii:0.3.2")
-  intellijPlatform{
+  testImplementation("org.opentest4j:opentest4j:1.3.0")
+  intellijPlatform {
     testImplementation(libs.junit)
 
     bundledPlugins("com.intellij.java")

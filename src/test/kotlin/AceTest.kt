@@ -157,6 +157,8 @@ class AceTest : BaseTest() {
 
     typeAndWaitForResults("t")
 
+    typeAndWaitForResults(session.tags[1].key)
+
     myFixture.checkResult("tes<caret>t test test")
   }
 
