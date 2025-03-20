@@ -8,7 +8,7 @@ plugins {
   alias(libs.plugins.intelliJPlatform) // IntelliJ Platform Gradle Plugin
   alias(libs.plugins.changelog) // Gradle Changelog Plugin
   alias(libs.plugins.kover) // Gradle Kover Plugin
-  id("com.github.ben-manes.versions") version "0.51.0"
+  id("com.github.ben-manes.versions") version "0.52.0"
 }
 
 tasks {
@@ -81,9 +81,8 @@ dependencies {
     testImplementation(libs.junit)
 
     bundledPlugins("com.intellij.java")
-    create("IC", "2024.2.2")
+    create("IC", "2024.3")
     pluginVerifier()
-    instrumentationTools()
     testFramework(TestFrameworkType.Platform)
   }
 }
