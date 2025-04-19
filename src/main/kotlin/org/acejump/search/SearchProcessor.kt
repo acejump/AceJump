@@ -12,10 +12,7 @@ import org.acejump.matchesAt
  * Searches editor text for matches of a [SearchQuery], and updates
  * previous results when the user [type]s a character.
  */
-internal class SearchProcessor private constructor(
-  query: SearchQuery,
-  results: MutableMap<Editor, IntArrayList>
-) {
+internal class SearchProcessor private constructor(query: SearchQuery, results: MutableMap<Editor, IntArrayList>) {
   companion object {
     fun fromChar(editors: List<Editor>, char: Char, boundaries: Boundaries) =
       SearchProcessor(editors, SearchQuery.Literal(char.toString()), boundaries)
