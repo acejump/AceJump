@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.21
+
+- Relax version upper bound
+
 ## 3.8.20
 
 - Add support for 2024.2, fixing [#463](https://github.com/acejump/AceJump/issues/463)

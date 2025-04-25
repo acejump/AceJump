@@ -57,7 +57,7 @@ kotlin {
   }
 }
 
-val acejumpVersion = "3.8.20"
+val acejumpVersion = "3.8.21"
 
 changelog {
   version = acejumpVersion
@@ -89,6 +89,10 @@ dependencies {
 
 intellijPlatform {
   pluginConfiguration {
+    ideaVersion {
+      sinceBuild = provider { "251" }
+      untilBuild = provider { null }
+    }
     version = acejumpVersion
     name = "AceJump"
   }
