@@ -17,20 +17,11 @@ tasks {
     archiveFileName = "AceJump.zip"
   }
 
-  runIde {
-    findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) }
-  }
+  runIde { findProperty("luginDev")?.let { args = listOf(projectDir.absolutePath) } }
 
   publishPlugin {
     val intellijPublishToken: String? by project
     token = intellijPublishToken
-  }
-
-  patchPluginXml {
-    sinceBuild = "223.7571.182"
-    changeNotes = provider {
-      changelog.renderItem(changelog.getAll().values.take(2).last(), HTML)
-    }
   }
 
   // Remove pending: https://youtrack.jetbrains.com/issue/IDEA-278926
@@ -93,6 +84,7 @@ intellijPlatform {
       sinceBuild = provider { "251" }
       untilBuild = provider { null }
     }
+    changeNotes = provider { changelog.renderItem(changelog.getAll().values.take(2).last(), HTML) }
     version = acejumpVersion
     name = "AceJump"
   }
