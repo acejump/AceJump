@@ -81,7 +81,7 @@ dependencies {
 intellijPlatform {
   pluginConfiguration {
     ideaVersion {
-      sinceBuild = provider { "251" }
+      sinceBuild = provider { "241" }
       untilBuild = provider { null }
     }
     changeNotes = provider { changelog.renderItem(changelog.getAll().values.take(2).last(), HTML) }
