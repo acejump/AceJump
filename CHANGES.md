@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 3.8.22
+
+- Tags now paint rightwards when left is out of bounds, thanks to [@ivw](https://github.com/ivw)
+
 ## 3.8.21
 
 - Relax version upper bound
