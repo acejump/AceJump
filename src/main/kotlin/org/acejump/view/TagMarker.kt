@@ -116,7 +116,7 @@ class TagMarker(
     }
 
     val rectL = createLeftAlignedTagRect(editor, cache, font)
-    if (occupied.none(rectL::intersects))
+    if (rectL.x >= 0 && occupied.none(rectL::intersects))
       return rectL.takeIf { boundaries.isOffsetInside(editor, offsetL, cache) }
 
     val rectR = createRightAlignedTagRect(editor, cache, font)
