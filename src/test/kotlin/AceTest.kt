@@ -121,7 +121,7 @@ class AceTest : BaseTest() {
   }
 
   fun `test line mode`() {
-    makeEditor("    test\n    three\n    lines")
+    makeEditor("    test\n    three\n    lines", visibleLines = 3)
 
     takeAction(AceAction.StartAllLineMarksMode())
 

@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.IdeActions
 import com.intellij.openapi.fileTypes.PlainTextFileType
 import com.intellij.psi.PsiFile
+import com.intellij.testFramework.EditorTestUtil
 import com.intellij.testFramework.FileEditorManagerTestCase
 import com.intellij.util.ui.UIUtil
 import org.acejump.action.AceAction
@@ -31,6 +32,10 @@ abstract class BaseTest: FileEditorManagerTestCase() {
 
   fun makeEditor(contents: String): PsiFile =
     myFixture.configureByText(PlainTextFileType.INSTANCE, contents)
+
+  fun makeEditor(contents: String, visibleLines: Int, visibleColumns: Int = 120) =
+    myFixture.configureByText(PlainTextFileType.INSTANCE, contents)
+      .also { EditorTestUtil.setEditorVisibleSize(myFixture.editor, visibleColumns, visibleLines) }
 
   fun resetEditor() {
     myFixture.editor?.let {
