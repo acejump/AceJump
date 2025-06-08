@@ -11,8 +11,10 @@ import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx
 import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.util.IncorrectOperationException
 import org.acejump.boundaries.Boundaries
+import org.acejump.boundaries.StandardBoundaries
 import org.acejump.boundaries.StandardBoundaries.AFTER_CARET
 import org.acejump.boundaries.StandardBoundaries.BEFORE_CARET
+import org.acejump.boundaries.StandardBoundaries.VISIBLE_ON_SCREEN
 import org.acejump.boundaries.StandardBoundaries.WHOLE_FILE
 import org.acejump.input.JumpMode
 import org.acejump.input.JumpMode.DECLARATION
@@ -111,10 +113,10 @@ sealed class AceAction: DumbAwareAction() {
   class StartAllWordsMode          : BaseRegexSearchAction(ALL_WORDS, WHOLE_FILE)
   class StartAllWordsBackwardsMode : BaseRegexSearchAction(ALL_WORDS, BEFORE_CARET)
   class StartAllWordsForwardMode   : BaseRegexSearchAction(ALL_WORDS, AFTER_CARET)
-  class StartAllLineStartsMode     : BaseRegexSearchAction(LINE_STARTS, WHOLE_FILE)
-  class StartAllLineEndsMode       : BaseRegexSearchAction(LINE_ENDS, WHOLE_FILE)
-  class StartAllLineIndentsMode    : BaseRegexSearchAction(LINE_INDENTS, WHOLE_FILE)
-  class StartAllLineMarksMode      : BaseRegexSearchAction(LINE_ALL_MARKS, WHOLE_FILE)
+  class StartAllLineStartsMode     : BaseRegexSearchAction(LINE_STARTS, VISIBLE_ON_SCREEN)
+  class StartAllLineEndsMode       : BaseRegexSearchAction(LINE_ENDS, VISIBLE_ON_SCREEN)
+  class StartAllLineIndentsMode    : BaseRegexSearchAction(LINE_INDENTS, VISIBLE_ON_SCREEN)
+  class StartAllLineMarksMode      : BaseRegexSearchAction(LINE_ALL_MARKS, VISIBLE_ON_SCREEN)
 
   // @formatter:on
 }
