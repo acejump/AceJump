@@ -26,6 +26,8 @@ Press the AceJump shortcut, followed by <kbd>→</kbd> to target the last, <kbd>
 
 AceJump supports other modes as well (e.g. **Jump End Mode**), you can explore the action options under **Settings | Plugins | Browse Repositories... | 🔍 "AceJump"**.
 
+![](https://github.com/user-attachments/assets/7ede3fcb-7b64-4501-beb9-e9929f647558)
+
 ## Tips
 
 - Press <kbd>Tab</kbd> when searching to jump to the next group of matches in the editor.
