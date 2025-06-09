@@ -24,6 +24,8 @@ Press the AceJump shortcut, followed by <kbd>→</kbd> to target the last, <kbd>
 
 ![](https://cloud.githubusercontent.com/assets/175716/20177472/4f0ba956-a74d-11e6-97ba-b296eacdd396.png)
 
+AceJump supports other modes as well (e.g. **Jump End Mode**), you can explore the action options under **Settings | Plugins | Browse Repositories... | 🔍 "AceJump"**.
+
 ## Tips
 
 - Press <kbd>Tab</kbd> when searching to jump to the next group of matches in the editor.
