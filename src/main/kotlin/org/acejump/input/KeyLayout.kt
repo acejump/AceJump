@@ -13,6 +13,7 @@ import kotlin.math.floor
 @Suppress("unused")
 enum class KeyLayout(internal val rows: Array<String>, priority: String) {
   COLEMK(arrayOf("1234567890", "qwfpgjluy", "arstdhneio", "zxcvbkm"), priority = "tndhseriaovkcmbxzgjplfuwyq5849673210"),
+  COLEDH(arrayOf("1234567890", "qwfpbjluy", "arstgmneio", "zxcdvkh"), priority = "tngmseriaodkchvxzbjplfuwyq5849673210"),
   WORKMN(arrayOf("1234567890", "qdrwbjfup", "ashtgyneoi", "zxmcvkl"), priority = "tnhegysoaiclvkmxzwfrubjdpq5849673210"),
   DVORAK(arrayOf("1234567890", "pyfgcrl", "aoeuidhtns", "qjkxbmwvz"), priority = "uhetidonasxkbjmqwvzgfycprl5849673210"),
   QWERTY(arrayOf("1234567890", "qwertyuiop", "asdfghjkl", "zxcvbnm"), priority = "fjghdkslavncmbxzrutyeiwoqp5849673210"),
